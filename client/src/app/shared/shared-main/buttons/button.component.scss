@@ -1,0 +1,74 @@
+@use '_variables' as *;
+@use '_mixins' as *;
+
+@mixin responsive-label {
+  .action-button {
+    padding: 0 13px;
+  }
+
+  .button-label {
+    display: none;
+  }
+}
+
+:host {
+  outline: none;
+  display: inline-block;
+}
+
+my-small-loader ::ng-deep .root {
+  display: inline-block;
+  margin: 0 3px 0 0;
+  width: 20px;
+}
+
+a[class$=-button],
+span[class$=-button] {
+  > span {
+    @include margin-left(5px);
+  }
+}
+
+.action-button {
+  @include peertube-button-link;
+  @include button-with-icon(21px);
+
+  width: 100%; // useful for ellipsis, allow to define a max-width on host component
+}
+
+.orange-button {
+  @include peertube-button;
+  @include orange-button;
+}
+
+.orange-button-link {
+  @include peertube-button-link;
+  @include orange-button;
+}
+
+.grey-button {
+  @include peertube-button;
+  @include grey-button;
+}
+
+.grey-button-link {
+  @include peertube-button-link;
+  @include grey-button;
+}
+
+.button-label {
+  @include ellipsis;
+}
+
+// In a table, try to minimize the space taken by this button
+@media screen and (max-width: 1400px) {
+  :host-context(td) {
+    @include responsive-label;
+  }
+}
+
+@media screen and (max-width: $small-view) {
+  .responsive-label {
+    @include responsive-label;
+  }
+}

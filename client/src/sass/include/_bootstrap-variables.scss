@@ -1,0 +1,42 @@
+$dropdown-link-active-bg: inherit;
+
+$modal-footer-border-width: 0;
+$modal-md: 600px;
+
+$grid-breakpoints: (
+  // CLASSIC BREAKPOINTS GROUP
+  // Extra small screen / phone
+  xs: 0,
+  // Small screen / phone
+  sm: 576px,
+  // Medium screen / tablet
+  md: 768px,
+  // Large screen / desktop
+  lg: 900px,
+  // Extra large screens / wide desktops
+  xl: 1200px,
+  xxl: 1600px,
+
+  // SCREEN GROUP
+  fhd: 1800px,
+  qhd: 2560px,
+  uhd: 3840px
+);
+
+@function breakpoint($label) {
+  @return map-get($grid-breakpoints, $label);
+}
+
+$container-max-widths: (
+  sm: 420px,
+  md: 720px,
+  lg: 900px,
+  xl: 1140px
+);
+
+$input-btn-focus-width: 0;
+$input-btn-focus-color: inherit;
+$input-focus-border-color: #ced4da;
+
+$nav-pills-link-active-bg: #F0F0F0;
+$nav-pills-link-active-color: #000;

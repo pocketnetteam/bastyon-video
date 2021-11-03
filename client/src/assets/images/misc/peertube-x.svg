@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+	<style type="text/css">
+	.st0{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+	.st1{fill:currentColor;}
+</style>
+	<line class="st0" x1="17.1" y1="9.5" x2="22.1" y2="14.5" />
+	<line class="st0" x1="22.1" y1="9.5" x2="17.1" y2="14.5" />
+	<g>
+		<g>
+			<g>
+				<path class="st1" d="M2,2.6V12l6.9-4.3" />
+				<path class="st1" d="M2,12v9.4l6.9-5.2" />
+				<path class="st1" d="M8.9,7.7v8.6l6.9-4.3" />
+			</g>
+		</g>
+	</g>
+</svg>

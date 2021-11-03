@@ -1,0 +1,133 @@
+@use '_variables' as *;
+@use '_mixins' as *;
+
+$form-base-input-width: 340px;
+
+label {
+  font-weight: $font-regular;
+  font-size: 100%;
+}
+
+form {
+  padding-bottom: 1.5rem;
+}
+
+input[type=text] {
+  @include peertube-input-text($form-base-input-width);
+
+  display: block;
+}
+
+input[type=number] {
+  @include peertube-input-text($form-base-input-width);
+
+  display: block;
+}
+
+.number-with-unit {
+  position: relative;
+  width: min-content;
+
+  input[type=number] + span {
+    position: absolute;
+    top: 5px;
+    right: 2.5rem;
+  }
+}
+
+input[type=checkbox] {
+  @include peertube-checkbox(1px);
+}
+
+.peertube-select-container {
+  @include peertube-select-container($form-base-input-width);
+}
+
+my-select-options,
+my-select-custom-value,
+my-select-checkbox {
+  @include responsive-width($form-base-input-width);
+
+  display: block;
+}
+
+input[type=submit] {
+  @include peertube-button;
+  @include orange-button;
+  @include margin-left(auto);
+
+  display: flex;
+
+  + .form-error {
+    @include margin-left(5px);
+
+    display: inline;
+  }
+}
+
+.inner-form-title {
+  @include settings-big-title;
+}
+
+textarea {
+  @include peertube-textarea(500px, 150px);
+
+  max-width: 100%;
+  display: block;
+
+  &.small {
+    height: 75px;
+  }
+}
+
+.label-small-info {
+  font-style: italic;
+  margin-bottom: 10px;
+}
+
+.disabled-checkbox-extra {
+  &,
+  ::ng-deep label {
+    opacity: .5;
+    pointer-events: none;
+  }
+}
+
+.form-group-right {
+  padding-top: 2px;
+}
+
+ngb-tabset:not(.previews) ::ng-deep {
+  .nav-link {
+    font-size: 105%;
+  }
+}
+
+.submit-error {
+  margin-bottom: 20px;
+}
+
+.alert-signup {
+  width: fit-content;
+  margin-top: 10px;
+}
+
+.callout-container {
+  position: absolute;
+  display: flex;
+  height: 0;
+  width: 100%;
+  justify-content: right;
+
+  .callout-link {
+    @include peertube-button-link;
+
+    position: relative;
+    right: 3.3em;
+    top: .3em;
+    font-size: 90%;
+    color: pvar(--mainColor);
+    background-color: pvar(--mainBackgroundColor);
+    padding: 0 .3em;
+  }
+}

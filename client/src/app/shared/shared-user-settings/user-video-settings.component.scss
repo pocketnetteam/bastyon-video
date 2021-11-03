@@ -1,0 +1,30 @@
+@use '_variables' as *;
+@use '_mixins' as *;
+
+label {
+  font-weight: $font-regular;
+  font-size: 100%;
+}
+
+input[type=submit] {
+  @include peertube-button;
+  @include orange-button;
+
+  margin-top: 15px;
+}
+
+.peertube-select-container {
+  @include peertube-select-container(340px);
+
+  margin-bottom: 30px;
+}
+
+my-select-languages {
+  @include responsive-width(340px);
+
+  display: block;
+}
+
+.form-group-select {
+  margin-bottom: 30px;
+}

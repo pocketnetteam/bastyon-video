@@ -1,0 +1,89 @@
+@use '_variables' as *;
+@use '_mixins' as *;
+
+.about-instance-title {
+  display: flex;
+  justify-content: space-between;
+
+  .title {
+    font-size: 20px;
+    font-weight: $font-semibold;
+  }
+
+  .contact-admin {
+    @include peertube-button-link;
+    @include orange-button;
+
+    height: fit-content;
+  }
+}
+
+.instance-badges {
+  font-size: 16px;
+  margin-bottom: 20px;
+
+  .badge {
+    @include margin-right(5px);
+
+    font-size: 12px;
+    font-weight: $font-semibold;
+
+    &.category {
+      background-color: pvar(--mainColor);
+    }
+  }
+}
+
+.section-title {
+  font-weight: $font-semibold;
+  font-size: 16px;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.middle-title {
+  @include in-content-small-title;
+
+  margin-top: 0;
+  margin-bottom: 25px;
+}
+
+.block {
+  margin-bottom: 75px;
+  font-size: 15px;
+}
+
+.short-description {
+  margin-top: 10px;
+}
+
+.short-description .dedicated-to-nsfw {
+  margin-top: 20px;
+  font-weight: $font-semibold;
+}
+
+.anchor-link {
+  @include disable-outline;
+
+  position: relative;
+
+  &:hover,
+  &:active {
+    &::after {
+      @include margin-left(0.2em);
+
+      content: '#';
+      display: inline-block;
+    }
+  }
+
+  .middle-title,
+  .section-title {
+    display: inline-block;
+  }
+
+  .section-title {
+    color: var(--mainForegroundColor);
+  }
+}

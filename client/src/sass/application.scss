@@ -1,0 +1,455 @@
+$icon-font-path: '~@neos21/bootstrap3-glyphicons/assets/fonts/';
+
+@use 'sass:math';
+
+@use '_variables' as *;
+@use '_mixins' as *;
+
+@use '_fonts';
+
+@use './classes';
+
+@use './custom-markup';
+
+@use './ng-select';
+
+// Needs an import because we extends glyphicon icons in primeng
+@import './bootstrap';
+@import './primeng-custom';
+
+[hidden] {
+  display: none !important;
+}
+
+body {
+  /*** theme ***/
+  // now beware sass requires interpolation
+  // for css custom properties #{$var}
+  --mainColor: #{$main-color};
+  --mainColorLighter: #{$main-color-lighter};
+  --mainColorLightest: #{$main-color-lightest};
+  --mainHoverColor: #{$main-hover-color};
+  --mainBackgroundColor: #{$bg-color};
+  --mainForegroundColor: #{$fg-color};
+  --secondaryColor: #{$secondary-color};
+
+  --greyForegroundColor: #{$grey-foreground-color};
+  --greyBackgroundColor: #{$grey-background-color};
+
+  --menuBackgroundColor: #{$menu-background};
+  --menuForegroundColor: #{$menu-color};
+
+  --submenuBackgroundColor: #{$sub-menu-background-color};
+  --channelBackgroundColor: #{$channel-background-color};
+
+  --inputForegroundColor: #{$input-foreground-color};
+  --inputBackgroundColor: #{$input-background-color};
+  --inputPlaceholderColor: #{$input-placeholder-color};
+
+  --textareaForegroundColor: #{$textarea-foreground-color};
+  --textareaBackgroundColor: #{$textarea-background-color};
+  --markdownTextareaBackgroundColor: #{$markdown-textarea-background-color};
+
+  --actionButtonColor: #{$grey-foreground-color};
+  --supportButtonBackgroundColor: #{transparent};
+  --supportButtonColor: #{pvar(--actionButtonColor)};
+  --supportButtonHeartColor: #{$support-button-heart};
+
+  --activatedActionButtonColor: #{$activated-action-button-color};
+
+  --horizontalMarginContent: #{$not-expanded-horizontal-margins};
+  --videosHorizontalMarginContent: 6vw;
+  --mainColWidth: calc(100vw - #{$menu-width});
+
+  font-family: $main-fonts;
+  font-weight: $font-regular;
+  color: pvar(--mainForegroundColor);
+  background-color: pvar(--mainBackgroundColor);
+  font-size: 14px;
+  // On desktop browsers, make sure vertical scroll bar is always visible
+  // Allow to disable the scrollbar instead of hide it when the content fit the body
+  // And not move the content and header horizontally sticked to right when the content is updating
+  overflow-y: scroll;
+
+  // Fix "reboot" style that set text-align: left
+  text-align: start;
+}
+
+::selection {
+  color: pvar(--mainBackgroundColor);
+  background-color: pvar(--mainHoverColor);
+}
+
+noscript,
+#incompatible-browser {
+  display: block;
+  font-size: 1.2rem;
+  max-width: 600px;
+  margin: 1rem auto;
+}
+
+strong {
+  font-weight: $font-semibold;
+}
+
+input.readonly {
+  /* Force blank on readonly inputs */
+  background-color: pvar(--inputBackgroundColor) !important;
+}
+
+input,
+textarea {
+  outline: none;
+  color: pvar(--inputForegroundColor);
+}
+
+button {
+  @include disable-outline;
+
+  background: unset;
+}
+
+label {
+  font-weight: $font-bold;
+  font-size: 15px;
+}
+
+code {
+  background-color: pvar(--greyBackgroundColor);
+  color: pvar(--greyForegroundColor);
+  border-radius: 3px;
+  padding: .2em .4em;
+  margin: auto .4em;
+  font-size: 75%;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.form-error,
+.form-warning {
+  display: block;
+  margin-top: 5px;
+}
+
+.form-error {
+  color: $red;
+}
+
+.input-error,
+my-input-toggle-hidden ::ng-deep input {
+  border-color: $red !important;
+}
+
+.full-width {
+  width: 100%;
+  margin: 0 auto;
+  max-width: initial;
+}
+
+.glyphicon-black {
+  color: #000;
+}
+
+.row {
+  margin: 0 !important;
+}
+
+.main-col {
+  @include margin-left($menu-width);
+
+  width: calc(100% - #{$menu-width});
+  outline: none;
+
+  .margin-content {
+    margin: 0 pvar(--horizontalMarginContent);
+    flex-grow: 1;
+  }
+
+  .sub-menu {
+    background-color: pvar(--submenuBackgroundColor);
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0 pvar(--horizontalMarginContent);
+    height: $sub-menu-height;
+    margin-bottom: $sub-menu-margin-bottom;
+    overflow-x: auto;
+
+    &.sub-menu-fixed {
+      position: fixed;
+      z-index: #{z('sub-menu') - 1};
+      max-width: pvar(--mainColWidth);
+    }
+  }
+
+  // Use an appropriate offset top when sub-menu fixed
+  .margin-content.offset-content {
+    padding-top: $sub-menu-height + $sub-menu-margin-bottom;
+  }
+
+  // Override some properties if the main content is expanded (no menu on the left)
+  &.expanded {
+    --horizontalMarginContent: #{$expanded-horizontal-margins};
+    --mainColWidth: 100vw;
+
+    @include margin-left(0);
+    width: 100%;
+  }
+
+  &.lock-scroll .main-row > router-outlet + * {  /* stylelint-disable-line selector-max-compound-selectors */
+    // Lock and hide body scrollbars
+    position: fixed;
+
+    // Lock and hide sub-menu scrollbars
+    .sub-menu { /* stylelint-disable-line */
+      overflow-x: hidden;
+    }
+  }
+}
+
+.title-page {
+  @include disable-default-a-behaviour;
+  @include margin-right(55px);
+
+  opacity: 0.6;
+  color: pvar(--mainForegroundColor);
+  font-size: 16px;
+  display: inline-block;
+  font-weight: $font-semibold;
+  border-bottom: 2px solid transparent;
+
+  &.title-page-single {
+    margin-top: 30px;
+    margin-bottom: 25px;
+  }
+
+  &.active {
+    border-bottom-color: pvar(--mainColor);
+  }
+
+  &.title-page-single {
+    font-size: 125%;
+  }
+
+  &:hover,
+  &:active,
+  &:focus {
+    color: pvar(--mainForegroundColor);
+  }
+
+  &.active,
+  &:hover,
+  &:active,
+  &:focus,
+  &.title-page-single {
+    opacity: 1;
+    outline: 0 hidden !important;
+  }
+
+  @media screen and (max-width: $mobile-view) {
+    @include margin-left(15px);
+  }
+}
+
+.title-page-about,
+.title-page-settings {
+  white-space: nowrap;
+  font-size: 115%;
+}
+
+.admin-sub-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+
+  .form-sub-title {
+    flex-grow: 1;
+  }
+
+  .admin-sub-nav a {
+    @include disable-default-a-behaviour;
+
+    font-size: 16px;
+    color: pvar(--mainForegroundColor);
+    padding: 5px 15px;
+    border-radius: 0.25rem;
+    font-weight: $font-semibold;
+    opacity: 0.6;
+
+    &.active {
+      background-color: pvar(--submenuBackgroundColor);
+    }
+
+    &.active,
+    &:hover,
+    &:active,
+    &:focus {
+      opacity: 1;
+    }
+  }
+}
+
+.form-sub-title {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+// In tables, don't have a hover different background
+table {
+  .action-button-edit,
+  .action-button-delete {
+    &:hover,
+    &:active,
+    &:focus,
+    &[disabled],
+    &.disabled {
+      background-color: $grey-background-color !important;
+    }
+  }
+}
+
+.no-results {
+  height: 40vh;
+  max-height: 500px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: $font-semibold;
+}
+
+.dropdown-item {
+  @include dropdown-with-icon-item;
+
+  my-global-icon {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+/* offsetTop for scrollToAnchor */
+
+.anchor {
+  position: relative;
+  top: #{-($header-height + 20px)};
+}
+
+.offset-content { // if sub-menu fixed
+  .anchor {
+    top: #{-($header-height + $sub-menu-height + 20px)};
+  }
+}
+
+.form-group-description {
+  @extend .text-muted;
+
+  font-size: 90%;
+  margin-top: 10px;
+}
+
+ngx-loading-bar {
+  z-index: z(header) + 1 !important;
+}
+
+@media screen and (max-width: #{breakpoint(xxl)}) {
+  .main-col {
+    --horizontalMarginContent: #{math.div($not-expanded-horizontal-margins, 2)};
+    --videosHorizontalMarginContent: 30px;
+
+    &.expanded {
+      --horizontalMarginContent: #{math.div($expanded-horizontal-margins, 2)};
+    }
+  }
+}
+
+@media screen and (max-width: #{breakpoint(lg)}) {
+  .main-col {
+    --videosHorizontalMarginContent: #{pvar(--horizontalMarginContent)};
+  }
+
+  /* the following applies from 500px to 900px and is partially overriden from 500px to 800px by changes below to $small-view */
+  .main-col,
+  .main-col.expanded {
+    --horizontalMarginContent: #{math.div($expanded-horizontal-margins, 3)};
+
+    .sub-menu {
+      padding: 0 50px;
+
+      .title-page {
+        font-size: 17px;
+      }
+    }
+  }
+}
+
+@media screen and (min-width: $mobile-view) and (max-width: $small-view) {
+  .main-col {
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: $small-view) {
+  .main-col,
+  .main-col.expanded {
+    --horizontalMarginContent: 15px;
+
+    @include margin-left(0);
+
+    .sub-menu {
+      width: 100vw;
+      padding: 0 15px;
+      margin-bottom: $sub-menu-margin-bottom-small-view;
+      overflow-x: auto;
+    }
+
+    // Use an appropriate offset top when sub-menu fixed
+    .margin-content.offset-content {
+      padding-top: $sub-menu-height + $sub-menu-margin-bottom-small-view;
+    }
+
+    .admin-sub-header {
+      flex-direction: column;
+
+      .form-sub-title {
+        @include margin-right(0 !important);
+
+        margin-bottom: 10px;
+        text-align: center;
+      }
+
+      .admin-sub-nav {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        height: 50px;
+        padding: 10px 0;
+        width: 100%;
+
+        a {
+          @include margin-left(5px);
+        }
+      }
+    }
+
+    my-markdown-textarea {
+      .root {
+        max-width: 100% !important;
+      }
+    }
+
+    input[type=text],
+    input[type=password],
+    input[type=email],
+    textarea,
+    .peertube-select-container {
+      flex-grow: 1;
+    }
+
+    .caption input[type=text] {
+      width: unset !important;
+      flex-grow: 1;
+    }
+  }
+}

@@ -1,0 +1,23 @@
+@use '_variables' as *;
+@use '_mixins' as *;
+
+.root {
+  height: auto;
+  display: flex;
+  align-items: center;
+
+  .button-file {
+    @include peertube-button-file(auto);
+    @include grey-button;
+
+    &.with-icon {
+      @include button-with-icon;
+    }
+  }
+
+  .filename {
+    @include margin-left(5px);
+
+    font-weight: $font-semibold;
+  }
+}

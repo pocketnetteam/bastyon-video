@@ -1,0 +1,221 @@
+import { util, has, get } from 'config'
+import { uniq } from 'lodash'
+import { URL } from 'url'
+import { getFFmpegVersion } from '@server/helpers/ffmpeg-utils'
+import { VideoRedundancyConfigFilter } from '@shared/models/redundancy/video-redundancy-config-filter.type'
+import { RecentlyAddedStrategy } from '../../shared/models/redundancy'
+import { isProdInstance, isTestInstance, parseSemVersion } from '../helpers/core-utils'
+import { isArray } from '../helpers/custom-validators/misc'
+import { logger } from '../helpers/logger'
+import { UserModel } from '../models/user/user'
+import { ApplicationModel, getServerActor } from '../models/application/application'
+import { OAuthClientModel } from '../models/oauth/oauth-client'
+import { CONFIG, isEmailEnabled } from './config'
+import { WEBSERVER } from './constants'
+
+async function checkActivityPubUrls () {
+  const actor = await getServerActor()
+
+  const parsed = new URL(actor.url)
+  if (WEBSERVER.HOST !== parsed.host) {
+    const NODE_ENV = util.getEnv('NODE_ENV')
+    const NODE_CONFIG_DIR = util.getEnv('NODE_CONFIG_DIR')
+
+    logger.warn(
+      'It seems PeerTube was started (and created some data) with another domain name. ' +
+      'This means you will not be able to federate! ' +
+      'Please use %s %s npm run update-host to fix this.',
+      NODE_CONFIG_DIR ? `NODE_CONFIG_DIR=${NODE_CONFIG_DIR}` : '',
+      NODE_ENV ? `NODE_ENV=${NODE_ENV}` : ''
+    )
+  }
+}
+
+// Some checks on configuration files
+// Return an error message, or null if everything is okay
+function checkConfig () {
+
+  // Moved configuration keys
+  if (has('services.csp-logger')) {
+    logger.warn('services.csp-logger configuration has been renamed to csp.report_uri. Please update your configuration file.')
+  }
+
+  // Email verification
+  if (!isEmailEnabled()) {
+    if (CONFIG.SIGNUP.ENABLED && CONFIG.SIGNUP.REQUIRES_EMAIL_VERIFICATION) {
+      return 'Emailer is disabled but you require signup email verification.'
+    }
+
+    if (CONFIG.CONTACT_FORM.ENABLED) {
+      logger.warn('Emailer is disabled so the contact form will not work.')
+    }
+  }
+
+  // NSFW policy
+  const defaultNSFWPolicy = CONFIG.INSTANCE.DEFAULT_NSFW_POLICY
+  {
+    const available = [ 'do_not_list', 'blur', 'display' ]
+    if (available.includes(defaultNSFWPolicy) === false) {
+      return 'NSFW policy setting should be ' + available.join(' or ') + ' instead of ' + defaultNSFWPolicy
+    }
+  }
+
+  // Redundancies
+  const redundancyVideos = CONFIG.REDUNDANCY.VIDEOS.STRATEGIES
+  if (isArray(redundancyVideos)) {
+    const available = [ 'most-views', 'trending', 'recently-added' ]
+    for (const r of redundancyVideos) {
+      if (available.includes(r.strategy) === false) {
+        return 'Videos redundancy should have ' + available.join(' or ') + ' strategy instead of ' + r.strategy
+      }
+
+      // Lifetime should not be < 10 hours
+      if (!isTestInstance() && r.minLifetime < 1000 * 3600 * 10) {
+        return 'Video redundancy minimum lifetime should be >= 10 hours for strategy ' + r.strategy
+      }
+    }
+
+    const filtered = uniq(redundancyVideos.map(r => r.strategy))
+    if (filtered.length !== redundancyVideos.length) {
+      return 'Redundancy video entries should have unique strategies'
+    }
+
+    const recentlyAddedStrategy = redundancyVideos.find(r => r.strategy === 'recently-added') as RecentlyAddedStrategy
+    if (recentlyAddedStrategy && isNaN(recentlyAddedStrategy.minViews)) {
+      return 'Min views in recently added strategy is not a number'
+    }
+  } else {
+    return 'Videos redundancy should be an array (you must uncomment lines containing - too)'
+  }
+
+  // Remote redundancies
+  const acceptFrom = CONFIG.REMOTE_REDUNDANCY.VIDEOS.ACCEPT_FROM
+  const acceptFromValues = new Set<VideoRedundancyConfigFilter>([ 'nobody', 'anybody', 'followings' ])
+  if (acceptFromValues.has(acceptFrom) === false) {
+    return 'remote_redundancy.videos.accept_from has an incorrect value'
+  }
+
+  // Check storage directory locations
+  if (isProdInstance()) {
+    const configStorage = get('storage')
+    for (const key of Object.keys(configStorage)) {
+      if (configStorage[key].startsWith('storage/')) {
+        logger.warn(
+          'Directory of %s should not be in the production directory of PeerTube. Please check your production configuration file.',
+          key
+        )
+      }
+    }
+  }
+
+  if (CONFIG.STORAGE.VIDEOS_DIR === CONFIG.STORAGE.REDUNDANCY_DIR) {
+    logger.warn('Redundancy directory should be different than the videos folder.')
+  }
+
+  // Transcoding
+  if (CONFIG.TRANSCODING.ENABLED) {
+    if (CONFIG.TRANSCODING.WEBTORRENT.ENABLED === false && CONFIG.TRANSCODING.HLS.ENABLED === false) {
+      return 'You need to enable at least WebTorrent transcoding or HLS transcoding.'
+    }
+
+    if (CONFIG.TRANSCODING.CONCURRENCY <= 0) {
+      return 'Transcoding concurrency should be > 0'
+    }
+  }
+
+  if (CONFIG.IMPORT.VIDEOS.HTTP.ENABLED || CONFIG.IMPORT.VIDEOS.TORRENT.ENABLED) {
+    if (CONFIG.IMPORT.VIDEOS.CONCURRENCY <= 0) {
+      return 'Video import concurrency should be > 0'
+    }
+  }
+
+  // Broadcast message
+  if (CONFIG.BROADCAST_MESSAGE.ENABLED) {
+    const currentLevel = CONFIG.BROADCAST_MESSAGE.LEVEL
+    const available = [ 'info', 'warning', 'error' ]
+
+    if (available.includes(currentLevel) === false) {
+      return 'Broadcast message level should be ' + available.join(' or ') + ' instead of ' + currentLevel
+    }
+  }
+
+  // Search index
+  if (CONFIG.SEARCH.SEARCH_INDEX.ENABLED === true) {
+    if (CONFIG.SEARCH.REMOTE_URI.USERS === false) {
+      return 'You cannot enable search index without enabling remote URI search for users.'
+    }
+  }
+
+  // Live
+  if (CONFIG.LIVE.ENABLED === true) {
+    if (CONFIG.LIVE.ALLOW_REPLAY === true && CONFIG.TRANSCODING.ENABLED === false) {
+      return 'Live allow replay cannot be enabled if transcoding is not enabled.'
+    }
+  }
+
+  // Object storage
+  if (CONFIG.OBJECT_STORAGE.ENABLED === true) {
+
+    if (!CONFIG.OBJECT_STORAGE.VIDEOS.BUCKET_NAME) {
+      return 'videos_bucket should be set when object storage support is enabled.'
+    }
+
+    if (!CONFIG.OBJECT_STORAGE.STREAMING_PLAYLISTS.BUCKET_NAME) {
+      return 'streaming_playlists_bucket should be set when object storage support is enabled.'
+    }
+
+    if (
+      CONFIG.OBJECT_STORAGE.VIDEOS.BUCKET_NAME === CONFIG.OBJECT_STORAGE.STREAMING_PLAYLISTS.BUCKET_NAME &&
+      CONFIG.OBJECT_STORAGE.VIDEOS.PREFIX === CONFIG.OBJECT_STORAGE.STREAMING_PLAYLISTS.PREFIX
+    ) {
+      if (CONFIG.OBJECT_STORAGE.VIDEOS.PREFIX === '') {
+        return 'Object storage bucket prefixes should be set when the same bucket is used for both types of video.'
+      } else {
+        return 'Object storage bucket prefixes should be set to different values when the same bucket is used for both types of video.'
+      }
+    }
+  }
+
+  return null
+}
+
+// We get db by param to not import it in this file (import orders)
+async function clientsExist () {
+  const totalClients = await OAuthClientModel.countTotal()
+
+  return totalClients !== 0
+}
+
+// We get db by param to not import it in this file (import orders)
+async function usersExist () {
+  const totalUsers = await UserModel.countTotal()
+
+  return totalUsers !== 0
+}
+
+// We get db by param to not import it in this file (import orders)
+async function applicationExist () {
+  const totalApplication = await ApplicationModel.countTotal()
+
+  return totalApplication !== 0
+}
+
+async function checkFFmpegVersion () {
+  const version = await getFFmpegVersion()
+  const { major, minor } = parseSemVersion(version)
+
+  if (major < 4 || (major === 4 && minor < 1)) {
+    logger.warn('Your ffmpeg version (%s) is outdated. PeerTube supports ffmpeg >= 4.1. Please upgrade.', version)
+  }
+}
+
+// ---------------------------------------------------------------------------
+
+export {
+  checkConfig,
+  clientsExist,
+  checkFFmpegVersion,
+  usersExist,
+  applicationExist,
+  checkActivityPubUrls
+}

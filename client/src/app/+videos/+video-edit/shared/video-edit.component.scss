@@ -1,0 +1,148 @@
+@use '_variables' as *;
+@use '_mixins' as *;
+
+label,
+my-dynamic-form-field ::ng-deep label {
+  font-weight: $font-regular;
+  font-size: 100%;
+}
+
+.peertube-select-container {
+  @include peertube-select-container(auto);
+}
+
+.title-page a {
+  color: pvar(--mainForegroundColor);
+
+  &:hover {
+    text-decoration: none;
+    opacity: .8;
+  }
+}
+
+my-peertube-checkbox {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.nav-tabs {
+  margin-bottom: 15px;
+}
+
+.video-edit {
+  height: 100%;
+  min-height: 300px;
+
+  .form-group {
+    margin-bottom: 25px;
+  }
+
+  input {
+    @include peertube-input-text(100%);
+    display: block;
+  }
+
+  .label-tags + span {
+    font-size: 15px;
+  }
+
+  .advanced-settings .form-group {
+    margin-bottom: 20px;
+  }
+}
+
+.captions-header {
+  text-align: end;
+  margin-bottom: 1rem;
+}
+
+.create-caption {
+  @include create-button;
+}
+
+.caption-entry {
+  display: flex;
+  height: 40px;
+  align-items: center;
+
+  a.caption-entry-label {
+    @include disable-default-a-behaviour;
+
+    flex-grow: 1;
+    color: #000;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+
+  .caption-entry-label {
+    @include margin-right(20px);
+
+    font-size: 15px;
+    font-weight: bold;
+    width: 150px;
+  }
+
+  .caption-entry-state {
+    width: 200px;
+
+    &.caption-entry-state-create {
+      color: #39CC0B;
+    }
+
+    &.caption-entry-state-delete {
+      color: #FF0000;
+    }
+  }
+
+  .caption-entry-delete {
+    @include peertube-button;
+    @include grey-button;
+  }
+}
+
+.no-caption {
+  text-align: center;
+  font-size: 15px;
+}
+
+.submit-container {
+  text-align: end;
+
+  .message-submit {
+    @include margin-right(25px);
+
+    display: inline-block;
+    color: pvar(--greyForegroundColor);
+    font-size: 15px;
+  }
+}
+
+p-calendar {
+  display: block;
+
+  ::ng-deep {
+    .p-calendar {
+      width: 100%;
+    }
+
+    .p-inputtext {
+      @include peertube-input-text(100%);
+      color: #000;
+    }
+  }
+}
+
+.form-columns {
+  display: grid;
+
+  grid-template-columns: 66% 1fr;
+  grid-gap: 30px;
+}
+
+@include on-small-main-col {
+  .form-columns {
+    grid-template-columns: 1fr;
+  }
+}
