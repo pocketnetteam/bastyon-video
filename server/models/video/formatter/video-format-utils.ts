@@ -86,6 +86,8 @@ function videoModelToFormattedJSON (video: MVideoFormattable, options?: VideoFor
     publishedAt: video.publishedAt,
     originallyPublishedAt: video.originallyPublishedAt,
 
+    aspectRatio: video.aspectRatio,
+
     isLive: video.isLive,
 
     account: video.VideoChannel.Account.toFormattedSummaryJSON(),
@@ -384,6 +386,8 @@ function videoModelToActivityPubObject (video: MVideoAP): VideoObject {
     sensitive: video.nsfw,
     waitTranscoding: video.waitTranscoding,
     isLiveBroadcast: video.isLive,
+
+    aspectRatio: video.aspectRatio,
 
     liveSaveReplay: video.isLive
       ? video.VideoLive.saveReplay

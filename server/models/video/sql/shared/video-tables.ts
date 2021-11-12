@@ -261,7 +261,8 @@ export class VideoTables {
       'channelId',
       'createdAt',
       'updatedAt',
-      'moveJobsRunning'
+      'moveJobsRunning',
+      'aspectRatio'
     ]
   }
 }
