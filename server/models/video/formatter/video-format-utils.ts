@@ -156,7 +156,9 @@ function videoModelToFormattedDetailsJSON (video: MVideoFormattableDetails): Vid
     trackerUrls: video.getTrackerUrls(),
 
     files: [],
-    streamingPlaylists
+    streamingPlaylists,
+
+    aspectRatio: video.aspectRatio
   }
 
   // Format and sort video files

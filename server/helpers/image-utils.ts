@@ -67,8 +67,7 @@ async function jimpProcessor (path: string, destination: string, newSize: { widt
   }
 
   await jimpInstance
-    .resize(newSize.width, newSize.height)
-    .quality(80)
+    .quality(95)
     .writeAsync(destination)
 }
 

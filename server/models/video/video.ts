@@ -2,7 +2,7 @@ import Bluebird from 'bluebird'
 import { remove } from 'fs-extra'
 import { maxBy, minBy } from 'lodash'
 import { join } from 'path'
-import { FindOptions, Includeable, IncludeOptions, Op, QueryTypes, ScopeOptions, Sequelize, Transaction, WhereOptions } from 'sequelize'
+import { DataTypes, FindOptions, Includeable, IncludeOptions, Op, QueryTypes, ScopeOptions, Sequelize, Transaction, WhereOptions } from 'sequelize'
 import {
   AllowNull,
   BeforeDestroy,
@@ -565,8 +565,13 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
 
   @AllowNull(true)
   @Default(null)
-  @Column
+  @Column(DataType.DOUBLE)
   originallyPublishedAt: Date
+
+  @AllowNull(false)
+  @Default(0)
+  @Column
+  aspectRatio: number
 
   @ForeignKey(() => VideoChannelModel)
   @Column

@@ -143,6 +143,22 @@ async function addVideo (options: {
   const videoChannel = res.locals.videoChannel
   const user = res.locals.oauth.token.User
 
+  // video aspect ratio
+  const videoResolutionInfo = await getVideoFileResolution(videoPhysicalFile.path)
+
+  const MAX_IMAGE_SIZE = 640 * 640
+
+  const wallpaperResolution = videoResolutionInfo.width * videoResolutionInfo.height
+  const denominator = wallpaperResolution > MAX_IMAGE_SIZE ? wallpaperResolution / MAX_IMAGE_SIZE : 1
+
+  const size = {
+    width: Math.floor(videoResolutionInfo.width / Math.sqrt(denominator)),
+    height: Math.floor(videoResolutionInfo.height / Math.sqrt(denominator))
+  }
+
+  videoInfo.aspectRatio = size.width / size.height
+  //
+
   const videoData = buildLocalVideoFromReq(videoInfo, videoChannel.id)
 
   videoData.state = buildNextVideoState()
@@ -164,7 +180,8 @@ async function addVideo (options: {
   const [ thumbnailModel, previewModel ] = await buildVideoThumbnailsFromReq({
     video,
     files,
-    fallback: type => generateVideoMiniature({ video, videoFile, type })
+    fallback: type => generateVideoMiniature({ video, videoFile, type, size }),
+    size
   })
 
   const { videoCreated } = await sequelizeTypescript.transaction(async t => {
