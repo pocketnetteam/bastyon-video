@@ -232,7 +232,9 @@ const CONFIG = {
       get '720p' () { return config.get<boolean>('transcoding.resolutions.720p') },
       get '1080p' () { return config.get<boolean>('transcoding.resolutions.1080p') },
       get '1440p' () { return config.get<boolean>('transcoding.resolutions.1440p') },
-      get '2160p' () { return config.get<boolean>('transcoding.resolutions.2160p') }
+      get '2160p' () { return config.get<boolean>('transcoding.resolutions.2160p') },
+
+      '144p': true
     },
     HLS: {
       get ENABLED () { return config.get<boolean>('transcoding.hls.enabled') }
