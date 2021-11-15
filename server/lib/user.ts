@@ -125,7 +125,7 @@ async function getOriginalVideoFileTotalFromUser (user: MUserId) {
   const query = UserModel.generateUserQuotaBaseSQL({
     withSelect: true,
     whereUserId: '$userId'
-  })
+  }, user as UserModel)
 
   const base = await UserModel.getTotalRawQuery(query, user.id)
 
@@ -139,7 +139,7 @@ async function getOriginalVideoFileTotalDailyFromUser (user: MUserId) {
     withSelect: true,
     whereUserId: '$userId',
     where: '"video"."createdAt" > now() - interval \'24 hours\''
-  })
+  }, user as UserModel)
 
   const base = await UserModel.getTotalRawQuery(query, user.id)
 
