@@ -1,6 +1,6 @@
 import Bull, { Job, JobOptions, Queue } from 'bull'
 import { jobStates } from '@server/helpers/custom-validators/jobs'
-import { CONFIG, LOGGER_ENDPOINT } from '@server/initializers/config'
+import { CONFIG } from '@server/initializers/config'
 import { processVideoRedundancy } from '@server/lib/job-queue/handlers/video-redundancy'
 import {
   ActivitypubFollowPayload,
@@ -20,7 +20,15 @@ import {
   VideoTranscodingPayload
 } from '../../../shared/models'
 import { logger } from '../../helpers/logger'
-import { JOB_ATTEMPTS, JOB_COMPLETED_LIFETIME, JOB_CONCURRENCY, JOB_TTL, REPEAT_JOBS, WEBSERVER } from '../../initializers/constants'
+import {
+  JOB_ATTEMPTS,
+  JOB_COMPLETED_LIFETIME,
+  JOB_CONCURRENCY,
+  JOB_TTL,
+  REPEAT_JOBS,
+  WEBSERVER,
+  LOGGER_ENDPOINT
+} from '../../initializers/constants'
 import { Redis } from '../redis'
 import { processActivityPubCleaner } from './handlers/activitypub-cleaner'
 import { processActivityPubFollow } from './handlers/activitypub-follow'
