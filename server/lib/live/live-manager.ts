@@ -374,7 +374,7 @@ class LiveManager {
             videoId: fullVideo.id,
             name: jobName
           }
-        }, { delay: 543210 })
+        }, { delay: 500000 })
 
         fullVideo.state = VideoState.LIVE_ENDED
       } else {

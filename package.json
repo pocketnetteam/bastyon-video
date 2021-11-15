@@ -82,6 +82,7 @@
     "bluebird": "^3.5.0",
     "bull": "^3.4.2",
     "bytes": "^3.0.0",
+    "check-disk-space": "^3.0.1",
     "chokidar": "^3.4.2",
     "commander": "^8.0.0",
     "config": "^3.0.0",

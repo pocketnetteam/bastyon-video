@@ -30,6 +30,8 @@ const LAST_MIGRATION_VERSION = 670
 
 const TRANSCODING_JOB_TYPE = 'new-resolution-to-hls'
 
+const FULL_DISC_SPACE_PERCENTAGE = 0.9
+
 // ---------------------------------------------------------------------------
 
 const API_VERSION = 'v1'
@@ -849,6 +851,8 @@ export {
   JOB_ATTEMPTS,
   AP_CLEANER_CONCURRENCY,
   LAST_MIGRATION_VERSION,
+  TRANSCODING_JOB_TYPE,
+  FULL_DISC_SPACE_PERCENTAGE,
   OAUTH_LIFETIME,
   CUSTOM_HTML_TAG_COMMENTS,
   BROADCAST_CONCURRENCY,
