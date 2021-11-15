@@ -394,8 +394,10 @@ function addDefaultLiveHLSParams (command: FfmpegCommand, outPath: string, maste
   command.outputOption('-hls_time ' + VIDEO_LIVE.SEGMENT_TIME_SECONDS)
   command.outputOption('-hls_list_size ' + VIDEO_LIVE.SEGMENTS_LIST_SIZE)
   command.outputOption('-hls_flags delete_segments+independent_segments')
-  command.outputOption(`-hls_segment_filename ${join(outPath, '%v-%06d.ts')}`)
-  command.outputOption('-master_pl_name ' + masterPlaylistName)
+  command.outputOption('-strftime 1')
+  command.outputOption(`-hls_segment_filename ${join(outPath, '%v-%Y%m%d-%s.ts')}`)
+  command.outputOption('-master_pl_name master.m3u8')
+  command.outputOption('-hls_flags delete_segments')
   command.outputOption(`-f hls`)
 
   command.output(join(outPath, '%v.m3u8'))

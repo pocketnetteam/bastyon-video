@@ -22,7 +22,7 @@ import { JobQueue } from '../job-queue'
 import { PeerTubeSocket } from '../peertube-socket'
 import { generateHLSMasterPlaylistFilename, generateHlsSha256SegmentsFilename } from '../paths'
 import { LiveQuotaStore } from './live-quota-store'
-// import { LiveSegmentShaStore } from './live-segment-sha-store'
+import { LiveSegmentShaStore } from './live-segment-sha-store'
 // import { cleanupLive } from './live-utils'
 import { MuxingSession } from './shared'
 
@@ -201,9 +201,9 @@ class LiveManager {
     }
 
     // Cleanup old potential live files (could happen with a permanent live)
-    // LiveSegmentShaStore.Instance.cleanupShaSegments(video.uuid)
+    LiveSegmentShaStore.Instance.cleanupShaSegments(video.uuid)
 
-    // const oldStreamingPlaylist = await VideoStreamingPlaylistModel.loadHLSPlaylistByVideo(video.id)
+    const oldStreamingPlaylist = await VideoStreamingPlaylistModel.loadHLSPlaylistByVideo(video.id)
     // if (oldStreamingPlaylist) {
     //   await cleanupLive(video, oldStreamingPlaylist)
     // }
@@ -233,7 +233,14 @@ class LiveManager {
       { allResolutions, ...lTags(sessionId, video.uuid) }
     )
 
-    const streamingPlaylist = await this.createLivePlaylist(video, allResolutions)
+    let streamingPlaylist
+
+    if (oldStreamingPlaylist) {
+      Object.assign(oldStreamingPlaylist, { Video: video })
+      streamingPlaylist = oldStreamingPlaylist
+    } else {
+      streamingPlaylist = await this.createLivePlaylist(video, allResolutions)
+    }
 
     return this.runMuxingSession({
       sessionId,

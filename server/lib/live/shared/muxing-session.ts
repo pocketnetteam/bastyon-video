@@ -2,7 +2,7 @@
 import { mapSeries } from 'bluebird'
 import { FSWatcher, watch } from 'chokidar'
 import { FfmpegCommand } from 'fluent-ffmpeg'
-import { appendFile, ensureDir, readFile, stat } from 'fs-extra'
+import { appendFile, ensureDir, readFile, stat, readdir, unlink } from 'fs-extra'
 import { basename, join } from 'path'
 import { EventEmitter } from 'stream'
 import { getLiveMuxingCommand, getLiveTranscodingCommand } from '@server/helpers/ffmpeg-utils'
@@ -114,7 +114,7 @@ class MuxingSession extends EventEmitter {
   }
 
   async runMuxing () {
-    this.createFiles()
+    await this.createFiles()
 
     const outPath = await this.prepareDirectories()
 
@@ -137,7 +137,7 @@ class MuxingSession extends EventEmitter {
 
     logger.info('Running live muxing/transcoding for %s.', this.videoUUID, this.lTags)
 
-    this.watchTSFiles(outPath)
+    await this.watchTSFiles(outPath)
     this.watchMasterFile(outPath)
 
     this.ffmpegCommand.on('error', (err, stdout, stderr) => {
@@ -207,12 +207,16 @@ class MuxingSession extends EventEmitter {
     })
   }
 
-  private watchTSFiles (outPath: string) {
+  private async watchTSFiles (outPath: string) {
     const startStreamDateTime = new Date().getTime()
 
     this.tsWatcher = watch(outPath + '/*.ts')
 
     const playlistIdMatcher = /^([\d+])-/
+
+    const existingFiles = await readdir(outPath)
+
+    await Promise.all(existingFiles.map(fileName => fileName.includes('.ts') ? unlink(join(outPath, fileName)) : Promise.resolve()))
 
     const addHandler = async segmentPath => {
       logger.debug('Live add handler of %s.', segmentPath, this.lTags)
@@ -263,11 +267,13 @@ class MuxingSession extends EventEmitter {
     }
   }
 
-  private createFiles () {
+  private async createFiles () {
     for (let i = 0; i < this.allResolutions.length; i++) {
       const resolution = this.allResolutions[i]
 
-      const file = new VideoFileModel({
+      const existingFile = await VideoFileModel.loadByPlaylistId(this.streamingPlaylist.id, resolution)
+
+      const file = existingFile || new VideoFileModel({
         resolution,
         size: -1,
         extname: '.ts',
@@ -276,8 +282,11 @@ class MuxingSession extends EventEmitter {
         videoStreamingPlaylistId: this.streamingPlaylist.id
       })
 
-      VideoFileModel.customUpsert(file, 'streaming-playlist', null)
+      if (!existingFile) {
+        VideoFileModel.customUpsert(file, 'streaming-playlist', null)
         .catch(err => logger.error('Cannot create file for live streaming.', { err, ...this.lTags }))
+      }
+
     }
   }
 
