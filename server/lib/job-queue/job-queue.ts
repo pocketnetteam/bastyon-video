@@ -266,6 +266,12 @@ class JobQueue {
   static get Instance () {
     return this.instance || (this.instance = new this())
   }
+
+  getQueues (type: string, state: string[] = [ 'active', 'completed', 'failed', 'waiting', 'delayed', 'paused' ]) {
+    const queue = this.queues[type]
+
+    return queue.getJobs(state)
+  }
 }
 
 // ---------------------------------------------------------------------------

@@ -22,9 +22,11 @@ import { JobQueue } from '../job-queue'
 import { PeerTubeSocket } from '../peertube-socket'
 import { generateHLSMasterPlaylistFilename, generateHlsSha256SegmentsFilename } from '../paths'
 import { LiveQuotaStore } from './live-quota-store'
-import { LiveSegmentShaStore } from './live-segment-sha-store'
-import { cleanupLive } from './live-utils'
+// import { LiveSegmentShaStore } from './live-segment-sha-store'
+// import { cleanupLive } from './live-utils'
 import { MuxingSession } from './shared'
+
+import * as Bull from 'bull'
 
 const NodeRtmpSession = require('node-media-server/src/node_rtmp_session')
 const context = require('node-media-server/src/node_core_ctx')
@@ -175,7 +177,18 @@ class LiveManager {
   }
 
   private async handleSession (sessionId: string, streamPath: string, streamKey: string) {
-    const videoLive = await VideoLiveModel.loadByStreamKey(streamKey)
+    const pendingStreamJobs = await JobQueue.Instance.getQueues('video-live-ending', [ 'delayed' ])
+
+    const currentSessionJob = pendingStreamJobs.find((job: Bull.Job) => job.data.name === streamKey)
+
+    const videoLive = currentSessionJob
+      ? await VideoLiveModel.loadByStreamKeyLiveEnded(streamKey)
+      : await VideoLiveModel.loadByStreamKey(streamKey)
+
+    if (currentSessionJob) {
+      await currentSessionJob.remove()
+    }
+
     if (!videoLive) {
       logger.warn('Unknown live video with stream key %s.', streamKey, lTags(sessionId))
       return this.abortSession(sessionId)
@@ -188,12 +201,12 @@ class LiveManager {
     }
 
     // Cleanup old potential live files (could happen with a permanent live)
-    LiveSegmentShaStore.Instance.cleanupShaSegments(video.uuid)
+    // LiveSegmentShaStore.Instance.cleanupShaSegments(video.uuid)
 
-    const oldStreamingPlaylist = await VideoStreamingPlaylistModel.loadHLSPlaylistByVideo(video.id)
-    if (oldStreamingPlaylist) {
-      await cleanupLive(video, oldStreamingPlaylist)
-    }
+    // const oldStreamingPlaylist = await VideoStreamingPlaylistModel.loadHLSPlaylistByVideo(video.id)
+    // if (oldStreamingPlaylist) {
+    //   await cleanupLive(video, oldStreamingPlaylist)
+    // }
 
     this.videoSessions.set(video.id, sessionId)
 
@@ -298,7 +311,7 @@ class LiveManager {
 
       muxingSession.destroy()
 
-      return this.onAfterMuxingCleanup(videoId)
+      return this.onAfterMuxingCleanup(videoId, false, videoLive.streamKey)
         .catch(err => logger.error('Error in end transmuxing.', { err, ...localLTags }))
     })
 
@@ -340,7 +353,7 @@ class LiveManager {
     this.videoSessions.delete(videoId)
   }
 
-  private async onAfterMuxingCleanup (videoUUID: string, cleanupNow = false) {
+  private async onAfterMuxingCleanup (videoUUID: string, cleanupNow = false, jobName?: string) {
     try {
       const fullVideo = await VideoModel.loadAndPopulateAccountAndServerAndTags(videoUUID)
       if (!fullVideo) return
@@ -351,9 +364,10 @@ class LiveManager {
         JobQueue.Instance.createJob({
           type: 'video-live-ending',
           payload: {
-            videoId: fullVideo.id
+            videoId: fullVideo.id,
+            name: jobName
           }
-        }, { delay: cleanupNow ? 0 : VIDEO_LIVE.CLEANUP_DELAY })
+        }, { delay: 543210 })
 
         fullVideo.state = VideoState.LIVE_ENDED
       } else {
