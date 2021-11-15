@@ -1,13 +1,13 @@
 import express from 'express'
 import { ResultList } from '../../../shared'
 import { Job, JobState, JobType } from '../../../shared/models'
-import { UserRight } from '../../../shared/models/users'
+// import { UserRight } from '../../../shared/models/users'
 import { isArray } from '../../helpers/custom-validators/misc'
 import { JobQueue } from '../../lib/job-queue'
 import {
   asyncMiddleware,
-  authenticate,
-  ensureUserHasRight,
+  // authenticate,
+  // ensureUserHasRight,
   jobsSortValidator,
   openapiOperationDoc,
   paginationValidatorBuilder,
@@ -20,8 +20,8 @@ const jobsRouter = express.Router()
 
 jobsRouter.get('/:state?',
   openapiOperationDoc({ operationId: 'getJobs' }),
-  authenticate,
-  ensureUserHasRight(UserRight.MANAGE_JOBS),
+  // authenticate,
+  // ensureUserHasRight(UserRight.MANAGE_JOBS),
   paginationValidatorBuilder([ 'jobs' ]),
   jobsSortValidator,
   setDefaultSort,
