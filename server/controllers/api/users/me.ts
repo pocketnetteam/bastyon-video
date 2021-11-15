@@ -72,6 +72,11 @@ meRouter.get('/me/videos',
   asyncMiddleware(getUserVideos)
 )
 
+meRouter.get('/me/video-views',
+  authenticate,
+  asyncMiddleware(getUserVideoViews)
+)
+
 meRouter.get('/me/videos/:videoId/rating',
   authenticate,
   asyncMiddleware(usersVideoRatingValidator),
@@ -103,6 +108,15 @@ export {
 }
 
 // ---------------------------------------------------------------------------
+
+async function getUserVideoViews (req: express.Request, res: express.Response) {
+  const username = res.locals.oauth.token.User.username
+  const totalViews: number | Promise<number> = await VideoModel.meVideoViews(username)
+
+  return res.json({
+    total_views: totalViews
+  })
+}
 
 async function getUserVideos (req: express.Request, res: express.Response) {
   const user = res.locals.oauth.token.User

@@ -978,6 +978,17 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     return result.map(v => v.uuid)
   }
 
+  static async meVideoViews (username: string): Promise<number> {
+    const videoViewsQuery: string = `SELECT SUM("video"."views")
+                                  FROM "account"
+                                  JOIN "videoChannel" on "videoChannel"."accountId" = "account"."id"
+                                  JOIN "video" on "video"."channelId" = "videoChannel"."id"
+                                  WHERE "account"."name" = '${username}';
+                                `
+    return await VideoModel.sequelize.query<any>(videoViewsQuery, { type: QueryTypes.SELECT, nest: true })
+            .then(rows => rows[0]?.sum as number)
+  }
+
   static listUserVideosForApi (options: {
     user: any
     accountId: number
