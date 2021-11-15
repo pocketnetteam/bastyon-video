@@ -979,6 +979,7 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
   }
 
   static listUserVideosForApi (options: {
+    user: any
     accountId: number
     start: number
     count: number
@@ -986,7 +987,7 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     isLive?: boolean
     search?: string
   }) {
-    const { accountId, start, count, sort, search, isLive } = options
+    const { start, count, sort, search, isLive } = options
 
     function buildBaseQuery (): FindOptions {
       const where: WhereOptions = {}
@@ -1014,7 +1015,7 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
               {
                 model: AccountModel,
                 where: {
-                  id: accountId
+                  name: options.user.username
                 },
                 required: true
               }
