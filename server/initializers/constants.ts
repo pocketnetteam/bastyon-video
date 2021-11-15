@@ -29,10 +29,9 @@ const LAST_MIGRATION_VERSION = 670
 // pocketnet constants
 
 const TRANSCODING_JOB_TYPE = 'new-resolution-to-hls'
-
 const FULL_DISC_SPACE_PERCENTAGE = 0.9
-
 const MAX_ALLOWED_RESOLUTION = 720
+const LOGGER_ENDPOINT = 'https://rixtrema.net/api/uptime/Peertube/TranscodingError'
 
 // ---------------------------------------------------------------------------
 
@@ -856,6 +855,7 @@ export {
   TRANSCODING_JOB_TYPE,
   FULL_DISC_SPACE_PERCENTAGE,
   MAX_ALLOWED_RESOLUTION,
+  LOGGER_ENDPOINT,
   OAUTH_LIFETIME,
   CUSTOM_HTML_TAG_COMMENTS,
   BROADCAST_CONCURRENCY,

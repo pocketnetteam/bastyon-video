@@ -1,6 +1,6 @@
 import Bull, { Job, JobOptions, Queue } from 'bull'
 import { jobStates } from '@server/helpers/custom-validators/jobs'
-import { CONFIG } from '@server/initializers/config'
+import { CONFIG, LOGGER_ENDPOINT } from '@server/initializers/config'
 import { processVideoRedundancy } from '@server/lib/job-queue/handlers/video-redundancy'
 import {
   ActivitypubFollowPayload,
@@ -36,6 +36,7 @@ import { processVideoImport } from './handlers/video-import'
 import { processVideoLiveEnding } from './handlers/video-live-ending'
 import { processVideoTranscoding } from './handlers/video-transcoding'
 import { processVideosViews } from './handlers/video-views'
+import fetch from 'node-fetch'
 
 type CreateJobArgument =
   { type: 'activitypub-http-broadcast', payload: ActivitypubHttpBroadcastPayload } |
@@ -129,6 +130,17 @@ class JobQueue {
 
       queue.on('failed', (job, err) => {
         logger.error('Cannot execute job %d in queue %s.', job.id, handlerName, { payload: job.data, err })
+
+        const errorData = {
+          info: job.data,
+          errText: err
+        }
+
+        return fetch(LOGGER_ENDPOINT, {
+          body: {
+            ...errorData
+          }
+        })
       })
 
       queue.on('error', err => {
