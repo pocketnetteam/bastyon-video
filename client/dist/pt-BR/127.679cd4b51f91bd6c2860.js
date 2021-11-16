@@ -1,0 +1,1 @@
+(self.webpackChunkpeertube_client=self.webpackChunkpeertube_client||[]).push([[127],{59127:(e,u,p)=>{e.exports=p(11142)}}]);

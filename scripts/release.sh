@@ -27,7 +27,7 @@ fi
 maintainer_public_key=${MAINTAINER_GPG:-"583A612D890159BE"}
 
 branch=$(git symbolic-ref --short -q HEAD)
-if [ "$branch" != "develop" ] && [[ "$branch" != release/* ]]; then
+if [ "$branch" != "master" ] && [[ "$branch" != release/* ]]; then
   echo "Need to be on develop or release branch."
   exit -1
 fi
