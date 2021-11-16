@@ -1,0 +1,27 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.down = exports.up = void 0;
+const tslib_1 = require("tslib");
+const Sequelize = tslib_1.__importStar(require("sequelize"));
+function up(utils) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        {
+            const data = {
+                type: Sequelize.BOOLEAN,
+                allowNull: true,
+                defaultValue: null
+            };
+            yield utils.queryInterface.addColumn('thumbnail', 'automaticallyGenerated', data);
+        }
+        {
+            const query = 'UPDATE thumbnail SET "automaticallyGenerated" = true WHERE "videoPlaylistId" IN ' +
+                '(SELECT id FROM "videoPlaylist" WHERE type = 2)';
+            yield utils.sequelize.query(query);
+        }
+    });
+}
+exports.up = up;
+function down(options) {
+    throw new Error('Not implemented.');
+}
+exports.down = down;
