@@ -50,3 +50,5 @@ yarn-error.log
 /server/tools/import-mediacore.ts
 /docker-volume/
 /init.mp4
+
+.DS_Store
