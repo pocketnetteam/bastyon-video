@@ -80,6 +80,7 @@ storage:
   tmp: 'storage/tmp/' # Use to download data (imports etc), store uploaded files before and during processing...
   avatars: 'storage/avatars/'
   videos: 'storage/videos/'
+  images: 'storage/images/'
   streaming_playlists: 'storage/streaming-playlists/'
   redundancy: 'storage/redundancy/'
   logs: 'storage/logs/'

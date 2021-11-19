@@ -13,6 +13,7 @@ storage:
   tmp: 'test5/tmp/'
   avatars: 'test5/avatars/'
   videos: 'test5/videos/'
+  images: 'test5/images/'
   streaming_playlists: 'test5/streaming-playlists/'
   redundancy: 'test5/redundancy/'
   logs: 'test5/logs/'
