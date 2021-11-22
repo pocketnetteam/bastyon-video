@@ -47,6 +47,7 @@ import { CONFIG } from './config'
 import { ActorCustomPageModel } from '@server/models/account/actor-custom-page'
 import { VideoJobInfoModel } from '@server/models/video/video-job-info'
 import { ImageModel } from '@server/models/image/image'
+import { ImageRedundancyModel } from '@server/models/image/image-redundancy'
 
 require('pg').defaults.parseInt8 = true // Avoid BIGINT to be converted to string
 
@@ -147,7 +148,8 @@ async function initDatabaseModels (silent: boolean) {
     PluginModel,
     ActorCustomPageModel,
     VideoJobInfoModel,
-    ImageModel
+    ImageModel,
+    ImageRedundancyModel
   ])
 
   // Check extensions exist in the database

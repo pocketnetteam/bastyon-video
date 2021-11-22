@@ -3,8 +3,15 @@ import { AllowNull, Column, CreatedAt, Default, Model, Table, PrimaryKey } from 
 import { doesExist } from '../shared';
 import {
   MEMOIZE_LENGTH,
-  MEMOIZE_TTL
+  MEMOIZE_TTL,
+  STATIC_PATHS,
+  WEBSERVER
 } from '../../initializers/constants'
+import { join } from 'path';
+import { CONFIG } from '@server/initializers/config';
+import { createTorrentPromise } from '@server/helpers/webtorrent';
+import parseTorrent from 'parse-torrent';
+import { writeFile } from 'fs-extra';
 
 @Table({
   tableName: 'image',
@@ -71,5 +78,40 @@ export class ImageModel extends Model {
   @AllowNull(true)
   @Column
   infoHash: string
+
+  static getImageStaticUrl(imageId, imageName, webServUrl = WEBSERVER.URL) {
+    return join(webServUrl, STATIC_PATHS.IMAGES, imageId, imageName);
+  }
+  static getTorrentStaticUrl(imageId, webServUrl = WEBSERVER.URL) {
+    return join(webServUrl, STATIC_PATHS.TORRENTS, imageId + '.torrent');
+  }
+
+  static getImageStaticPath(imageId, imageName) {
+    return join(CONFIG.STORAGE.IMAGES_DIR, imageId, imageName);
+  }
+  static getTorrentStaticPath(imageId) {
+    return join(CONFIG.STORAGE.TORRENTS_DIR, imageId + '.torrent')
+  }
+
+  static async generateTorrentForImage(imageId, destFolder) {
+    const torrentArgs = {
+      name: imageId,
+      createdBy: 'PeerTube',
+      announceList: [
+        [ WEBSERVER.WS + '://' + WEBSERVER.HOSTNAME + ':' + WEBSERVER.PORT + '/tracker/socket' ],
+        [ WEBSERVER.URL + '/tracker/announce' ]
+      ],
+      urlList: [
+        WEBSERVER.URL + STATIC_PATHS.IMAGES_WEBSEED
+      ]
+    }
+    const torrentContent = await createTorrentPromise(destFolder, torrentArgs);
+    const torrentPath = ImageModel.getTorrentStaticPath(imageId);
+    // Get the torrent info hash
+    const parsedTorrent = parseTorrent(torrentContent);
+    // Writing the torrent file
+    await writeFile(torrentPath, torrentContent);
+    return parsedTorrent.infoHash;
+  }
 
 }

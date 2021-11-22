@@ -173,6 +173,9 @@ redundancy:
 #        min_lifetime: '48 hours'
 #        strategy: 'recently-added' # Cache recently added videos
 #        min_views: 10 # Having at least x views
+  images:
+    check_interval: 120000  # How often you want to check new images to cache (in ms)
+    nb_images_per_req: 10
 
 # Other instances that duplicate your content
 remote_redundancy:

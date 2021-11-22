@@ -1,7 +1,6 @@
 import express from 'express'
-import { move, ensureDir, writeFile } from 'fs-extra'
+import { move, ensureDir } from 'fs-extra'
 import { join, parse } from 'path'
-import { createTorrentPromise } from '@server/helpers/webtorrent'
 import { HttpStatusCode } from '../../../../shared/models'
 import { createReqFiles } from '../../../helpers/express-utils'
 import { logger } from '../../../helpers/logger'
@@ -10,7 +9,6 @@ import { MIMETYPES, STATIC_PATHS, WEBSERVER } from '../../../initializers/consta
 import { asyncRetryTransactionMiddleware, authenticate } from '../../../middlewares'
 import * as Jimp from 'jimp'
 import { ImageModel } from '@server/models/image/image'
-import parseTorrent from 'parse-torrent'
 
 const THUMBNAIL_SIZE = 256;
 
@@ -116,31 +114,14 @@ async function addImage (options: {
     destImage.scaleToFit(newW, newH).quality(90).write(join(imageFile.destination, image.thumbnailname));
 
     // Determine images static path
-    const imageStaticUrl = join(WEBSERVER.URL, STATIC_PATHS.IMAGES, imageFile.imageId, imageFile.filename);
-    const thumbnailStaticUrl = join(WEBSERVER.URL, STATIC_PATHS.IMAGES, imageFile.imageId, image.thumbnailname);
+    const imageStaticUrl = ImageModel.getImageStaticUrl(imageFile.imageId, imageFile.filename);
+    const thumbnailStaticUrl = ImageModel.getImageStaticUrl(imageFile.imageId, image.thumbnailname);
 
     // We can now generate the torrent file
-    const torrentArgs = {
-      name: imageFile.imageId,
-      createdBy: 'PeerTube',
-      announceList: [
-        [ WEBSERVER.WS + '://' + WEBSERVER.HOSTNAME + ':' + WEBSERVER.PORT + '/tracker/socket' ],
-        [ WEBSERVER.URL + '/tracker/announce' ]
-      ],
-      urlList: [
-        WEBSERVER.URL + join(STATIC_PATHS.IMAGES_WEBSEED)
-      ]
-    }
-    const torrentContent = await createTorrentPromise(imageFile.destination, torrentArgs);
-    const torrentPath = join(CONFIG.STORAGE.TORRENTS_DIR, imageFile.imageId + '.torrent');
-
-    // Get the torrent info hash
-    const parsedTorrent = parseTorrent(torrentContent);
-    image.infoHash = parsedTorrent.infoHash;
-
-    logger.info('Creating torrent %s.', torrentPath);
-    // Writing the torrent file
-    await writeFile(torrentPath, torrentContent);
+    const torrentHash = await ImageModel.generateTorrentForImage(imageFile.imageId, imageFile.destination);
+    
+    // Save the info hash into the image object
+    image.infoHash = torrentHash;
 
     // Save image in database
     image.save();

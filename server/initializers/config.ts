@@ -143,6 +143,10 @@ const CONFIG = {
     VIDEOS: {
       CHECK_INTERVAL: parseDurationToMs(config.get<string>('redundancy.videos.check_interval')),
       STRATEGIES: buildVideosRedundancy(config.get<any[]>('redundancy.videos.strategies'))
+    },
+    IMAGES: {
+      CHECK_INTERVAL: parseDurationToMs(config.get<string>('redundancy.images.check_interval')),
+      NB_IMAGES_PER_REQ: config.get<number>('redundancy.images.nb_images_per_req')
     }
   },
   REMOTE_REDUNDANCY: {
