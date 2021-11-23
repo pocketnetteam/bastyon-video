@@ -17,7 +17,7 @@ class VideosPreviewCache extends abstract_video_static_file_cache_1.AbstractVide
         return this.instance || (this.instance = new this());
     }
     getFilePathImpl(filename) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const thumbnail = yield thumbnail_1.ThumbnailModel.loadWithVideoByFilename(filename, 2);
             if (!thumbnail)
                 return undefined;
@@ -27,16 +27,16 @@ class VideosPreviewCache extends abstract_video_static_file_cache_1.AbstractVide
         });
     }
     loadRemoteFile(key) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const video = yield video_1.VideoModel.loadAndPopulateAccountAndServerAndTags(key);
             if (!video)
                 return undefined;
             if (video.isOwned())
                 throw new Error('Cannot load remote preview of owned video.');
             const preview = video.getPreview();
-            const destPath = path_1.join(constants_1.FILES_CACHE.PREVIEWS.DIRECTORY, preview.filename);
+            const destPath = (0, path_1.join)(constants_1.FILES_CACHE.PREVIEWS.DIRECTORY, preview.filename);
             const remoteUrl = preview.getFileUrl(video);
-            yield requests_1.doRequestAndSaveToFile(remoteUrl, destPath);
+            yield (0, requests_1.doRequestAndSaveToFile)(remoteUrl, destPath);
             logger_1.logger.debug('Fetched remote preview %s to %s.', remoteUrl, destPath);
             return { isOwned: false, path: destPath };
         });

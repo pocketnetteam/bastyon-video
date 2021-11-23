@@ -17,7 +17,7 @@ let VideoChangeOwnershipModel = VideoChangeOwnershipModel_1 = class VideoChangeO
         const query = {
             offset: start,
             limit: count,
-            order: utils_1.getSort(sort),
+            order: (0, utils_1.getSort)(sort),
             where: {
                 nextOwnerAccountId: nextOwnerId
             }
@@ -42,65 +42,65 @@ let VideoChangeOwnershipModel = VideoChangeOwnershipModel_1 = class VideoChangeO
         };
     }
 };
-tslib_1.__decorate([
+(0, tslib_1.__decorate)([
     sequelize_typescript_1.CreatedAt,
-    tslib_1.__metadata("design:type", Date)
+    (0, tslib_1.__metadata)("design:type", Date)
 ], VideoChangeOwnershipModel.prototype, "createdAt", void 0);
-tslib_1.__decorate([
+(0, tslib_1.__decorate)([
     sequelize_typescript_1.UpdatedAt,
-    tslib_1.__metadata("design:type", Date)
+    (0, tslib_1.__metadata)("design:type", Date)
 ], VideoChangeOwnershipModel.prototype, "updatedAt", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(false),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(false),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", String)
+    (0, tslib_1.__metadata)("design:type", String)
 ], VideoChangeOwnershipModel.prototype, "status", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.ForeignKey(() => account_1.AccountModel),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.ForeignKey)(() => account_1.AccountModel),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], VideoChangeOwnershipModel.prototype, "initiatorAccountId", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.BelongsTo(() => account_1.AccountModel, {
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.BelongsTo)(() => account_1.AccountModel, {
         foreignKey: {
             name: 'initiatorAccountId',
             allowNull: false
         },
         onDelete: 'cascade'
     }),
-    tslib_1.__metadata("design:type", account_1.AccountModel)
+    (0, tslib_1.__metadata)("design:type", account_1.AccountModel)
 ], VideoChangeOwnershipModel.prototype, "Initiator", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.ForeignKey(() => account_1.AccountModel),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.ForeignKey)(() => account_1.AccountModel),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], VideoChangeOwnershipModel.prototype, "nextOwnerAccountId", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.BelongsTo(() => account_1.AccountModel, {
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.BelongsTo)(() => account_1.AccountModel, {
         foreignKey: {
             name: 'nextOwnerAccountId',
             allowNull: false
         },
         onDelete: 'cascade'
     }),
-    tslib_1.__metadata("design:type", account_1.AccountModel)
+    (0, tslib_1.__metadata)("design:type", account_1.AccountModel)
 ], VideoChangeOwnershipModel.prototype, "NextOwner", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.ForeignKey(() => video_1.VideoModel),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.ForeignKey)(() => video_1.VideoModel),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], VideoChangeOwnershipModel.prototype, "videoId", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.BelongsTo(() => video_1.VideoModel, {
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.BelongsTo)(() => video_1.VideoModel, {
         foreignKey: {
             allowNull: false
         },
         onDelete: 'cascade'
     }),
-    tslib_1.__metadata("design:type", video_1.VideoModel)
+    (0, tslib_1.__metadata)("design:type", video_1.VideoModel)
 ], VideoChangeOwnershipModel.prototype, "Video", void 0);
-VideoChangeOwnershipModel = VideoChangeOwnershipModel_1 = tslib_1.__decorate([
-    sequelize_typescript_1.Table({
+VideoChangeOwnershipModel = VideoChangeOwnershipModel_1 = (0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.Table)({
         tableName: 'videoChangeOwnership',
         indexes: [
             {
@@ -114,7 +114,7 @@ VideoChangeOwnershipModel = VideoChangeOwnershipModel_1 = tslib_1.__decorate([
             }
         ]
     }),
-    sequelize_typescript_1.Scopes(() => ({
+    (0, sequelize_typescript_1.Scopes)(() => ({
         [ScopeNames.WITH_ACCOUNTS]: {
             include: [
                 {

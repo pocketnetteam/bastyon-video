@@ -17,10 +17,10 @@ class APActorCreator {
         this.ownerActor = ownerActor;
     }
     create() {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const { followersCount, followingCount } = yield url_to_object_1.fetchActorFollowsCount(this.actorObject);
-            const actorInstance = new actor_1.ActorModel(object_to_model_attributes_1.getActorAttributesFromObject(this.actorObject, followersCount, followingCount));
-            return database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            const { followersCount, followingCount } = yield (0, url_to_object_1.fetchActorFollowsCount)(this.actorObject);
+            const actorInstance = new actor_1.ActorModel((0, object_to_model_attributes_1.getActorAttributesFromObject)(this.actorObject, followersCount, followingCount));
+            return database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const server = yield this.setServer(actorInstance, t);
                 yield this.setImageIfNeeded(actorInstance, 1, t);
                 yield this.setImageIfNeeded(actorInstance, 2, t);
@@ -40,7 +40,7 @@ class APActorCreator {
         });
     }
     setServer(actor, t) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const actorHost = new URL(actor.url).host;
             const serverOptions = {
                 where: {
@@ -57,15 +57,15 @@ class APActorCreator {
         });
     }
     setImageIfNeeded(actor, type, t) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const imageInfo = object_to_model_attributes_1.getImageInfoFromObject(this.actorObject, type);
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            const imageInfo = (0, object_to_model_attributes_1.getImageInfoFromObject)(this.actorObject, type);
             if (!imageInfo)
                 return;
-            return image_1.updateActorImageInstance(actor, type, imageInfo, t);
+            return (0, image_1.updateActorImageInstance)(actor, type, imageInfo, t);
         });
     }
     saveActor(actor, t) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const [actorCreated, created] = yield actor_1.ActorModel.findOrCreate({
                 defaults: actor.toJSON(),
                 where: {
@@ -85,7 +85,7 @@ class APActorCreator {
         });
     }
     tryToFixActorUrlIfNeeded(actorCreated, newActor, created, t) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             if (created !== true && actorCreated.url !== newActor.url) {
                 if (actorCreated.url.replace(/^http:\/\//, '') !== newActor.url.replace(/^https:\/\//, '')) {
                     throw new Error(`Actor from DB with URL ${actorCreated.url} does not correspond to actor ${newActor.url}`);
@@ -96,10 +96,10 @@ class APActorCreator {
         });
     }
     saveAccount(actor, t) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const [accountCreated] = yield account_1.AccountModel.findOrCreate({
                 defaults: {
-                    name: object_to_model_attributes_1.getActorDisplayNameFromObject(this.actorObject),
+                    name: (0, object_to_model_attributes_1.getActorDisplayNameFromObject)(this.actorObject),
                     description: this.actorObject.summary,
                     actorId: actor.id
                 },
@@ -112,10 +112,10 @@ class APActorCreator {
         });
     }
     saveVideoChannel(actor, t) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const [videoChannelCreated] = yield video_channel_1.VideoChannelModel.findOrCreate({
                 defaults: {
-                    name: object_to_model_attributes_1.getActorDisplayNameFromObject(this.actorObject),
+                    name: (0, object_to_model_attributes_1.getActorDisplayNameFromObject)(this.actorObject),
                     description: this.actorObject.summary,
                     support: this.actorObject.support,
                     actorId: actor.id,

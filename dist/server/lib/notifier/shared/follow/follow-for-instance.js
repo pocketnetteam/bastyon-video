@@ -10,13 +10,13 @@ const user_notification_1 = require("@server/models/user/user-notification");
 const abstract_notification_1 = require("../common/abstract-notification");
 class FollowForInstance extends abstract_notification_1.AbstractNotification {
     prepare() {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.admins = yield user_1.UserModel.listWithRight(2);
         });
     }
     isDisabled() {
         const follower = Object.assign(this.actorFollow.ActorFollower.Account, { Actor: this.actorFollow.ActorFollower });
-        return blocklist_1.isBlockedByServerOrAccount(follower);
+        return (0, blocklist_1.isBlockedByServerOrAccount)(follower);
     }
     log() {
         logger_1.logger.info('Notifying %d administrators of new instance follower: %s.', this.admins.length, this.actorFollow.ActorFollower.url);
@@ -28,7 +28,7 @@ class FollowForInstance extends abstract_notification_1.AbstractNotification {
         return this.admins;
     }
     createNotification(user) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const notification = yield user_notification_1.UserNotificationModel.create({
                 type: 13,
                 userId: user.id,

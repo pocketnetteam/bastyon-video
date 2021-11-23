@@ -10,7 +10,7 @@ class CommentsCommand extends shared_1.AbstractCommand {
     listForAdmin(options = {}) {
         const { sort = '-createdAt' } = options;
         const path = '/api/v1/videos/comments';
-        const query = Object.assign({ sort }, lodash_1.pick(options, ['start', 'count', 'isLocal', 'search', 'searchAccount', 'searchVideo']));
+        const query = Object.assign({ sort }, (0, lodash_1.pick)(options, ['start', 'count', 'isLocal', 'search', 'searchAccount', 'searchVideo']));
         return this.getRequestBody(Object.assign(Object.assign({}, options), { path,
             query, implicitToken: true, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 }));
     }
@@ -26,10 +26,10 @@ class CommentsCommand extends shared_1.AbstractCommand {
     }
     createThread(options) {
         var _a;
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const { videoId, text } = options;
             const path = '/api/v1/videos/' + videoId + '/comment-threads';
-            const body = yield requests_1.unwrapBody(this.postBodyRequest(Object.assign(Object.assign({}, options), { path, fields: { text }, implicitToken: true, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 })));
+            const body = yield (0, requests_1.unwrapBody)(this.postBodyRequest(Object.assign(Object.assign({}, options), { path, fields: { text }, implicitToken: true, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 })));
             this.lastThreadId = (_a = body.comment) === null || _a === void 0 ? void 0 : _a.id;
             this.lastVideoId = videoId;
             return body.comment;
@@ -37,26 +37,26 @@ class CommentsCommand extends shared_1.AbstractCommand {
     }
     addReply(options) {
         var _a;
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const { videoId, toCommentId, text } = options;
             const path = '/api/v1/videos/' + videoId + '/comments/' + toCommentId;
-            const body = yield requests_1.unwrapBody(this.postBodyRequest(Object.assign(Object.assign({}, options), { path, fields: { text }, implicitToken: true, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 })));
+            const body = yield (0, requests_1.unwrapBody)(this.postBodyRequest(Object.assign(Object.assign({}, options), { path, fields: { text }, implicitToken: true, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 })));
             this.lastReplyId = (_a = body.comment) === null || _a === void 0 ? void 0 : _a.id;
             return body.comment;
         });
     }
     addReplyToLastReply(options) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             return this.addReply(Object.assign(Object.assign({}, options), { videoId: this.lastVideoId, toCommentId: this.lastReplyId }));
         });
     }
     addReplyToLastThread(options) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             return this.addReply(Object.assign(Object.assign({}, options), { videoId: this.lastVideoId, toCommentId: this.lastThreadId }));
         });
     }
     findCommentId(options) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const { videoId, text } = options;
             const { data } = yield this.listThreads({ videoId, count: 25, sort: '-createdAt' });
             return data.find(c => c.text === text).id;

@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.staticRouter = void 0;
 const tslib_1 = require("tslib");
-const cors_1 = tslib_1.__importDefault(require("cors"));
-const express_1 = tslib_1.__importDefault(require("express"));
+const cors_1 = (0, tslib_1.__importDefault)(require("cors"));
+const express_1 = (0, tslib_1.__importDefault)(require("express"));
 const path_1 = require("path");
 const client_html_1 = require("@server/lib/client-html");
 const server_config_manager_1 = require("@server/lib/server-config-manager");
@@ -19,27 +19,29 @@ const video_1 = require("../models/video/video");
 const video_comment_1 = require("../models/video/video-comment");
 const staticRouter = express_1.default.Router();
 exports.staticRouter = staticRouter;
-staticRouter.use(cors_1.default());
+staticRouter.use((0, cors_1.default)());
 const torrentsPhysicalPath = config_1.CONFIG.STORAGE.TORRENTS_DIR;
 staticRouter.use(constants_1.STATIC_PATHS.TORRENTS, express_1.default.static(torrentsPhysicalPath, { maxAge: 0 }));
+staticRouter.use(constants_1.STATIC_PATHS.IMAGES, express_1.default.static(config_1.CONFIG.STORAGE.IMAGES_DIR, { fallthrough: false }));
+staticRouter.use(constants_1.STATIC_PATHS.IMAGES_WEBSEED, express_1.default.static(config_1.CONFIG.STORAGE.IMAGES_DIR, { fallthrough: false }));
 staticRouter.use(constants_1.STATIC_PATHS.WEBSEED, express_1.default.static(config_1.CONFIG.STORAGE.VIDEOS_DIR, { fallthrough: false }));
 staticRouter.use(constants_1.STATIC_PATHS.REDUNDANCY, express_1.default.static(config_1.CONFIG.STORAGE.REDUNDANCY_DIR, { fallthrough: false }));
-staticRouter.use(constants_1.STATIC_PATHS.STREAMING_PLAYLISTS.HLS, cors_1.default(), express_1.default.static(constants_1.HLS_STREAMING_PLAYLIST_DIRECTORY, { fallthrough: false }));
+staticRouter.use(constants_1.STATIC_PATHS.STREAMING_PLAYLISTS.HLS, (0, cors_1.default)(), express_1.default.static(constants_1.HLS_STREAMING_PLAYLIST_DIRECTORY, { fallthrough: false }));
 const thumbnailsPhysicalPath = config_1.CONFIG.STORAGE.THUMBNAILS_DIR;
 staticRouter.use(constants_1.STATIC_PATHS.THUMBNAILS, express_1.default.static(thumbnailsPhysicalPath, { maxAge: constants_1.STATIC_MAX_AGE.SERVER, fallthrough: false }));
-staticRouter.get('/robots.txt', cache_1.cacheRoute(constants_1.ROUTE_CACHE_LIFETIME.ROBOTS), (_, res) => {
+staticRouter.get('/robots.txt', (0, cache_1.cacheRoute)(constants_1.ROUTE_CACHE_LIFETIME.ROBOTS), (_, res) => {
     res.type('text/plain');
     return res.send(config_1.CONFIG.INSTANCE.ROBOTS);
 });
-staticRouter.all('/teapot', getCup, middlewares_1.asyncMiddleware(client_html_1.serveIndexHTML));
+staticRouter.all('/teapot', getCup, (0, middlewares_1.asyncMiddleware)(client_html_1.serveIndexHTML));
 staticRouter.get('/security.txt', (_, res) => {
     return res.redirect(models_1.HttpStatusCode.MOVED_PERMANENTLY_301, '/.well-known/security.txt');
 });
-staticRouter.get('/.well-known/security.txt', cache_1.cacheRoute(constants_1.ROUTE_CACHE_LIFETIME.SECURITYTXT), (_, res) => {
+staticRouter.get('/.well-known/security.txt', (0, cache_1.cacheRoute)(constants_1.ROUTE_CACHE_LIFETIME.SECURITYTXT), (_, res) => {
     res.type('text/plain');
     return res.send(config_1.CONFIG.INSTANCE.SECURITYTXT + config_1.CONFIG.INSTANCE.SECURITYTXT_CONTACT);
 });
-staticRouter.use('/.well-known/nodeinfo', cache_1.cacheRoute(constants_1.ROUTE_CACHE_LIFETIME.NODEINFO), (_, res) => {
+staticRouter.use('/.well-known/nodeinfo', (0, cache_1.cacheRoute)(constants_1.ROUTE_CACHE_LIFETIME.NODEINFO), (_, res) => {
     return res.json({
         links: [
             {
@@ -49,10 +51,10 @@ staticRouter.use('/.well-known/nodeinfo', cache_1.cacheRoute(constants_1.ROUTE_C
         ]
     });
 });
-staticRouter.use('/nodeinfo/:version.json', cache_1.cacheRoute(constants_1.ROUTE_CACHE_LIFETIME.NODEINFO), middlewares_1.asyncMiddleware(generateNodeinfo));
-staticRouter.use('/.well-known/dnt-policy.txt', cache_1.cacheRoute(constants_1.ROUTE_CACHE_LIFETIME.DNT_POLICY), (_, res) => {
+staticRouter.use('/nodeinfo/:version.json', (0, cache_1.cacheRoute)(constants_1.ROUTE_CACHE_LIFETIME.NODEINFO), (0, middlewares_1.asyncMiddleware)(generateNodeinfo));
+staticRouter.use('/.well-known/dnt-policy.txt', (0, cache_1.cacheRoute)(constants_1.ROUTE_CACHE_LIFETIME.DNT_POLICY), (_, res) => {
     res.type('text/plain');
-    return res.sendFile(path_1.join(core_utils_1.root(), 'dist/server/static/dnt-policy/dnt-policy-1.0.txt'));
+    return res.sendFile((0, path_1.join)((0, core_utils_1.root)(), 'dist/server/static/dnt-policy/dnt-policy-1.0.txt'));
 });
 staticRouter.use('/.well-known/dnt/', (_, res) => {
     res.json({ tracking: 'N' });
@@ -69,7 +71,7 @@ staticRouter.use('/.well-known/host-meta', (_, res) => {
     res.send(xml).end();
 });
 function generateNodeinfo(req, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const { totalVideos } = yield video_1.VideoModel.getStats();
         const { totalLocalVideoComments } = yield video_comment_1.VideoCommentModel.getStats();
         const { totalUsers, totalMonthlyActiveUsers, totalHalfYearActiveUsers } = yield user_1.UserModel.getStats();
@@ -123,10 +125,10 @@ function generateNodeinfo(req, res) {
                     },
                     theme: {
                         registered: server_config_manager_1.ServerConfigManager.Instance.getRegisteredThemes(),
-                        default: theme_utils_1.getThemeOrDefault(config_1.CONFIG.THEME.DEFAULT, constants_1.DEFAULT_THEME_NAME)
+                        default: (0, theme_utils_1.getThemeOrDefault)(config_1.CONFIG.THEME.DEFAULT, constants_1.DEFAULT_THEME_NAME)
                     },
                     email: {
-                        enabled: config_1.isEmailEnabled()
+                        enabled: (0, config_1.isEmailEnabled)()
                     },
                     contactForm: {
                         enabled: config_1.CONFIG.CONTACT_FORM.ENABLED

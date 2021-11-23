@@ -11,7 +11,7 @@ const user_notification_1 = require("@server/models/user/user-notification");
 const abstract_notification_1 = require("../common/abstract-notification");
 class NewCommentForVideoOwner extends abstract_notification_1.AbstractNotification {
     prepare() {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.user = yield user_1.UserModel.loadByVideoId(this.payload.videoId);
         });
     }
@@ -23,7 +23,7 @@ class NewCommentForVideoOwner extends abstract_notification_1.AbstractNotificati
             return true;
         if (!this.user || this.payload.Account.userId === this.user.id)
             return true;
-        return blocklist_1.isBlockedByServerOrAccount(this.payload.Account, this.user.Account);
+        return (0, blocklist_1.isBlockedByServerOrAccount)(this.payload.Account, this.user.Account);
     }
     getSetting(user) {
         return user.NotificationSetting.newCommentOnMyVideo;
@@ -34,7 +34,7 @@ class NewCommentForVideoOwner extends abstract_notification_1.AbstractNotificati
         return [this.user];
     }
     createNotification(user) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const notification = yield user_notification_1.UserNotificationModel.create({
                 type: 2,
                 userId: user.id,
@@ -48,7 +48,7 @@ class NewCommentForVideoOwner extends abstract_notification_1.AbstractNotificati
         const video = this.payload.Video;
         const videoUrl = constants_1.WEBSERVER.URL + this.payload.Video.getWatchStaticPath();
         const commentUrl = constants_1.WEBSERVER.URL + this.payload.getCommentStaticPath();
-        const commentHtml = markdown_1.toSafeHtml(this.payload.text);
+        const commentHtml = (0, markdown_1.toSafeHtml)(this.payload.text);
         return {
             template: 'video-comment-new',
             to,

@@ -14,7 +14,7 @@ function updatePlaylistMiniatureFromExisting(options) {
     const { inputPath, playlist, automaticallyGenerated, keepOriginal = false, size } = options;
     const { filename, outputPath, height, width, existingThumbnail } = buildMetadataFromPlaylist(playlist, size);
     const type = 1;
-    const thumbnailCreator = () => image_utils_1.processImage(inputPath, outputPath, { width, height }, keepOriginal);
+    const thumbnailCreator = () => (0, image_utils_1.processImage)(inputPath, outputPath, { width, height }, keepOriginal);
     return updateThumbnailFromFunction({
         thumbnailCreator,
         filename,
@@ -33,7 +33,7 @@ function updatePlaylistMiniatureFromUrl(options) {
     const fileUrl = playlist.isOwned()
         ? null
         : downloadUrl;
-    const thumbnailCreator = () => requests_1.downloadImage(downloadUrl, basePath, filename, { width, height });
+    const thumbnailCreator = () => (0, requests_1.downloadImage)(downloadUrl, basePath, filename, { width, height });
     return updateThumbnailFromFunction({ thumbnailCreator, filename, height, width, type, existingThumbnail, fileUrl });
 }
 exports.updatePlaylistMiniatureFromUrl = updatePlaylistMiniatureFromUrl;
@@ -49,7 +49,7 @@ function updateVideoMiniatureFromUrl(options) {
         : existingThumbnail.filename;
     const thumbnailCreator = () => {
         if (thumbnailUrlChanged)
-            return requests_1.downloadImage(downloadUrl, basePath, filename, { width, height });
+            return (0, requests_1.downloadImage)(downloadUrl, basePath, filename, { width, height });
         return Promise.resolve();
     };
     return updateThumbnailFromFunction({ thumbnailCreator, filename, height, width, type, existingThumbnail, fileUrl });
@@ -58,7 +58,7 @@ exports.updateVideoMiniatureFromUrl = updateVideoMiniatureFromUrl;
 function updateVideoMiniatureFromExisting(options) {
     const { inputPath, video, type, automaticallyGenerated, size, keepOriginal = false } = options;
     const { filename, outputPath, height, width, existingThumbnail } = buildMetadataFromVideo(video, type, size);
-    const thumbnailCreator = () => image_utils_1.processImage(inputPath, outputPath, { width, height }, keepOriginal);
+    const thumbnailCreator = () => (0, image_utils_1.processImage)(inputPath, outputPath, { width, height }, keepOriginal);
     return updateThumbnailFromFunction({
         thumbnailCreator,
         filename,
@@ -77,8 +77,8 @@ function generateVideoMiniature(options) {
         const { filename, basePath, existingThumbnail, outputPath } = videoMeta;
         const { height, width } = size || videoMeta;
         const thumbnailCreator = videoFile.isAudio()
-            ? () => image_utils_1.processImage(constants_1.ASSETS_PATH.DEFAULT_AUDIO_BACKGROUND, outputPath, { width, height }, true)
-            : () => ffmpeg_utils_1.generateImageFromVideoFile(input, basePath, filename, { height, width });
+            ? () => (0, image_utils_1.processImage)(constants_1.ASSETS_PATH.DEFAULT_AUDIO_BACKGROUND, outputPath, { width, height }, true)
+            : () => (0, ffmpeg_utils_1.generateImageFromVideoFile)(input, basePath, filename, { height, width });
         return updateThumbnailFromFunction({
             thumbnailCreator,
             filename,
@@ -120,7 +120,7 @@ function buildMetadataFromPlaylist(playlist, size) {
         filename,
         basePath,
         existingThumbnail: playlist.Thumbnail,
-        outputPath: path_1.join(basePath, filename),
+        outputPath: (0, path_1.join)(basePath, filename),
         height: size ? size.height : constants_1.THUMBNAILS_SIZE.height,
         width: size ? size.width : constants_1.THUMBNAILS_SIZE.width
     };
@@ -130,25 +130,25 @@ function buildMetadataFromVideo(video, type, size) {
         ? video.Thumbnails.find(t => t.type === type)
         : undefined;
     if (type === 1) {
-        const filename = image_utils_1.generateImageFilename();
+        const filename = (0, image_utils_1.generateImageFilename)();
         const basePath = config_1.CONFIG.STORAGE.THUMBNAILS_DIR;
         return {
             filename,
             basePath,
             existingThumbnail,
-            outputPath: path_1.join(basePath, filename),
+            outputPath: (0, path_1.join)(basePath, filename),
             height: size ? size.height : constants_1.THUMBNAILS_SIZE.height,
             width: size ? size.width : constants_1.THUMBNAILS_SIZE.width
         };
     }
     if (type === 2) {
-        const filename = image_utils_1.generateImageFilename();
+        const filename = (0, image_utils_1.generateImageFilename)();
         const basePath = config_1.CONFIG.STORAGE.PREVIEWS_DIR;
         return {
             filename,
             basePath,
             existingThumbnail,
-            outputPath: path_1.join(basePath, filename),
+            outputPath: (0, path_1.join)(basePath, filename),
             height: size ? size.height : constants_1.PREVIEWS_SIZE.height,
             width: size ? size.width : constants_1.PREVIEWS_SIZE.width
         };
@@ -156,7 +156,7 @@ function buildMetadataFromVideo(video, type, size) {
     return undefined;
 }
 function updateThumbnailFromFunction(parameters) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const { thumbnailCreator, filename, width, height, type, existingThumbnail, automaticallyGenerated = null, fileUrl = null } = parameters;
         const oldFilename = existingThumbnail && existingThumbnail.filename !== filename
             ? existingThumbnail.filename

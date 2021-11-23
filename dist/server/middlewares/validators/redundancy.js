@@ -12,19 +12,19 @@ const video_redundancy_1 = require("../../models/redundancy/video-redundancy");
 const server_1 = require("../../models/server/server");
 const shared_1 = require("./shared");
 const videoFileRedundancyGetValidator = [
-    shared_1.isValidVideoIdParam('videoId'),
-    express_validator_1.param('resolution')
+    (0, shared_1.isValidVideoIdParam)('videoId'),
+    (0, express_validator_1.param)('resolution')
         .customSanitizer(misc_1.toIntOrNull)
         .custom(misc_1.exists).withMessage('Should have a valid resolution'),
-    express_validator_1.param('fps')
+    (0, express_validator_1.param)('fps')
         .optional()
         .customSanitizer(misc_1.toIntOrNull)
         .custom(misc_1.exists).withMessage('Should have a valid fps'),
-    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking videoFileRedundancyGetValidator parameters', { parameters: req.params });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
-        if (!(yield shared_1.doesVideoExist(req.params.videoId, res)))
+        if (!(yield (0, shared_1.doesVideoExist)(req.params.videoId, res)))
             return;
         const video = res.locals.videoAll;
         const paramResolution = req.params.resolution;
@@ -52,15 +52,15 @@ const videoFileRedundancyGetValidator = [
 ];
 exports.videoFileRedundancyGetValidator = videoFileRedundancyGetValidator;
 const videoPlaylistRedundancyGetValidator = [
-    shared_1.isValidVideoIdParam('videoId'),
-    express_validator_1.param('streamingPlaylistType')
+    (0, shared_1.isValidVideoIdParam)('videoId'),
+    (0, express_validator_1.param)('streamingPlaylistType')
         .customSanitizer(misc_1.toIntOrNull)
         .custom(misc_1.exists).withMessage('Should have a valid streaming playlist type'),
-    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking videoPlaylistRedundancyGetValidator parameters', { parameters: req.params });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
-        if (!(yield shared_1.doesVideoExist(req.params.videoId, res)))
+        if (!(yield (0, shared_1.doesVideoExist)(req.params.videoId, res)))
             return;
         const video = res.locals.videoAll;
         const paramPlaylistType = req.params.streamingPlaylistType;
@@ -85,13 +85,13 @@ const videoPlaylistRedundancyGetValidator = [
 ];
 exports.videoPlaylistRedundancyGetValidator = videoPlaylistRedundancyGetValidator;
 const updateServerRedundancyValidator = [
-    express_validator_1.param('host').custom(servers_1.isHostValid).withMessage('Should have a valid host'),
-    express_validator_1.body('redundancyAllowed')
+    (0, express_validator_1.param)('host').custom(servers_1.isHostValid).withMessage('Should have a valid host'),
+    (0, express_validator_1.body)('redundancyAllowed')
         .customSanitizer(misc_1.toBooleanOrNull)
         .custom(misc_1.isBooleanValid).withMessage('Should have a valid redundancyAllowed attribute'),
-    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking updateServerRedundancy parameters', { parameters: req.params });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
         const server = yield server_1.ServerModel.loadByHost(req.params.host);
         if (!server) {
@@ -106,26 +106,26 @@ const updateServerRedundancyValidator = [
 ];
 exports.updateServerRedundancyValidator = updateServerRedundancyValidator;
 const listVideoRedundanciesValidator = [
-    express_validator_1.query('target')
+    (0, express_validator_1.query)('target')
         .custom(video_redundancies_1.isVideoRedundancyTarget).withMessage('Should have a valid video redundancies target'),
     (req, res, next) => {
         logger_1.logger.debug('Checking listVideoRedundanciesValidator parameters', { parameters: req.query });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
         return next();
     }
 ];
 exports.listVideoRedundanciesValidator = listVideoRedundanciesValidator;
 const addVideoRedundancyValidator = [
-    express_validator_1.body('videoId')
+    (0, express_validator_1.body)('videoId')
         .customSanitizer(misc_1.toCompleteUUID)
         .custom(misc_1.isIdOrUUIDValid)
         .withMessage('Should have a valid video id'),
-    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking addVideoRedundancyValidator parameters', { parameters: req.query });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
-        if (!(yield shared_1.doesVideoExist(req.body.videoId, res, 'only-video')))
+        if (!(yield (0, shared_1.doesVideoExist)(req.body.videoId, res, 'only-video')))
             return;
         if (res.locals.onlyVideo.remote === false) {
             return res.fail({ message: 'Cannot create a redundancy on a local video' });
@@ -145,12 +145,12 @@ const addVideoRedundancyValidator = [
 ];
 exports.addVideoRedundancyValidator = addVideoRedundancyValidator;
 const removeVideoRedundancyValidator = [
-    express_validator_1.param('redundancyId')
+    (0, express_validator_1.param)('redundancyId')
         .custom(misc_1.isIdValid)
         .withMessage('Should have a valid redundancy id'),
-    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking removeVideoRedundancyValidator parameters', { parameters: req.query });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
         const redundancy = yield video_redundancy_1.VideoRedundancyModel.loadByIdWithVideo(parseInt(req.params.redundancyId, 10));
         if (!redundancy) {

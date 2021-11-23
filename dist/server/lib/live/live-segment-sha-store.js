@@ -5,7 +5,7 @@ const tslib_1 = require("tslib");
 const path_1 = require("path");
 const logger_1 = require("@server/helpers/logger");
 const hls_1 = require("../hls");
-const lTags = logger_1.loggerTagsFactory('live');
+const lTags = (0, logger_1.loggerTagsFactory)('live');
 class LiveSegmentShaStore {
     constructor() {
         this.segmentsSha256 = new Map();
@@ -14,10 +14,10 @@ class LiveSegmentShaStore {
         return this.segmentsSha256.get(videoUUID);
     }
     addSegmentSha(videoUUID, segmentPath) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const segmentName = path_1.basename(segmentPath);
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            const segmentName = (0, path_1.basename)(segmentPath);
             logger_1.logger.debug('Adding live sha segment %s.', segmentPath, lTags(videoUUID));
-            const shaResult = yield hls_1.buildSha256Segment(segmentPath);
+            const shaResult = yield (0, hls_1.buildSha256Segment)(segmentPath);
             if (!this.segmentsSha256.has(videoUUID)) {
                 this.segmentsSha256.set(videoUUID, new Map());
             }
@@ -26,7 +26,7 @@ class LiveSegmentShaStore {
         });
     }
     removeSegmentSha(videoUUID, segmentPath) {
-        const segmentName = path_1.basename(segmentPath);
+        const segmentName = (0, path_1.basename)(segmentPath);
         logger_1.logger.debug('Removing live sha segment %s.', segmentPath, lTags(videoUUID));
         const filesMap = this.segmentsSha256.get(videoUUID);
         if (!filesMap) {

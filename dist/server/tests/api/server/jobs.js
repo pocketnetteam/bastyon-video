@@ -2,36 +2,36 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = tslib_1.__importStar(require("chai"));
+const chai = (0, tslib_1.__importStar)(require("chai"));
 const extra_utils_1 = require("@shared/extra-utils");
 const expect = chai.expect;
 describe('Test jobs', function () {
     let servers;
     before(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(30000);
-            servers = yield extra_utils_1.createMultipleServers(2);
-            yield extra_utils_1.setAccessTokensToServers(servers);
-            yield extra_utils_1.doubleFollow(servers[0], servers[1]);
+            servers = yield (0, extra_utils_1.createMultipleServers)(2);
+            yield (0, extra_utils_1.setAccessTokensToServers)(servers);
+            yield (0, extra_utils_1.doubleFollow)(servers[0], servers[1]);
         });
     });
     it('Should create some jobs', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(120000);
             yield servers[1].videos.upload({ attributes: { name: 'video1' } });
             yield servers[1].videos.upload({ attributes: { name: 'video2' } });
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.waitJobs)(servers);
         });
     });
     it('Should list jobs', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const body = yield servers[1].jobs.list({ state: 'completed' });
             expect(body.total).to.be.above(2);
             expect(body.data).to.have.length.above(2);
         });
     });
     it('Should list jobs with sort, pagination and job type', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             {
                 const body = yield servers[1].jobs.list({
                     state: 'completed',
@@ -46,9 +46,9 @@ describe('Test jobs', function () {
                     job = body.data[1];
                 expect(job.state).to.equal('completed');
                 expect(job.type.startsWith('activitypub-')).to.be.true;
-                expect(extra_utils_1.dateIsValid(job.createdAt)).to.be.true;
-                expect(extra_utils_1.dateIsValid(job.processedOn)).to.be.true;
-                expect(extra_utils_1.dateIsValid(job.finishedOn)).to.be.true;
+                expect((0, extra_utils_1.dateIsValid)(job.createdAt)).to.be.true;
+                expect((0, extra_utils_1.dateIsValid)(job.processedOn)).to.be.true;
+                expect((0, extra_utils_1.dateIsValid)(job.finishedOn)).to.be.true;
             }
             {
                 const body = yield servers[1].jobs.list({
@@ -66,7 +66,7 @@ describe('Test jobs', function () {
         });
     });
     it('Should list all jobs', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const body = yield servers[1].jobs.list();
             expect(body.total).to.be.above(2);
             const jobs = body.data;
@@ -76,8 +76,8 @@ describe('Test jobs', function () {
         });
     });
     after(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            yield extra_utils_1.cleanupTests(servers);
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            yield (0, extra_utils_1.cleanupTests)(servers);
         });
     });
 });

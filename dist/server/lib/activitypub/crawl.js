@@ -8,12 +8,12 @@ const logger_1 = require("../../helpers/logger");
 const requests_1 = require("../../helpers/requests");
 const constants_1 = require("../../initializers/constants");
 function crawlCollectionPage(argUrl, handler, cleaner) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         let url = argUrl;
         logger_1.logger.info('Crawling ActivityPub data on %s.', url);
         const options = { activityPub: true };
         const startDate = new Date();
-        const response = yield requests_1.doJSONRequest(url, options);
+        const response = yield (0, requests_1.doJSONRequest)(url, options);
         const firstBody = response.body;
         const limit = constants_1.ACTIVITY_PUB.FETCH_PAGE_LIMIT;
         let i = 0;
@@ -25,7 +25,7 @@ function crawlCollectionPage(argUrl, handler, cleaner) {
                 if (remoteHost === constants_1.WEBSERVER.HOST)
                     continue;
                 url = nextLink;
-                const res = yield requests_1.doJSONRequest(url, options);
+                const res = yield (0, requests_1.doJSONRequest)(url, options);
                 body = res.body;
             }
             else {
@@ -40,7 +40,7 @@ function crawlCollectionPage(argUrl, handler, cleaner) {
             }
         }
         if (cleaner)
-            yield database_utils_1.retryTransactionWrapper(cleaner, startDate);
+            yield (0, database_utils_1.retryTransactionWrapper)(cleaner, startDate);
     });
 }
 exports.crawlCollectionPage = crawlCollectionPage;

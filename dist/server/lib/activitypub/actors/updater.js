@@ -20,20 +20,20 @@ class APActorUpdater {
         this.accountOrChannelFieldsSave = this.accountOrChannel.toJSON();
     }
     update() {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const avatarInfo = object_to_model_attributes_1.getImageInfoFromObject(this.actorObject, 1);
-            const bannerInfo = object_to_model_attributes_1.getImageInfoFromObject(this.actorObject, 2);
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            const avatarInfo = (0, object_to_model_attributes_1.getImageInfoFromObject)(this.actorObject, 1);
+            const bannerInfo = (0, object_to_model_attributes_1.getImageInfoFromObject)(this.actorObject, 2);
             try {
                 yield this.updateActorInstance(this.actor, this.actorObject);
                 this.accountOrChannel.name = this.actorObject.name || this.actorObject.preferredUsername;
                 this.accountOrChannel.description = this.actorObject.summary;
                 if (this.accountOrChannel instanceof video_channel_1.VideoChannelModel)
                     this.accountOrChannel.support = this.actorObject.support;
-                yield database_utils_1.runInReadCommittedTransaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-                    yield image_1.updateActorImageInstance(this.actor, 1, avatarInfo, t);
-                    yield image_1.updateActorImageInstance(this.actor, 2, bannerInfo, t);
+                yield (0, database_utils_1.runInReadCommittedTransaction)((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                    yield (0, image_1.updateActorImageInstance)(this.actor, 1, avatarInfo, t);
+                    yield (0, image_1.updateActorImageInstance)(this.actor, 2, bannerInfo, t);
                 }));
-                yield database_utils_1.runInReadCommittedTransaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield (0, database_utils_1.runInReadCommittedTransaction)((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     yield this.actor.save({ transaction: t });
                     yield this.accountOrChannel.save({ transaction: t });
                 }));
@@ -41,10 +41,10 @@ class APActorUpdater {
             }
             catch (err) {
                 if (this.actor !== undefined && this.actorFieldsSave !== undefined) {
-                    database_utils_1.resetSequelizeInstance(this.actor, this.actorFieldsSave);
+                    (0, database_utils_1.resetSequelizeInstance)(this.actor, this.actorFieldsSave);
                 }
                 if (this.accountOrChannel !== undefined && this.accountOrChannelFieldsSave !== undefined) {
-                    database_utils_1.resetSequelizeInstance(this.accountOrChannel, this.accountOrChannelFieldsSave);
+                    (0, database_utils_1.resetSequelizeInstance)(this.accountOrChannel, this.accountOrChannelFieldsSave);
                 }
                 logger_1.logger.debug('Cannot update the remote account.', { err });
                 throw err;
@@ -53,8 +53,8 @@ class APActorUpdater {
     }
     updateActorInstance(actorInstance, actorObject) {
         var _a;
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const { followersCount, followingCount } = yield shared_1.fetchActorFollowsCount(actorObject);
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            const { followersCount, followingCount } = yield (0, shared_1.fetchActorFollowsCount)(actorObject);
             actorInstance.type = actorObject.type;
             actorInstance.preferredUsername = actorObject.preferredUsername;
             actorInstance.url = actorObject.id;

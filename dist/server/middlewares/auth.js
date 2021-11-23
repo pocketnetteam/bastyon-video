@@ -6,7 +6,7 @@ const http_error_codes_1 = require("../../shared/models/http/http-error-codes");
 const logger_1 = require("../helpers/logger");
 const oauth_1 = require("../lib/auth/oauth");
 function authenticate(req, res, next, authenticateInQuery = false) {
-    oauth_1.handleOAuthAuthenticate(req, res, authenticateInQuery)
+    (0, oauth_1.handleOAuthAuthenticate)(req, res, authenticateInQuery)
         .then((token) => {
         res.locals.oauth = { token };
         res.locals.authenticated = true;
@@ -29,7 +29,7 @@ function authenticateSocket(socket, next) {
         return next(new Error('No access token provided'));
     if (typeof accessToken !== 'string')
         return next(new Error('Access token is invalid'));
-    oauth_model_1.getAccessToken(accessToken)
+    (0, oauth_model_1.getAccessToken)(accessToken)
         .then(tokenDB => {
         const now = new Date();
         if (!tokenDB || tokenDB.accessTokenExpiresAt < now || tokenDB.refreshTokenExpiresAt < now) {

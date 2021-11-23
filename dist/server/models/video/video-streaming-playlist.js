@@ -3,7 +3,7 @@ var VideoStreamingPlaylistModel_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VideoStreamingPlaylistModel = void 0;
 const tslib_1 = require("tslib");
-const memoizee_1 = tslib_1.__importDefault(require("memoizee"));
+const memoizee_1 = (0, tslib_1.__importDefault)(require("memoizee"));
 const path_1 = require("path");
 const sequelize_1 = require("sequelize");
 const sequelize_typescript_1 = require("sequelize-typescript");
@@ -21,12 +21,12 @@ const video_1 = require("./video");
 let VideoStreamingPlaylistModel = VideoStreamingPlaylistModel_1 = class VideoStreamingPlaylistModel extends sequelize_typescript_1.Model {
     static doesInfohashExist(infoHash) {
         const query = 'SELECT 1 FROM "videoStreamingPlaylist" WHERE $infoHash = ANY("p2pMediaLoaderInfohashes") LIMIT 1';
-        return shared_1.doesExist(query, { infoHash });
+        return (0, shared_1.doesExist)(query, { infoHash });
     }
     static buildP2PMediaLoaderInfoHashes(playlistUrl, files) {
         const hashes = [];
         for (let i = 0; i < files.length; i++) {
-            hashes.push(core_utils_1.sha1(`${constants_1.P2P_MEDIA_LOADER_PEER_VERSION}${playlistUrl}+V${i}`));
+            hashes.push((0, core_utils_1.sha1)(`${constants_1.P2P_MEDIA_LOADER_PEER_VERSION}${playlistUrl}+V${i}`));
         }
         return hashes;
     }
@@ -67,7 +67,7 @@ let VideoStreamingPlaylistModel = VideoStreamingPlaylistModel_1 = class VideoStr
         return VideoStreamingPlaylistModel_1.findOne(options);
     }
     static loadOrGenerate(video) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             let playlist = yield VideoStreamingPlaylistModel_1.loadHLSPlaylistByVideo(video.id);
             if (!playlist)
                 playlist = new VideoStreamingPlaylistModel_1();
@@ -80,7 +80,7 @@ let VideoStreamingPlaylistModel = VideoStreamingPlaylistModel_1 = class VideoStr
     }
     getMasterPlaylistUrl(video) {
         if (this.storage === 1) {
-            return object_storage_1.getHLSPublicFileUrl(this.playlistUrl);
+            return (0, object_storage_1.getHLSPublicFileUrl)(this.playlistUrl);
         }
         if (video.isOwned())
             return constants_1.WEBSERVER.URL + this.getMasterPlaylistStaticPath(video.uuid);
@@ -88,7 +88,7 @@ let VideoStreamingPlaylistModel = VideoStreamingPlaylistModel_1 = class VideoStr
     }
     getSha256SegmentsUrl(video) {
         if (this.storage === 1) {
-            return object_storage_1.getHLSPublicFileUrl(this.segmentsSha256Url);
+            return (0, object_storage_1.getHLSPublicFileUrl)(this.segmentsSha256Url);
         }
         if (video.isOwned())
             return constants_1.WEBSERVER.URL + this.getSha256SegmentsStaticPath(video.uuid, video.isLive);
@@ -107,106 +107,106 @@ let VideoStreamingPlaylistModel = VideoStreamingPlaylistModel_1 = class VideoStr
             this.videoId === other.videoId;
     }
     getMasterPlaylistStaticPath(videoUUID) {
-        return path_1.join(constants_1.STATIC_PATHS.STREAMING_PLAYLISTS.HLS, videoUUID, this.playlistFilename);
+        return (0, path_1.join)(constants_1.STATIC_PATHS.STREAMING_PLAYLISTS.HLS, videoUUID, this.playlistFilename);
     }
     getSha256SegmentsStaticPath(videoUUID, isLive) {
         if (isLive)
-            return path_1.join('/live', 'segments-sha256', videoUUID);
-        return path_1.join(constants_1.STATIC_PATHS.STREAMING_PLAYLISTS.HLS, videoUUID, this.segmentsSha256Filename);
+            return (0, path_1.join)('/live', 'segments-sha256', videoUUID);
+        return (0, path_1.join)(constants_1.STATIC_PATHS.STREAMING_PLAYLISTS.HLS, videoUUID, this.segmentsSha256Filename);
     }
 };
-VideoStreamingPlaylistModel.doesInfohashExistCached = memoizee_1.default(VideoStreamingPlaylistModel_1.doesInfohashExist, {
+VideoStreamingPlaylistModel.doesInfohashExistCached = (0, memoizee_1.default)(VideoStreamingPlaylistModel_1.doesInfohashExist, {
     promise: true,
     max: constants_1.MEMOIZE_LENGTH.INFO_HASH_EXISTS,
     maxAge: constants_1.MEMOIZE_TTL.INFO_HASH_EXISTS
 });
-tslib_1.__decorate([
+(0, tslib_1.__decorate)([
     sequelize_typescript_1.CreatedAt,
-    tslib_1.__metadata("design:type", Date)
+    (0, tslib_1.__metadata)("design:type", Date)
 ], VideoStreamingPlaylistModel.prototype, "createdAt", void 0);
-tslib_1.__decorate([
+(0, tslib_1.__decorate)([
     sequelize_typescript_1.UpdatedAt,
-    tslib_1.__metadata("design:type", Date)
+    (0, tslib_1.__metadata)("design:type", Date)
 ], VideoStreamingPlaylistModel.prototype, "updatedAt", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(false),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(false),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], VideoStreamingPlaylistModel.prototype, "type", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(false),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(false),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", String)
+    (0, tslib_1.__metadata)("design:type", String)
 ], VideoStreamingPlaylistModel.prototype, "playlistFilename", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(true),
-    sequelize_typescript_1.Is('PlaylistUrl', value => utils_1.throwIfNotValid(value, misc_1.isActivityPubUrlValid, 'playlist url', true)),
-    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.VIDEOS.URL.max)),
-    tslib_1.__metadata("design:type", String)
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(true),
+    (0, sequelize_typescript_1.Is)('PlaylistUrl', value => (0, utils_1.throwIfNotValid)(value, misc_1.isActivityPubUrlValid, 'playlist url', true)),
+    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.VIDEOS.URL.max)),
+    (0, tslib_1.__metadata)("design:type", String)
 ], VideoStreamingPlaylistModel.prototype, "playlistUrl", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(false),
-    sequelize_typescript_1.Is('VideoStreamingPlaylistInfoHashes', value => utils_1.throwIfNotValid(value, v => misc_2.isArrayOf(v, videos_1.isVideoFileInfoHashValid), 'info hashes')),
-    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.ARRAY(sequelize_typescript_1.DataType.STRING)),
-    tslib_1.__metadata("design:type", Array)
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(false),
+    (0, sequelize_typescript_1.Is)('VideoStreamingPlaylistInfoHashes', value => (0, utils_1.throwIfNotValid)(value, v => (0, misc_2.isArrayOf)(v, videos_1.isVideoFileInfoHashValid), 'info hashes')),
+    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.ARRAY(sequelize_typescript_1.DataType.STRING)),
+    (0, tslib_1.__metadata)("design:type", Array)
 ], VideoStreamingPlaylistModel.prototype, "p2pMediaLoaderInfohashes", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(false),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(false),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], VideoStreamingPlaylistModel.prototype, "p2pMediaLoaderPeerVersion", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(false),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(false),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", String)
+    (0, tslib_1.__metadata)("design:type", String)
 ], VideoStreamingPlaylistModel.prototype, "segmentsSha256Filename", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(true),
-    sequelize_typescript_1.Is('VideoStreamingSegmentsSha256Url', value => utils_1.throwIfNotValid(value, misc_1.isActivityPubUrlValid, 'segments sha256 url', true)),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(true),
+    (0, sequelize_typescript_1.Is)('VideoStreamingSegmentsSha256Url', value => (0, utils_1.throwIfNotValid)(value, misc_1.isActivityPubUrlValid, 'segments sha256 url', true)),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", String)
+    (0, tslib_1.__metadata)("design:type", String)
 ], VideoStreamingPlaylistModel.prototype, "segmentsSha256Url", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.ForeignKey(() => video_1.VideoModel),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.ForeignKey)(() => video_1.VideoModel),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], VideoStreamingPlaylistModel.prototype, "videoId", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(false),
-    sequelize_typescript_1.Default(0),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(false),
+    (0, sequelize_typescript_1.Default)(0),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], VideoStreamingPlaylistModel.prototype, "storage", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.BelongsTo(() => video_1.VideoModel, {
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.BelongsTo)(() => video_1.VideoModel, {
         foreignKey: {
             allowNull: false
         },
         onDelete: 'CASCADE'
     }),
-    tslib_1.__metadata("design:type", video_1.VideoModel)
+    (0, tslib_1.__metadata)("design:type", video_1.VideoModel)
 ], VideoStreamingPlaylistModel.prototype, "Video", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.HasMany(() => video_file_1.VideoFileModel, {
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.HasMany)(() => video_file_1.VideoFileModel, {
         foreignKey: {
             allowNull: true
         },
         onDelete: 'CASCADE'
     }),
-    tslib_1.__metadata("design:type", Array)
+    (0, tslib_1.__metadata)("design:type", Array)
 ], VideoStreamingPlaylistModel.prototype, "VideoFiles", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.HasMany(() => video_redundancy_1.VideoRedundancyModel, {
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.HasMany)(() => video_redundancy_1.VideoRedundancyModel, {
         foreignKey: {
             allowNull: false
         },
         onDelete: 'CASCADE',
         hooks: true
     }),
-    tslib_1.__metadata("design:type", Array)
+    (0, tslib_1.__metadata)("design:type", Array)
 ], VideoStreamingPlaylistModel.prototype, "RedundancyVideos", void 0);
-VideoStreamingPlaylistModel = VideoStreamingPlaylistModel_1 = tslib_1.__decorate([
-    sequelize_typescript_1.Table({
+VideoStreamingPlaylistModel = VideoStreamingPlaylistModel_1 = (0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.Table)({
         tableName: 'videoStreamingPlaylist',
         indexes: [
             {

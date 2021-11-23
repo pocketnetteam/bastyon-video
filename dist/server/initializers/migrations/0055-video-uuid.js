@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.down = exports.up = void 0;
 const tslib_1 = require("tslib");
-const Sequelize = tslib_1.__importStar(require("sequelize"));
+const Sequelize = (0, tslib_1.__importStar)(require("sequelize"));
 function up(utils) {
     const q = utils.queryInterface;
     const dataUUID = {

@@ -190,7 +190,7 @@ let ActorModel = ActorModel_1 = class ActorModel extends sequelize_typescript_1.
             columnOfCount = 'actorId';
         }
         return ActorModel_1.update({
-            [columnToUpdate]: sequelize_1.literal(`(SELECT COUNT(*) FROM "actorFollow" WHERE "${columnOfCount}" = ${sanitizedOfId})`)
+            [columnToUpdate]: (0, sequelize_1.literal)(`(SELECT COUNT(*) FROM "actorFollow" WHERE "${columnOfCount}" = ${sanitizedOfId})`)
         }, { where, transaction });
     }
     static loadAccountActorByVideoId(videoId, transaction) {
@@ -256,7 +256,7 @@ let ActorModel = ActorModel_1 = class ActorModel extends sequelize_typescript_1.
         let icon;
         let image;
         if (this.avatarId) {
-            const extension = core_utils_1.getLowercaseExtension(this.Avatar.filename);
+            const extension = (0, core_utils_1.getLowercaseExtension)(this.Avatar.filename);
             icon = {
                 type: 'Image',
                 mediaType: constants_1.MIMETYPES.IMAGE.EXT_MIMETYPE[extension],
@@ -267,7 +267,7 @@ let ActorModel = ActorModel_1 = class ActorModel extends sequelize_typescript_1.
         }
         if (this.bannerId) {
             const banner = this.Banner;
-            const extension = core_utils_1.getLowercaseExtension(banner.filename);
+            const extension = (0, core_utils_1.getLowercaseExtension)(banner.filename);
             image = {
                 type: 'Image',
                 mediaType: constants_1.MIMETYPES.IMAGE.EXT_MIMETYPE[extension],
@@ -299,7 +299,7 @@ let ActorModel = ActorModel_1 = class ActorModel extends sequelize_typescript_1.
             icon,
             image
         };
-        return activitypub_1.activityPubContextify(json);
+        return (0, activitypub_1.activityPubContextify)(json);
     }
     getFollowerSharedInboxUrls(t) {
         const query = {
@@ -361,108 +361,108 @@ let ActorModel = ActorModel_1 = class ActorModel extends sequelize_typescript_1.
     isOutdated() {
         if (this.isOwned())
             return false;
-        return utils_1.isOutdated(this, constants_1.ACTIVITY_PUB.ACTOR_REFRESH_INTERVAL);
+        return (0, utils_1.isOutdated)(this, constants_1.ACTIVITY_PUB.ACTOR_REFRESH_INTERVAL);
     }
     getCreatedAt() {
         return this.remoteCreatedAt || this.createdAt;
     }
 };
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(false),
-    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.ENUM(...lodash_1.values(constants_1.ACTIVITY_PUB_ACTOR_TYPES))),
-    tslib_1.__metadata("design:type", String)
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(false),
+    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.ENUM(...(0, lodash_1.values)(constants_1.ACTIVITY_PUB_ACTOR_TYPES))),
+    (0, tslib_1.__metadata)("design:type", String)
 ], ActorModel.prototype, "type", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(false),
-    sequelize_typescript_1.Is('ActorPreferredUsername', value => utils_1.throwIfNotValid(value, actor_1.isActorPreferredUsernameValid, 'actor preferred username')),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(false),
+    (0, sequelize_typescript_1.Is)('ActorPreferredUsername', value => (0, utils_1.throwIfNotValid)(value, actor_1.isActorPreferredUsernameValid, 'actor preferred username')),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", String)
+    (0, tslib_1.__metadata)("design:type", String)
 ], ActorModel.prototype, "preferredUsername", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(false),
-    sequelize_typescript_1.Is('ActorUrl', value => utils_1.throwIfNotValid(value, misc_1.isActivityPubUrlValid, 'url')),
-    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.ACTORS.URL.max)),
-    tslib_1.__metadata("design:type", String)
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(false),
+    (0, sequelize_typescript_1.Is)('ActorUrl', value => (0, utils_1.throwIfNotValid)(value, misc_1.isActivityPubUrlValid, 'url')),
+    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.ACTORS.URL.max)),
+    (0, tslib_1.__metadata)("design:type", String)
 ], ActorModel.prototype, "url", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(true),
-    sequelize_typescript_1.Is('ActorPublicKey', value => utils_1.throwIfNotValid(value, actor_1.isActorPublicKeyValid, 'public key', true)),
-    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.ACTORS.PUBLIC_KEY.max)),
-    tslib_1.__metadata("design:type", String)
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(true),
+    (0, sequelize_typescript_1.Is)('ActorPublicKey', value => (0, utils_1.throwIfNotValid)(value, actor_1.isActorPublicKeyValid, 'public key', true)),
+    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.ACTORS.PUBLIC_KEY.max)),
+    (0, tslib_1.__metadata)("design:type", String)
 ], ActorModel.prototype, "publicKey", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(true),
-    sequelize_typescript_1.Is('ActorPublicKey', value => utils_1.throwIfNotValid(value, actor_1.isActorPrivateKeyValid, 'private key', true)),
-    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.ACTORS.PRIVATE_KEY.max)),
-    tslib_1.__metadata("design:type", String)
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(true),
+    (0, sequelize_typescript_1.Is)('ActorPublicKey', value => (0, utils_1.throwIfNotValid)(value, actor_1.isActorPrivateKeyValid, 'private key', true)),
+    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.ACTORS.PRIVATE_KEY.max)),
+    (0, tslib_1.__metadata)("design:type", String)
 ], ActorModel.prototype, "privateKey", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(false),
-    sequelize_typescript_1.Is('ActorFollowersCount', value => utils_1.throwIfNotValid(value, actor_1.isActorFollowersCountValid, 'followers count')),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(false),
+    (0, sequelize_typescript_1.Is)('ActorFollowersCount', value => (0, utils_1.throwIfNotValid)(value, actor_1.isActorFollowersCountValid, 'followers count')),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], ActorModel.prototype, "followersCount", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(false),
-    sequelize_typescript_1.Is('ActorFollowersCount', value => utils_1.throwIfNotValid(value, actor_1.isActorFollowingCountValid, 'following count')),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(false),
+    (0, sequelize_typescript_1.Is)('ActorFollowersCount', value => (0, utils_1.throwIfNotValid)(value, actor_1.isActorFollowingCountValid, 'following count')),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], ActorModel.prototype, "followingCount", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(false),
-    sequelize_typescript_1.Is('ActorInboxUrl', value => utils_1.throwIfNotValid(value, misc_1.isActivityPubUrlValid, 'inbox url')),
-    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.ACTORS.URL.max)),
-    tslib_1.__metadata("design:type", String)
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(false),
+    (0, sequelize_typescript_1.Is)('ActorInboxUrl', value => (0, utils_1.throwIfNotValid)(value, misc_1.isActivityPubUrlValid, 'inbox url')),
+    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.ACTORS.URL.max)),
+    (0, tslib_1.__metadata)("design:type", String)
 ], ActorModel.prototype, "inboxUrl", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(true),
-    sequelize_typescript_1.Is('ActorOutboxUrl', value => utils_1.throwIfNotValid(value, misc_1.isActivityPubUrlValid, 'outbox url', true)),
-    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.ACTORS.URL.max)),
-    tslib_1.__metadata("design:type", String)
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(true),
+    (0, sequelize_typescript_1.Is)('ActorOutboxUrl', value => (0, utils_1.throwIfNotValid)(value, misc_1.isActivityPubUrlValid, 'outbox url', true)),
+    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.ACTORS.URL.max)),
+    (0, tslib_1.__metadata)("design:type", String)
 ], ActorModel.prototype, "outboxUrl", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(true),
-    sequelize_typescript_1.Is('ActorSharedInboxUrl', value => utils_1.throwIfNotValid(value, misc_1.isActivityPubUrlValid, 'shared inbox url', true)),
-    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.ACTORS.URL.max)),
-    tslib_1.__metadata("design:type", String)
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(true),
+    (0, sequelize_typescript_1.Is)('ActorSharedInboxUrl', value => (0, utils_1.throwIfNotValid)(value, misc_1.isActivityPubUrlValid, 'shared inbox url', true)),
+    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.ACTORS.URL.max)),
+    (0, tslib_1.__metadata)("design:type", String)
 ], ActorModel.prototype, "sharedInboxUrl", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(true),
-    sequelize_typescript_1.Is('ActorFollowersUrl', value => utils_1.throwIfNotValid(value, misc_1.isActivityPubUrlValid, 'followers url', true)),
-    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.ACTORS.URL.max)),
-    tslib_1.__metadata("design:type", String)
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(true),
+    (0, sequelize_typescript_1.Is)('ActorFollowersUrl', value => (0, utils_1.throwIfNotValid)(value, misc_1.isActivityPubUrlValid, 'followers url', true)),
+    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.ACTORS.URL.max)),
+    (0, tslib_1.__metadata)("design:type", String)
 ], ActorModel.prototype, "followersUrl", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(true),
-    sequelize_typescript_1.Is('ActorFollowingUrl', value => utils_1.throwIfNotValid(value, misc_1.isActivityPubUrlValid, 'following url', true)),
-    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.ACTORS.URL.max)),
-    tslib_1.__metadata("design:type", String)
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(true),
+    (0, sequelize_typescript_1.Is)('ActorFollowingUrl', value => (0, utils_1.throwIfNotValid)(value, misc_1.isActivityPubUrlValid, 'following url', true)),
+    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.ACTORS.URL.max)),
+    (0, tslib_1.__metadata)("design:type", String)
 ], ActorModel.prototype, "followingUrl", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(true),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(true),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Date)
+    (0, tslib_1.__metadata)("design:type", Date)
 ], ActorModel.prototype, "remoteCreatedAt", void 0);
-tslib_1.__decorate([
+(0, tslib_1.__decorate)([
     sequelize_typescript_1.CreatedAt,
-    tslib_1.__metadata("design:type", Date)
+    (0, tslib_1.__metadata)("design:type", Date)
 ], ActorModel.prototype, "createdAt", void 0);
-tslib_1.__decorate([
+(0, tslib_1.__decorate)([
     sequelize_typescript_1.UpdatedAt,
-    tslib_1.__metadata("design:type", Date)
+    (0, tslib_1.__metadata)("design:type", Date)
 ], ActorModel.prototype, "updatedAt", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.ForeignKey(() => actor_image_1.ActorImageModel),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.ForeignKey)(() => actor_image_1.ActorImageModel),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], ActorModel.prototype, "avatarId", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.ForeignKey(() => actor_image_1.ActorImageModel),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.ForeignKey)(() => actor_image_1.ActorImageModel),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], ActorModel.prototype, "bannerId", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.BelongsTo(() => actor_image_1.ActorImageModel, {
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.BelongsTo)(() => actor_image_1.ActorImageModel, {
         foreignKey: {
             name: 'avatarId',
             allowNull: true
@@ -471,10 +471,10 @@ tslib_1.__decorate([
         onDelete: 'set null',
         hooks: true
     }),
-    tslib_1.__metadata("design:type", actor_image_1.ActorImageModel)
+    (0, tslib_1.__metadata)("design:type", actor_image_1.ActorImageModel)
 ], ActorModel.prototype, "Avatar", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.BelongsTo(() => actor_image_1.ActorImageModel, {
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.BelongsTo)(() => actor_image_1.ActorImageModel, {
         foreignKey: {
             name: 'bannerId',
             allowNull: true
@@ -483,10 +483,10 @@ tslib_1.__decorate([
         onDelete: 'set null',
         hooks: true
     }),
-    tslib_1.__metadata("design:type", actor_image_1.ActorImageModel)
+    (0, tslib_1.__metadata)("design:type", actor_image_1.ActorImageModel)
 ], ActorModel.prototype, "Banner", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.HasMany(() => actor_follow_1.ActorFollowModel, {
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.HasMany)(() => actor_follow_1.ActorFollowModel, {
         foreignKey: {
             name: 'actorId',
             allowNull: false
@@ -494,10 +494,10 @@ tslib_1.__decorate([
         as: 'ActorFollowings',
         onDelete: 'cascade'
     }),
-    tslib_1.__metadata("design:type", Array)
+    (0, tslib_1.__metadata)("design:type", Array)
 ], ActorModel.prototype, "ActorFollowing", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.HasMany(() => actor_follow_1.ActorFollowModel, {
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.HasMany)(() => actor_follow_1.ActorFollowModel, {
         foreignKey: {
             name: 'targetActorId',
             allowNull: false
@@ -505,44 +505,44 @@ tslib_1.__decorate([
         as: 'ActorFollowers',
         onDelete: 'cascade'
     }),
-    tslib_1.__metadata("design:type", Array)
+    (0, tslib_1.__metadata)("design:type", Array)
 ], ActorModel.prototype, "ActorFollowers", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.ForeignKey(() => server_1.ServerModel),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.ForeignKey)(() => server_1.ServerModel),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], ActorModel.prototype, "serverId", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.BelongsTo(() => server_1.ServerModel, {
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.BelongsTo)(() => server_1.ServerModel, {
         foreignKey: {
             allowNull: true
         },
         onDelete: 'cascade'
     }),
-    tslib_1.__metadata("design:type", server_1.ServerModel)
+    (0, tslib_1.__metadata)("design:type", server_1.ServerModel)
 ], ActorModel.prototype, "Server", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.HasOne(() => account_1.AccountModel, {
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.HasOne)(() => account_1.AccountModel, {
         foreignKey: {
             allowNull: true
         },
         onDelete: 'cascade',
         hooks: true
     }),
-    tslib_1.__metadata("design:type", account_1.AccountModel)
+    (0, tslib_1.__metadata)("design:type", account_1.AccountModel)
 ], ActorModel.prototype, "Account", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.HasOne(() => video_channel_1.VideoChannelModel, {
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.HasOne)(() => video_channel_1.VideoChannelModel, {
         foreignKey: {
             allowNull: true
         },
         onDelete: 'cascade',
         hooks: true
     }),
-    tslib_1.__metadata("design:type", video_channel_1.VideoChannelModel)
+    (0, tslib_1.__metadata)("design:type", video_channel_1.VideoChannelModel)
 ], ActorModel.prototype, "VideoChannel", void 0);
-ActorModel = ActorModel_1 = tslib_1.__decorate([
-    sequelize_typescript_1.DefaultScope(() => ({
+ActorModel = ActorModel_1 = (0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.DefaultScope)(() => ({
         include: [
             {
                 model: server_1.ServerModel,
@@ -555,7 +555,7 @@ ActorModel = ActorModel_1 = tslib_1.__decorate([
             }
         ]
     })),
-    sequelize_typescript_1.Scopes(() => ({
+    (0, sequelize_typescript_1.Scopes)(() => ({
         [ScopeNames.FULL]: {
             include: [
                 {
@@ -589,7 +589,7 @@ ActorModel = ActorModel_1 = tslib_1.__decorate([
             ]
         }
     })),
-    sequelize_typescript_1.Table({
+    (0, sequelize_typescript_1.Table)({
         tableName: 'actor',
         indexes: [
             {

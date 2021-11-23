@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = tslib_1.__importStar(require("chai"));
+const chai = (0, tslib_1.__importStar)(require("chai"));
 const extra_utils_1 = require("@shared/extra-utils");
 const expect = chai.expect;
 describe('Test stats (excluding redundancy)', function () {
@@ -13,22 +13,22 @@ describe('Test stats (excluding redundancy)', function () {
         password: 'super_password'
     };
     before(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(60000);
-            servers = yield extra_utils_1.createMultipleServers(3);
-            yield extra_utils_1.setAccessTokensToServers(servers);
-            yield extra_utils_1.doubleFollow(servers[0], servers[1]);
+            servers = yield (0, extra_utils_1.createMultipleServers)(3);
+            yield (0, extra_utils_1.setAccessTokensToServers)(servers);
+            yield (0, extra_utils_1.doubleFollow)(servers[0], servers[1]);
             yield servers[0].users.create({ username: user.username, password: user.password });
             const { uuid } = yield servers[0].videos.upload({ attributes: { fixture: 'video_short.webm' } });
             yield servers[0].comments.createThread({ videoId: uuid, text: 'comment' });
             yield servers[0].videos.view({ id: uuid });
-            yield extra_utils_1.wait(8000);
+            yield (0, extra_utils_1.wait)(8000);
             yield servers[2].follows.follow({ hosts: [servers[0].url] });
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.waitJobs)(servers);
         });
     });
     it('Should have the correct stats on instance 1', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const data = yield servers[0].stats.get();
             expect(data.totalLocalVideoComments).to.equal(1);
             expect(data.totalLocalVideos).to.equal(1);
@@ -43,7 +43,7 @@ describe('Test stats (excluding redundancy)', function () {
         });
     });
     it('Should have the correct stats on instance 2', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const data = yield servers[1].stats.get();
             expect(data.totalLocalVideoComments).to.equal(0);
             expect(data.totalLocalVideos).to.equal(0);
@@ -58,7 +58,7 @@ describe('Test stats (excluding redundancy)', function () {
         });
     });
     it('Should have the correct stats on instance 3', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const data = yield servers[2].stats.get();
             expect(data.totalLocalVideoComments).to.equal(0);
             expect(data.totalLocalVideos).to.equal(0);
@@ -72,16 +72,16 @@ describe('Test stats (excluding redundancy)', function () {
         });
     });
     it('Should have the correct total videos stats after an unfollow', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(15000);
             yield servers[2].follows.unfollow({ target: servers[0] });
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.waitJobs)(servers);
             const data = yield servers[2].stats.get();
             expect(data.totalVideos).to.equal(0);
         });
     });
     it('Should have the correct active user stats', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const server = servers[0];
             {
                 const data = yield server.stats.get();
@@ -99,7 +99,7 @@ describe('Test stats (excluding redundancy)', function () {
         });
     });
     it('Should have the correct active channel stats', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const server = servers[0];
             {
                 const data = yield server.stats.get();
@@ -129,7 +129,7 @@ describe('Test stats (excluding redundancy)', function () {
         });
     });
     it('Should have the correct playlist stats', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const server = servers[0];
             {
                 const data = yield server.stats.get();
@@ -149,7 +149,7 @@ describe('Test stats (excluding redundancy)', function () {
         });
     });
     it('Should correctly count video file sizes if transcoding is enabled', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(60000);
             yield servers[0].config.updateCustomSubConfig({
                 newConfig: {
@@ -175,7 +175,7 @@ describe('Test stats (excluding redundancy)', function () {
                 }
             });
             yield servers[0].videos.upload({ attributes: { name: 'video', fixture: 'video_short.webm' } });
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.waitJobs)(servers);
             {
                 const data = yield servers[1].stats.get();
                 expect(data.totalLocalVideoFilesSize).to.equal(0);
@@ -188,7 +188,7 @@ describe('Test stats (excluding redundancy)', function () {
         });
     });
     it('Should have the correct AP stats', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(60000);
             yield servers[0].config.updateCustomSubConfig({
                 newConfig: {
@@ -201,8 +201,8 @@ describe('Test stats (excluding redundancy)', function () {
             for (let i = 0; i < 10; i++) {
                 yield servers[0].videos.upload({ attributes: { name: 'video' } });
             }
-            yield extra_utils_1.waitJobs(servers);
-            yield extra_utils_1.wait(6000);
+            yield (0, extra_utils_1.waitJobs)(servers);
+            yield (0, extra_utils_1.wait)(6000);
             const second = yield servers[1].stats.get();
             expect(second.totalActivityPubMessagesProcessed).to.be.greaterThan(first.totalActivityPubMessagesProcessed);
             const apTypes = [
@@ -215,15 +215,15 @@ describe('Test stats (excluding redundancy)', function () {
             for (const apType of apTypes) {
                 expect(second['totalActivityPub' + apType + 'MessagesErrors']).to.equal(0);
             }
-            yield extra_utils_1.wait(6000);
+            yield (0, extra_utils_1.wait)(6000);
             const third = yield servers[1].stats.get();
             expect(third.totalActivityPubMessagesWaiting).to.equal(0);
             expect(third.activityPubMessagesProcessedPerSecond).to.be.lessThan(second.activityPubMessagesProcessedPerSecond);
         });
     });
     after(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            yield extra_utils_1.cleanupTests(servers);
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            yield (0, extra_utils_1.cleanupTests)(servers);
         });
     });
 });

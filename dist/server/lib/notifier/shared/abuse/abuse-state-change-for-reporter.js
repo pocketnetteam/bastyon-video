@@ -10,7 +10,7 @@ const user_notification_1 = require("@server/models/user/user-notification");
 const abstract_notification_1 = require("../common/abstract-notification");
 class AbuseStateChangeForReporter extends abstract_notification_1.AbstractNotification {
     prepare() {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const reporter = this.abuse.ReporterAccount;
             if (reporter.isOwned() !== true)
                 return;
@@ -18,7 +18,7 @@ class AbuseStateChangeForReporter extends abstract_notification_1.AbstractNotifi
         });
     }
     log() {
-        logger_1.logger.info('Notifying reporter of abuse % of state change.', url_1.getAbuseTargetUrl(this.abuse));
+        logger_1.logger.info('Notifying reporter of abuse % of state change.', (0, url_1.getAbuseTargetUrl)(this.abuse));
     }
     getSetting(user) {
         return user.NotificationSetting.abuseStateChange;
@@ -29,7 +29,7 @@ class AbuseStateChangeForReporter extends abstract_notification_1.AbstractNotifi
         return [this.user];
     }
     createNotification(user) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const notification = yield user_notification_1.UserNotificationModel.create({
                 type: 15,
                 userId: user.id,

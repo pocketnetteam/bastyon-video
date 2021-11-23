@@ -46,50 +46,50 @@ let UserVideoHistoryModel = UserVideoHistoryModel_1 = class UserVideoHistoryMode
         return UserVideoHistoryModel_1.destroy(query);
     }
 };
-tslib_1.__decorate([
+(0, tslib_1.__decorate)([
     sequelize_typescript_1.CreatedAt,
-    tslib_1.__metadata("design:type", Date)
+    (0, tslib_1.__metadata)("design:type", Date)
 ], UserVideoHistoryModel.prototype, "createdAt", void 0);
-tslib_1.__decorate([
+(0, tslib_1.__decorate)([
     sequelize_typescript_1.UpdatedAt,
-    tslib_1.__metadata("design:type", Date)
+    (0, tslib_1.__metadata)("design:type", Date)
 ], UserVideoHistoryModel.prototype, "updatedAt", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(false),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(false),
     sequelize_typescript_1.IsInt,
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], UserVideoHistoryModel.prototype, "currentTime", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.ForeignKey(() => video_1.VideoModel),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.ForeignKey)(() => video_1.VideoModel),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], UserVideoHistoryModel.prototype, "videoId", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.BelongsTo(() => video_1.VideoModel, {
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.BelongsTo)(() => video_1.VideoModel, {
         foreignKey: {
             allowNull: false
         },
         onDelete: 'CASCADE'
     }),
-    tslib_1.__metadata("design:type", video_1.VideoModel)
+    (0, tslib_1.__metadata)("design:type", video_1.VideoModel)
 ], UserVideoHistoryModel.prototype, "Video", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.ForeignKey(() => user_1.UserModel),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.ForeignKey)(() => user_1.UserModel),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], UserVideoHistoryModel.prototype, "userId", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.BelongsTo(() => user_1.UserModel, {
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.BelongsTo)(() => user_1.UserModel, {
         foreignKey: {
             allowNull: false
         },
         onDelete: 'CASCADE'
     }),
-    tslib_1.__metadata("design:type", user_1.UserModel)
+    (0, tslib_1.__metadata)("design:type", user_1.UserModel)
 ], UserVideoHistoryModel.prototype, "User", void 0);
-UserVideoHistoryModel = UserVideoHistoryModel_1 = tslib_1.__decorate([
-    sequelize_typescript_1.Table({
+UserVideoHistoryModel = UserVideoHistoryModel_1 = (0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.Table)({
         tableName: 'userVideoHistory',
         indexes: [
             {

@@ -10,136 +10,136 @@ const peertube_crypto_1 = require("../../../helpers/peertube-crypto");
 describe('Test activity pub helpers', function () {
     describe('When checking the Linked Signature', function () {
         it('Should fail with an invalid Mastodon signature', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                const body = require(extra_utils_1.buildAbsoluteFixturePath('./ap-json/mastodon/create-bad-signature.json'));
-                const publicKey = require(extra_utils_1.buildAbsoluteFixturePath('./ap-json/mastodon/public-key.json')).publicKey;
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                const body = require((0, extra_utils_1.buildAbsoluteFixturePath)('./ap-json/mastodon/create-bad-signature.json'));
+                const publicKey = require((0, extra_utils_1.buildAbsoluteFixturePath)('./ap-json/mastodon/public-key.json')).publicKey;
                 const fromActor = { publicKey, url: 'http://localhost:9002/accounts/peertube' };
-                const result = yield peertube_crypto_1.isJsonLDSignatureVerified(fromActor, body);
-                chai_1.expect(result).to.be.false;
+                const result = yield (0, peertube_crypto_1.isJsonLDSignatureVerified)(fromActor, body);
+                (0, chai_1.expect)(result).to.be.false;
             });
         });
         it('Should fail with an invalid public key', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                const body = require(extra_utils_1.buildAbsoluteFixturePath('./ap-json/mastodon/create.json'));
-                const publicKey = require(extra_utils_1.buildAbsoluteFixturePath('./ap-json/mastodon/bad-public-key.json')).publicKey;
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                const body = require((0, extra_utils_1.buildAbsoluteFixturePath)('./ap-json/mastodon/create.json'));
+                const publicKey = require((0, extra_utils_1.buildAbsoluteFixturePath)('./ap-json/mastodon/bad-public-key.json')).publicKey;
                 const fromActor = { publicKey, url: 'http://localhost:9002/accounts/peertube' };
-                const result = yield peertube_crypto_1.isJsonLDSignatureVerified(fromActor, body);
-                chai_1.expect(result).to.be.false;
+                const result = yield (0, peertube_crypto_1.isJsonLDSignatureVerified)(fromActor, body);
+                (0, chai_1.expect)(result).to.be.false;
             });
         });
         it('Should succeed with a valid Mastodon signature', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                const body = require(extra_utils_1.buildAbsoluteFixturePath('./ap-json/mastodon/create.json'));
-                const publicKey = require(extra_utils_1.buildAbsoluteFixturePath('./ap-json/mastodon/public-key.json')).publicKey;
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                const body = require((0, extra_utils_1.buildAbsoluteFixturePath)('./ap-json/mastodon/create.json'));
+                const publicKey = require((0, extra_utils_1.buildAbsoluteFixturePath)('./ap-json/mastodon/public-key.json')).publicKey;
                 const fromActor = { publicKey, url: 'http://localhost:9002/accounts/peertube' };
-                const result = yield peertube_crypto_1.isJsonLDSignatureVerified(fromActor, body);
-                chai_1.expect(result).to.be.true;
+                const result = yield (0, peertube_crypto_1.isJsonLDSignatureVerified)(fromActor, body);
+                (0, chai_1.expect)(result).to.be.true;
             });
         });
         it('Should fail with an invalid PeerTube signature', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                const keys = require(extra_utils_1.buildAbsoluteFixturePath('./ap-json/peertube/invalid-keys.json'));
-                const body = require(extra_utils_1.buildAbsoluteFixturePath('./ap-json/peertube/announce-without-context.json'));
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                const keys = require((0, extra_utils_1.buildAbsoluteFixturePath)('./ap-json/peertube/invalid-keys.json'));
+                const body = require((0, extra_utils_1.buildAbsoluteFixturePath)('./ap-json/peertube/announce-without-context.json'));
                 const actorSignature = { url: 'http://localhost:9002/accounts/peertube', privateKey: keys.privateKey };
-                const signedBody = yield activitypub_1.buildSignedActivity(actorSignature, body);
+                const signedBody = yield (0, activitypub_1.buildSignedActivity)(actorSignature, body);
                 const fromActor = { publicKey: keys.publicKey, url: 'http://localhost:9002/accounts/peertube' };
-                const result = yield peertube_crypto_1.isJsonLDSignatureVerified(fromActor, signedBody);
-                chai_1.expect(result).to.be.false;
+                const result = yield (0, peertube_crypto_1.isJsonLDSignatureVerified)(fromActor, signedBody);
+                (0, chai_1.expect)(result).to.be.false;
             });
         });
         it('Should succeed with a valid PeerTube signature', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                const keys = require(extra_utils_1.buildAbsoluteFixturePath('./ap-json/peertube/keys.json'));
-                const body = require(extra_utils_1.buildAbsoluteFixturePath('./ap-json/peertube/announce-without-context.json'));
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                const keys = require((0, extra_utils_1.buildAbsoluteFixturePath)('./ap-json/peertube/keys.json'));
+                const body = require((0, extra_utils_1.buildAbsoluteFixturePath)('./ap-json/peertube/announce-without-context.json'));
                 const actorSignature = { url: 'http://localhost:9002/accounts/peertube', privateKey: keys.privateKey };
-                const signedBody = yield activitypub_1.buildSignedActivity(actorSignature, body);
+                const signedBody = yield (0, activitypub_1.buildSignedActivity)(actorSignature, body);
                 const fromActor = { publicKey: keys.publicKey, url: 'http://localhost:9002/accounts/peertube' };
-                const result = yield peertube_crypto_1.isJsonLDSignatureVerified(fromActor, signedBody);
-                chai_1.expect(result).to.be.true;
+                const result = yield (0, peertube_crypto_1.isJsonLDSignatureVerified)(fromActor, signedBody);
+                (0, chai_1.expect)(result).to.be.true;
             });
         });
     });
     describe('When checking HTTP signature', function () {
         it('Should fail with an invalid http signature', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                const req = extra_utils_1.buildRequestStub();
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                const req = (0, extra_utils_1.buildRequestStub)();
                 req.method = 'POST';
                 req.url = '/accounts/ronan/inbox';
-                const mastodonObject = lodash_1.cloneDeep(require(extra_utils_1.buildAbsoluteFixturePath('./ap-json/mastodon/bad-http-signature.json')));
+                const mastodonObject = (0, lodash_1.cloneDeep)(require((0, extra_utils_1.buildAbsoluteFixturePath)('./ap-json/mastodon/bad-http-signature.json')));
                 req.body = mastodonObject.body;
                 req.headers = mastodonObject.headers;
-                const parsed = peertube_crypto_1.parseHTTPSignature(req, 3600 * 1000 * 365 * 10);
-                const publicKey = require(extra_utils_1.buildAbsoluteFixturePath('./ap-json/mastodon/public-key.json')).publicKey;
+                const parsed = (0, peertube_crypto_1.parseHTTPSignature)(req, 3600 * 1000 * 365 * 10);
+                const publicKey = require((0, extra_utils_1.buildAbsoluteFixturePath)('./ap-json/mastodon/public-key.json')).publicKey;
                 const actor = { publicKey };
-                const verified = peertube_crypto_1.isHTTPSignatureVerified(parsed, actor);
-                chai_1.expect(verified).to.be.false;
+                const verified = (0, peertube_crypto_1.isHTTPSignatureVerified)(parsed, actor);
+                (0, chai_1.expect)(verified).to.be.false;
             });
         });
         it('Should fail with an invalid public key', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                const req = extra_utils_1.buildRequestStub();
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                const req = (0, extra_utils_1.buildRequestStub)();
                 req.method = 'POST';
                 req.url = '/accounts/ronan/inbox';
-                const mastodonObject = lodash_1.cloneDeep(require(extra_utils_1.buildAbsoluteFixturePath('./ap-json/mastodon/http-signature.json')));
+                const mastodonObject = (0, lodash_1.cloneDeep)(require((0, extra_utils_1.buildAbsoluteFixturePath)('./ap-json/mastodon/http-signature.json')));
                 req.body = mastodonObject.body;
                 req.headers = mastodonObject.headers;
-                const parsed = peertube_crypto_1.parseHTTPSignature(req, 3600 * 1000 * 365 * 10);
-                const publicKey = require(extra_utils_1.buildAbsoluteFixturePath('./ap-json/mastodon/bad-public-key.json')).publicKey;
+                const parsed = (0, peertube_crypto_1.parseHTTPSignature)(req, 3600 * 1000 * 365 * 10);
+                const publicKey = require((0, extra_utils_1.buildAbsoluteFixturePath)('./ap-json/mastodon/bad-public-key.json')).publicKey;
                 const actor = { publicKey };
-                const verified = peertube_crypto_1.isHTTPSignatureVerified(parsed, actor);
-                chai_1.expect(verified).to.be.false;
+                const verified = (0, peertube_crypto_1.isHTTPSignatureVerified)(parsed, actor);
+                (0, chai_1.expect)(verified).to.be.false;
             });
         });
         it('Should fail because of clock skew', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                const req = extra_utils_1.buildRequestStub();
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                const req = (0, extra_utils_1.buildRequestStub)();
                 req.method = 'POST';
                 req.url = '/accounts/ronan/inbox';
-                const mastodonObject = lodash_1.cloneDeep(require(extra_utils_1.buildAbsoluteFixturePath('./ap-json/mastodon/http-signature.json')));
+                const mastodonObject = (0, lodash_1.cloneDeep)(require((0, extra_utils_1.buildAbsoluteFixturePath)('./ap-json/mastodon/http-signature.json')));
                 req.body = mastodonObject.body;
                 req.headers = mastodonObject.headers;
                 let errored = false;
                 try {
-                    peertube_crypto_1.parseHTTPSignature(req);
+                    (0, peertube_crypto_1.parseHTTPSignature)(req);
                 }
                 catch (_a) {
                     errored = true;
                 }
-                chai_1.expect(errored).to.be.true;
+                (0, chai_1.expect)(errored).to.be.true;
             });
         });
         it('Should with a scheme', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                const req = extra_utils_1.buildRequestStub();
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                const req = (0, extra_utils_1.buildRequestStub)();
                 req.method = 'POST';
                 req.url = '/accounts/ronan/inbox';
-                const mastodonObject = lodash_1.cloneDeep(require(extra_utils_1.buildAbsoluteFixturePath('./ap-json/mastodon/http-signature.json')));
+                const mastodonObject = (0, lodash_1.cloneDeep)(require((0, extra_utils_1.buildAbsoluteFixturePath)('./ap-json/mastodon/http-signature.json')));
                 req.body = mastodonObject.body;
                 req.headers = mastodonObject.headers;
                 req.headers = 'Signature ' + mastodonObject.headers;
                 let errored = false;
                 try {
-                    peertube_crypto_1.parseHTTPSignature(req, 3600 * 1000 * 365 * 10);
+                    (0, peertube_crypto_1.parseHTTPSignature)(req, 3600 * 1000 * 365 * 10);
                 }
                 catch (_a) {
                     errored = true;
                 }
-                chai_1.expect(errored).to.be.true;
+                (0, chai_1.expect)(errored).to.be.true;
             });
         });
         it('Should succeed with a valid signature', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                const req = extra_utils_1.buildRequestStub();
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                const req = (0, extra_utils_1.buildRequestStub)();
                 req.method = 'POST';
                 req.url = '/accounts/ronan/inbox';
-                const mastodonObject = lodash_1.cloneDeep(require(extra_utils_1.buildAbsoluteFixturePath('./ap-json/mastodon/http-signature.json')));
+                const mastodonObject = (0, lodash_1.cloneDeep)(require((0, extra_utils_1.buildAbsoluteFixturePath)('./ap-json/mastodon/http-signature.json')));
                 req.body = mastodonObject.body;
                 req.headers = mastodonObject.headers;
-                const parsed = peertube_crypto_1.parseHTTPSignature(req, 3600 * 1000 * 365 * 10);
-                const publicKey = require(extra_utils_1.buildAbsoluteFixturePath('./ap-json/mastodon/public-key.json')).publicKey;
+                const parsed = (0, peertube_crypto_1.parseHTTPSignature)(req, 3600 * 1000 * 365 * 10);
+                const publicKey = require((0, extra_utils_1.buildAbsoluteFixturePath)('./ap-json/mastodon/public-key.json')).publicKey;
                 const actor = { publicKey };
-                const verified = peertube_crypto_1.isHTTPSignatureVerified(parsed, actor);
-                chai_1.expect(verified).to.be.true;
+                const verified = (0, peertube_crypto_1.isHTTPSignatureVerified)(parsed, actor);
+                (0, chai_1.expect)(verified).to.be.true;
             });
         });
     });

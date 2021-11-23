@@ -2,10 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isShortUUID = exports.shortToUUID = exports.uuidToShort = exports.buildUUID = void 0;
 const tslib_1 = require("tslib");
-const short_uuid_1 = tslib_1.__importStar(require("short-uuid"));
-const translator = short_uuid_1.default();
+const short_uuid_1 = (0, tslib_1.__importStar)(require("short-uuid"));
+const translator = (0, short_uuid_1.default)();
 function buildUUID() {
-    return short_uuid_1.uuid();
+    return (0, short_uuid_1.uuid)();
 }
 exports.buildUUID = buildUUID;
 function uuidToShort(uuid) {

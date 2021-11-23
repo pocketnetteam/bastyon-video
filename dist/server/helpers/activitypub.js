@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.buildRemoteVideoBaseUrl = exports.buildSignedActivity = exports.activityPubCollectionPagination = exports.activityPubContextify = exports.getAPId = exports.checkUrlsSameHost = void 0;
 const tslib_1 = require("tslib");
 const url_1 = require("url");
-const validator_1 = tslib_1.__importDefault(require("validator"));
+const validator_1 = (0, tslib_1.__importDefault)(require("validator"));
 const constants_1 = require("../initializers/constants");
 const core_utils_1 = require("./core-utils");
 const peertube_crypto_1 = require("./peertube-crypto");
@@ -125,7 +125,7 @@ function activityPubContextify(data, type = 'All') {
 }
 exports.activityPubContextify = activityPubContextify;
 function activityPubCollectionPagination(baseUrl, handler, page, size = constants_1.ACTIVITY_PUB.COLLECTION_ITEMS_PER_PAGE) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         if (!page || !validator_1.default.isInt(page)) {
             const result = yield handler(0, 1);
             return {
@@ -135,7 +135,7 @@ function activityPubCollectionPagination(baseUrl, handler, page, size = constant
                 first: baseUrl + '?page=1'
             };
         }
-        const { start, count } = core_utils_1.pageToStartAndCount(page, size);
+        const { start, count } = (0, core_utils_1.pageToStartAndCount)(page, size);
         const result = yield handler(start, count);
         let next;
         let prev;
@@ -160,7 +160,7 @@ function activityPubCollectionPagination(baseUrl, handler, page, size = constant
 exports.activityPubCollectionPagination = activityPubCollectionPagination;
 function buildSignedActivity(byActor, data, contextType) {
     const activity = activityPubContextify(data, contextType);
-    return peertube_crypto_1.signJsonLDObject(byActor, activity);
+    return (0, peertube_crypto_1.signJsonLDObject)(byActor, activity);
 }
 exports.buildSignedActivity = buildSignedActivity;
 function getAPId(activity) {

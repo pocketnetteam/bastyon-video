@@ -8,7 +8,7 @@ class CaptionsCommand extends shared_1.AbstractCommand {
     add(options) {
         const { videoId, language, fixture, mimeType } = options;
         const path = '/api/v1/videos/' + videoId + '/captions/' + language;
-        const captionfile = miscs_1.buildAbsoluteFixturePath(fixture);
+        const captionfile = (0, miscs_1.buildAbsoluteFixturePath)(fixture);
         const captionfileAttach = mimeType
             ? [captionfile, { contentType: mimeType }]
             : captionfile;

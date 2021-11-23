@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MockSmtpServer = void 0;
 const tslib_1 = require("tslib");
-const maildev_1 = tslib_1.__importDefault(require("maildev"));
+const maildev_1 = (0, tslib_1.__importDefault)(require("maildev"));
 const core_utils_1 = require("@shared/core-utils");
 const miscs_1 = require("../miscs");
 class MockSmtpServer {
@@ -11,7 +11,7 @@ class MockSmtpServer {
     }
     collectEmails(emailsCollection) {
         return new Promise((res, rej) => {
-            const port = miscs_1.parallelTests() ? core_utils_1.randomInt(1000, 2000) : 1025;
+            const port = (0, miscs_1.parallelTests)() ? (0, core_utils_1.randomInt)(1000, 2000) : 1025;
             this.emails = emailsCollection;
             if (this.started) {
                 return res(undefined);

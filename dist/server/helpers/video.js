@@ -8,7 +8,7 @@ function getVideoWithAttributes(res) {
 }
 exports.getVideoWithAttributes = getVideoWithAttributes;
 function extractVideo(videoOrPlaylist) {
-    return models_1.isStreamingPlaylist(videoOrPlaylist)
+    return (0, models_1.isStreamingPlaylist)(videoOrPlaylist)
         ? videoOrPlaylist.Video
         : videoOrPlaylist;
 }

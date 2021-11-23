@@ -14,7 +14,7 @@ let VideoJobInfoModel = VideoJobInfoModel_1 = class VideoJobInfoModel extends se
         return VideoJobInfoModel_1.findOne({ where, transaction });
     }
     static increaseOrCreate(videoUUID, column) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const options = { type: sequelize_1.QueryTypes.SELECT, bind: { videoUUID } };
             const [{ pendingMove }] = yield VideoJobInfoModel_1.sequelize.query(`
     INSERT INTO "videoJobInfo" ("videoId", "${column}", "createdAt", "updatedAt")
@@ -35,7 +35,7 @@ let VideoJobInfoModel = VideoJobInfoModel_1 = class VideoJobInfoModel extends se
         });
     }
     static decrease(videoUUID, column) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const options = { type: sequelize_1.QueryTypes.SELECT, bind: { videoUUID } };
             const [{ pendingMove }] = yield VideoJobInfoModel_1.sequelize.query(`
     UPDATE
@@ -53,45 +53,45 @@ let VideoJobInfoModel = VideoJobInfoModel_1 = class VideoJobInfoModel extends se
         });
     }
 };
-tslib_1.__decorate([
+(0, tslib_1.__decorate)([
     sequelize_typescript_1.CreatedAt,
-    tslib_1.__metadata("design:type", Date)
+    (0, tslib_1.__metadata)("design:type", Date)
 ], VideoJobInfoModel.prototype, "createdAt", void 0);
-tslib_1.__decorate([
+(0, tslib_1.__decorate)([
     sequelize_typescript_1.UpdatedAt,
-    tslib_1.__metadata("design:type", Date)
+    (0, tslib_1.__metadata)("design:type", Date)
 ], VideoJobInfoModel.prototype, "updatedAt", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(false),
-    sequelize_typescript_1.Default(0),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(false),
+    (0, sequelize_typescript_1.Default)(0),
     sequelize_typescript_1.IsInt,
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], VideoJobInfoModel.prototype, "pendingMove", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(false),
-    sequelize_typescript_1.Default(0),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(false),
+    (0, sequelize_typescript_1.Default)(0),
     sequelize_typescript_1.IsInt,
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], VideoJobInfoModel.prototype, "pendingTranscode", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.ForeignKey(() => video_1.VideoModel),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.ForeignKey)(() => video_1.VideoModel),
     sequelize_typescript_1.Unique,
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], VideoJobInfoModel.prototype, "videoId", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.BelongsTo(() => video_1.VideoModel, {
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.BelongsTo)(() => video_1.VideoModel, {
         foreignKey: {
             allowNull: false
         },
         onDelete: 'cascade'
     }),
-    tslib_1.__metadata("design:type", video_1.VideoModel)
+    (0, tslib_1.__metadata)("design:type", video_1.VideoModel)
 ], VideoJobInfoModel.prototype, "Video", void 0);
-VideoJobInfoModel = VideoJobInfoModel_1 = tslib_1.__decorate([
-    sequelize_typescript_1.Table({
+VideoJobInfoModel = VideoJobInfoModel_1 = (0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.Table)({
         tableName: 'videoJobInfo',
         indexes: [
             {

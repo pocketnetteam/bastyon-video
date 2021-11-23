@@ -10,7 +10,7 @@ const video_channel_1 = require("@server/models/video/video-channel");
 const abstract_notification_1 = require("../common/abstract-notification");
 class NewAutoBlacklistForModerators extends abstract_notification_1.AbstractNotification {
     prepare() {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.moderators = yield user_1.UserModel.listWithRight(12);
         });
     }
@@ -24,7 +24,7 @@ class NewAutoBlacklistForModerators extends abstract_notification_1.AbstractNoti
         return this.moderators;
     }
     createNotification(user) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const notification = yield user_notification_1.UserNotificationModel.create({
                 type: 12,
                 userId: user.id,
@@ -35,7 +35,7 @@ class NewAutoBlacklistForModerators extends abstract_notification_1.AbstractNoti
         });
     }
     createEmail(to) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const videoAutoBlacklistUrl = constants_1.WEBSERVER.URL + '/admin/moderation/video-auto-blacklist/list';
             const videoUrl = constants_1.WEBSERVER.URL + this.payload.Video.getWatchStaticPath();
             const channel = yield video_channel_1.VideoChannelModel.loadAndPopulateAccount(this.payload.Video.channelId);

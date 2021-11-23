@@ -10,19 +10,19 @@ const shared_1 = require("../shared");
 class PlaylistsCommand extends shared_1.AbstractCommand {
     list(options) {
         const path = '/api/v1/video-playlists';
-        const query = core_utils_1.pick(options, ['start', 'count', 'sort']);
+        const query = (0, core_utils_1.pick)(options, ['start', 'count', 'sort']);
         return this.getRequestBody(Object.assign(Object.assign({}, options), { path,
             query, implicitToken: false, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 }));
     }
     listByChannel(options) {
         const path = '/api/v1/video-channels/' + options.handle + '/video-playlists';
-        const query = core_utils_1.pick(options, ['start', 'count', 'sort']);
+        const query = (0, core_utils_1.pick)(options, ['start', 'count', 'sort']);
         return this.getRequestBody(Object.assign(Object.assign({}, options), { path,
             query, implicitToken: false, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 }));
     }
     listByAccount(options) {
         const path = '/api/v1/accounts/' + options.handle + '/video-playlists';
-        const query = core_utils_1.pick(options, ['start', 'count', 'sort', 'search', 'playlistType']);
+        const query = (0, core_utils_1.pick)(options, ['start', 'count', 'sort', 'search', 'playlistType']);
         return this.getRequestBody(Object.assign(Object.assign({}, options), { path,
             query, implicitToken: false, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 }));
     }
@@ -42,13 +42,13 @@ class PlaylistsCommand extends shared_1.AbstractCommand {
         return this.deleteRequest(Object.assign(Object.assign({}, options), { path, implicitToken: true, defaultExpectedStatus: models_1.HttpStatusCode.NO_CONTENT_204 }));
     }
     create(options) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const path = '/api/v1/video-playlists';
-            const fields = lodash_1.omit(options.attributes, 'thumbnailfile');
+            const fields = (0, lodash_1.omit)(options.attributes, 'thumbnailfile');
             const attaches = options.attributes.thumbnailfile
                 ? { thumbnailfile: options.attributes.thumbnailfile }
                 : {};
-            const body = yield requests_1.unwrapBody(this.postUploadRequest(Object.assign(Object.assign({}, options), { path,
+            const body = yield (0, requests_1.unwrapBody)(this.postUploadRequest(Object.assign(Object.assign({}, options), { path,
                 fields,
                 attaches, implicitToken: true, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 })));
             return body.videoPlaylist;
@@ -56,7 +56,7 @@ class PlaylistsCommand extends shared_1.AbstractCommand {
     }
     update(options) {
         const path = '/api/v1/video-playlists/' + options.playlistId;
-        const fields = lodash_1.omit(options.attributes, 'thumbnailfile');
+        const fields = (0, lodash_1.omit)(options.attributes, 'thumbnailfile');
         const attaches = options.attributes.thumbnailfile
             ? { thumbnailfile: options.attributes.thumbnailfile }
             : {};
@@ -65,10 +65,10 @@ class PlaylistsCommand extends shared_1.AbstractCommand {
             attaches, implicitToken: true, defaultExpectedStatus: models_1.HttpStatusCode.NO_CONTENT_204 }));
     }
     addElement(options) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const attributes = Object.assign(Object.assign({}, options.attributes), { videoId: yield this.server.videos.getId(Object.assign(Object.assign({}, options), { uuid: options.attributes.videoId })) });
             const path = '/api/v1/video-playlists/' + options.playlistId + '/videos';
-            const body = yield requests_1.unwrapBody(this.postBodyRequest(Object.assign(Object.assign({}, options), { path, fields: attributes, implicitToken: true, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 })));
+            const body = yield (0, requests_1.unwrapBody)(this.postBodyRequest(Object.assign(Object.assign({}, options), { path, fields: attributes, implicitToken: true, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 })));
             return body.videoPlaylistElement;
         });
     }

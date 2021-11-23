@@ -2,16 +2,16 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.jobsRouter = void 0;
 const tslib_1 = require("tslib");
-const express_1 = tslib_1.__importDefault(require("express"));
+const express_1 = (0, tslib_1.__importDefault)(require("express"));
 const misc_1 = require("../../helpers/custom-validators/misc");
 const job_queue_1 = require("../../lib/job-queue");
 const middlewares_1 = require("../../middlewares");
 const jobs_1 = require("../../middlewares/validators/jobs");
 const jobsRouter = express_1.default.Router();
 exports.jobsRouter = jobsRouter;
-jobsRouter.get('/:state?', middlewares_1.openapiOperationDoc({ operationId: 'getJobs' }), middlewares_1.paginationValidatorBuilder(['jobs']), middlewares_1.jobsSortValidator, middlewares_1.setDefaultSort, middlewares_1.setDefaultPagination, jobs_1.listJobsValidator, middlewares_1.asyncMiddleware(listJobs));
+jobsRouter.get('/:state?', (0, middlewares_1.openapiOperationDoc)({ operationId: 'getJobs' }), (0, middlewares_1.paginationValidatorBuilder)(['jobs']), middlewares_1.jobsSortValidator, middlewares_1.setDefaultSort, middlewares_1.setDefaultPagination, jobs_1.listJobsValidator, (0, middlewares_1.asyncMiddleware)(listJobs));
 function listJobs(req, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const state = req.params.state;
         const asc = req.query.sort === 'createdAt';
         const jobType = req.query.jobType;
@@ -31,8 +31,8 @@ function listJobs(req, res) {
     });
 }
 function formatJob(job, state) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        const error = misc_1.isArray(job.stacktrace) && job.stacktrace.length !== 0
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        const error = (0, misc_1.isArray)(job.stacktrace) && job.stacktrace.length !== 0
             ? job.stacktrace[0]
             : null;
         return {

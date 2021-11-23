@@ -2,10 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.configRouter = void 0;
 const tslib_1 = require("tslib");
-const express_1 = tslib_1.__importDefault(require("express"));
+const express_1 = (0, tslib_1.__importDefault)(require("express"));
 const fs_extra_1 = require("fs-extra");
 const lodash_1 = require("lodash");
-const validator_1 = tslib_1.__importDefault(require("validator"));
+const validator_1 = (0, tslib_1.__importDefault)(require("validator"));
 const server_config_manager_1 = require("@server/lib/server-config-manager");
 const audit_logger_1 = require("../../helpers/audit-logger");
 const core_utils_1 = require("../../helpers/core-utils");
@@ -15,14 +15,14 @@ const middlewares_1 = require("../../middlewares");
 const config_2 = require("../../middlewares/validators/config");
 const configRouter = express_1.default.Router();
 exports.configRouter = configRouter;
-const auditLogger = audit_logger_1.auditLoggerFactory('config');
-configRouter.get('/', middlewares_1.openapiOperationDoc({ operationId: 'getConfig' }), middlewares_1.asyncMiddleware(getConfig));
-configRouter.get('/about', middlewares_1.openapiOperationDoc({ operationId: 'getAbout' }), getAbout);
-configRouter.get('/custom', middlewares_1.openapiOperationDoc({ operationId: 'getCustomConfig' }), middlewares_1.authenticate, middlewares_1.ensureUserHasRight(8), getCustomConfig);
-configRouter.put('/custom', middlewares_1.openapiOperationDoc({ operationId: 'putCustomConfig' }), middlewares_1.authenticate, middlewares_1.ensureUserHasRight(8), config_2.customConfigUpdateValidator, middlewares_1.asyncMiddleware(updateCustomConfig));
-configRouter.delete('/custom', middlewares_1.openapiOperationDoc({ operationId: 'delCustomConfig' }), middlewares_1.authenticate, middlewares_1.ensureUserHasRight(8), middlewares_1.asyncMiddleware(deleteCustomConfig));
+const auditLogger = (0, audit_logger_1.auditLoggerFactory)('config');
+configRouter.get('/', (0, middlewares_1.openapiOperationDoc)({ operationId: 'getConfig' }), (0, middlewares_1.asyncMiddleware)(getConfig));
+configRouter.get('/about', (0, middlewares_1.openapiOperationDoc)({ operationId: 'getAbout' }), getAbout);
+configRouter.get('/custom', (0, middlewares_1.openapiOperationDoc)({ operationId: 'getCustomConfig' }), middlewares_1.authenticate, (0, middlewares_1.ensureUserHasRight)(8), getCustomConfig);
+configRouter.put('/custom', (0, middlewares_1.openapiOperationDoc)({ operationId: 'putCustomConfig' }), middlewares_1.authenticate, (0, middlewares_1.ensureUserHasRight)(8), config_2.customConfigUpdateValidator, (0, middlewares_1.asyncMiddleware)(updateCustomConfig));
+configRouter.delete('/custom', (0, middlewares_1.openapiOperationDoc)({ operationId: 'delCustomConfig' }), middlewares_1.authenticate, (0, middlewares_1.ensureUserHasRight)(8), (0, middlewares_1.asyncMiddleware)(deleteCustomConfig));
 function getConfig(req, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const json = yield server_config_manager_1.ServerConfigManager.Instance.getServerConfig(req.ip);
         return res.json(json);
     });
@@ -52,24 +52,24 @@ function getCustomConfig(req, res) {
     return res.json(data);
 }
 function deleteCustomConfig(req, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        yield fs_extra_1.remove(config_1.CONFIG.CUSTOM_FILE);
-        auditLogger.delete(audit_logger_1.getAuditIdFromRes(res), new audit_logger_1.CustomConfigAuditView(customConfig()));
-        config_1.reloadConfig();
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        yield (0, fs_extra_1.remove)(config_1.CONFIG.CUSTOM_FILE);
+        auditLogger.delete((0, audit_logger_1.getAuditIdFromRes)(res), new audit_logger_1.CustomConfigAuditView(customConfig()));
+        (0, config_1.reloadConfig)();
         client_html_1.ClientHtml.invalidCache();
         const data = customConfig();
         return res.json(data);
     });
 }
 function updateCustomConfig(req, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const oldCustomConfigAuditKeys = new audit_logger_1.CustomConfigAuditView(customConfig());
         const toUpdateJSON = convertCustomConfigBody(req.body);
-        yield fs_extra_1.writeJSON(config_1.CONFIG.CUSTOM_FILE, toUpdateJSON, { spaces: 2 });
-        config_1.reloadConfig();
+        yield (0, fs_extra_1.writeJSON)(config_1.CONFIG.CUSTOM_FILE, toUpdateJSON, { spaces: 2 });
+        (0, config_1.reloadConfig)();
         client_html_1.ClientHtml.invalidCache();
         const data = customConfig();
-        auditLogger.update(audit_logger_1.getAuditIdFromRes(res), new audit_logger_1.CustomConfigAuditView(data), oldCustomConfigAuditKeys);
+        auditLogger.update((0, audit_logger_1.getAuditIdFromRes)(res), new audit_logger_1.CustomConfigAuditView(data), oldCustomConfigAuditKeys);
         return res.json(data);
     });
 }
@@ -247,12 +247,12 @@ function convertCustomConfigBody(body) {
             return k;
         if (k === '0p')
             return k;
-        return lodash_1.snakeCase(k);
+        return (0, lodash_1.snakeCase)(k);
     }
     function valueConverter(v) {
         if (validator_1.default.isNumeric(v + ''))
             return parseInt('' + v, 10);
         return v;
     }
-    return core_utils_1.objectConverter(body, keyConverter, valueConverter);
+    return (0, core_utils_1.objectConverter)(body, keyConverter, valueConverter);
 }

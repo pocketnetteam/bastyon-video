@@ -4,7 +4,7 @@ exports.buildActorInstance = exports.pushActorImageProcessInQueue = exports.dele
 const tslib_1 = require("tslib");
 require("multer");
 const async_1 = require("async");
-const lru_cache_1 = tslib_1.__importDefault(require("lru-cache"));
+const lru_cache_1 = (0, tslib_1.__importDefault)(require("lru-cache"));
 const path_1 = require("path");
 const core_utils_1 = require("@server/helpers/core-utils");
 const uuid_1 = require("@server/helpers/uuid");
@@ -35,16 +35,16 @@ function buildActorInstance(type, url, preferredUsername) {
 }
 exports.buildActorInstance = buildActorInstance;
 function updateLocalActorImageFile(accountOrChannel, imagePhysicalFile, type) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const imageSize = type === 1
             ? constants_1.ACTOR_IMAGES_SIZE.AVATARS
             : constants_1.ACTOR_IMAGES_SIZE.BANNERS;
-        const extension = core_utils_1.getLowercaseExtension(imagePhysicalFile.filename);
-        const imageName = uuid_1.buildUUID() + extension;
-        const destination = path_1.join(config_1.CONFIG.STORAGE.ACTOR_IMAGES, imageName);
-        yield image_utils_1.processImage(imagePhysicalFile.path, destination, imageSize);
-        return database_utils_1.retryTransactionWrapper(() => {
-            return database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const extension = (0, core_utils_1.getLowercaseExtension)(imagePhysicalFile.filename);
+        const imageName = (0, uuid_1.buildUUID)() + extension;
+        const destination = (0, path_1.join)(config_1.CONFIG.STORAGE.ACTOR_IMAGES, imageName);
+        yield (0, image_utils_1.processImage)(imagePhysicalFile.path, destination, imageSize);
+        return (0, database_utils_1.retryTransactionWrapper)(() => {
+            return database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const actorImageInfo = {
                     name: imageName,
                     fileUrl: null,
@@ -52,9 +52,9 @@ function updateLocalActorImageFile(accountOrChannel, imagePhysicalFile, type) {
                     width: imageSize.width,
                     onDisk: true
                 };
-                const updatedActor = yield actors_1.updateActorImageInstance(accountOrChannel.Actor, type, actorImageInfo, t);
+                const updatedActor = yield (0, actors_1.updateActorImageInstance)(accountOrChannel.Actor, type, actorImageInfo, t);
                 yield updatedActor.save({ transaction: t });
-                yield send_1.sendUpdateActor(accountOrChannel, t);
+                yield (0, send_1.sendUpdateActor)(accountOrChannel, t);
                 return type === 1
                     ? updatedActor.Avatar
                     : updatedActor.Banner;
@@ -64,23 +64,23 @@ function updateLocalActorImageFile(accountOrChannel, imagePhysicalFile, type) {
 }
 exports.updateLocalActorImageFile = updateLocalActorImageFile;
 function deleteLocalActorImageFile(accountOrChannel, type) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        return database_utils_1.retryTransactionWrapper(() => {
-            return database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
-                const updatedActor = yield actors_1.deleteActorImageInstance(accountOrChannel.Actor, type, t);
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return (0, database_utils_1.retryTransactionWrapper)(() => {
+            return database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                const updatedActor = yield (0, actors_1.deleteActorImageInstance)(accountOrChannel.Actor, type, t);
                 yield updatedActor.save({ transaction: t });
-                yield send_1.sendUpdateActor(accountOrChannel, t);
+                yield (0, send_1.sendUpdateActor)(accountOrChannel, t);
                 return updatedActor.Avatar;
             }));
         });
     });
 }
 exports.deleteLocalActorImageFile = deleteLocalActorImageFile;
-const downloadImageQueue = async_1.queue((task, cb) => {
+const downloadImageQueue = (0, async_1.queue)((task, cb) => {
     const size = task.type === 1
         ? constants_1.ACTOR_IMAGES_SIZE.AVATARS
         : constants_1.ACTOR_IMAGES_SIZE.BANNERS;
-    requests_1.downloadImage(task.fileUrl, config_1.CONFIG.STORAGE.ACTOR_IMAGES, task.filename, size)
+    (0, requests_1.downloadImage)(task.fileUrl, config_1.CONFIG.STORAGE.ACTOR_IMAGES, task.filename, size)
         .then(() => cb())
         .catch(err => cb(err));
 }, constants_1.QUEUE_CONCURRENCY.ACTOR_PROCESS_IMAGE);

@@ -28,7 +28,7 @@ const videos_1 = require("../../activitypub/videos");
 const notifier_1 = require("../../notifier");
 const thumbnail_2 = require("../../thumbnail");
 function processVideoImport(job) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const payload = job.data;
         if (payload.type === 'youtube-dl')
             return processYoutubeDLImport(job, payload);
@@ -38,7 +38,7 @@ function processVideoImport(job) {
 }
 exports.processVideoImport = processVideoImport;
 function processTorrentImport(job, payload) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         logger_1.logger.info('Processing torrent video import in job %d.', job.id);
         const videoImport = yield getVideoImportOrDie(payload.videoImportId);
         const options = {
@@ -46,14 +46,14 @@ function processTorrentImport(job, payload) {
             videoImportId: payload.videoImportId
         };
         const target = {
-            torrentName: videoImport.torrentName ? utils_1.getSecureTorrentName(videoImport.torrentName) : undefined,
+            torrentName: videoImport.torrentName ? (0, utils_1.getSecureTorrentName)(videoImport.torrentName) : undefined,
             uri: videoImport.magnetUri
         };
-        return processFile(() => webtorrent_1.downloadWebTorrentVideo(target, constants_1.VIDEO_IMPORT_TIMEOUT), videoImport, options);
+        return processFile(() => (0, webtorrent_1.downloadWebTorrentVideo)(target, constants_1.VIDEO_IMPORT_TIMEOUT), videoImport, options);
     });
 }
 function processYoutubeDLImport(job, payload) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         logger_1.logger.info('Processing youtubeDL video import in job %d.', job.id);
         const videoImport = yield getVideoImportOrDie(payload.videoImportId);
         const options = {
@@ -65,7 +65,7 @@ function processYoutubeDLImport(job, payload) {
     });
 }
 function getVideoImportOrDie(videoImportId) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const videoImport = yield video_import_1.VideoImportModel.loadAndPopulateVideo(videoImportId);
         if (!videoImport || !videoImport.Video) {
             throw new Error('Cannot import video %s: the video import or video linked to this import does not exist anymore.');
@@ -74,25 +74,25 @@ function getVideoImportOrDie(videoImportId) {
     });
 }
 function processFile(downloader, videoImport, options) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         let tempVideoPath;
         let videoFile;
         try {
             tempVideoPath = yield downloader();
-            const stats = yield fs_extra_1.stat(tempVideoPath);
-            const isAble = yield user_1.isAbleToUploadVideo(videoImport.User.id, stats.size);
+            const stats = yield (0, fs_extra_1.stat)(tempVideoPath);
+            const isAble = yield (0, user_1.isAbleToUploadVideo)(videoImport.User.id, stats.size);
             if (isAble === false) {
                 throw new Error('The user video quota is exceeded with this video to import.');
             }
-            const { resolution } = yield ffprobe_utils_1.getVideoFileResolution(tempVideoPath);
-            const fps = yield ffprobe_utils_1.getVideoFileFPS(tempVideoPath);
-            const duration = yield ffprobe_utils_1.getDurationFromVideoFile(tempVideoPath);
-            const fileExt = core_utils_1.getLowercaseExtension(tempVideoPath);
+            const { resolution } = yield (0, ffprobe_utils_1.getVideoFileResolution)(tempVideoPath);
+            const fps = yield (0, ffprobe_utils_1.getVideoFileFPS)(tempVideoPath);
+            const duration = yield (0, ffprobe_utils_1.getDurationFromVideoFile)(tempVideoPath);
+            const fileExt = (0, core_utils_1.getLowercaseExtension)(tempVideoPath);
             const videoFileData = {
                 extname: fileExt,
                 resolution,
                 size: stats.size,
-                filename: paths_1.generateWebTorrentVideoFilename(resolution, fileExt),
+                filename: (0, paths_1.generateWebTorrentVideoFilename)(resolution, fileExt),
                 fps,
                 videoId: videoImport.videoId
             };
@@ -117,12 +117,12 @@ function processFile(downloader, videoImport, options) {
             const videoWithFiles = Object.assign(videoImport.Video, { VideoFiles: [videoFile], VideoStreamingPlaylists: [] });
             const videoImportWithFiles = Object.assign(videoImport, { Video: videoWithFiles });
             const videoDestFile = video_path_manager_1.VideoPathManager.Instance.getFSVideoFileOutputPath(videoImportWithFiles.Video, videoFile);
-            yield fs_extra_1.move(tempVideoPath, videoDestFile);
+            yield (0, fs_extra_1.move)(tempVideoPath, videoDestFile);
             tempVideoPath = null;
             let thumbnailModel;
             let thumbnailSave;
             if (!videoImportWithFiles.Video.getMiniature()) {
-                thumbnailModel = yield thumbnail_2.generateVideoMiniature({
+                thumbnailModel = yield (0, thumbnail_2.generateVideoMiniature)({
                     video: videoImportWithFiles.Video,
                     videoFile,
                     type: 1
@@ -132,31 +132,31 @@ function processFile(downloader, videoImport, options) {
             let previewModel;
             let previewSave;
             if (!videoImportWithFiles.Video.getPreview()) {
-                previewModel = yield thumbnail_2.generateVideoMiniature({
+                previewModel = yield (0, thumbnail_2.generateVideoMiniature)({
                     video: videoImportWithFiles.Video,
                     videoFile,
                     type: 2
                 });
                 previewSave = previewModel.toJSON();
             }
-            yield webtorrent_1.createTorrentAndSetInfoHash(videoImportWithFiles.Video, videoFile);
+            yield (0, webtorrent_1.createTorrentAndSetInfoHash)(videoImportWithFiles.Video, videoFile);
             const videoFileSave = videoFile.toJSON();
-            const { videoImportUpdated, video } = yield database_utils_1.retryTransactionWrapper(() => {
-                return database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const { videoImportUpdated, video } = yield (0, database_utils_1.retryTransactionWrapper)(() => {
+                return database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     const videoImportToUpdate = videoImportWithFiles;
                     const video = yield video_2.VideoModel.load(videoImportToUpdate.videoId, t);
                     if (!video)
                         throw new Error('Video linked to import ' + videoImportToUpdate.videoId + ' does not exist anymore.');
                     const videoFileCreated = yield videoFile.save({ transaction: t });
                     video.duration = duration;
-                    video.state = video_state_1.buildNextVideoState(video.state);
+                    video.state = (0, video_state_1.buildNextVideoState)(video.state);
                     yield video.save({ transaction: t });
                     if (thumbnailModel)
                         yield video.addAndSaveThumbnail(thumbnailModel, t);
                     if (previewModel)
                         yield video.addAndSaveThumbnail(previewModel, t);
                     const videoForFederation = yield video_2.VideoModel.loadAndPopulateAccountAndServerAndTags(video.uuid, t);
-                    yield videos_1.federateVideoIfNeeded(videoForFederation, true, t);
+                    yield (0, videos_1.federateVideoIfNeeded)(videoForFederation, true, t);
                     videoImportToUpdate.state = 2;
                     const videoImportUpdated = yield videoImportToUpdate.save({ transaction: t });
                     videoImportUpdated.Video = video;
@@ -181,16 +181,16 @@ function processFile(downloader, videoImport, options) {
                 notifier_1.Notifier.Instance.notifyOnNewVideoIfNeeded(video);
             }
             if (video.state === 6) {
-                return video_1.addMoveToObjectStorageJob(videoImportUpdated.Video);
+                return (0, video_1.addMoveToObjectStorageJob)(videoImportUpdated.Video);
             }
             if (video.state === 2) {
-                yield video_1.addOptimizeOrMergeAudioJob(videoImportUpdated.Video, videoFile, videoImport.User);
+                yield (0, video_1.addOptimizeOrMergeAudioJob)(videoImportUpdated.Video, videoFile, videoImport.User);
             }
         }
         catch (err) {
             try {
                 if (tempVideoPath)
-                    yield fs_extra_1.remove(tempVideoPath);
+                    yield (0, fs_extra_1.remove)(tempVideoPath);
             }
             catch (errUnlink) {
                 logger_1.logger.warn('Cannot cleanup files after a video import error.', { err: errUnlink });

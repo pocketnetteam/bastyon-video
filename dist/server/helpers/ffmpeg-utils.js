@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.buildx264VODCommand = exports.resetSupportedEncoders = exports.getFFmpegVersion = exports.runCommand = exports.transcode = exports.generateImageFromVideoFile = exports.processGIF = exports.convertWebPToJPG = exports.buildStreamSuffix = exports.getLiveMuxingCommand = exports.getLiveTranscodingCommand = void 0;
 const tslib_1 = require("tslib");
-const fluent_ffmpeg_1 = tslib_1.__importStar(require("fluent-ffmpeg"));
+const fluent_ffmpeg_1 = (0, tslib_1.__importStar)(require("fluent-ffmpeg"));
 const fs_extra_1 = require("fs-extra");
 const path_1 = require("path");
 const constants_1 = require("@server/initializers/constants");
@@ -14,11 +14,11 @@ const image_utils_1 = require("./image-utils");
 const logger_1 = require("./logger");
 let supportedEncoders;
 function checkFFmpegEncoders(peertubeAvailableEncoders) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         if (supportedEncoders !== undefined) {
             return supportedEncoders;
         }
-        const getAvailableEncodersPromise = core_utils_2.promisify0(fluent_ffmpeg_1.getAvailableEncoders);
+        const getAvailableEncodersPromise = (0, core_utils_2.promisify0)(fluent_ffmpeg_1.getAvailableEncoders);
         const availableFFmpegEncoders = yield getAvailableEncodersPromise();
         const searchEncoders = new Set();
         for (const type of ['live', 'vod']) {
@@ -41,13 +41,13 @@ function resetSupportedEncoders() {
 }
 exports.resetSupportedEncoders = resetSupportedEncoders;
 function convertWebPToJPG(path, destination) {
-    const command = fluent_ffmpeg_1.default(path, { niceness: constants_1.FFMPEG_NICE.THUMBNAIL })
+    const command = (0, fluent_ffmpeg_1.default)(path, { niceness: constants_1.FFMPEG_NICE.THUMBNAIL })
         .output(destination);
     return runCommand({ command, silent: true });
 }
 exports.convertWebPToJPG = convertWebPToJPG;
 function processGIF(path, destination, newSize) {
-    const command = fluent_ffmpeg_1.default(path, { niceness: constants_1.FFMPEG_NICE.THUMBNAIL })
+    const command = (0, fluent_ffmpeg_1.default)(path, { niceness: constants_1.FFMPEG_NICE.THUMBNAIL })
         .fps(20)
         .size(`${newSize.width}x${newSize.height}`)
         .output(destination);
@@ -55,28 +55,28 @@ function processGIF(path, destination, newSize) {
 }
 exports.processGIF = processGIF;
 function generateImageFromVideoFile(fromPath, folder, imageName, size) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const pendingImageName = 'pending-' + imageName;
         const options = {
             filename: pendingImageName,
             count: 1,
             folder
         };
-        const pendingImagePath = path_1.join(folder, pendingImageName);
+        const pendingImagePath = (0, path_1.join)(folder, pendingImageName);
         try {
             yield new Promise((res, rej) => {
-                fluent_ffmpeg_1.default(fromPath, { niceness: constants_1.FFMPEG_NICE.THUMBNAIL })
+                (0, fluent_ffmpeg_1.default)(fromPath, { niceness: constants_1.FFMPEG_NICE.THUMBNAIL })
                     .on('error', rej)
                     .on('end', () => res(imageName))
                     .thumbnail(options);
             });
-            const destination = path_1.join(folder, imageName);
-            yield image_utils_1.processImage(pendingImagePath, destination, size);
+            const destination = (0, path_1.join)(folder, imageName);
+            yield (0, image_utils_1.processImage)(pendingImagePath, destination, size);
         }
         catch (err) {
             logger_1.logger.error('Cannot generate image from video %s.', fromPath, { err });
             try {
-                yield fs_extra_1.remove(pendingImagePath);
+                yield (0, fs_extra_1.remove)(pendingImagePath);
             }
             catch (err) {
                 logger_1.logger.debug('Cannot remove pending image path after generation error.', { err });
@@ -94,7 +94,7 @@ const builders = {
     'video': buildx264VODCommand
 };
 function transcode(options) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         logger_1.logger.debug('Will run transcode.', { options });
         let command = getFFmpeg(options.inputPath, 'vod')
             .output(options.outputPath);
@@ -105,7 +105,7 @@ function transcode(options) {
 }
 exports.transcode = transcode;
 function getLiveTranscodingCommand(options) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const { rtmpUrl, outPath, resolutions, fps, bitrate, availableEncoders, profile, masterPlaylistName, ratio } = options;
         const input = rtmpUrl;
         const command = getFFmpeg(input, 'live');
@@ -122,7 +122,7 @@ function getLiveTranscodingCommand(options) {
         addDefaultEncoderGlobalParams({ command });
         for (let i = 0; i < resolutions.length; i++) {
             const resolution = resolutions[i];
-            const resolutionFPS = ffprobe_utils_1.computeFPS(fps, resolution);
+            const resolutionFPS = (0, ffprobe_utils_1.computeFPS)(fps, resolution);
             const baseEncoderBuilderParams = {
                 input,
                 availableEncoders,
@@ -212,16 +212,16 @@ function addDefaultLiveHLSParams(command, outPath, masterPlaylistName) {
     command.outputOption('-hls_list_size ' + constants_1.VIDEO_LIVE.SEGMENTS_LIST_SIZE);
     command.outputOption('-hls_flags delete_segments+independent_segments');
     command.outputOption('-strftime 1');
-    command.outputOption(`-hls_segment_filename ${path_1.join(outPath, '%v-%Y%m%d-%s.ts')}`);
+    command.outputOption(`-hls_segment_filename ${(0, path_1.join)(outPath, '%v-%Y%m%d-%s.ts')}`);
     command.outputOption('-master_pl_name master.m3u8');
     command.outputOption('-hls_flags delete_segments');
     command.outputOption(`-f hls`);
-    command.output(path_1.join(outPath, '%v.m3u8'));
+    command.output((0, path_1.join)(outPath, '%v.m3u8'));
 }
 function buildx264VODCommand(command, options) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        let fps = yield ffprobe_utils_1.getVideoFileFPS(options.inputPath);
-        fps = ffprobe_utils_1.computeFPS(fps, options.resolution);
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        let fps = yield (0, ffprobe_utils_1.getVideoFileFPS)(options.inputPath);
+        fps = (0, ffprobe_utils_1.computeFPS)(fps, options.resolution);
         let scaleFilterValue;
         if (options.resolution !== undefined) {
             scaleFilterValue = options.isPortraitMode === true
@@ -234,7 +234,7 @@ function buildx264VODCommand(command, options) {
 }
 exports.buildx264VODCommand = buildx264VODCommand;
 function buildAudioMergeCommand(command, options) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         command = command.loop(undefined);
         const scaleFilterValue = getScaleCleanerValue();
         command = yield presetVideo({ command, input: options.audioPath, transcodeOptions: options, scaleFilterValue });
@@ -265,7 +265,7 @@ function addCommonHLSVODCommandOptions(command, outputPath) {
         .outputOption('-hls_flags single_file');
 }
 function buildHLSVODCommand(command, options) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const videoPath = getHLSVideoPath(options);
         if (options.copyCodecs)
             command = presetCopy(command);
@@ -287,22 +287,22 @@ function buildHLSVODFromTSCommand(command, options) {
     return command;
 }
 function fixHLSPlaylistIfNeeded(options) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         if (options.type !== 'hls' && options.type !== 'hls-from-ts')
             return;
-        const fileContent = yield fs_extra_1.readFile(options.outputPath);
+        const fileContent = yield (0, fs_extra_1.readFile)(options.outputPath);
         const videoFileName = options.hlsPlaylist.videoFilename;
         const videoFilePath = getHLSVideoPath(options);
         const newContent = fileContent.toString()
             .replace(`#EXT-X-MAP:URI="${videoFilePath}",`, `#EXT-X-MAP:URI="${videoFileName}",`);
-        yield fs_extra_1.writeFile(options.outputPath, newContent);
+        yield (0, fs_extra_1.writeFile)(options.outputPath, newContent);
     });
 }
 function getHLSVideoPath(options) {
-    return `${path_1.dirname(options.outputPath)}/${options.hlsPlaylist.videoFilename}`;
+    return `${(0, path_1.dirname)(options.outputPath)}/${options.hlsPlaylist.videoFilename}`;
 }
 function getEncoderBuilderResult(options) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const { availableEncoders, profile, streamType, videoType } = options;
         const encodersToTry = availableEncoders.encodersToTry[videoType][streamType];
         const encoders = availableEncoders.available[videoType];
@@ -325,7 +325,7 @@ function getEncoderBuilderResult(options) {
                     continue;
                 }
             }
-            const result = yield builder(core_utils_1.pick(options, ['input', 'resolution', 'inputBitrate', 'fps', 'inputRatio', 'streamNum']));
+            const result = yield builder((0, core_utils_1.pick)(options, ['input', 'resolution', 'inputBitrate', 'fps', 'inputRatio', 'streamNum']));
             return {
                 result,
                 encoder: result.copy === true
@@ -337,16 +337,16 @@ function getEncoderBuilderResult(options) {
     });
 }
 function presetVideo(options) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const { command, input, transcodeOptions, fps, scaleFilterValue } = options;
         let localCommand = command
             .format('mp4')
             .outputOption('-movflags faststart');
         addDefaultEncoderGlobalParams({ command });
-        const probe = yield ffprobe_utils_1.ffprobePromise(input);
-        const parsedAudio = yield ffprobe_utils_1.getAudioStream(input, probe);
-        const bitrate = yield ffprobe_utils_1.getVideoFileBitrate(input, probe);
-        const { ratio } = yield ffprobe_utils_1.getVideoFileResolution(input, probe);
+        const probe = yield (0, ffprobe_utils_1.ffprobePromise)(input);
+        const parsedAudio = yield (0, ffprobe_utils_1.getAudioStream)(input, probe);
+        const bitrate = yield (0, ffprobe_utils_1.getVideoFileBitrate)(input, probe);
+        const { ratio } = yield (0, ffprobe_utils_1.getVideoFileResolution)(input, probe);
         let streamsToProcess = ['audio', 'video'];
         if (!parsedAudio.audioStream) {
             localCommand = localCommand.noAudio();
@@ -408,7 +408,7 @@ function getScaleFilter(options) {
     return 'scale';
 }
 function getFFmpeg(input, type) {
-    const command = fluent_ffmpeg_1.default(input, {
+    const command = (0, fluent_ffmpeg_1.default)(input, {
         niceness: type === 'live' ? constants_1.FFMPEG_NICE.LIVE : constants_1.FFMPEG_NICE.VOD,
         cwd: config_1.CONFIG.STORAGE.TMP_DIR
     });
@@ -422,12 +422,12 @@ function getFFmpeg(input, type) {
 }
 function getFFmpegVersion() {
     return new Promise((res, rej) => {
-        fluent_ffmpeg_1.default()._getFfmpegPath((err, ffmpegPath) => {
+        (0, fluent_ffmpeg_1.default)()._getFfmpegPath((err, ffmpegPath) => {
             if (err)
                 return rej(err);
             if (!ffmpegPath)
                 return rej(new Error('Could not find ffmpeg path'));
-            return core_utils_2.execPromise(`${ffmpegPath} -version`)
+            return (0, core_utils_2.execPromise)(`${ffmpegPath} -version`)
                 .then(stdout => {
                 const parsed = stdout.match(/ffmpeg version .?(\d+\.\d+(\.\d+)?)/);
                 if (!parsed || !parsed[1])
@@ -444,7 +444,7 @@ function getFFmpegVersion() {
 }
 exports.getFFmpegVersion = getFFmpegVersion;
 function runCommand(options) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const { command, silent = false, job } = options;
         return new Promise((res, rej) => {
             let shellCommand;

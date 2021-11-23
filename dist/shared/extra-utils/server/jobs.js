@@ -4,7 +4,7 @@ exports.waitJobs = void 0;
 const tslib_1 = require("tslib");
 const miscs_1 = require("../miscs");
 function waitJobs(serversArg, skipDelayed = false) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const pendingJobWait = process.env.NODE_PENDING_JOB_WAIT
             ? parseInt(process.env.NODE_PENDING_JOB_WAIT, 10)
             : 250;
@@ -50,11 +50,11 @@ function waitJobs(serversArg, skipDelayed = false) {
             pendingRequests = false;
             yield Promise.all(tasksBuilder());
             if (pendingRequests === false) {
-                yield miscs_1.wait(pendingJobWait);
+                yield (0, miscs_1.wait)(pendingJobWait);
                 yield Promise.all(tasksBuilder());
             }
             if (pendingRequests) {
-                yield miscs_1.wait(pendingJobWait);
+                yield (0, miscs_1.wait)(pendingJobWait);
             }
         } while (pendingRequests);
     });

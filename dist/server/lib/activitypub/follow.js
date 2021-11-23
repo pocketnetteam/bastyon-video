@@ -9,13 +9,13 @@ const constants_1 = require("../../initializers/constants");
 const server_1 = require("../../models/server/server");
 const job_queue_1 = require("../job-queue");
 function autoFollowBackIfNeeded(actorFollow, transaction) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         if (!config_1.CONFIG.FOLLOWINGS.INSTANCE.AUTO_FOLLOW_BACK.ENABLED)
             return;
         const follower = actorFollow.ActorFollower;
         if (follower.type === 'Application' && follower.preferredUsername === constants_1.SERVER_ACTOR_NAME) {
             logger_1.logger.info('Auto follow back %s.', follower.url);
-            const me = yield application_1.getServerActor();
+            const me = yield (0, application_1.getServerActor)();
             const server = yield server_1.ServerModel.load(follower.serverId, transaction);
             const host = server.host;
             const payload = {

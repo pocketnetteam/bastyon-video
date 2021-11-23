@@ -5,7 +5,7 @@ const tslib_1 = require("tslib");
 const video_playlist_1 = require("@server/models/video/video-playlist");
 const models_1 = require("@shared/models");
 function doesVideoPlaylistExist(id, res, fetchType = 'summary') {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         if (fetchType === 'summary') {
             const videoPlaylist = yield video_playlist_1.VideoPlaylistModel.loadWithAccountAndChannelSummary(id, undefined);
             res.locals.videoPlaylistSummary = videoPlaylist;

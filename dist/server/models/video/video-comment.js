@@ -97,28 +97,28 @@ let VideoCommentModel = VideoCommentModel_1 = class VideoCommentModel extends se
         if (search) {
             Object.assign(where, {
                 [sequelize_1.Op.or]: [
-                    utils_1.searchAttribute(search, 'text'),
-                    utils_1.searchAttribute(search, '$Account.Actor.preferredUsername$'),
-                    utils_1.searchAttribute(search, '$Account.name$'),
-                    utils_1.searchAttribute(search, '$Video.name$')
+                    (0, utils_1.searchAttribute)(search, 'text'),
+                    (0, utils_1.searchAttribute)(search, '$Account.Actor.preferredUsername$'),
+                    (0, utils_1.searchAttribute)(search, '$Account.name$'),
+                    (0, utils_1.searchAttribute)(search, '$Video.name$')
                 ]
             });
         }
         if (searchAccount) {
             Object.assign(whereActor, {
                 [sequelize_1.Op.or]: [
-                    utils_1.searchAttribute(searchAccount, '$Account.Actor.preferredUsername$'),
-                    utils_1.searchAttribute(searchAccount, '$Account.name$')
+                    (0, utils_1.searchAttribute)(searchAccount, '$Account.Actor.preferredUsername$'),
+                    (0, utils_1.searchAttribute)(searchAccount, '$Account.name$')
                 ]
             });
         }
         if (searchVideo) {
-            Object.assign(whereVideo, utils_1.searchAttribute(searchVideo, 'name'));
+            Object.assign(whereVideo, (0, utils_1.searchAttribute)(searchVideo, 'name'));
         }
         const query = {
             offset: start,
             limit: count,
-            order: utils_1.getCommentSort(sort),
+            order: (0, utils_1.getCommentSort)(sort),
             where,
             include: [
                 {
@@ -150,18 +150,18 @@ let VideoCommentModel = VideoCommentModel_1 = class VideoCommentModel extends se
         });
     }
     static listThreadsForApi(parameters) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const { videoId, isVideoOwned, start, count, sort, user } = parameters;
             const blockerAccountIds = yield VideoCommentModel_1.buildBlockerAccountIds({ videoId, user, isVideoOwned });
             const accountBlockedWhere = {
                 accountId: {
-                    [sequelize_1.Op.notIn]: sequelize_1.Sequelize.literal('(' + utils_1.buildBlockedAccountSQL(blockerAccountIds) + ')')
+                    [sequelize_1.Op.notIn]: sequelize_1.Sequelize.literal('(' + (0, utils_1.buildBlockedAccountSQL)(blockerAccountIds) + ')')
                 }
             };
             const queryList = {
                 offset: start,
                 limit: count,
-                order: utils_1.getCommentSort(sort),
+                order: (0, utils_1.getCommentSort)(sort),
                 where: {
                     [sequelize_1.Op.and]: [
                         {
@@ -199,7 +199,7 @@ let VideoCommentModel = VideoCommentModel_1 = class VideoCommentModel extends se
         });
     }
     static listThreadCommentsForApi(parameters) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const { videoId, threadId, user, isVideoOwned } = parameters;
             const blockerAccountIds = yield VideoCommentModel_1.buildBlockerAccountIds({ videoId, user, isVideoOwned });
             const query = {
@@ -217,7 +217,7 @@ let VideoCommentModel = VideoCommentModel_1 = class VideoCommentModel extends se
                             [sequelize_1.Op.or]: [
                                 {
                                     accountId: {
-                                        [sequelize_1.Op.notIn]: sequelize_1.Sequelize.literal('(' + utils_1.buildBlockedAccountSQL(blockerAccountIds) + ')')
+                                        [sequelize_1.Op.notIn]: sequelize_1.Sequelize.literal('(' + (0, utils_1.buildBlockedAccountSQL)(blockerAccountIds) + ')')
                                     }
                                 },
                                 {
@@ -265,7 +265,7 @@ let VideoCommentModel = VideoCommentModel_1 = class VideoCommentModel extends se
             .findAll(query);
     }
     static listAndCountByVideoForAP(video, start, count, t) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const blockerAccountIds = yield VideoCommentModel_1.buildBlockerAccountIds({
                 videoId: video.id,
                 isVideoOwned: video.isOwned()
@@ -277,7 +277,7 @@ let VideoCommentModel = VideoCommentModel_1 = class VideoCommentModel extends se
                 where: {
                     videoId: video.id,
                     accountId: {
-                        [sequelize_1.Op.notIn]: sequelize_1.Sequelize.literal('(' + utils_1.buildBlockedAccountSQL(blockerAccountIds) + ')')
+                        [sequelize_1.Op.notIn]: sequelize_1.Sequelize.literal('(' + (0, utils_1.buildBlockedAccountSQL)(blockerAccountIds) + ')')
                     }
                 },
                 transaction: t
@@ -286,10 +286,10 @@ let VideoCommentModel = VideoCommentModel_1 = class VideoCommentModel extends se
         });
     }
     static listForFeed(parameters) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const serverActor = yield application_1.getServerActor();
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            const serverActor = yield (0, application_1.getServerActor)();
             const { start, count, videoId, accountId, videoChannelId } = parameters;
-            const whereAnd = utils_1.buildBlockedAccountSQLOptimized('"VideoCommentModel"."accountId"', [serverActor.Account.id, '"Video->VideoChannel"."accountId"']);
+            const whereAnd = (0, utils_1.buildBlockedAccountSQLOptimized)('"VideoCommentModel"."accountId"', [serverActor.Account.id, '"Video->VideoChannel"."accountId"']);
             if (accountId) {
                 whereAnd.push({
                     accountId
@@ -368,7 +368,7 @@ let VideoCommentModel = VideoCommentModel_1 = class VideoCommentModel extends se
             .findAll(query);
     }
     static getStats() {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const totalLocalVideoComments = yield VideoCommentModel_1.count({
                 include: [
                     {
@@ -411,7 +411,7 @@ let VideoCommentModel = VideoCommentModel_1 = class VideoCommentModel extends se
                 },
                 videoId,
                 accountId: {
-                    [sequelize_1.Op.notIn]: utils_1.buildLocalAccountIdsIn()
+                    [sequelize_1.Op.notIn]: (0, utils_1.buildLocalAccountIdsIn)()
                 },
                 deletedAt: null
             }
@@ -448,16 +448,16 @@ let VideoCommentModel = VideoCommentModel_1 = class VideoCommentModel extends se
         const firstMentionRegex = new RegExp(`^${mentionRegex} `, 'g');
         const endMentionRegex = new RegExp(` ${mentionRegex}$`, 'g');
         const remoteMentionsRegex = new RegExp(' ' + remoteMention + ' ', 'g');
-        result = result.concat(regexp_1.regexpCapture(this.text, firstMentionRegex)
-            .map(([, username1, username2]) => username1 || username2), regexp_1.regexpCapture(this.text, endMentionRegex)
-            .map(([, username1, username2]) => username1 || username2), regexp_1.regexpCapture(this.text, remoteMentionsRegex)
+        result = result.concat((0, regexp_1.regexpCapture)(this.text, firstMentionRegex)
+            .map(([, username1, username2]) => username1 || username2), (0, regexp_1.regexpCapture)(this.text, endMentionRegex)
+            .map(([, username1, username2]) => username1 || username2), (0, regexp_1.regexpCapture)(this.text, remoteMentionsRegex)
             .map(([, username]) => username));
         if (this.isOwned()) {
             const localMentionsRegex = new RegExp(' ' + localMention + ' ', 'g');
-            result = result.concat(regexp_1.regexpCapture(this.text, localMentionsRegex)
+            result = result.concat((0, regexp_1.regexpCapture)(this.text, localMentionsRegex)
                 .map(([, username]) => username));
         }
-        return lodash_1.uniq(result);
+        return (0, lodash_1.uniq)(result);
     }
     toFormattedJSON() {
         return {
@@ -541,9 +541,9 @@ let VideoCommentModel = VideoCommentModel_1 = class VideoCommentModel extends se
         };
     }
     static buildBlockerAccountIds(options) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const { videoId, user, isVideoOwned } = options;
-            const serverActor = yield application_1.getServerActor();
+            const serverActor = yield (0, application_1.getServerActor)();
             const blockerAccountIds = [serverActor.Account.id];
             if (user)
                 blockerAccountIds.push(user.Account.id);
@@ -555,37 +555,37 @@ let VideoCommentModel = VideoCommentModel_1 = class VideoCommentModel extends se
         });
     }
 };
-tslib_1.__decorate([
+(0, tslib_1.__decorate)([
     sequelize_typescript_1.CreatedAt,
-    tslib_1.__metadata("design:type", Date)
+    (0, tslib_1.__metadata)("design:type", Date)
 ], VideoCommentModel.prototype, "createdAt", void 0);
-tslib_1.__decorate([
+(0, tslib_1.__decorate)([
     sequelize_typescript_1.UpdatedAt,
-    tslib_1.__metadata("design:type", Date)
+    (0, tslib_1.__metadata)("design:type", Date)
 ], VideoCommentModel.prototype, "updatedAt", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(true),
-    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.DATE),
-    tslib_1.__metadata("design:type", Date)
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(true),
+    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.DATE),
+    (0, tslib_1.__metadata)("design:type", Date)
 ], VideoCommentModel.prototype, "deletedAt", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(false),
-    sequelize_typescript_1.Is('VideoCommentUrl', value => utils_1.throwIfNotValid(value, misc_1.isActivityPubUrlValid, 'url')),
-    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.VIDEOS.URL.max)),
-    tslib_1.__metadata("design:type", String)
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(false),
+    (0, sequelize_typescript_1.Is)('VideoCommentUrl', value => (0, utils_1.throwIfNotValid)(value, misc_1.isActivityPubUrlValid, 'url')),
+    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.VIDEOS.URL.max)),
+    (0, tslib_1.__metadata)("design:type", String)
 ], VideoCommentModel.prototype, "url", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(false),
-    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.TEXT),
-    tslib_1.__metadata("design:type", String)
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(false),
+    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.TEXT),
+    (0, tslib_1.__metadata)("design:type", String)
 ], VideoCommentModel.prototype, "text", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.ForeignKey(() => VideoCommentModel_1),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.ForeignKey)(() => VideoCommentModel_1),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], VideoCommentModel.prototype, "originCommentId", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.BelongsTo(() => VideoCommentModel_1, {
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.BelongsTo)(() => VideoCommentModel_1, {
         foreignKey: {
             name: 'originCommentId',
             allowNull: true
@@ -593,15 +593,15 @@ tslib_1.__decorate([
         as: 'OriginVideoComment',
         onDelete: 'CASCADE'
     }),
-    tslib_1.__metadata("design:type", VideoCommentModel)
+    (0, tslib_1.__metadata)("design:type", VideoCommentModel)
 ], VideoCommentModel.prototype, "OriginVideoComment", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.ForeignKey(() => VideoCommentModel_1),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.ForeignKey)(() => VideoCommentModel_1),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], VideoCommentModel.prototype, "inReplyToCommentId", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.BelongsTo(() => VideoCommentModel_1, {
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.BelongsTo)(() => VideoCommentModel_1, {
         foreignKey: {
             name: 'inReplyToCommentId',
             allowNull: true
@@ -609,55 +609,55 @@ tslib_1.__decorate([
         as: 'InReplyToVideoComment',
         onDelete: 'CASCADE'
     }),
-    tslib_1.__metadata("design:type", VideoCommentModel)
+    (0, tslib_1.__metadata)("design:type", VideoCommentModel)
 ], VideoCommentModel.prototype, "InReplyToVideoComment", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.ForeignKey(() => video_1.VideoModel),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.ForeignKey)(() => video_1.VideoModel),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], VideoCommentModel.prototype, "videoId", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.BelongsTo(() => video_1.VideoModel, {
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.BelongsTo)(() => video_1.VideoModel, {
         foreignKey: {
             allowNull: false
         },
         onDelete: 'CASCADE'
     }),
-    tslib_1.__metadata("design:type", video_1.VideoModel)
+    (0, tslib_1.__metadata)("design:type", video_1.VideoModel)
 ], VideoCommentModel.prototype, "Video", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.ForeignKey(() => account_1.AccountModel),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.ForeignKey)(() => account_1.AccountModel),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], VideoCommentModel.prototype, "accountId", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.BelongsTo(() => account_1.AccountModel, {
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.BelongsTo)(() => account_1.AccountModel, {
         foreignKey: {
             allowNull: true
         },
         onDelete: 'CASCADE'
     }),
-    tslib_1.__metadata("design:type", account_1.AccountModel)
+    (0, tslib_1.__metadata)("design:type", account_1.AccountModel)
 ], VideoCommentModel.prototype, "Account", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.HasMany(() => video_comment_abuse_1.VideoCommentAbuseModel, {
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.HasMany)(() => video_comment_abuse_1.VideoCommentAbuseModel, {
         foreignKey: {
             name: 'videoCommentId',
             allowNull: true
         },
         onDelete: 'set null'
     }),
-    tslib_1.__metadata("design:type", Array)
+    (0, tslib_1.__metadata)("design:type", Array)
 ], VideoCommentModel.prototype, "CommentAbuses", void 0);
-VideoCommentModel = VideoCommentModel_1 = tslib_1.__decorate([
-    sequelize_typescript_1.Scopes(() => ({
+VideoCommentModel = VideoCommentModel_1 = (0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.Scopes)(() => ({
         [ScopeNames.ATTRIBUTES_FOR_API]: (blockerAccountIds) => {
             return {
                 attributes: {
                     include: [
                         [
                             sequelize_1.Sequelize.literal('(' +
-                                'WITH "blocklist" AS (' + utils_1.buildBlockedAccountSQL(blockerAccountIds) + ')' +
+                                'WITH "blocklist" AS (' + (0, utils_1.buildBlockedAccountSQL)(blockerAccountIds) + ')' +
                                 'SELECT COUNT("replies"."id") ' +
                                 'FROM "videoComment" AS "replies" ' +
                                 'WHERE "replies"."originCommentId" = "VideoCommentModel"."id" ' +
@@ -733,7 +733,7 @@ VideoCommentModel = VideoCommentModel_1 = tslib_1.__decorate([
             ]
         }
     })),
-    sequelize_typescript_1.Table({
+    (0, sequelize_typescript_1.Table)({
         tableName: 'videoComment',
         indexes: [
             {

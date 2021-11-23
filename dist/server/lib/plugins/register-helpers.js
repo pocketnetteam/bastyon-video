@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RegisterHelpers = void 0;
 const tslib_1 = require("tslib");
-const express_1 = tslib_1.__importDefault(require("express"));
+const express_1 = (0, tslib_1.__importDefault)(require("express"));
 const logger_1 = require("@server/helpers/logger");
 const external_auth_1 = require("@server/lib/auth/external-auth");
 const video_constant_manager_factory_1 = require("@server/lib/plugins/video-constant-manager-factory");
@@ -40,7 +40,7 @@ class RegisterHelpers {
         const registerExternalAuth = this.buildRegisterExternalAuth();
         const unregisterIdAndPassAuth = this.buildUnregisterIdAndPassAuth();
         const unregisterExternalAuth = this.buildUnregisterExternalAuth();
-        const peertubeHelpers = plugin_helpers_builder_1.buildPluginHelpers(this.plugin, this.npmName);
+        const peertubeHelpers = (0, plugin_helpers_builder_1.buildPluginHelpers)(this.plugin, this.npmName);
         return {
             registerHook,
             registerSetting,
@@ -128,7 +128,7 @@ class RegisterHelpers {
             this.externalAuths.push(options);
             return {
                 userAuthenticated(result) {
-                    external_auth_1.onExternalUserAuthenticated({
+                    (0, external_auth_1.onExternalUserAuthenticated)({
                         npmName: self.npmName,
                         authName: options.authName,
                         authResult: result

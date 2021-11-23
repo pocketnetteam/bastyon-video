@@ -10,21 +10,21 @@ const abuse_message_1 = require("@server/models/abuse/abuse-message");
 const http_error_codes_1 = require("../../../shared/models/http/http-error-codes");
 const shared_1 = require("./shared");
 const abuseReportValidator = [
-    express_validator_1.body('account.id')
+    (0, express_validator_1.body)('account.id')
         .optional()
         .custom(misc_1.isIdValid)
         .withMessage('Should have a valid accountId'),
-    express_validator_1.body('video.id')
+    (0, express_validator_1.body)('video.id')
         .optional()
         .customSanitizer(misc_1.toCompleteUUID)
         .custom(misc_1.isIdOrUUIDValid)
         .withMessage('Should have a valid videoId'),
-    express_validator_1.body('video.startAt')
+    (0, express_validator_1.body)('video.startAt')
         .optional()
         .customSanitizer(misc_1.toIntOrNull)
         .custom(abuses_1.isAbuseTimestampValid)
         .withMessage('Should have valid starting time value'),
-    express_validator_1.body('video.endAt')
+    (0, express_validator_1.body)('video.endAt')
         .optional()
         .customSanitizer(misc_1.toIntOrNull)
         .custom(abuses_1.isAbuseTimestampValid)
@@ -32,28 +32,28 @@ const abuseReportValidator = [
         .bail()
         .custom(abuses_1.isAbuseTimestampCoherent)
         .withMessage('Should have a startAt timestamp beginning before endAt'),
-    express_validator_1.body('comment.id')
+    (0, express_validator_1.body)('comment.id')
         .optional()
         .custom(misc_1.isIdValid)
         .withMessage('Should have a valid commentId'),
-    express_validator_1.body('reason')
+    (0, express_validator_1.body)('reason')
         .custom(abuses_1.isAbuseReasonValid)
         .withMessage('Should have a valid reason'),
-    express_validator_1.body('predefinedReasons')
+    (0, express_validator_1.body)('predefinedReasons')
         .optional()
         .custom(abuses_1.areAbusePredefinedReasonsValid)
         .withMessage('Should have a valid list of predefined reasons'),
-    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
         var _a, _b, _c, _d, _e, _f;
         logger_1.logger.debug('Checking abuseReport parameters', { parameters: req.body });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
         const body = req.body;
-        if (((_a = body.video) === null || _a === void 0 ? void 0 : _a.id) && !(yield shared_1.doesVideoExist(body.video.id, res)))
+        if (((_a = body.video) === null || _a === void 0 ? void 0 : _a.id) && !(yield (0, shared_1.doesVideoExist)(body.video.id, res)))
             return;
-        if (((_b = body.account) === null || _b === void 0 ? void 0 : _b.id) && !(yield shared_1.doesAccountIdExist(body.account.id, res)))
+        if (((_b = body.account) === null || _b === void 0 ? void 0 : _b.id) && !(yield (0, shared_1.doesAccountIdExist)(body.account.id, res)))
             return;
-        if (((_c = body.comment) === null || _c === void 0 ? void 0 : _c.id) && !(yield shared_1.doesCommentIdExist(body.comment.id, res)))
+        if (((_c = body.comment) === null || _c === void 0 ? void 0 : _c.id) && !(yield (0, shared_1.doesCommentIdExist)(body.comment.id, res)))
             return;
         if (!((_d = body.video) === null || _d === void 0 ? void 0 : _d.id) && !((_e = body.account) === null || _e === void 0 ? void 0 : _e.id) && !((_f = body.comment) === null || _f === void 0 ? void 0 : _f.id)) {
             res.fail({ message: 'video id or account id or comment id is required.' });
@@ -64,101 +64,101 @@ const abuseReportValidator = [
 ];
 exports.abuseReportValidator = abuseReportValidator;
 const abuseGetValidator = [
-    express_validator_1.param('id').custom(misc_1.isIdValid).not().isEmpty().withMessage('Should have a valid id'),
-    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    (0, express_validator_1.param)('id').custom(misc_1.isIdValid).not().isEmpty().withMessage('Should have a valid id'),
+    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking abuseGetValidator parameters', { parameters: req.body });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
-        if (!(yield shared_1.doesAbuseExist(req.params.id, res)))
+        if (!(yield (0, shared_1.doesAbuseExist)(req.params.id, res)))
             return;
         return next();
     })
 ];
 exports.abuseGetValidator = abuseGetValidator;
 const abuseUpdateValidator = [
-    express_validator_1.param('id').custom(misc_1.isIdValid).not().isEmpty().withMessage('Should have a valid id'),
-    express_validator_1.body('state')
+    (0, express_validator_1.param)('id').custom(misc_1.isIdValid).not().isEmpty().withMessage('Should have a valid id'),
+    (0, express_validator_1.body)('state')
         .optional()
         .custom(abuses_1.isAbuseStateValid).withMessage('Should have a valid abuse state'),
-    express_validator_1.body('moderationComment')
+    (0, express_validator_1.body)('moderationComment')
         .optional()
         .custom(abuses_1.isAbuseModerationCommentValid).withMessage('Should have a valid moderation comment'),
-    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking abuseUpdateValidator parameters', { parameters: req.body });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
-        if (!(yield shared_1.doesAbuseExist(req.params.id, res)))
+        if (!(yield (0, shared_1.doesAbuseExist)(req.params.id, res)))
             return;
         return next();
     })
 ];
 exports.abuseUpdateValidator = abuseUpdateValidator;
 const abuseListForAdminsValidator = [
-    express_validator_1.query('id')
+    (0, express_validator_1.query)('id')
         .optional()
         .custom(misc_1.isIdValid).withMessage('Should have a valid id'),
-    express_validator_1.query('filter')
+    (0, express_validator_1.query)('filter')
         .optional()
         .custom(abuses_1.isAbuseFilterValid)
         .withMessage('Should have a valid filter'),
-    express_validator_1.query('predefinedReason')
+    (0, express_validator_1.query)('predefinedReason')
         .optional()
         .custom(abuses_1.isAbusePredefinedReasonValid)
         .withMessage('Should have a valid predefinedReason'),
-    express_validator_1.query('search')
+    (0, express_validator_1.query)('search')
         .optional()
         .custom(misc_1.exists).withMessage('Should have a valid search'),
-    express_validator_1.query('state')
+    (0, express_validator_1.query)('state')
         .optional()
         .custom(abuses_1.isAbuseStateValid).withMessage('Should have a valid abuse state'),
-    express_validator_1.query('videoIs')
+    (0, express_validator_1.query)('videoIs')
         .optional()
         .custom(abuses_1.isAbuseVideoIsValid).withMessage('Should have a valid "video is" attribute'),
-    express_validator_1.query('searchReporter')
+    (0, express_validator_1.query)('searchReporter')
         .optional()
         .custom(misc_1.exists).withMessage('Should have a valid reporter search'),
-    express_validator_1.query('searchReportee')
+    (0, express_validator_1.query)('searchReportee')
         .optional()
         .custom(misc_1.exists).withMessage('Should have a valid reportee search'),
-    express_validator_1.query('searchVideo')
+    (0, express_validator_1.query)('searchVideo')
         .optional()
         .custom(misc_1.exists).withMessage('Should have a valid video search'),
-    express_validator_1.query('searchVideoChannel')
+    (0, express_validator_1.query)('searchVideoChannel')
         .optional()
         .custom(misc_1.exists).withMessage('Should have a valid video channel search'),
     (req, res, next) => {
         logger_1.logger.debug('Checking abuseListForAdminsValidator parameters', { parameters: req.body });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
         return next();
     }
 ];
 exports.abuseListForAdminsValidator = abuseListForAdminsValidator;
 const abuseListForUserValidator = [
-    express_validator_1.query('id')
+    (0, express_validator_1.query)('id')
         .optional()
         .custom(misc_1.isIdValid).withMessage('Should have a valid id'),
-    express_validator_1.query('search')
+    (0, express_validator_1.query)('search')
         .optional()
         .custom(misc_1.exists).withMessage('Should have a valid search'),
-    express_validator_1.query('state')
+    (0, express_validator_1.query)('state')
         .optional()
         .custom(abuses_1.isAbuseStateValid).withMessage('Should have a valid abuse state'),
     (req, res, next) => {
         logger_1.logger.debug('Checking abuseListForUserValidator parameters', { parameters: req.body });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
         return next();
     }
 ];
 exports.abuseListForUserValidator = abuseListForUserValidator;
 const getAbuseValidator = [
-    express_validator_1.param('id').custom(misc_1.isIdValid).not().isEmpty().withMessage('Should have a valid id'),
-    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    (0, express_validator_1.param)('id').custom(misc_1.isIdValid).not().isEmpty().withMessage('Should have a valid id'),
+    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking getAbuseValidator parameters', { parameters: req.body });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
-        if (!(yield shared_1.doesAbuseExist(req.params.id, res)))
+        if (!(yield (0, shared_1.doesAbuseExist)(req.params.id, res)))
             return;
         const user = res.locals.oauth.token.user;
         const abuse = res.locals.abuse;
@@ -186,20 +186,20 @@ const checkAbuseValidForMessagesValidator = [
 ];
 exports.checkAbuseValidForMessagesValidator = checkAbuseValidForMessagesValidator;
 const addAbuseMessageValidator = [
-    express_validator_1.body('message').custom(abuses_1.isAbuseMessageValid).not().isEmpty().withMessage('Should have a valid abuse message'),
+    (0, express_validator_1.body)('message').custom(abuses_1.isAbuseMessageValid).not().isEmpty().withMessage('Should have a valid abuse message'),
     (req, res, next) => {
         logger_1.logger.debug('Checking addAbuseMessageValidator parameters', { parameters: req.body });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
         return next();
     }
 ];
 exports.addAbuseMessageValidator = addAbuseMessageValidator;
 const deleteAbuseMessageValidator = [
-    express_validator_1.param('messageId').custom(misc_1.isIdValid).not().isEmpty().withMessage('Should have a valid message id'),
-    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    (0, express_validator_1.param)('messageId').custom(misc_1.isIdValid).not().isEmpty().withMessage('Should have a valid message id'),
+    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking deleteAbuseMessageValidator parameters', { parameters: req.body });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
         const user = res.locals.oauth.token.user;
         const abuse = res.locals.abuse;

@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = tslib_1.__importStar(require("chai"));
+const chai = (0, tslib_1.__importStar)(require("chai"));
 const path_1 = require("path");
 const ffprobe_utils_1 = require("@server/helpers/ffprobe-utils");
 const extra_utils_1 = require("@shared/extra-utils");
@@ -12,11 +12,11 @@ describe('Test live', function () {
     let servers = [];
     let commands;
     before(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(120000);
-            servers = yield extra_utils_1.createMultipleServers(2);
-            yield extra_utils_1.setAccessTokensToServers(servers);
-            yield extra_utils_1.setDefaultVideoChannel(servers);
+            servers = yield (0, extra_utils_1.createMultipleServers)(2);
+            yield (0, extra_utils_1.setAccessTokensToServers)(servers);
+            yield (0, extra_utils_1.setDefaultVideoChannel)(servers);
             yield servers[0].config.updateCustomSubConfig({
                 newConfig: {
                     live: {
@@ -28,14 +28,14 @@ describe('Test live', function () {
                     }
                 }
             });
-            yield extra_utils_1.doubleFollow(servers[0], servers[1]);
+            yield (0, extra_utils_1.doubleFollow)(servers[0], servers[1]);
             commands = servers.map(s => s.live);
         });
     });
     describe('Live creation, update and delete', function () {
         let liveVideoUUID;
         it('Should create a live with the appropriate parameters', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(20000);
                 const attributes = {
                     category: 1,
@@ -57,7 +57,7 @@ describe('Test live', function () {
                 };
                 const live = yield commands[0].create({ fields: attributes });
                 liveVideoUUID = live.uuid;
-                yield extra_utils_1.waitJobs(servers);
+                yield (0, extra_utils_1.waitJobs)(servers);
                 for (const server of servers) {
                     const video = yield server.videos.get({ id: liveVideoUUID });
                     expect(video.category.id).to.equal(1);
@@ -75,8 +75,8 @@ describe('Test live', function () {
                     expect(video.commentsEnabled).to.be.false;
                     expect(video.downloadEnabled).to.be.false;
                     expect(video.privacy.id).to.equal(1);
-                    yield extra_utils_1.testImage(server.url, 'video_short1-preview.webm', video.previewPath);
-                    yield extra_utils_1.testImage(server.url, 'video_short1.webm', video.thumbnailPath);
+                    yield (0, extra_utils_1.testImage)(server.url, 'video_short1-preview.webm', video.previewPath);
+                    yield (0, extra_utils_1.testImage)(server.url, 'video_short1.webm', video.thumbnailPath);
                     const live = yield server.live.get({ videoId: liveVideoUUID });
                     if (server.url === servers[0].url) {
                         expect(live.rtmpUrl).to.equal('rtmp://' + server.hostname + ':' + servers[0].rtmpPort + '/live');
@@ -91,7 +91,7 @@ describe('Test live', function () {
             });
         });
         it('Should have a default preview and thumbnail', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(20000);
                 const attributes = {
                     name: 'default live thumbnail',
@@ -101,18 +101,18 @@ describe('Test live', function () {
                 };
                 const live = yield commands[0].create({ fields: attributes });
                 const videoId = live.uuid;
-                yield extra_utils_1.waitJobs(servers);
+                yield (0, extra_utils_1.waitJobs)(servers);
                 for (const server of servers) {
                     const video = yield server.videos.get({ id: videoId });
                     expect(video.privacy.id).to.equal(2);
                     expect(video.nsfw).to.be.true;
-                    yield extra_utils_1.makeRawRequest(server.url + video.thumbnailPath, models_1.HttpStatusCode.OK_200);
-                    yield extra_utils_1.makeRawRequest(server.url + video.previewPath, models_1.HttpStatusCode.OK_200);
+                    yield (0, extra_utils_1.makeRawRequest)(server.url + video.thumbnailPath, models_1.HttpStatusCode.OK_200);
+                    yield (0, extra_utils_1.makeRawRequest)(server.url + video.previewPath, models_1.HttpStatusCode.OK_200);
                 }
             });
         });
         it('Should not have the live listed since nobody streams into', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 for (const server of servers) {
                     const { total, data } = yield server.videos.list();
                     expect(total).to.equal(0);
@@ -121,19 +121,19 @@ describe('Test live', function () {
             });
         });
         it('Should not be able to update a live of another server', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 yield commands[1].update({ videoId: liveVideoUUID, fields: { saveReplay: false }, expectedStatus: models_1.HttpStatusCode.FORBIDDEN_403 });
             });
         });
         it('Should update the live', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 yield commands[0].update({ videoId: liveVideoUUID, fields: { saveReplay: false } });
-                yield extra_utils_1.waitJobs(servers);
+                yield (0, extra_utils_1.waitJobs)(servers);
             });
         });
         it('Have the live updated', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 for (const server of servers) {
                     const live = yield server.live.get({ videoId: liveVideoUUID });
                     if (server.url === servers[0].url) {
@@ -149,14 +149,14 @@ describe('Test live', function () {
             });
         });
         it('Delete the live', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 yield servers[0].videos.remove({ id: liveVideoUUID });
-                yield extra_utils_1.waitJobs(servers);
+                yield (0, extra_utils_1.waitJobs)(servers);
             });
         });
         it('Should have the live deleted', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 for (const server of servers) {
                     yield server.videos.get({ id: liveVideoUUID, expectedStatus: models_1.HttpStatusCode.NOT_FOUND_404 });
                     yield server.live.get({ videoId: liveVideoUUID, expectedStatus: models_1.HttpStatusCode.NOT_FOUND_404 });
@@ -169,19 +169,19 @@ describe('Test live', function () {
         let liveVideoId;
         let vodVideoId;
         before(function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(120000);
                 vodVideoId = (yield servers[0].videos.quickUpload({ name: 'vod video' })).uuid;
                 const liveOptions = { name: 'live', privacy: 1, channelId: servers[0].store.channel.id };
                 const live = yield commands[0].create({ fields: liveOptions });
                 liveVideoId = live.uuid;
                 ffmpegCommand = yield servers[0].live.sendRTMPStreamInVideo({ videoId: liveVideoId });
-                yield extra_utils_1.waitUntilLivePublishedOnAllServers(servers, liveVideoId);
-                yield extra_utils_1.waitJobs(servers);
+                yield (0, extra_utils_1.waitUntilLivePublishedOnAllServers)(servers, liveVideoId);
+                yield (0, extra_utils_1.waitJobs)(servers);
             });
         });
         it('Should only display lives', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const { data, total } = yield servers[0].videos.list({ isLive: true });
                 expect(total).to.equal(1);
                 expect(data).to.have.lengthOf(1);
@@ -189,7 +189,7 @@ describe('Test live', function () {
             });
         });
         it('Should not display lives', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const { data, total } = yield servers[0].videos.list({ isLive: false });
                 expect(total).to.equal(1);
                 expect(data).to.have.lengthOf(1);
@@ -197,24 +197,24 @@ describe('Test live', function () {
             });
         });
         it('Should display my lives', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(60000);
-                yield extra_utils_1.stopFfmpeg(ffmpegCommand);
-                yield extra_utils_1.waitJobs(servers);
+                yield (0, extra_utils_1.stopFfmpeg)(ffmpegCommand);
+                yield (0, extra_utils_1.waitJobs)(servers);
                 const { data } = yield servers[0].videos.listMyVideos({ isLive: true });
                 const result = data.every(v => v.isLive);
                 expect(result).to.be.true;
             });
         });
         it('Should not display my lives', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const { data } = yield servers[0].videos.listMyVideos({ isLive: false });
                 const result = data.every(v => !v.isLive);
                 expect(result).to.be.true;
             });
         });
         after(function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 yield servers[0].videos.remove({ id: vodVideoId });
                 yield servers[0].videos.remove({ id: liveVideoId });
             });
@@ -227,7 +227,7 @@ describe('Test live', function () {
             rtmpUrl = 'rtmp://' + servers[0].hostname + ':' + servers[0].rtmpPort + '';
         });
         function createLiveWrapper() {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const liveAttributes = {
                     name: 'user live',
                     channelId: servers[0].store.channel.id,
@@ -241,29 +241,29 @@ describe('Test live', function () {
             });
         }
         it('Should not allow a stream without the appropriate path', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(60000);
                 liveVideo = yield createLiveWrapper();
-                const command = extra_utils_1.sendRTMPStream({ rtmpBaseUrl: rtmpUrl + '/bad-live', streamKey: liveVideo.streamKey });
-                yield extra_utils_1.testFfmpegStreamError(command, true);
+                const command = (0, extra_utils_1.sendRTMPStream)({ rtmpBaseUrl: rtmpUrl + '/bad-live', streamKey: liveVideo.streamKey });
+                yield (0, extra_utils_1.testFfmpegStreamError)(command, true);
             });
         });
         it('Should not allow a stream without the appropriate stream key', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(60000);
-                const command = extra_utils_1.sendRTMPStream({ rtmpBaseUrl: rtmpUrl + '/live', streamKey: 'bad-stream-key' });
-                yield extra_utils_1.testFfmpegStreamError(command, true);
+                const command = (0, extra_utils_1.sendRTMPStream)({ rtmpBaseUrl: rtmpUrl + '/live', streamKey: 'bad-stream-key' });
+                yield (0, extra_utils_1.testFfmpegStreamError)(command, true);
             });
         });
         it('Should succeed with the correct params', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(60000);
-                const command = extra_utils_1.sendRTMPStream({ rtmpBaseUrl: rtmpUrl + '/live', streamKey: liveVideo.streamKey });
-                yield extra_utils_1.testFfmpegStreamError(command, false);
+                const command = (0, extra_utils_1.sendRTMPStream)({ rtmpBaseUrl: rtmpUrl + '/live', streamKey: liveVideo.streamKey });
+                yield (0, extra_utils_1.testFfmpegStreamError)(command, false);
             });
         });
         it('Should list this live now someone stream into it', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 for (const server of servers) {
                     const { total, data } = yield server.videos.list();
                     expect(total).to.equal(1);
@@ -275,28 +275,28 @@ describe('Test live', function () {
             });
         });
         it('Should not allow a stream on a live that was blacklisted', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(60000);
                 liveVideo = yield createLiveWrapper();
                 yield servers[0].blacklist.add({ videoId: liveVideo.uuid });
-                const command = extra_utils_1.sendRTMPStream({ rtmpBaseUrl: rtmpUrl + '/live', streamKey: liveVideo.streamKey });
-                yield extra_utils_1.testFfmpegStreamError(command, true);
+                const command = (0, extra_utils_1.sendRTMPStream)({ rtmpBaseUrl: rtmpUrl + '/live', streamKey: liveVideo.streamKey });
+                yield (0, extra_utils_1.testFfmpegStreamError)(command, true);
             });
         });
         it('Should not allow a stream on a live that was deleted', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(60000);
                 liveVideo = yield createLiveWrapper();
                 yield servers[0].videos.remove({ id: liveVideo.uuid });
-                const command = extra_utils_1.sendRTMPStream({ rtmpBaseUrl: rtmpUrl + '/live', streamKey: liveVideo.streamKey });
-                yield extra_utils_1.testFfmpegStreamError(command, true);
+                const command = (0, extra_utils_1.sendRTMPStream)({ rtmpBaseUrl: rtmpUrl + '/live', streamKey: liveVideo.streamKey });
+                yield (0, extra_utils_1.testFfmpegStreamError)(command, true);
             });
         });
     });
     describe('Live transcoding', function () {
         let liveVideoId;
         function createLiveWrapper(saveReplay) {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const liveAttributes = {
                     name: 'live video',
                     channelId: servers[0].store.channel.id,
@@ -308,7 +308,7 @@ describe('Test live', function () {
             });
         }
         function testVideoResolutions(liveVideoId, resolutions) {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 for (const server of servers) {
                     const { data } = yield server.videos.list();
                     expect(data.find(v => v.uuid === liveVideoId)).to.exist;
@@ -317,7 +317,7 @@ describe('Test live', function () {
                     const hlsPlaylist = video.streamingPlaylists.find(s => s.type === 1);
                     expect(hlsPlaylist).to.exist;
                     expect(hlsPlaylist.files).to.have.lengthOf(0);
-                    yield extra_utils_1.checkResolutionsInMasterPlaylist({ server, playlistUrl: hlsPlaylist.playlistUrl, resolutions });
+                    yield (0, extra_utils_1.checkResolutionsInMasterPlaylist)({ server, playlistUrl: hlsPlaylist.playlistUrl, resolutions });
                     for (let i = 0; i < resolutions.length; i++) {
                         const segmentNum = 3;
                         const segmentName = `${i}-00000${segmentNum}.ts`;
@@ -327,7 +327,7 @@ describe('Test live', function () {
                         });
                         expect(subPlaylist).to.contain(segmentName);
                         const baseUrlAndPath = servers[0].url + '/static/streaming-playlists/hls';
-                        yield extra_utils_1.checkLiveSegmentHash({
+                        yield (0, extra_utils_1.checkLiveSegmentHash)({
                             server,
                             baseUrlSegment: baseUrlAndPath,
                             videoUUID: video.uuid,
@@ -361,36 +361,36 @@ describe('Test live', function () {
             });
         }
         before(function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 yield updateConf([]);
             });
         });
         it('Should enable transcoding without additional resolutions', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(120000);
                 liveVideoId = yield createLiveWrapper(false);
                 const ffmpegCommand = yield commands[0].sendRTMPStreamInVideo({ videoId: liveVideoId });
-                yield extra_utils_1.waitUntilLivePublishedOnAllServers(servers, liveVideoId);
-                yield extra_utils_1.waitJobs(servers);
+                yield (0, extra_utils_1.waitUntilLivePublishedOnAllServers)(servers, liveVideoId);
+                yield (0, extra_utils_1.waitJobs)(servers);
                 yield testVideoResolutions(liveVideoId, [720]);
-                yield extra_utils_1.stopFfmpeg(ffmpegCommand);
+                yield (0, extra_utils_1.stopFfmpeg)(ffmpegCommand);
             });
         });
         it('Should enable transcoding with some resolutions', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(120000);
                 const resolutions = [240, 480];
                 yield updateConf(resolutions);
                 liveVideoId = yield createLiveWrapper(false);
                 const ffmpegCommand = yield commands[0].sendRTMPStreamInVideo({ videoId: liveVideoId });
-                yield extra_utils_1.waitUntilLivePublishedOnAllServers(servers, liveVideoId);
-                yield extra_utils_1.waitJobs(servers);
+                yield (0, extra_utils_1.waitUntilLivePublishedOnAllServers)(servers, liveVideoId);
+                yield (0, extra_utils_1.waitJobs)(servers);
                 yield testVideoResolutions(liveVideoId, resolutions);
-                yield extra_utils_1.stopFfmpeg(ffmpegCommand);
+                yield (0, extra_utils_1.stopFfmpeg)(ffmpegCommand);
             });
         });
         it('Should correctly set the appropriate bitrate depending on the input', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(120000);
                 liveVideoId = yield createLiveWrapper(false);
                 const ffmpegCommand = yield commands[0].sendRTMPStreamInVideo({
@@ -398,34 +398,34 @@ describe('Test live', function () {
                     fixtureName: 'video_short.mp4',
                     copyCodecs: true
                 });
-                yield extra_utils_1.waitUntilLivePublishedOnAllServers(servers, liveVideoId);
-                yield extra_utils_1.waitJobs(servers);
+                yield (0, extra_utils_1.waitUntilLivePublishedOnAllServers)(servers, liveVideoId);
+                yield (0, extra_utils_1.waitJobs)(servers);
                 const video = yield servers[0].videos.get({ id: liveVideoId });
                 const masterPlaylist = video.streamingPlaylists[0].playlistUrl;
-                const probe = yield ffprobe_utils_1.ffprobePromise(masterPlaylist);
+                const probe = yield (0, ffprobe_utils_1.ffprobePromise)(masterPlaylist);
                 const bitrates = probe.streams.map(s => parseInt(s.tags.variant_bitrate));
                 for (const bitrate of bitrates) {
                     expect(bitrate).to.exist;
                     expect(isNaN(bitrate)).to.be.false;
                     expect(bitrate).to.be.below(61000000);
                 }
-                yield extra_utils_1.stopFfmpeg(ffmpegCommand);
+                yield (0, extra_utils_1.stopFfmpeg)(ffmpegCommand);
             });
         });
         it('Should enable transcoding with some resolutions and correctly save them', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(200000);
                 const resolutions = [240, 360, 720];
                 yield updateConf(resolutions);
                 liveVideoId = yield createLiveWrapper(true);
                 const ffmpegCommand = yield commands[0].sendRTMPStreamInVideo({ videoId: liveVideoId, fixtureName: 'video_short2.webm' });
-                yield extra_utils_1.waitUntilLivePublishedOnAllServers(servers, liveVideoId);
-                yield extra_utils_1.waitJobs(servers);
+                yield (0, extra_utils_1.waitUntilLivePublishedOnAllServers)(servers, liveVideoId);
+                yield (0, extra_utils_1.waitJobs)(servers);
                 yield testVideoResolutions(liveVideoId, resolutions);
-                yield extra_utils_1.stopFfmpeg(ffmpegCommand);
+                yield (0, extra_utils_1.stopFfmpeg)(ffmpegCommand);
                 yield commands[0].waitUntilEnded({ videoId: liveVideoId });
-                yield extra_utils_1.waitJobs(servers);
-                yield extra_utils_1.waitUntilLivePublishedOnAllServers(servers, liveVideoId);
+                yield (0, extra_utils_1.waitJobs)(servers);
+                yield (0, extra_utils_1.waitUntilLivePublishedOnAllServers)(servers, liveVideoId);
                 const maxBitrateLimits = {
                     720: 6500 * 1000,
                     360: 1250 * 1000,
@@ -442,10 +442,10 @@ describe('Test live', function () {
                     expect(video.duration).to.be.greaterThan(1);
                     expect(video.files).to.have.lengthOf(0);
                     const hlsPlaylist = video.streamingPlaylists.find(s => s.type === 1);
-                    yield extra_utils_1.makeRawRequest(hlsPlaylist.playlistUrl, models_1.HttpStatusCode.OK_200);
-                    yield extra_utils_1.makeRawRequest(hlsPlaylist.segmentsSha256Url, models_1.HttpStatusCode.OK_200);
-                    expect(path_1.basename(hlsPlaylist.playlistUrl)).to.not.equal('master.m3u8');
-                    expect(path_1.basename(hlsPlaylist.segmentsSha256Url)).to.not.equal('segments-sha256.json');
+                    yield (0, extra_utils_1.makeRawRequest)(hlsPlaylist.playlistUrl, models_1.HttpStatusCode.OK_200);
+                    yield (0, extra_utils_1.makeRawRequest)(hlsPlaylist.segmentsSha256Url, models_1.HttpStatusCode.OK_200);
+                    expect((0, path_1.basename)(hlsPlaylist.playlistUrl)).to.not.equal('master.m3u8');
+                    expect((0, path_1.basename)(hlsPlaylist.segmentsSha256Url)).to.not.equal('segments-sha256.json');
                     expect(hlsPlaylist.files).to.have.lengthOf(resolutions.length);
                     for (const resolution of resolutions) {
                         const file = hlsPlaylist.files.find(f => f.resolution.id === resolution);
@@ -457,23 +457,23 @@ describe('Test live', function () {
                         else {
                             expect(file.fps).to.be.approximately(30, 2);
                         }
-                        const filename = path_1.basename(file.fileUrl);
+                        const filename = (0, path_1.basename)(file.fileUrl);
                         expect(filename).to.not.contain(video.uuid);
-                        const segmentPath = servers[0].servers.buildDirectory(path_1.join('streaming-playlists', 'hls', video.uuid, filename));
-                        const probe = yield ffprobe_utils_1.ffprobePromise(segmentPath);
-                        const videoStream = yield ffprobe_utils_1.getVideoStreamFromFile(segmentPath, probe);
+                        const segmentPath = servers[0].servers.buildDirectory((0, path_1.join)('streaming-playlists', 'hls', video.uuid, filename));
+                        const probe = yield (0, ffprobe_utils_1.ffprobePromise)(segmentPath);
+                        const videoStream = yield (0, ffprobe_utils_1.getVideoStreamFromFile)(segmentPath, probe);
                         expect(probe.format.bit_rate).to.be.below(maxBitrateLimits[videoStream.height]);
                         expect(probe.format.bit_rate).to.be.at.least(minBitrateLimits[videoStream.height]);
-                        yield extra_utils_1.makeRawRequest(file.torrentUrl, models_1.HttpStatusCode.OK_200);
-                        yield extra_utils_1.makeRawRequest(file.fileUrl, models_1.HttpStatusCode.OK_200);
+                        yield (0, extra_utils_1.makeRawRequest)(file.torrentUrl, models_1.HttpStatusCode.OK_200);
+                        yield (0, extra_utils_1.makeRawRequest)(file.fileUrl, models_1.HttpStatusCode.OK_200);
                     }
                 }
             });
         });
         it('Should correctly have cleaned up the live files', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(30000);
-                yield extra_utils_1.checkLiveCleanupAfterSave(servers[0], liveVideoId, [240, 360, 720]);
+                yield (0, extra_utils_1.checkLiveCleanupAfterSave)(servers[0], liveVideoId, [240, 360, 720]);
             });
         });
     });
@@ -481,7 +481,7 @@ describe('Test live', function () {
         let liveVideoId;
         let liveVideoReplayId;
         function createLiveWrapper(saveReplay) {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const liveAttributes = {
                     name: 'live video',
                     channelId: servers[0].store.channel.id,
@@ -493,7 +493,7 @@ describe('Test live', function () {
             });
         }
         before(function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(120000);
                 liveVideoId = yield createLiveWrapper(false);
                 liveVideoReplayId = yield createLiveWrapper(true);
@@ -507,27 +507,27 @@ describe('Test live', function () {
                 ]);
                 yield commands[0].waitUntilSegmentGeneration({ videoUUID: liveVideoId, resolution: 0, segment: 2 });
                 yield commands[0].waitUntilSegmentGeneration({ videoUUID: liveVideoReplayId, resolution: 0, segment: 2 });
-                yield extra_utils_1.killallServers([servers[0]]);
+                yield (0, extra_utils_1.killallServers)([servers[0]]);
                 yield servers[0].run();
-                yield extra_utils_1.wait(5000);
+                yield (0, extra_utils_1.wait)(5000);
             });
         });
         it('Should cleanup lives', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(60000);
                 yield commands[0].waitUntilEnded({ videoId: liveVideoId });
             });
         });
         it('Should save a live replay', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(120000);
                 yield commands[0].waitUntilPublished({ videoId: liveVideoReplayId });
             });
         });
     });
     after(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            yield extra_utils_1.cleanupTests(servers);
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            yield (0, extra_utils_1.cleanupTests)(servers);
         });
     });
 });

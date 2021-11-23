@@ -12,8 +12,8 @@ const video_comment_1 = require("../../models/video/video-comment");
 const actors_1 = require("./actors");
 const videos_1 = require("./videos");
 function addVideoComments(commentUrls) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        return bluebird_1.map(commentUrls, (commentUrl) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return (0, bluebird_1.map)(commentUrls, (commentUrl) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             try {
                 yield resolveThread({ url: commentUrl, isVideo: false });
             }
@@ -25,7 +25,7 @@ function addVideoComments(commentUrls) {
 }
 exports.addVideoComments = addVideoComments;
 function resolveThread(params) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const { url, isVideo } = params;
         if (params.commentCreated === undefined)
             params.commentCreated = false;
@@ -49,7 +49,7 @@ function resolveThread(params) {
 }
 exports.resolveThread = resolveThread;
 function resolveCommentFromDB(params) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const { url, comments, commentCreated } = params;
         const commentFromDatabase = yield video_comment_1.VideoCommentModel.loadByUrlAndPopulateReplyAndVideoUrlAndAccount(url);
         if (!commentFromDatabase)
@@ -68,10 +68,10 @@ function resolveCommentFromDB(params) {
     });
 }
 function tryToResolveThreadFromVideo(params) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const { url, comments, commentCreated } = params;
         const syncParam = { likes: true, dislikes: true, shares: true, comments: false, thumbnail: true, refreshVideo: false };
-        const { video } = yield videos_1.getOrCreateAPVideo({ videoObject: url, syncParam });
+        const { video } = yield (0, videos_1.getOrCreateAPVideo)({ videoObject: url, syncParam });
         if (video.isOwned() && !video.hasPrivacyForFederation()) {
             throw new Error('Cannot resolve thread of video with privacy that is not compatible with federation');
         }
@@ -99,26 +99,26 @@ function tryToResolveThreadFromVideo(params) {
     });
 }
 function resolveRemoteParentComment(params) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const { url, comments } = params;
         if (comments.length > constants_1.ACTIVITY_PUB.MAX_RECURSION_COMMENTS) {
             throw new Error('Recursion limit reached when resolving a thread');
         }
-        const { body } = yield requests_1.doJSONRequest(url, { activityPub: true });
-        if (video_comments_1.sanitizeAndCheckVideoCommentObject(body) === false) {
+        const { body } = yield (0, requests_1.doJSONRequest)(url, { activityPub: true });
+        if ((0, video_comments_1.sanitizeAndCheckVideoCommentObject)(body) === false) {
             throw new Error(`Remote video comment JSON ${url} is not valid:` + JSON.stringify(body));
         }
         const actorUrl = body.attributedTo;
         if (!actorUrl && body.type !== 'Tombstone')
             throw new Error('Miss attributed to in comment');
-        if (actorUrl && activitypub_1.checkUrlsSameHost(url, actorUrl) !== true) {
+        if (actorUrl && (0, activitypub_1.checkUrlsSameHost)(url, actorUrl) !== true) {
             throw new Error(`Actor url ${actorUrl} has not the same host than the comment url ${url}`);
         }
-        if (activitypub_1.checkUrlsSameHost(body.id, url) !== true) {
+        if ((0, activitypub_1.checkUrlsSameHost)(body.id, url) !== true) {
             throw new Error(`Comment url ${url} host is different from the AP object id ${body.id}`);
         }
         const actor = actorUrl
-            ? yield actors_1.getOrCreateAPActor(actorUrl, 'all')
+            ? yield (0, actors_1.getOrCreateAPActor)(actorUrl, 'all')
             : null;
         const comment = new video_comment_1.VideoCommentModel({
             url: body.id,

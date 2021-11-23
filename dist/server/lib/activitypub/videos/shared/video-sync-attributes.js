@@ -11,9 +11,9 @@ const crawl_1 = require("../../crawl");
 const share_1 = require("../../share");
 const video_comments_1 = require("../../video-comments");
 const video_rates_1 = require("../../video-rates");
-const lTags = logger_1.loggerTagsFactory('ap', 'video');
+const lTags = (0, logger_1.loggerTagsFactory)('ap', 'video');
 function syncVideoExternalAttributes(video, fetchedVideo, syncParam) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         logger_1.logger.info('Adding likes/dislikes/shares/comments of video %s.', video.uuid);
         yield syncRates('like', video, fetchedVideo, syncParam.likes);
         yield syncRates('dislike', video, fetchedVideo, syncParam.dislikes);
@@ -35,9 +35,9 @@ function syncRates(type, video, fetchedVideo, isSync) {
             : 'video-dislikes';
         return createJob({ uri, videoId: video.id, type: jobType });
     }
-    const handler = items => video_rates_1.createRates(items, video, type);
+    const handler = items => (0, video_rates_1.createRates)(items, video, type);
     const cleaner = crawlStartDate => account_video_rate_1.AccountVideoRateModel.cleanOldRatesOf(video.id, type, crawlStartDate);
-    return crawl_1.crawlCollectionPage(uri, handler, cleaner)
+    return (0, crawl_1.crawlCollectionPage)(uri, handler, cleaner)
         .catch(err => logger_1.logger.error('Cannot add rate of video %s.', video.uuid, Object.assign({ err, rootUrl: uri }, lTags(video.uuid, video.url))));
 }
 function syncShares(video, fetchedVideo, isSync) {
@@ -45,9 +45,9 @@ function syncShares(video, fetchedVideo, isSync) {
     if (!isSync) {
         return createJob({ uri, videoId: video.id, type: 'video-shares' });
     }
-    const handler = items => share_1.addVideoShares(items, video);
+    const handler = items => (0, share_1.addVideoShares)(items, video);
     const cleaner = crawlStartDate => video_share_1.VideoShareModel.cleanOldSharesOf(video.id, crawlStartDate);
-    return crawl_1.crawlCollectionPage(uri, handler, cleaner)
+    return (0, crawl_1.crawlCollectionPage)(uri, handler, cleaner)
         .catch(err => logger_1.logger.error('Cannot add shares of video %s.', video.uuid, Object.assign({ err, rootUrl: uri }, lTags(video.uuid, video.url))));
 }
 function syncComments(video, fetchedVideo, isSync) {
@@ -55,8 +55,8 @@ function syncComments(video, fetchedVideo, isSync) {
     if (!isSync) {
         return createJob({ uri, videoId: video.id, type: 'video-comments' });
     }
-    const handler = items => video_comments_1.addVideoComments(items);
+    const handler = items => (0, video_comments_1.addVideoComments)(items);
     const cleaner = crawlStartDate => video_comment_1.VideoCommentModel.cleanOldCommentsOf(video.id, crawlStartDate);
-    return crawl_1.crawlCollectionPage(uri, handler, cleaner)
+    return (0, crawl_1.crawlCollectionPage)(uri, handler, cleaner)
         .catch(err => logger_1.logger.error('Cannot add comments of video %s.', video.uuid, Object.assign({ err, rootUrl: uri }, lTags(video.uuid, video.url))));
 }

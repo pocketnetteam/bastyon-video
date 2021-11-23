@@ -10,7 +10,7 @@ const winston_1 = require("winston");
 const config_1 = require("../initializers/config");
 const constants_1 = require("../initializers/constants");
 const label = config_1.CONFIG.WEBSERVER.HOSTNAME + ':' + config_1.CONFIG.WEBSERVER.PORT;
-fs_extra_1.mkdirpSync(config_1.CONFIG.STORAGE.LOG_DIR);
+(0, fs_extra_1.mkdirpSync)(config_1.CONFIG.STORAGE.LOG_DIR);
 function getLoggerReplacer() {
     const seen = new WeakSet();
     return (key, value) => {
@@ -37,7 +37,7 @@ function getLoggerReplacer() {
 }
 const consoleLoggerFormat = winston_1.format.printf(info => {
     const toOmit = ['label', 'timestamp', 'level', 'message', 'sql', 'tags'];
-    const obj = lodash_1.omit(info, ...toOmit);
+    const obj = (0, lodash_1.omit)(info, ...toOmit);
     let additionalInfos = JSON.stringify(obj, getLoggerReplacer(), 2);
     if (additionalInfos === undefined || additionalInfos === '{}')
         additionalInfos = '';
@@ -45,7 +45,7 @@ const consoleLoggerFormat = winston_1.format.printf(info => {
         additionalInfos = ' ' + additionalInfos;
     if (info.sql) {
         if (config_1.CONFIG.LOG.PRETTIFY_SQL) {
-            additionalInfos += '\n' + sql_formatter_1.format(info.sql, {
+            additionalInfos += '\n' + (0, sql_formatter_1.format)(info.sql, {
                 language: 'sql',
                 indent: '  '
             });
@@ -72,7 +72,7 @@ const labelFormatter = (suffix) => {
 };
 exports.labelFormatter = labelFormatter;
 const fileLoggerOptions = {
-    filename: path_1.join(config_1.CONFIG.STORAGE.LOG_DIR, constants_1.LOG_FILENAME),
+    filename: (0, path_1.join)(config_1.CONFIG.STORAGE.LOG_DIR, constants_1.LOG_FILENAME),
     handleExceptions: true,
     format: winston_1.format.combine(winston_1.format.timestamp(), jsonLoggerFormat)
 };
@@ -83,7 +83,7 @@ if (config_1.CONFIG.LOG.ROTATION.ENABLED) {
 const logger = buildLogger();
 exports.logger = logger;
 function buildLogger(labelSuffix) {
-    return winston_1.createLogger({
+    return (0, winston_1.createLogger)({
         level: config_1.CONFIG.LOG.LEVEL,
         format: winston_1.format.combine(labelFormatter(labelSuffix), winston_1.format.splat()),
         transports: [
@@ -131,11 +131,11 @@ function loggerTagsFactory(...defaultTags) {
 }
 exports.loggerTagsFactory = loggerTagsFactory;
 function mtimeSortFilesDesc(files, basePath) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const promises = [];
         const out = [];
         for (const file of files) {
-            const p = fs_extra_1.stat(basePath + '/' + file)
+            const p = (0, fs_extra_1.stat)(basePath + '/' + file)
                 .then(stats => {
                 if (stats.isFile())
                     out.push({ file, mtime: stats.mtime.getTime() });

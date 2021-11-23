@@ -7,7 +7,7 @@ const shared_1 = require("../shared");
 class CLICommand extends shared_1.AbstractCommand {
     static exec(command) {
         return new Promise((res, rej) => {
-            child_process_1.exec(command, (err, stdout, _stderr) => {
+            (0, child_process_1.exec)(command, (err, stdout, _stderr) => {
                 if (err)
                     return rej(err);
                 return res(stdout);
@@ -18,7 +18,7 @@ class CLICommand extends shared_1.AbstractCommand {
         return `NODE_ENV=test NODE_APP_INSTANCE=${this.server.internalServerNumber}`;
     }
     execWithEnv(command) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             return CLICommand.exec(`${this.getEnv()} ${command}`);
         });
     }

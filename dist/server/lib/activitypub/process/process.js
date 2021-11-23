@@ -33,7 +33,7 @@ const processActivity = {
     View: process_view_1.processViewActivity
 };
 function processActivities(activities, options = {}) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const { outboxUrl, signatureActor, inboxActor, fromFetch = false } = options;
         const actorsCache = {};
         for (const activity of activities) {
@@ -41,16 +41,16 @@ function processActivities(activities, options = {}) {
                 logger_1.logger.error('Cannot process activity %s (type: %s) without the actor signature.', activity.id, activity.type);
                 continue;
             }
-            const actorUrl = activitypub_1.getAPId(activity.actor);
+            const actorUrl = (0, activitypub_1.getAPId)(activity.actor);
             if (signatureActor && actorUrl !== signatureActor.url) {
                 logger_1.logger.warn('Signature mismatch between %s and %s, skipping.', actorUrl, signatureActor.url);
                 continue;
             }
-            if (outboxUrl && activitypub_1.checkUrlsSameHost(outboxUrl, actorUrl) !== true) {
+            if (outboxUrl && (0, activitypub_1.checkUrlsSameHost)(outboxUrl, actorUrl) !== true) {
                 logger_1.logger.warn('Host mismatch between outbox URL %s and actor URL %s, skipping.', outboxUrl, actorUrl);
                 continue;
             }
-            const byActor = signatureActor || actorsCache[actorUrl] || (yield actors_1.getOrCreateAPActor(actorUrl));
+            const byActor = signatureActor || actorsCache[actorUrl] || (yield (0, actors_1.getOrCreateAPActor)(actorUrl));
             actorsCache[actorUrl] = byActor;
             const activityProcessor = processActivity[activity.type];
             if (activityProcessor === undefined) {

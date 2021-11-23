@@ -9,8 +9,8 @@ const misc_1 = require("../../helpers/custom-validators/misc");
 const logger_1 = require("../../helpers/logger");
 const shared_1 = require("./shared");
 const feedsFormatValidator = [
-    express_validator_1.param('format').optional().custom(feeds_1.isValidRSSFeed).withMessage('Should have a valid format (rss, atom, json)'),
-    express_validator_1.query('format').optional().custom(feeds_1.isValidRSSFeed).withMessage('Should have a valid format (rss, atom, json)')
+    (0, express_validator_1.param)('format').optional().custom(feeds_1.isValidRSSFeed).withMessage('Should have a valid format (rss, atom, json)'),
+    (0, express_validator_1.query)('format').optional().custom(feeds_1.isValidRSSFeed).withMessage('Should have a valid format (rss, atom, json)')
 ];
 exports.feedsFormatValidator = feedsFormatValidator;
 function setFeedFormatContentType(req, res, next) {
@@ -41,66 +41,66 @@ function setFeedFormatContentType(req, res, next) {
 }
 exports.setFeedFormatContentType = setFeedFormatContentType;
 const videoFeedsValidator = [
-    express_validator_1.query('accountId')
+    (0, express_validator_1.query)('accountId')
         .optional()
         .custom(misc_1.isIdValid)
         .withMessage('Should have a valid account id'),
-    express_validator_1.query('accountName')
+    (0, express_validator_1.query)('accountName')
         .optional(),
-    express_validator_1.query('videoChannelId')
+    (0, express_validator_1.query)('videoChannelId')
         .optional()
         .custom(misc_1.isIdValid)
         .withMessage('Should have a valid channel id'),
-    express_validator_1.query('videoChannelName')
+    (0, express_validator_1.query)('videoChannelName')
         .optional(),
-    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking feeds parameters', { parameters: req.query });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
-        if (req.query.accountId && !(yield shared_1.doesAccountIdExist(req.query.accountId, res)))
+        if (req.query.accountId && !(yield (0, shared_1.doesAccountIdExist)(req.query.accountId, res)))
             return;
-        if (req.query.videoChannelId && !(yield shared_1.doesVideoChannelIdExist(req.query.videoChannelId, res)))
+        if (req.query.videoChannelId && !(yield (0, shared_1.doesVideoChannelIdExist)(req.query.videoChannelId, res)))
             return;
-        if (req.query.accountName && !(yield shared_1.doesAccountNameWithHostExist(req.query.accountName, res)))
+        if (req.query.accountName && !(yield (0, shared_1.doesAccountNameWithHostExist)(req.query.accountName, res)))
             return;
-        if (req.query.videoChannelName && !(yield shared_1.doesVideoChannelNameWithHostExist(req.query.videoChannelName, res)))
+        if (req.query.videoChannelName && !(yield (0, shared_1.doesVideoChannelNameWithHostExist)(req.query.videoChannelName, res)))
             return;
         return next();
     })
 ];
 exports.videoFeedsValidator = videoFeedsValidator;
 const videoSubscriptionFeedsValidator = [
-    express_validator_1.query('accountId')
+    (0, express_validator_1.query)('accountId')
         .custom(misc_1.isIdValid)
         .withMessage('Should have a valid account id'),
-    express_validator_1.query('token')
+    (0, express_validator_1.query)('token')
         .custom(misc_1.exists)
         .withMessage('Should have a token'),
-    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking subscription feeds parameters', { parameters: req.query });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
-        if (!(yield shared_1.doesAccountIdExist(req.query.accountId, res)))
+        if (!(yield (0, shared_1.doesAccountIdExist)(req.query.accountId, res)))
             return;
-        if (!(yield shared_1.doesUserFeedTokenCorrespond(res.locals.account.userId, req.query.token, res)))
+        if (!(yield (0, shared_1.doesUserFeedTokenCorrespond)(res.locals.account.userId, req.query.token, res)))
             return;
         return next();
     })
 ];
 exports.videoSubscriptionFeedsValidator = videoSubscriptionFeedsValidator;
 const videoCommentsFeedsValidator = [
-    express_validator_1.query('videoId')
+    (0, express_validator_1.query)('videoId')
         .customSanitizer(misc_1.toCompleteUUID)
         .optional()
         .custom(misc_1.isIdOrUUIDValid),
-    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking feeds parameters', { parameters: req.query });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
         if (req.query.videoId && (req.query.videoChannelId || req.query.videoChannelName)) {
             return res.fail({ message: 'videoId cannot be mixed with a channel filter' });
         }
-        if (req.query.videoId && !(yield shared_1.doesVideoExist(req.query.videoId, res)))
+        if (req.query.videoId && !(yield (0, shared_1.doesVideoExist)(req.query.videoId, res)))
             return;
         return next();
     })

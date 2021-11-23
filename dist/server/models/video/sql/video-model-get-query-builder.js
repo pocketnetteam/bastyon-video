@@ -15,7 +15,7 @@ class VideosModelGetQueryBuilder {
         this.videoModelBuilder = new video_model_builder_1.VideoModelBuilder('get', new video_tables_1.VideoTables('get'));
     }
     queryVideo(options) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const [videoRows, webtorrentFilesRows, streamingPlaylistFilesRows] = yield Promise.all([
                 this.videoQueryBuilder.queryVideos(options),
                 VideosModelGetQueryBuilder.videoFilesInclude.has(options.type)

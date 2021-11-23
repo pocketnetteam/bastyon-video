@@ -9,15 +9,15 @@ const constants_1 = require("../initializers/constants");
 const core_utils_1 = require("./core-utils");
 const custom_jsonld_signature_1 = require("./custom-jsonld-signature");
 const logger_1 = require("./logger");
-const bcryptComparePromise = core_utils_1.promisify2(bcrypt_1.compare);
-const bcryptGenSaltPromise = core_utils_1.promisify1(bcrypt_1.genSalt);
-const bcryptHashPromise = core_utils_1.promisify2(bcrypt_1.hash);
+const bcryptComparePromise = (0, core_utils_1.promisify2)(bcrypt_1.compare);
+const bcryptGenSaltPromise = (0, core_utils_1.promisify1)(bcrypt_1.genSalt);
+const bcryptHashPromise = (0, core_utils_1.promisify2)(bcrypt_1.hash);
 const httpSignature = require('http-signature');
 function createPrivateAndPublicKeys() {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         logger_1.logger.info('Generating a RSA key...');
-        const { key } = yield core_utils_1.createPrivateKey(constants_1.PRIVATE_RSA_KEY_SIZE);
-        const { publicKey } = yield core_utils_1.getPublicKey(key);
+        const { key } = yield (0, core_utils_1.createPrivateKey)(constants_1.PRIVATE_RSA_KEY_SIZE);
+        const { publicKey } = yield (0, core_utils_1.getPublicKey)(key);
         return { privateKey: key, publicKey };
     });
 }
@@ -27,7 +27,7 @@ function comparePassword(plainPassword, hashPassword) {
 }
 exports.comparePassword = comparePassword;
 function cryptPassword(password) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const salt = yield bcryptGenSaltPromise(constants_1.BCRYPT_SALT_SIZE);
         return bcryptHashPromise(password, salt);
     });
@@ -60,19 +60,19 @@ function isJsonLDSignatureVerified(fromActor, signedDocument) {
 }
 exports.isJsonLDSignatureVerified = isJsonLDSignatureVerified;
 function isJsonLDRSA2017Verified(fromActor, signedDocument) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const [documentHash, optionsHash] = yield Promise.all([
             createDocWithoutSignatureHash(signedDocument),
             createSignatureHash(signedDocument.signature)
         ]);
         const toVerify = optionsHash + documentHash;
-        const verify = crypto_1.createVerify('RSA-SHA256');
+        const verify = (0, crypto_1.createVerify)('RSA-SHA256');
         verify.update(toVerify, 'utf8');
         return verify.verify(fromActor.publicKey, signedDocument.signature.signatureValue, 'base64');
     });
 }
 function signJsonLDObject(byActor, data) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const signature = {
             type: 'RsaSignature2017',
             creator: byActor.url,
@@ -83,7 +83,7 @@ function signJsonLDObject(byActor, data) {
             createSignatureHash(signature)
         ]);
         const toSign = optionsHash + documentHash;
-        const sign = crypto_1.createSign('RSA-SHA256');
+        const sign = (0, crypto_1.createSign)('RSA-SHA256');
         sign.update(toSign, 'utf8');
         const signatureValue = sign.sign(byActor.privateKey, 'base64');
         Object.assign(signature, { signatureValue });
@@ -93,7 +93,7 @@ function signJsonLDObject(byActor, data) {
 exports.signJsonLDObject = signJsonLDObject;
 function buildDigest(body) {
     const rawBody = typeof body === 'string' ? body : JSON.stringify(body);
-    return 'SHA-256=' + core_utils_1.sha256(rawBody, 'base64');
+    return 'SHA-256=' + (0, core_utils_1.sha256)(rawBody, 'base64');
 }
 exports.buildDigest = buildDigest;
 function hashObject(obj) {
@@ -102,10 +102,10 @@ function hashObject(obj) {
         algorithm: 'URDNA2015',
         format: 'application/n-quads'
     })
-        .then(res => core_utils_1.sha256(res));
+        .then(res => (0, core_utils_1.sha256)(res));
 }
 function createSignatureHash(signature) {
-    const signatureCopy = lodash_1.cloneDeep(signature);
+    const signatureCopy = (0, lodash_1.cloneDeep)(signature);
     Object.assign(signatureCopy, {
         '@context': [
             'https://w3id.org/security/v1',
@@ -118,7 +118,7 @@ function createSignatureHash(signature) {
     return hashObject(signatureCopy);
 }
 function createDocWithoutSignatureHash(doc) {
-    const docWithoutSignature = lodash_1.cloneDeep(doc);
+    const docWithoutSignature = (0, lodash_1.cloneDeep)(doc);
     delete docWithoutSignature.signature;
     return hashObject(docWithoutSignature);
 }

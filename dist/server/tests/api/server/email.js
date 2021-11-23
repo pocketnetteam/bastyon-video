@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = tslib_1.__importStar(require("chai"));
+const chai = (0, tslib_1.__importStar)(require("chai"));
 const extra_utils_1 = require("@shared/extra-utils");
 const models_1 = require("@shared/models");
 const expect = chai.expect;
@@ -23,7 +23,7 @@ describe('Test emails', function () {
     };
     let emailPort;
     before(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(50000);
             emailPort = yield extra_utils_1.MockSmtpServer.Instance.collectEmails(emails);
             const overrideConfig = {
@@ -32,8 +32,8 @@ describe('Test emails', function () {
                     port: emailPort
                 }
             };
-            server = yield extra_utils_1.createSingleServer(1, overrideConfig);
-            yield extra_utils_1.setAccessTokensToServers([server]);
+            server = yield (0, extra_utils_1.createSingleServer)(1, overrideConfig);
+            yield (0, extra_utils_1.setAccessTokensToServers)([server]);
             {
                 const created = yield server.users.create({ username: user.username, password: user.password });
                 userId = created.id;
@@ -56,10 +56,10 @@ describe('Test emails', function () {
     });
     describe('When resetting user password', function () {
         it('Should ask to reset the password', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 yield server.users.askResetPassword({ email: 'user_1@example.com' });
-                yield extra_utils_1.waitJobs(server);
+                yield (0, extra_utils_1.waitJobs)(server);
                 expect(emails).to.have.lengthOf(1);
                 const email = emails[0];
                 expect(email['from'][0]['name']).equal('PeerTube');
@@ -77,7 +77,7 @@ describe('Test emails', function () {
             });
         });
         it('Should not reset the password with an invalid verification string', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 yield server.users.resetPassword({
                     userId,
                     verificationString: verificationString + 'b',
@@ -87,12 +87,12 @@ describe('Test emails', function () {
             });
         });
         it('Should reset the password', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 yield server.users.resetPassword({ userId, verificationString, password: 'super_password2' });
             });
         });
         it('Should not reset the password with the same verification string', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 yield server.users.resetPassword({
                     userId,
                     verificationString,
@@ -102,7 +102,7 @@ describe('Test emails', function () {
             });
         });
         it('Should login with this new password', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 user.password = 'super_password2';
                 yield server.login.getAccessToken(user);
             });
@@ -110,10 +110,10 @@ describe('Test emails', function () {
     });
     describe('When creating a user without password', function () {
         it('Should send a create password email', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 yield server.users.create({ username: 'create_password', password: '' });
-                yield extra_utils_1.waitJobs(server);
+                yield (0, extra_utils_1.waitJobs)(server);
                 expect(emails).to.have.lengthOf(2);
                 const email = emails[1];
                 expect(email['from'][0]['name']).equal('PeerTube');
@@ -131,7 +131,7 @@ describe('Test emails', function () {
             });
         });
         it('Should not reset the password with an invalid verification string', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 yield server.users.resetPassword({
                     userId: userId2,
                     verificationString: verificationString2 + 'c',
@@ -141,7 +141,7 @@ describe('Test emails', function () {
             });
         });
         it('Should reset the password', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 yield server.users.resetPassword({
                     userId: userId2,
                     verificationString: verificationString2,
@@ -150,7 +150,7 @@ describe('Test emails', function () {
             });
         });
         it('Should login with this new password', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 yield server.login.getAccessToken({
                     username: 'create_password',
                     password: 'newly_created_password'
@@ -160,11 +160,11 @@ describe('Test emails', function () {
     });
     describe('When creating an abuse', function () {
         it('Should send the notification email', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 const reason = 'my super bad reason';
                 yield server.abuses.report({ videoId, reason });
-                yield extra_utils_1.waitJobs(server);
+                yield (0, extra_utils_1.waitJobs)(server);
                 expect(emails).to.have.lengthOf(3);
                 const email = emails[2];
                 expect(email['from'][0]['name']).equal('PeerTube');
@@ -177,11 +177,11 @@ describe('Test emails', function () {
     });
     describe('When blocking/unblocking user', function () {
         it('Should send the notification email when blocking a user', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 const reason = 'my super bad reason';
                 yield server.users.banUser({ userId, reason });
-                yield extra_utils_1.waitJobs(server);
+                yield (0, extra_utils_1.waitJobs)(server);
                 expect(emails).to.have.lengthOf(4);
                 const email = emails[3];
                 expect(email['from'][0]['name']).equal('PeerTube');
@@ -193,10 +193,10 @@ describe('Test emails', function () {
             });
         });
         it('Should send the notification email when unblocking a user', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 yield server.users.unbanUser({ userId });
-                yield extra_utils_1.waitJobs(server);
+                yield (0, extra_utils_1.waitJobs)(server);
                 expect(emails).to.have.lengthOf(5);
                 const email = emails[4];
                 expect(email['from'][0]['name']).equal('PeerTube');
@@ -209,11 +209,11 @@ describe('Test emails', function () {
     });
     describe('When blacklisting a video', function () {
         it('Should send the notification email', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 const reason = 'my super reason';
                 yield server.blacklist.add({ videoId: videoUserUUID, reason });
-                yield extra_utils_1.waitJobs(server);
+                yield (0, extra_utils_1.waitJobs)(server);
                 expect(emails).to.have.lengthOf(6);
                 const email = emails[5];
                 expect(email['from'][0]['name']).equal('PeerTube');
@@ -225,10 +225,10 @@ describe('Test emails', function () {
             });
         });
         it('Should send the notification email', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 yield server.blacklist.remove({ videoId: videoUserUUID });
-                yield extra_utils_1.waitJobs(server);
+                yield (0, extra_utils_1.waitJobs)(server);
                 expect(emails).to.have.lengthOf(7);
                 const email = emails[6];
                 expect(email['from'][0]['name']).equal('PeerTube');
@@ -239,7 +239,7 @@ describe('Test emails', function () {
             });
         });
         it('Should have the manage preferences link in the email', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const email = emails[6];
                 expect(email['text']).to.contain('Manage your notification preferences');
             });
@@ -247,10 +247,10 @@ describe('Test emails', function () {
     });
     describe('When verifying a user email', function () {
         it('Should ask to send the verification email', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 yield server.users.askSendVerifyEmail({ email: 'user_1@example.com' });
-                yield extra_utils_1.waitJobs(server);
+                yield (0, extra_utils_1.waitJobs)(server);
                 expect(emails).to.have.lengthOf(8);
                 const email = emails[7];
                 expect(email['from'][0]['name']).equal('PeerTube');
@@ -268,7 +268,7 @@ describe('Test emails', function () {
             });
         });
         it('Should not verify the email with an invalid verification string', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 yield server.users.verifyEmail({
                     userId,
                     verificationString: verificationString + 'b',
@@ -278,15 +278,15 @@ describe('Test emails', function () {
             });
         });
         it('Should verify the email', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 yield server.users.verifyEmail({ userId, verificationString });
             });
         });
     });
     after(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             extra_utils_1.MockSmtpServer.Instance.kill();
-            yield extra_utils_1.cleanupTests([server]);
+            yield (0, extra_utils_1.cleanupTests)([server]);
         });
     });
 });

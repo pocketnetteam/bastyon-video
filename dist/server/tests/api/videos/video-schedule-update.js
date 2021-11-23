@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = tslib_1.__importStar(require("chai"));
+const chai = (0, tslib_1.__importStar)(require("chai"));
 const extra_utils_1 = require("@shared/extra-utils");
 const expect = chai.expect;
 function in10Seconds() {
@@ -14,15 +14,15 @@ describe('Test video update scheduler', function () {
     let servers = [];
     let video2UUID;
     before(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(30000);
-            servers = yield extra_utils_1.createMultipleServers(2);
-            yield extra_utils_1.setAccessTokensToServers(servers);
-            yield extra_utils_1.doubleFollow(servers[0], servers[1]);
+            servers = yield (0, extra_utils_1.createMultipleServers)(2);
+            yield (0, extra_utils_1.setAccessTokensToServers)(servers);
+            yield (0, extra_utils_1.doubleFollow)(servers[0], servers[1]);
         });
     });
     it('Should upload a video and schedule an update in 10 seconds', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(10000);
             const attributes = {
                 name: 'video 1',
@@ -33,11 +33,11 @@ describe('Test video update scheduler', function () {
                 }
             };
             yield servers[0].videos.upload({ attributes });
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.waitJobs)(servers);
         });
     });
     it('Should not list the video (in privacy mode)', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             for (const server of servers) {
                 const { total } = yield server.videos.list();
                 expect(total).to.equal(0);
@@ -45,7 +45,7 @@ describe('Test video update scheduler', function () {
         });
     });
     it('Should have my scheduled video in my account videos', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const { total, data } = yield servers[0].videos.listMyVideos();
             expect(total).to.equal(1);
             const videoFromList = data[0];
@@ -59,10 +59,10 @@ describe('Test video update scheduler', function () {
         });
     });
     it('Should wait some seconds and have the video in public privacy', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(50000);
-            yield extra_utils_1.wait(15000);
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.wait)(15000);
+            yield (0, extra_utils_1.waitJobs)(servers);
             for (const server of servers) {
                 const { total, data } = yield server.videos.list();
                 expect(total).to.equal(1);
@@ -71,7 +71,7 @@ describe('Test video update scheduler', function () {
         });
     });
     it('Should upload a video without scheduling an update', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(10000);
             const attributes = {
                 name: 'video 2',
@@ -79,11 +79,11 @@ describe('Test video update scheduler', function () {
             };
             const { uuid } = yield servers[0].videos.upload({ attributes });
             video2UUID = uuid;
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.waitJobs)(servers);
         });
     });
     it('Should update a video by scheduling an update', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(10000);
             const attributes = {
                 name: 'video 2 updated',
@@ -93,11 +93,11 @@ describe('Test video update scheduler', function () {
                 }
             };
             yield servers[0].videos.update({ id: video2UUID, attributes });
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.waitJobs)(servers);
         });
     });
     it('Should not display the updated video', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             for (const server of servers) {
                 const { total } = yield server.videos.list();
                 expect(total).to.equal(1);
@@ -105,7 +105,7 @@ describe('Test video update scheduler', function () {
         });
     });
     it('Should have my scheduled updated video in my account videos', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const { total, data } = yield servers[0].videos.listMyVideos();
             expect(total).to.equal(2);
             const video = data.find(v => v.uuid === video2UUID);
@@ -117,10 +117,10 @@ describe('Test video update scheduler', function () {
         });
     });
     it('Should wait some seconds and have the updated video in public privacy', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(20000);
-            yield extra_utils_1.wait(15000);
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.wait)(15000);
+            yield (0, extra_utils_1.waitJobs)(servers);
             for (const server of servers) {
                 const { total, data } = yield server.videos.list();
                 expect(total).to.equal(2);
@@ -131,8 +131,8 @@ describe('Test video update scheduler', function () {
         });
     });
     after(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            yield extra_utils_1.cleanupTests(servers);
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            yield (0, extra_utils_1.cleanupTests)(servers);
         });
     });
 });

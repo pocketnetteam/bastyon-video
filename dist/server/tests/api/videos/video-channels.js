@@ -2,13 +2,13 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = tslib_1.__importStar(require("chai"));
+const chai = (0, tslib_1.__importStar)(require("chai"));
 const path_1 = require("path");
 const constants_1 = require("@server/initializers/constants");
 const extra_utils_1 = require("@shared/extra-utils");
 const expect = chai.expect;
 function findChannel(server, channelId) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const body = yield server.channels.list({ sort: '-name' });
         return body.data.find(c => c.id === channelId);
     });
@@ -23,22 +23,22 @@ describe('Test video channels', function () {
     const avatarPaths = {};
     const bannerPaths = {};
     before(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(60000);
-            servers = yield extra_utils_1.createMultipleServers(2);
-            yield extra_utils_1.setAccessTokensToServers(servers);
-            yield extra_utils_1.setDefaultVideoChannel(servers);
-            yield extra_utils_1.doubleFollow(servers[0], servers[1]);
+            servers = yield (0, extra_utils_1.createMultipleServers)(2);
+            yield (0, extra_utils_1.setAccessTokensToServers)(servers);
+            yield (0, extra_utils_1.setDefaultVideoChannel)(servers);
+            yield (0, extra_utils_1.doubleFollow)(servers[0], servers[1]);
         });
     });
-    it('Should have one video channel (created with root)', () => tslib_1.__awaiter(this, void 0, void 0, function* () {
+    it('Should have one video channel (created with root)', () => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const body = yield servers[0].channels.list({ start: 0, count: 2 });
         expect(body.total).to.equal(1);
         expect(body.data).to.be.an('array');
         expect(body.data).to.have.lengthOf(1);
     }));
     it('Should create another video channel', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(10000);
             {
                 const videoChannel = {
@@ -55,10 +55,10 @@ describe('Test video channels', function () {
                 const { uuid } = yield servers[0].videos.upload({ attributes });
                 videoUUID = uuid;
             }
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.waitJobs)(servers);
         });
     });
-    it('Should have two video channels when getting my information', () => tslib_1.__awaiter(this, void 0, void 0, function* () {
+    it('Should have two video channels when getting my information', () => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         userInfo = yield servers[0].users.getMyInfo();
         expect(userInfo.videoChannels).to.be.an('array');
         expect(userInfo.videoChannels).to.have.lengthOf(2);
@@ -72,7 +72,7 @@ describe('Test video channels', function () {
         accountName = userInfo.account.name + '@' + userInfo.account.host;
     }));
     it('Should have two video channels when getting account channels on server 1', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const body = yield servers[0].channels.listByAccount({ accountName });
             expect(body.total).to.equal(2);
             const videoChannels = body.data;
@@ -87,7 +87,7 @@ describe('Test video channels', function () {
         });
     });
     it('Should paginate and sort account channels', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             {
                 const body = yield servers[0].channels.listByAccount({
                     accountName,
@@ -125,7 +125,7 @@ describe('Test video channels', function () {
         });
     });
     it('Should have one video channel when getting account channels on server 2', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const body = yield servers[1].channels.listByAccount({ accountName });
             expect(body.total).to.equal(1);
             expect(body.data).to.be.an('array');
@@ -138,7 +138,7 @@ describe('Test video channels', function () {
         });
     });
     it('Should list video channels', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const body = yield servers[0].channels.list({ start: 1, count: 1, sort: '-name' });
             expect(body.total).to.equal(2);
             expect(body.data).to.be.an('array');
@@ -148,7 +148,7 @@ describe('Test video channels', function () {
         });
     });
     it('Should update video channel', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(15000);
             const videoChannelAttributes = {
                 displayName: 'video channel updated',
@@ -156,11 +156,11 @@ describe('Test video channels', function () {
                 support: 'support updated'
             };
             yield servers[0].channels.update({ channelName: 'second_video_channel', attributes: videoChannelAttributes });
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.waitJobs)(servers);
         });
     });
     it('Should have video channel updated', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             for (const server of servers) {
                 const body = yield server.channels.list({ start: 0, count: 1, sort: '-name' });
                 expect(body.total).to.equal(2);
@@ -174,7 +174,7 @@ describe('Test video channels', function () {
         });
     });
     it('Should not have updated the video support field', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             for (const server of servers) {
                 const video = yield server.videos.get({ id: videoUUID });
                 expect(video.support).to.equal('video support field');
@@ -182,14 +182,14 @@ describe('Test video channels', function () {
         });
     });
     it('Should update the channel support field and update videos too', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(35000);
             const videoChannelAttributes = {
                 support: 'video channel support text updated',
                 bulkVideosSupportUpdate: true
             };
             yield servers[0].channels.update({ channelName: 'second_video_channel', attributes: videoChannelAttributes });
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.waitJobs)(servers);
             for (const server of servers) {
                 const video = yield server.videos.get({ id: videoUUID });
                 expect(video.support).to.equal(videoChannelAttributes.support);
@@ -197,7 +197,7 @@ describe('Test video channels', function () {
         });
     });
     it('Should update video channel avatar', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(15000);
             const fixture = 'avatar.png';
             yield servers[0].channels.updateImage({
@@ -205,20 +205,20 @@ describe('Test video channels', function () {
                 fixture,
                 type: 'avatar'
             });
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.waitJobs)(servers);
             for (const server of servers) {
                 const videoChannel = yield findChannel(server, secondVideoChannelId);
                 avatarPaths[server.port] = videoChannel.avatar.path;
-                yield extra_utils_1.testImage(server.url, 'avatar-resized', avatarPaths[server.port], '.png');
-                yield extra_utils_1.testFileExistsOrNot(server, 'avatars', path_1.basename(avatarPaths[server.port]), true);
-                const row = yield server.sql.getActorImage(path_1.basename(avatarPaths[server.port]));
+                yield (0, extra_utils_1.testImage)(server.url, 'avatar-resized', avatarPaths[server.port], '.png');
+                yield (0, extra_utils_1.testFileExistsOrNot)(server, 'avatars', (0, path_1.basename)(avatarPaths[server.port]), true);
+                const row = yield server.sql.getActorImage((0, path_1.basename)(avatarPaths[server.port]));
                 expect(row.height).to.equal(constants_1.ACTOR_IMAGES_SIZE.AVATARS.height);
                 expect(row.width).to.equal(constants_1.ACTOR_IMAGES_SIZE.AVATARS.width);
             }
         });
     });
     it('Should update video channel banner', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(15000);
             const fixture = 'banner.jpg';
             yield servers[0].channels.updateImage({
@@ -226,44 +226,44 @@ describe('Test video channels', function () {
                 fixture,
                 type: 'banner'
             });
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.waitJobs)(servers);
             for (const server of servers) {
                 const videoChannel = yield server.channels.get({ channelName: 'second_video_channel@' + servers[0].host });
                 bannerPaths[server.port] = videoChannel.banner.path;
-                yield extra_utils_1.testImage(server.url, 'banner-resized', bannerPaths[server.port]);
-                yield extra_utils_1.testFileExistsOrNot(server, 'avatars', path_1.basename(bannerPaths[server.port]), true);
-                const row = yield server.sql.getActorImage(path_1.basename(bannerPaths[server.port]));
+                yield (0, extra_utils_1.testImage)(server.url, 'banner-resized', bannerPaths[server.port]);
+                yield (0, extra_utils_1.testFileExistsOrNot)(server, 'avatars', (0, path_1.basename)(bannerPaths[server.port]), true);
+                const row = yield server.sql.getActorImage((0, path_1.basename)(bannerPaths[server.port]));
                 expect(row.height).to.equal(constants_1.ACTOR_IMAGES_SIZE.BANNERS.height);
                 expect(row.width).to.equal(constants_1.ACTOR_IMAGES_SIZE.BANNERS.width);
             }
         });
     });
     it('Should delete the video channel avatar', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(15000);
             yield servers[0].channels.deleteImage({ channelName: 'second_video_channel', type: 'avatar' });
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.waitJobs)(servers);
             for (const server of servers) {
                 const videoChannel = yield findChannel(server, secondVideoChannelId);
-                yield extra_utils_1.testFileExistsOrNot(server, 'avatars', path_1.basename(avatarPaths[server.port]), false);
+                yield (0, extra_utils_1.testFileExistsOrNot)(server, 'avatars', (0, path_1.basename)(avatarPaths[server.port]), false);
                 expect(videoChannel.avatar).to.be.null;
             }
         });
     });
     it('Should delete the video channel banner', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(15000);
             yield servers[0].channels.deleteImage({ channelName: 'second_video_channel', type: 'banner' });
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.waitJobs)(servers);
             for (const server of servers) {
                 const videoChannel = yield findChannel(server, secondVideoChannelId);
-                yield extra_utils_1.testFileExistsOrNot(server, 'avatars', path_1.basename(bannerPaths[server.port]), false);
+                yield (0, extra_utils_1.testFileExistsOrNot)(server, 'avatars', (0, path_1.basename)(bannerPaths[server.port]), false);
                 expect(videoChannel.banner).to.be.null;
             }
         });
     });
     it('Should list the second video channel videos', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(10000);
             for (const server of servers) {
                 const channelURI = 'second_video_channel@localhost:' + servers[0].port;
@@ -276,14 +276,14 @@ describe('Test video channels', function () {
         });
     });
     it('Should change the video channel of a video', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(10000);
             yield servers[0].videos.update({ id: videoUUID, attributes: { channelId: servers[0].store.channel.id } });
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.waitJobs)(servers);
         });
     });
     it('Should list the first video channel videos', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(10000);
             for (const server of servers) {
                 {
@@ -303,12 +303,12 @@ describe('Test video channels', function () {
         });
     });
     it('Should delete video channel', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             yield servers[0].channels.delete({ channelName: 'second_video_channel' });
         });
     });
     it('Should have video channel deleted', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const body = yield servers[0].channels.list({ start: 0, count: 10 });
             expect(body.total).to.equal(1);
             expect(body.data).to.be.an('array');
@@ -317,7 +317,7 @@ describe('Test video channels', function () {
         });
     });
     it('Should create the main channel with an uuid if there is a conflict', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             {
                 const videoChannel = { name: 'toto_channel', displayName: 'My toto channel' };
                 const created = yield servers[0].channels.create({ attributes: videoChannel });
@@ -333,7 +333,7 @@ describe('Test video channels', function () {
         });
     });
     it('Should report correct channel views per days', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(10000);
             {
                 const { data } = yield servers[0].channels.listByAccount({ accountName, withStats: true });
@@ -349,7 +349,7 @@ describe('Test video channels', function () {
             {
                 yield servers[0].videos.view({ id: videoUUID, xForwardedFor: '0.0.0.1,127.0.0.1' });
                 yield servers[0].videos.view({ id: videoUUID, xForwardedFor: '0.0.0.2,127.0.0.1' });
-                yield extra_utils_1.wait(8000);
+                yield (0, extra_utils_1.wait)(8000);
                 const { data } = yield servers[0].channels.listByAccount({ accountName, withStats: true });
                 const channelWithView = data.find(channel => channel.id === servers[0].store.channel.id);
                 expect(channelWithView.viewsPerDay.slice(-1)[0].views).to.equal(2);
@@ -357,7 +357,7 @@ describe('Test video channels', function () {
         });
     });
     it('Should report correct videos count', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const { data } = yield servers[0].channels.listByAccount({ accountName, withStats: true });
             const totoChannel = data.find(c => c.name === 'toto_channel');
             const rootChannel = data.find(c => c.name === 'root_channel');
@@ -366,7 +366,7 @@ describe('Test video channels', function () {
         });
     });
     it('Should search among account video channels', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             {
                 const body = yield servers[0].channels.listByAccount({ accountName, search: 'root' });
                 expect(body.total).to.equal(1);
@@ -382,17 +382,17 @@ describe('Test video channels', function () {
         });
     });
     it('Should list channels by updatedAt desc if a video has been uploaded', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(30000);
             yield servers[0].videos.upload({ attributes: { channelId: totoChannel } });
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.waitJobs)(servers);
             for (const server of servers) {
                 const { data } = yield server.channels.listByAccount({ accountName, sort: '-updatedAt' });
                 expect(data[0].name).to.equal('toto_channel');
                 expect(data[1].name).to.equal('root_channel');
             }
             yield servers[0].videos.upload({ attributes: { channelId: servers[0].store.channel.id } });
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.waitJobs)(servers);
             for (const server of servers) {
                 const { data } = yield server.channels.listByAccount({ accountName, sort: '-updatedAt' });
                 expect(data[0].name).to.equal('root_channel');
@@ -401,8 +401,8 @@ describe('Test video channels', function () {
         });
     });
     after(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            yield extra_utils_1.cleanupTests(servers);
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            yield (0, extra_utils_1.cleanupTests)(servers);
         });
     });
 });

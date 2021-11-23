@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = tslib_1.__importStar(require("chai"));
+const chai = (0, tslib_1.__importStar)(require("chai"));
 const extra_utils_1 = require("@shared/extra-utils");
 const expect = chai.expect;
 describe('Test a single server', function () {
@@ -77,42 +77,42 @@ describe('Test a single server', function () {
             ]
         });
         before(function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(30000);
-                server = yield extra_utils_1.createSingleServer(1);
-                yield extra_utils_1.setAccessTokensToServers([server]);
+                server = yield (0, extra_utils_1.createSingleServer)(1);
+                yield (0, extra_utils_1.setAccessTokensToServers)([server]);
             });
         });
         it('Should list video categories', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const categories = yield server.videos.getCategories();
                 expect(Object.keys(categories)).to.have.length.above(10);
                 expect(categories[11]).to.equal('News & Politics');
             });
         });
         it('Should list video licences', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const licences = yield server.videos.getLicences();
                 expect(Object.keys(licences)).to.have.length.above(5);
                 expect(licences[3]).to.equal('Attribution - No Derivatives');
             });
         });
         it('Should list video languages', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const languages = yield server.videos.getLanguages();
                 expect(Object.keys(languages)).to.have.length.above(5);
                 expect(languages['ru']).to.equal('Russian');
             });
         });
         it('Should list video privacies', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const privacies = yield server.videos.getPrivacies();
                 expect(Object.keys(privacies)).to.have.length.at.least(3);
                 expect(privacies[3]).to.equal('Private');
             });
         });
         it('Should not have videos', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const { data, total } = yield server.videos.list();
                 expect(total).to.equal(0);
                 expect(data).to.be.an('array');
@@ -120,7 +120,7 @@ describe('Test a single server', function () {
             });
         });
         it('Should upload the video', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 const attributes = {
                     name: 'my super name',
@@ -138,49 +138,49 @@ describe('Test a single server', function () {
             });
         });
         it('Should get and seed the uploaded video', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(5000);
                 const { data, total } = yield server.videos.list();
                 expect(total).to.equal(1);
                 expect(data).to.be.an('array');
                 expect(data.length).to.equal(1);
                 const video = data[0];
-                yield extra_utils_1.completeVideoCheck(server, video, getCheckAttributes());
+                yield (0, extra_utils_1.completeVideoCheck)(server, video, getCheckAttributes());
             });
         });
         it('Should get the video by UUID', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(5000);
                 const video = yield server.videos.get({ id: videoUUID });
-                yield extra_utils_1.completeVideoCheck(server, video, getCheckAttributes());
+                yield (0, extra_utils_1.completeVideoCheck)(server, video, getCheckAttributes());
             });
         });
         it('Should have the views updated', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(20000);
                 yield server.videos.view({ id: videoId });
                 yield server.videos.view({ id: videoId });
                 yield server.videos.view({ id: videoId });
-                yield extra_utils_1.wait(1500);
+                yield (0, extra_utils_1.wait)(1500);
                 yield server.videos.view({ id: videoId });
                 yield server.videos.view({ id: videoId });
-                yield extra_utils_1.wait(1500);
+                yield (0, extra_utils_1.wait)(1500);
                 yield server.videos.view({ id: videoId });
                 yield server.videos.view({ id: videoId });
-                yield extra_utils_1.wait(8000);
+                yield (0, extra_utils_1.wait)(8000);
                 const video = yield server.videos.get({ id: videoId });
                 expect(video.views).to.equal(3);
             });
         });
         it('Should remove the video', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const video = yield server.videos.get({ id: videoId });
                 yield server.videos.remove({ id: videoId });
-                yield extra_utils_1.checkVideoFilesWereRemoved({ video, server });
+                yield (0, extra_utils_1.checkVideoFilesWereRemoved)({ video, server });
             });
         });
         it('Should not have videos', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const { total, data } = yield server.videos.list();
                 expect(total).to.equal(0);
                 expect(data).to.be.an('array');
@@ -188,7 +188,7 @@ describe('Test a single server', function () {
             });
         });
         it('Should upload 6 videos', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(25000);
                 const videos = new Set([
                     'video_short.mp4', 'video_short.ogv', 'video_short.webm',
@@ -210,7 +210,7 @@ describe('Test a single server', function () {
             });
         });
         it('Should have the correct durations', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const { total, data } = yield server.videos.list();
                 expect(total).to.equal(6);
                 expect(data).to.be.an('array');
@@ -226,17 +226,17 @@ describe('Test a single server', function () {
             });
         });
         it('Should have the correct thumbnails', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const { data } = yield server.videos.list();
                 videosListBase = data;
                 for (const video of data) {
                     const videoName = video.name.replace(' name', '');
-                    yield extra_utils_1.testImage(server.url, videoName, video.thumbnailPath);
+                    yield (0, extra_utils_1.testImage)(server.url, videoName, video.thumbnailPath);
                 }
             });
         });
         it('Should list only the two first videos', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const { total, data } = yield server.videos.list({ start: 0, count: 2, sort: 'name' });
                 expect(total).to.equal(6);
                 expect(data.length).to.equal(2);
@@ -245,7 +245,7 @@ describe('Test a single server', function () {
             });
         });
         it('Should list only the next three videos', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const { total, data } = yield server.videos.list({ start: 2, count: 3, sort: 'name' });
                 expect(total).to.equal(6);
                 expect(data.length).to.equal(3);
@@ -255,7 +255,7 @@ describe('Test a single server', function () {
             });
         });
         it('Should list the last video', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const { total, data } = yield server.videos.list({ start: 5, count: 6, sort: 'name' });
                 expect(total).to.equal(6);
                 expect(data.length).to.equal(1);
@@ -263,7 +263,7 @@ describe('Test a single server', function () {
             });
         });
         it('Should not have the total field', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const { total, data } = yield server.videos.list({ start: 5, count: 6, sort: 'name', skipCount: true });
                 expect(total).to.not.exist;
                 expect(data.length).to.equal(1);
@@ -271,7 +271,7 @@ describe('Test a single server', function () {
             });
         });
         it('Should list and sort by name in descending order', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const { total, data } = yield server.videos.list({ sort: '-name' });
                 expect(total).to.equal(6);
                 expect(data.length).to.equal(6);
@@ -286,28 +286,28 @@ describe('Test a single server', function () {
             });
         });
         it('Should list and sort by trending in descending order', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const { total, data } = yield server.videos.list({ start: 0, count: 2, sort: '-trending' });
                 expect(total).to.equal(6);
                 expect(data.length).to.equal(2);
             });
         });
         it('Should list and sort by hotness in descending order', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const { total, data } = yield server.videos.list({ start: 0, count: 2, sort: '-hot' });
                 expect(total).to.equal(6);
                 expect(data.length).to.equal(2);
             });
         });
         it('Should list and sort by best in descending order', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const { total, data } = yield server.videos.list({ start: 0, count: 2, sort: '-best' });
                 expect(total).to.equal(6);
                 expect(data.length).to.equal(2);
             });
         });
         it('Should update a video', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const attributes = {
                     name: 'my super video updated',
                     category: 4,
@@ -323,7 +323,7 @@ describe('Test a single server', function () {
             });
         });
         it('Should filter by tags and category', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 {
                     const { data, total } = yield server.videos.list({ tagsAllOf: ['tagup1', 'tagup2'], categoryOneOf: [4] });
                     expect(total).to.equal(1);
@@ -336,35 +336,35 @@ describe('Test a single server', function () {
             });
         });
         it('Should have the video updated', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(60000);
                 const video = yield server.videos.get({ id: videoId });
-                yield extra_utils_1.completeVideoCheck(server, video, updateCheckAttributes());
+                yield (0, extra_utils_1.completeVideoCheck)(server, video, updateCheckAttributes());
             });
         });
         it('Should update only the tags of a video', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const attributes = {
                     tags: ['supertag', 'tag1', 'tag2']
                 };
                 yield server.videos.update({ id: videoId, attributes });
                 const video = yield server.videos.get({ id: videoId });
-                yield extra_utils_1.completeVideoCheck(server, video, Object.assign(updateCheckAttributes(), attributes));
+                yield (0, extra_utils_1.completeVideoCheck)(server, video, Object.assign(updateCheckAttributes(), attributes));
             });
         });
         it('Should update only the description of a video', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const attributes = {
                     description: 'hello everybody'
                 };
                 yield server.videos.update({ id: videoId, attributes });
                 const video = yield server.videos.get({ id: videoId });
                 const expectedAttributes = Object.assign(updateCheckAttributes(), { tags: ['supertag', 'tag1', 'tag2'] }, attributes);
-                yield extra_utils_1.completeVideoCheck(server, video, expectedAttributes);
+                yield (0, extra_utils_1.completeVideoCheck)(server, video, expectedAttributes);
             });
         });
         it('Should like a video', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 yield server.videos.rate({ id: videoId, rating: 'like' });
                 const video = yield server.videos.get({ id: videoId });
                 expect(video.likes).to.equal(1);
@@ -372,7 +372,7 @@ describe('Test a single server', function () {
             });
         });
         it('Should dislike the same video', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 yield server.videos.rate({ id: videoId, rating: 'dislike' });
                 const video = yield server.videos.get({ id: videoId });
                 expect(video.likes).to.equal(0);
@@ -380,7 +380,7 @@ describe('Test a single server', function () {
             });
         });
         it('Should sort by originallyPublishedAt', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 {
                     const now = new Date();
                     const attributes = { originallyPublishedAt: now.toISOString() };
@@ -410,8 +410,8 @@ describe('Test a single server', function () {
             });
         });
         after(function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.cleanupTests([server]);
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.cleanupTests)([server]);
             });
         });
     }

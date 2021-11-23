@@ -8,7 +8,7 @@ const user_notification_1 = require("@server/models/user/user-notification");
 const abstract_notification_1 = require("../common/abstract-notification");
 class NewPeerTubeVersionForAdmins extends abstract_notification_1.AbstractNotification {
     prepare() {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.admins = yield user_1.UserModel.listWithRight(4);
         });
     }
@@ -22,7 +22,7 @@ class NewPeerTubeVersionForAdmins extends abstract_notification_1.AbstractNotifi
         return this.admins;
     }
     createNotification(user) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const notification = yield user_notification_1.UserNotificationModel.create({
                 type: 18,
                 userId: user.id,

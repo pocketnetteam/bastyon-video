@@ -8,20 +8,20 @@ const activitypub_1 = require("../../../../helpers/activitypub");
 const constants_1 = require("../../../../initializers/constants");
 const actor_1 = require("../../../../models/actor/actor");
 function computeBody(payload) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         let body = payload.body;
         if (payload.signatureActorId) {
             const actorSignature = yield actor_1.ActorModel.load(payload.signatureActorId);
             if (!actorSignature)
                 throw new Error('Unknown signature actor id.');
-            body = yield activitypub_1.buildSignedActivity(actorSignature, payload.body, payload.contextType);
+            body = yield (0, activitypub_1.buildSignedActivity)(actorSignature, payload.body, payload.contextType);
         }
         return body;
     });
 }
 exports.computeBody = computeBody;
 function buildSignedRequestOptions(payload) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         let actor;
         if (payload.signatureActorId) {
             actor = yield actor_1.ActorModel.load(payload.signatureActorId);
@@ -29,7 +29,7 @@ function buildSignedRequestOptions(payload) {
                 throw new Error('Unknown signature actor id.');
         }
         else {
-            actor = yield application_1.getServerActor();
+            actor = yield (0, application_1.getServerActor)();
         }
         const keyId = actor.url;
         return {
@@ -44,7 +44,7 @@ function buildSignedRequestOptions(payload) {
 exports.buildSignedRequestOptions = buildSignedRequestOptions;
 function buildGlobalHeaders(body) {
     return {
-        'digest': peertube_crypto_1.buildDigest(body),
+        'digest': (0, peertube_crypto_1.buildDigest)(body),
         'content-type': 'application/activity+json',
         'accept': constants_1.ACTIVITY_PUB.ACCEPT_HEADER
     };

@@ -20,9 +20,9 @@ const handlers = {
     'merge-audio-to-webtorrent': handleWebTorrentMergeAudioJob,
     'optimize-to-webtorrent': handleWebTorrentOptimizeJob
 };
-const lTags = logger_1.loggerTagsFactory('transcoding');
+const lTags = (0, logger_1.loggerTagsFactory)('transcoding');
 function processVideoTranscoding(job) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const payload = job.data;
         logger_1.logger.info('Processing transcoding job %d.', job.id, lTags(payload.videoUUID));
         const video = yield video_2.VideoModel.loadAndPopulateAccountAndServerAndTags(payload.videoUUID);
@@ -41,14 +41,14 @@ function processVideoTranscoding(job) {
 }
 exports.processVideoTranscoding = processVideoTranscoding;
 function handleHLSJob(job, payload, video, user) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         logger_1.logger.info('Handling HLS transcoding job for %s.', video.uuid, lTags(video.uuid));
         const videoFileInput = payload.copyCodecs
             ? (video.getWebTorrentFile(payload.resolution) || video.getMaxQualityFile())
             : video.getMaxQualityFile();
         const videoOrStreamingPlaylist = videoFileInput.getVideoOrStreamingPlaylist();
         yield video_path_manager_1.VideoPathManager.Instance.makeAvailableVideoFile(videoOrStreamingPlaylist, videoFileInput, videoInputPath => {
-            return video_transcoding_1.generateHlsPlaylistResolution({
+            return (0, video_transcoding_1.generateHlsPlaylistResolution)({
                 video,
                 videoInputPath,
                 resolution: payload.resolution,
@@ -58,36 +58,36 @@ function handleHLSJob(job, payload, video, user) {
             });
         });
         logger_1.logger.info('HLS transcoding job for %s ended.', video.uuid, lTags(video.uuid));
-        yield database_utils_1.retryTransactionWrapper(onHlsPlaylistGeneration, video, user, payload);
+        yield (0, database_utils_1.retryTransactionWrapper)(onHlsPlaylistGeneration, video, user, payload);
     });
 }
 function handleNewWebTorrentResolutionJob(job, payload, video, user) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         logger_1.logger.info('Handling WebTorrent transcoding job for %s.', video.uuid, lTags(video.uuid));
-        yield video_transcoding_1.transcodeNewWebTorrentResolution(video, payload.resolution, payload.isPortraitMode || false, job);
+        yield (0, video_transcoding_1.transcodeNewWebTorrentResolution)(video, payload.resolution, payload.isPortraitMode || false, job);
         logger_1.logger.info('WebTorrent transcoding job for %s ended.', video.uuid, lTags(video.uuid));
-        yield database_utils_1.retryTransactionWrapper(onNewWebTorrentFileResolution, video, user, payload);
+        yield (0, database_utils_1.retryTransactionWrapper)(onNewWebTorrentFileResolution, video, user, payload);
     });
 }
 function handleWebTorrentMergeAudioJob(job, payload, video, user) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         logger_1.logger.info('Handling merge audio transcoding job for %s.', video.uuid, lTags(video.uuid));
-        yield video_transcoding_1.mergeAudioVideofile(video, payload.resolution, job);
+        yield (0, video_transcoding_1.mergeAudioVideofile)(video, payload.resolution, job);
         logger_1.logger.info('Merge audio transcoding job for %s ended.', video.uuid, lTags(video.uuid));
-        yield database_utils_1.retryTransactionWrapper(onVideoFileOptimizer, video, payload, 'video', user);
+        yield (0, database_utils_1.retryTransactionWrapper)(onVideoFileOptimizer, video, payload, 'video', user);
     });
 }
 function handleWebTorrentOptimizeJob(job, payload, video, user) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         logger_1.logger.info('Handling optimize transcoding job for %s.', video.uuid, lTags(video.uuid));
-        const { transcodeType } = yield video_transcoding_1.optimizeOriginalVideofile(video, video.getMaxQualityFile(), job);
+        const { transcodeType } = yield (0, video_transcoding_1.optimizeOriginalVideofile)(video, video.getMaxQualityFile(), job);
         logger_1.logger.info('Optimize transcoding job for %s ended.', video.uuid, lTags(video.uuid));
-        yield database_utils_1.retryTransactionWrapper(onVideoFileOptimizer, video, payload, transcodeType, user);
+        yield (0, database_utils_1.retryTransactionWrapper)(onVideoFileOptimizer, video, payload, transcodeType, user);
     });
 }
 function onHlsPlaylistGeneration(video, user, payload) {
     var _a;
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         if (payload.isMaxQuality && config_1.CONFIG.TRANSCODING.WEBTORRENT.ENABLED === false) {
             for (const file of video.VideoFiles) {
                 yield video.removeFileAndTorrent(file);
@@ -104,12 +104,12 @@ function onHlsPlaylistGeneration(video, user, payload) {
             });
         }
         yield video_job_info_1.VideoJobInfoModel.decrease(video.uuid, 'pendingTranscode');
-        yield video_state_1.moveToNextState(video, payload.isNewVideo);
+        yield (0, video_state_1.moveToNextState)(video, payload.isNewVideo);
     });
 }
 function onVideoFileOptimizer(videoArg, payload, transcodeType, user) {
     var _a;
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const { resolution, isPortraitMode } = yield videoArg.getMaxQualityResolution();
         const videoDatabase = yield video_2.VideoModel.loadAndPopulateAccountAndServerAndTags(videoArg.uuid);
         if (!videoDatabase)
@@ -128,24 +128,24 @@ function onVideoFileOptimizer(videoArg, payload, transcodeType, user) {
         });
         yield video_job_info_1.VideoJobInfoModel.decrease(videoDatabase.uuid, 'pendingTranscode');
         if (!hasHls && !hasNewResolutions) {
-            yield video_state_1.moveToNextState(videoDatabase, payload.isNewVideo);
+            yield (0, video_state_1.moveToNextState)(videoDatabase, payload.isNewVideo);
         }
     });
 }
 function onNewWebTorrentFileResolution(video, user, payload) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         yield createHlsJobIfEnabled(user, Object.assign(Object.assign({}, payload), { copyCodecs: true, isMaxQuality: false }));
         yield video_job_info_1.VideoJobInfoModel.decrease(video.uuid, 'pendingTranscode');
-        yield video_state_1.moveToNextState(video, payload.isNewVideo);
+        yield (0, video_state_1.moveToNextState)(video, payload.isNewVideo);
     });
 }
 exports.onNewWebTorrentFileResolution = onNewWebTorrentFileResolution;
 function createHlsJobIfEnabled(user, payload) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         if (!payload || config_1.CONFIG.TRANSCODING.ENABLED !== true || config_1.CONFIG.TRANSCODING.HLS.ENABLED !== true)
             return false;
         const jobOptions = {
-            priority: yield video_1.getTranscodingJobPriority(user)
+            priority: yield (0, video_1.getTranscodingJobPriority)(user)
         };
         const hlsTranscodingPayload = {
             type: 'new-resolution-to-hls',
@@ -156,15 +156,15 @@ function createHlsJobIfEnabled(user, payload) {
             isMaxQuality: payload.isMaxQuality,
             isNewVideo: payload.isNewVideo
         };
-        yield video_1.addTranscodingJob(hlsTranscodingPayload, jobOptions);
+        yield (0, video_1.addTranscodingJob)(hlsTranscodingPayload, jobOptions);
         return true;
     });
 }
 exports.createHlsJobIfEnabled = createHlsJobIfEnabled;
 function createLowerResolutionsJobs(options) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const { video, user, videoFileResolution, isPortraitMode, isNewVideo, type } = options;
-        const resolutionsEnabled = ffprobe_utils_1.computeResolutionsToTranscode(videoFileResolution, 'vod');
+        const resolutionsEnabled = (0, ffprobe_utils_1.computeResolutionsToTranscode)(videoFileResolution, 'vod');
         const resolutionCreated = [];
         for (const resolution of resolutionsEnabled) {
             let dataInput;
@@ -193,9 +193,9 @@ function createLowerResolutionsJobs(options) {
             if (!dataInput)
                 continue;
             const jobOptions = {
-                priority: yield video_1.getTranscodingJobPriority(user)
+                priority: yield (0, video_1.getTranscodingJobPriority)(user)
             };
-            yield video_1.addTranscodingJob(dataInput, jobOptions);
+            yield (0, video_1.addTranscodingJob)(dataInput, jobOptions);
         }
         if (resolutionCreated.length === 0) {
             logger_1.logger.info('No transcoding jobs created for video %s (no resolutions).', video.uuid, lTags(video.uuid));

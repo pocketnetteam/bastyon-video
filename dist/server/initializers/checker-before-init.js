@@ -75,11 +75,11 @@ function checkMissedConfig() {
 }
 exports.checkMissedConfig = checkMissedConfig;
 function checkFFmpeg(CONFIG) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         if (CONFIG.TRANSCODING.ENABLED === false)
             return undefined;
         const Ffmpeg = require('fluent-ffmpeg');
-        const getAvailableCodecsPromise = core_utils_1.promisify0(Ffmpeg.getAvailableCodecs);
+        const getAvailableCodecsPromise = (0, core_utils_1.promisify0)(Ffmpeg.getAvailableCodecs);
         const codecs = yield getAvailableCodecsPromise();
         const canEncode = ['libx264'];
         for (const codec of canEncode) {
@@ -95,7 +95,7 @@ function checkFFmpeg(CONFIG) {
 exports.checkFFmpeg = checkFFmpeg;
 function checkNodeVersion() {
     const v = process.version;
-    const { major } = core_utils_1.parseSemVersion(v);
+    const { major } = (0, core_utils_1.parseSemVersion)(v);
     logger_1.logger.debug('Checking NodeJS version %s.', v);
     if (major <= 10) {
         logger_1.logger.warn('Your NodeJS version %s is deprecated. Please upgrade.', v);

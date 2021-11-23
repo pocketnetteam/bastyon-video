@@ -9,10 +9,10 @@ class AbstractCommand {
         this.server = server;
     }
     getRequestBody(options) {
-        return requests_1.unwrapBody(this.getRequest(options));
+        return (0, requests_1.unwrapBody)(this.getRequest(options));
     }
     getRequestText(options) {
-        return requests_1.unwrapText(this.getRequest(options));
+        return (0, requests_1.unwrapText)(this.getRequest(options));
     }
     getRawRequest(options) {
         const { url, range } = options;
@@ -21,35 +21,35 @@ class AbstractCommand {
     }
     getRequest(options) {
         const { query } = options;
-        return requests_1.makeGetRequest(Object.assign(Object.assign({}, this.buildCommonRequestOptions(options)), { query }));
+        return (0, requests_1.makeGetRequest)(Object.assign(Object.assign({}, this.buildCommonRequestOptions(options)), { query }));
     }
     deleteRequest(options) {
         const { query, rawQuery } = options;
-        return requests_1.makeDeleteRequest(Object.assign(Object.assign({}, this.buildCommonRequestOptions(options)), { query,
+        return (0, requests_1.makeDeleteRequest)(Object.assign(Object.assign({}, this.buildCommonRequestOptions(options)), { query,
             rawQuery }));
     }
     putBodyRequest(options) {
         const { fields } = options;
-        return requests_1.makePutBodyRequest(Object.assign(Object.assign({}, this.buildCommonRequestOptions(options)), { fields }));
+        return (0, requests_1.makePutBodyRequest)(Object.assign(Object.assign({}, this.buildCommonRequestOptions(options)), { fields }));
     }
     postBodyRequest(options) {
         const { fields } = options;
-        return requests_1.makePostBodyRequest(Object.assign(Object.assign({}, this.buildCommonRequestOptions(options)), { fields }));
+        return (0, requests_1.makePostBodyRequest)(Object.assign(Object.assign({}, this.buildCommonRequestOptions(options)), { fields }));
     }
     postUploadRequest(options) {
         const { fields, attaches } = options;
-        return requests_1.makeUploadRequest(Object.assign(Object.assign({}, this.buildCommonRequestOptions(options)), { method: 'POST', fields,
+        return (0, requests_1.makeUploadRequest)(Object.assign(Object.assign({}, this.buildCommonRequestOptions(options)), { method: 'POST', fields,
             attaches }));
     }
     putUploadRequest(options) {
         const { fields, attaches } = options;
-        return requests_1.makeUploadRequest(Object.assign(Object.assign({}, this.buildCommonRequestOptions(options)), { method: 'PUT', fields,
+        return (0, requests_1.makeUploadRequest)(Object.assign(Object.assign({}, this.buildCommonRequestOptions(options)), { method: 'PUT', fields,
             attaches }));
     }
     updateImageRequest(options) {
-        const filePath = path_1.isAbsolute(options.fixture)
+        const filePath = (0, path_1.isAbsolute)(options.fixture)
             ? options.fixture
-            : path_1.join(tests_1.root(), 'server', 'tests', 'fixtures', options.fixture);
+            : (0, path_1.join)((0, tests_1.root)(), 'server', 'tests', 'fixtures', options.fixture);
         return this.postUploadRequest(Object.assign(Object.assign({}, options), { fields: {}, attaches: { [options.fieldname]: filePath } }));
     }
     buildCommonRequestOptions(options) {

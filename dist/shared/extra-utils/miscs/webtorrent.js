@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseTorrentVideo = exports.webtorrentAdd = void 0;
 const tslib_1 = require("tslib");
 const fs_extra_1 = require("fs-extra");
-const parse_torrent_1 = tslib_1.__importDefault(require("parse-torrent"));
+const parse_torrent_1 = (0, tslib_1.__importDefault)(require("parse-torrent"));
 const path_1 = require("path");
 let webtorrent;
 function webtorrentAdd(torrentId, refreshWebTorrent = false) {
@@ -28,11 +28,11 @@ function webtorrentAdd(torrentId, refreshWebTorrent = false) {
 }
 exports.webtorrentAdd = webtorrentAdd;
 function parseTorrentVideo(server, file) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        const torrentName = path_1.basename(file.torrentUrl);
-        const torrentPath = server.servers.buildDirectory(path_1.join('torrents', torrentName));
-        const data = yield fs_extra_1.readFile(torrentPath);
-        return parse_torrent_1.default(data);
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        const torrentName = (0, path_1.basename)(file.torrentUrl);
+        const torrentPath = server.servers.buildDirectory((0, path_1.join)('torrents', torrentName));
+        const data = yield (0, fs_extra_1.readFile)(torrentPath);
+        return (0, parse_torrent_1.default)(data);
     });
 }
 exports.parseTorrentVideo = parseTorrentVideo;

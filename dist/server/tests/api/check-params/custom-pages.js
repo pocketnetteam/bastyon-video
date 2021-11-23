@@ -9,10 +9,10 @@ describe('Test custom pages validators', function () {
     let server;
     let userAccessToken;
     before(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(120000);
-            server = yield extra_utils_1.createSingleServer(1);
-            yield extra_utils_1.setAccessTokensToServers([server]);
+            server = yield (0, extra_utils_1.createSingleServer)(1);
+            yield (0, extra_utils_1.setAccessTokensToServers)([server]);
             const user = { username: 'user1', password: 'password' };
             yield server.users.create({ username: user.username, password: user.password });
             userAccessToken = yield server.login.getAccessToken(user);
@@ -20,8 +20,8 @@ describe('Test custom pages validators', function () {
     });
     describe('When updating instance homepage', function () {
         it('Should fail with an unauthenticated user', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.makePutBodyRequest({
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.makePutBodyRequest)({
                     url: server.url,
                     path,
                     fields: { content: 'super content' },
@@ -30,8 +30,8 @@ describe('Test custom pages validators', function () {
             });
         });
         it('Should fail with a non admin user', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.makePutBodyRequest({
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.makePutBodyRequest)({
                     url: server.url,
                     path,
                     token: userAccessToken,
@@ -41,8 +41,8 @@ describe('Test custom pages validators', function () {
             });
         });
         it('Should succeed with the correct params', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.makePutBodyRequest({
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.makePutBodyRequest)({
                     url: server.url,
                     path,
                     token: server.accessToken,
@@ -54,8 +54,8 @@ describe('Test custom pages validators', function () {
     });
     describe('When getting instance homapage', function () {
         it('Should succeed with the correct params', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.makeGetRequest({
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.makeGetRequest)({
                     url: server.url,
                     path,
                     expectedStatus: models_1.HttpStatusCode.OK_200
@@ -64,8 +64,8 @@ describe('Test custom pages validators', function () {
         });
     });
     after(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            yield extra_utils_1.cleanupTests([server]);
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            yield (0, extra_utils_1.cleanupTests)([server]);
         });
     });
 });

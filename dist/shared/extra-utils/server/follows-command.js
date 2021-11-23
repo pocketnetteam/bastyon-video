@@ -8,13 +8,13 @@ const shared_1 = require("../shared");
 class FollowsCommand extends shared_1.AbstractCommand {
     getFollowers(options) {
         const path = '/api/v1/server/followers';
-        const query = core_utils_1.pick(options, ['start', 'count', 'sort', 'search', 'state', 'actorType']);
+        const query = (0, core_utils_1.pick)(options, ['start', 'count', 'sort', 'search', 'state', 'actorType']);
         return this.getRequestBody(Object.assign(Object.assign({}, options), { path,
             query, implicitToken: false, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 }));
     }
     getFollowings(options = {}) {
         const path = '/api/v1/server/following';
-        const query = core_utils_1.pick(options, ['start', 'count', 'sort', 'search', 'state', 'actorType']);
+        const query = (0, core_utils_1.pick)(options, ['start', 'count', 'sort', 'search', 'state', 'actorType']);
         return this.getRequestBody(Object.assign(Object.assign({}, options), { path,
             query, implicitToken: false, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 }));
     }
@@ -31,7 +31,7 @@ class FollowsCommand extends shared_1.AbstractCommand {
             fields, implicitToken: true, defaultExpectedStatus: models_1.HttpStatusCode.NO_CONTENT_204 }));
     }
     unfollow(options) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const { target } = options;
             const handle = typeof target === 'string'
                 ? target

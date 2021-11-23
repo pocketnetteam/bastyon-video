@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = tslib_1.__importStar(require("chai"));
+const chai = (0, tslib_1.__importStar)(require("chai"));
 const extra_utils_1 = require("@shared/extra-utils");
 const models_1 = require("@shared/models");
 const expect = chai.expect;
@@ -18,11 +18,11 @@ describe('Test video change ownership - nominal', function () {
     let liveId;
     let command;
     before(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(50000);
-            servers = yield extra_utils_1.createMultipleServers(2);
-            yield extra_utils_1.setAccessTokensToServers(servers);
-            yield extra_utils_1.setDefaultVideoChannel(servers);
+            servers = yield (0, extra_utils_1.createMultipleServers)(2);
+            yield (0, extra_utils_1.setAccessTokensToServers)(servers);
+            yield (0, extra_utils_1.setDefaultVideoChannel)(servers);
             yield servers[0].config.updateCustomSubConfig({
                 newConfig: {
                     transcoding: {
@@ -57,11 +57,11 @@ describe('Test video change ownership - nominal', function () {
                 liveId = video.id;
             }
             command = servers[0].changeOwnership;
-            yield extra_utils_1.doubleFollow(servers[0], servers[1]);
+            yield (0, extra_utils_1.doubleFollow)(servers[0], servers[1]);
         });
     });
     it('Should not have video change ownership', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             {
                 const body = yield command.list({ token: firstUserToken });
                 expect(body.total).to.equal(0);
@@ -77,13 +77,13 @@ describe('Test video change ownership - nominal', function () {
         });
     });
     it('Should send a request to change ownership of a video', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(15000);
             yield command.create({ token: firstUserToken, videoId: servers[0].store.videoCreated.id, username: secondUser });
         });
     });
     it('Should only return a request to change ownership for the second user', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             {
                 const body = yield command.list({ token: firstUserToken });
                 expect(body.total).to.equal(0);
@@ -100,13 +100,13 @@ describe('Test video change ownership - nominal', function () {
         });
     });
     it('Should accept the same change ownership request without crashing', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(10000);
             yield command.create({ token: firstUserToken, videoId: servers[0].store.videoCreated.id, username: secondUser });
         });
     });
     it('Should not create multiple change ownership requests while one is waiting', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(10000);
             const body = yield command.list({ token: secondUserToken });
             expect(body.total).to.equal(1);
@@ -115,25 +115,25 @@ describe('Test video change ownership - nominal', function () {
         });
     });
     it('Should not be possible to refuse the change of ownership from first user', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(10000);
             yield command.refuse({ token: firstUserToken, ownershipId: lastRequestId, expectedStatus: models_1.HttpStatusCode.FORBIDDEN_403 });
         });
     });
     it('Should be possible to refuse the change of ownership from second user', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(10000);
             yield command.refuse({ token: secondUserToken, ownershipId: lastRequestId });
         });
     });
     it('Should send a new request to change ownership of a video', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(15000);
             yield command.create({ token: firstUserToken, videoId: servers[0].store.videoCreated.id, username: secondUser });
         });
     });
     it('Should return two requests to change ownership for the second user', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             {
                 const body = yield command.list({ token: firstUserToken });
                 expect(body.total).to.equal(0);
@@ -150,7 +150,7 @@ describe('Test video change ownership - nominal', function () {
         });
     });
     it('Should not be possible to accept the change of ownership from first user', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(10000);
             yield command.accept({
                 token: firstUserToken,
@@ -161,14 +161,14 @@ describe('Test video change ownership - nominal', function () {
         });
     });
     it('Should be possible to accept the change of ownership from second user', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(10000);
             yield command.accept({ token: secondUserToken, ownershipId: lastRequestId, channelId: secondUserChannelId });
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.waitJobs)(servers);
         });
     });
     it('Should have the channel of the video updated', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             for (const server of servers) {
                 const video = yield server.videos.get({ id: servers[0].store.videoCreated.uuid });
                 expect(video.name).to.equal('my super name');
@@ -178,7 +178,7 @@ describe('Test video change ownership - nominal', function () {
         });
     });
     it('Should send a request to change ownership of a live', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(15000);
             yield command.create({ token: firstUserToken, videoId: liveId, username: secondUser });
             const body = yield command.list({ token: secondUserToken });
@@ -188,10 +188,10 @@ describe('Test video change ownership - nominal', function () {
         });
     });
     it('Should accept a live ownership change', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(20000);
             yield command.accept({ token: secondUserToken, ownershipId: lastRequestId, channelId: secondUserChannelId });
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.waitJobs)(servers);
             for (const server of servers) {
                 const video = yield server.videos.get({ id: servers[0].store.videoCreated.uuid });
                 expect(video.name).to.equal('my super name');
@@ -201,8 +201,8 @@ describe('Test video change ownership - nominal', function () {
         });
     });
     after(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            yield extra_utils_1.cleanupTests(servers);
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            yield (0, extra_utils_1.cleanupTests)(servers);
         });
     });
 });
@@ -214,10 +214,10 @@ describe('Test video change ownership - quota too small', function () {
     let secondUserToken = '';
     let lastRequestId;
     before(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(50000);
-            server = yield extra_utils_1.createSingleServer(1);
-            yield extra_utils_1.setAccessTokensToServers([server]);
+            server = yield (0, extra_utils_1.createSingleServer)(1);
+            yield (0, extra_utils_1.setAccessTokensToServers)([server]);
             yield server.users.create({ username: secondUser, videoQuota: 10 });
             firstUserToken = yield server.users.generateUserAndToken(firstUser);
             secondUserToken = yield server.login.getAccessToken(secondUser);
@@ -226,20 +226,20 @@ describe('Test video change ownership - quota too small', function () {
                 description: 'my super description'
             };
             yield server.videos.upload({ token: firstUserToken, attributes });
-            yield extra_utils_1.waitJobs(server);
+            yield (0, extra_utils_1.waitJobs)(server);
             const { data } = yield server.videos.list();
             expect(data.length).to.equal(1);
             server.store.videoCreated = data.find(video => video.name === 'my super name');
         });
     });
     it('Should send a request to change ownership of a video', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(15000);
             yield server.changeOwnership.create({ token: firstUserToken, videoId: server.store.videoCreated.id, username: secondUser });
         });
     });
     it('Should only return a request to change ownership for the second user', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             {
                 const body = yield server.changeOwnership.list({ token: firstUserToken });
                 expect(body.total).to.equal(0);
@@ -256,7 +256,7 @@ describe('Test video change ownership - quota too small', function () {
         });
     });
     it('Should not be possible to accept the change of ownership from second user because of exceeded quota', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(10000);
             const { videoChannels } = yield server.users.getMyInfo({ token: secondUserToken });
             const channelId = videoChannels[0].id;
@@ -269,8 +269,8 @@ describe('Test video change ownership - quota too small', function () {
         });
     });
     after(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            yield extra_utils_1.cleanupTests([server]);
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            yield (0, extra_utils_1.cleanupTests)([server]);
         });
     });
 });

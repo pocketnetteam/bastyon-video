@@ -6,7 +6,7 @@ const chai_1 = require("chai");
 const extra_utils_1 = require("@shared/extra-utils");
 const models_1 = require("@shared/models");
 function getVideosNames(server, token, filter, expectedStatus = models_1.HttpStatusCode.OK_200) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const paths = [
             '/api/v1/video-channels/root_channel/videos',
             '/api/v1/accounts/root/videos',
@@ -15,7 +15,7 @@ function getVideosNames(server, token, filter, expectedStatus = models_1.HttpSta
         ];
         const videosResults = [];
         for (const path of paths) {
-            const res = yield extra_utils_1.makeGetRequest({
+            const res = yield (0, extra_utils_1.makeGetRequest)({
                 url: server.url,
                 path,
                 token,
@@ -33,10 +33,10 @@ function getVideosNames(server, token, filter, expectedStatus = models_1.HttpSta
 describe('Test videos filter', function () {
     let servers;
     before(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(160000);
-            servers = yield extra_utils_1.createMultipleServers(2);
-            yield extra_utils_1.setAccessTokensToServers(servers);
+            servers = yield (0, extra_utils_1.createMultipleServers)(2);
+            yield (0, extra_utils_1.setAccessTokensToServers)(servers);
             for (const server of servers) {
                 const moderator = { username: 'moderator', password: 'my super password' };
                 yield server.users.create({ username: moderator.username, password: moderator.password, role: models_1.UserRole.MODERATOR });
@@ -51,53 +51,53 @@ describe('Test videos filter', function () {
                     yield server.videos.upload({ attributes });
                 }
             }
-            yield extra_utils_1.doubleFollow(servers[0], servers[1]);
+            yield (0, extra_utils_1.doubleFollow)(servers[0], servers[1]);
         });
     });
     describe('Check videos filter', function () {
         it('Should display local videos', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 for (const server of servers) {
                     const namesResults = yield getVideosNames(server, server.accessToken, 'local');
                     for (const names of namesResults) {
-                        chai_1.expect(names).to.have.lengthOf(1);
-                        chai_1.expect(names[0]).to.equal('public ' + server.serverNumber);
+                        (0, chai_1.expect)(names).to.have.lengthOf(1);
+                        (0, chai_1.expect)(names[0]).to.equal('public ' + server.serverNumber);
                     }
                 }
             });
         });
         it('Should display all local videos by the admin or the moderator', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 for (const server of servers) {
                     for (const token of [server.accessToken, server['moderatorAccessToken']]) {
                         const namesResults = yield getVideosNames(server, token, 'all-local');
                         for (const names of namesResults) {
-                            chai_1.expect(names).to.have.lengthOf(3);
-                            chai_1.expect(names[0]).to.equal('public ' + server.serverNumber);
-                            chai_1.expect(names[1]).to.equal('unlisted ' + server.serverNumber);
-                            chai_1.expect(names[2]).to.equal('private ' + server.serverNumber);
+                            (0, chai_1.expect)(names).to.have.lengthOf(3);
+                            (0, chai_1.expect)(names[0]).to.equal('public ' + server.serverNumber);
+                            (0, chai_1.expect)(names[1]).to.equal('unlisted ' + server.serverNumber);
+                            (0, chai_1.expect)(names[2]).to.equal('private ' + server.serverNumber);
                         }
                     }
                 }
             });
         });
         it('Should display all videos by the admin or the moderator', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 for (const server of servers) {
                     for (const token of [server.accessToken, server['moderatorAccessToken']]) {
                         const [channelVideos, accountVideos, videos, searchVideos] = yield getVideosNames(server, token, 'all');
-                        chai_1.expect(channelVideos).to.have.lengthOf(3);
-                        chai_1.expect(accountVideos).to.have.lengthOf(3);
-                        chai_1.expect(videos).to.have.lengthOf(5);
-                        chai_1.expect(searchVideos).to.have.lengthOf(5);
+                        (0, chai_1.expect)(channelVideos).to.have.lengthOf(3);
+                        (0, chai_1.expect)(accountVideos).to.have.lengthOf(3);
+                        (0, chai_1.expect)(videos).to.have.lengthOf(5);
+                        (0, chai_1.expect)(searchVideos).to.have.lengthOf(5);
                     }
                 }
             });
         });
     });
     after(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            yield extra_utils_1.cleanupTests(servers);
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            yield (0, extra_utils_1.cleanupTests)(servers);
         });
     });
 });

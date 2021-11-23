@@ -27,12 +27,12 @@ function buildNextVideoState(currentState) {
 }
 exports.buildNextVideoState = buildNextVideoState;
 function moveToNextState(video, isNewVideo = true) {
-    return database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const videoDatabase = yield video_1.VideoModel.loadAndPopulateAccountAndServerAndTags(video.uuid, t);
         if (!videoDatabase)
             return undefined;
         if (videoDatabase.state === 1) {
-            return videos_1.federateVideoIfNeeded(videoDatabase, false, t);
+            return (0, videos_1.federateVideoIfNeeded)(videoDatabase, false, t);
         }
         const newState = buildNextVideoState(videoDatabase.state);
         if (newState === 1) {
@@ -45,11 +45,11 @@ function moveToNextState(video, isNewVideo = true) {
 }
 exports.moveToNextState = moveToNextState;
 function moveToPublishedState(video, isNewVideo, transaction) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         logger_1.logger.info('Publishing video %s.', video.uuid, { tags: [video.uuid] });
         const previousState = video.state;
         yield video.setNewState(1, isNewVideo, transaction);
-        yield videos_1.federateVideoIfNeeded(video, isNewVideo, transaction);
+        yield (0, videos_1.federateVideoIfNeeded)(video, isNewVideo, transaction);
         if (isNewVideo)
             notifier_1.Notifier.Instance.notifyOnNewVideoIfNeeded(video);
         if (previousState === 2) {
@@ -58,14 +58,14 @@ function moveToPublishedState(video, isNewVideo, transaction) {
     });
 }
 function moveToExternalStorageState(video, isNewVideo, transaction) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const videoJobInfo = yield video_job_info_1.VideoJobInfoModel.load(video.id, transaction);
         const pendingTranscode = (videoJobInfo === null || videoJobInfo === void 0 ? void 0 : videoJobInfo.pendingTranscode) || 0;
         if (pendingTranscode !== 0)
             return;
         yield video.setNewState(6, isNewVideo, transaction);
         logger_1.logger.info('Creating external storage move job for video %s.', video.uuid, { tags: [video.uuid] });
-        video_2.addMoveToObjectStorageJob(video, isNewVideo)
+        (0, video_2.addMoveToObjectStorageJob)(video, isNewVideo)
             .catch(err => logger_1.logger.error('Cannot add move to object storage job', { err }));
     });
 }

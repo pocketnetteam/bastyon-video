@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = tslib_1.__importStar(require("chai"));
+const chai = (0, tslib_1.__importStar)(require("chai"));
 const extra_utils_1 = require("@shared/extra-utils");
 const models_1 = require("@shared/models");
 const expect = chai.expect;
@@ -33,9 +33,9 @@ describe('Test handle downs', function () {
     let unlistedCheckAttributes;
     let commentCommands;
     before(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(30000);
-            servers = yield extra_utils_1.createMultipleServers(3);
+            servers = yield (0, extra_utils_1.createMultipleServers)(3);
             commentCommands = servers.map(s => s.comments);
             checkAttributes = {
                 name: 'my super name for server 1',
@@ -70,28 +70,28 @@ describe('Test handle downs', function () {
                 ]
             };
             unlistedCheckAttributes = Object.assign(Object.assign({}, checkAttributes), { privacy: 2 });
-            yield extra_utils_1.setAccessTokensToServers(servers);
+            yield (0, extra_utils_1.setAccessTokensToServers)(servers);
         });
     });
     it('Should remove followers that are often down', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(240000);
             yield servers[1].follows.follow({ hosts: [servers[0].url] });
             yield servers[2].follows.follow({ hosts: [servers[0].url] });
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.waitJobs)(servers);
             yield servers[0].videos.upload({ attributes: videoAttributes });
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.waitJobs)(servers);
             for (const server of servers) {
                 const { data } = yield server.videos.list();
                 expect(data).to.be.an('array');
                 expect(data).to.have.lengthOf(1);
             }
-            yield extra_utils_1.killallServers([servers[1]]);
+            yield (0, extra_utils_1.killallServers)([servers[1]]);
             for (let i = 0; i < 10; i++) {
                 yield servers[0].videos.upload({ attributes: videoAttributes });
             }
-            yield extra_utils_1.waitJobs([servers[0], servers[2]]);
-            yield extra_utils_1.killallServers([servers[2]]);
+            yield (0, extra_utils_1.waitJobs)([servers[0], servers[2]]);
+            yield (0, extra_utils_1.killallServers)([servers[2]]);
             missedVideo1 = yield servers[0].videos.upload({ attributes: videoAttributes });
             missedVideo2 = yield servers[0].videos.upload({ attributes: videoAttributes });
             unlistedVideo = yield servers[0].videos.upload({ attributes: unlistedVideoAttributes });
@@ -103,8 +103,8 @@ describe('Test handle downs', function () {
                 const created = yield commentCommands[0].addReply({ videoId: missedVideo2.uuid, toCommentId: comment.id, text: 'comment 1-2' });
                 commentIdServer1 = created.id;
             }
-            yield extra_utils_1.waitJobs(servers[0]);
-            yield extra_utils_1.wait(11000);
+            yield (0, extra_utils_1.waitJobs)(servers[0]);
+            yield (0, extra_utils_1.wait)(11000);
             const body = yield servers[0].follows.getFollowers({ start: 0, count: 2, sort: 'createdAt' });
             expect(body.data).to.be.an('array');
             expect(body.data).to.have.lengthOf(1);
@@ -112,7 +112,7 @@ describe('Test handle downs', function () {
         });
     });
     it('Should not have pending/processing jobs anymore', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const states = ['waiting', 'active'];
             for (const state of states) {
                 const body = yield servers[0].jobs.list({
@@ -126,21 +126,21 @@ describe('Test handle downs', function () {
         });
     });
     it('Should re-follow server 1', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(35000);
             yield servers[1].run();
             yield servers[2].run();
             yield servers[1].follows.unfollow({ target: servers[0] });
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.waitJobs)(servers);
             yield servers[1].follows.follow({ hosts: [servers[0].url] });
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.waitJobs)(servers);
             const body = yield servers[0].follows.getFollowers({ start: 0, count: 2, sort: 'createdAt' });
             expect(body.data).to.be.an('array');
             expect(body.data).to.have.lengthOf(2);
         });
     });
     it('Should send an update to server 3, and automatically fetch the video', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(15000);
             {
                 const { data } = yield servers[2].videos.list();
@@ -149,21 +149,21 @@ describe('Test handle downs', function () {
             }
             yield servers[0].videos.update({ id: missedVideo1.uuid });
             yield servers[0].videos.update({ id: unlistedVideo.uuid });
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.waitJobs)(servers);
             {
                 const { data } = yield servers[2].videos.list();
                 expect(data).to.be.an('array');
                 expect(data).to.have.lengthOf(12);
             }
             const video = yield servers[2].videos.get({ id: unlistedVideo.uuid });
-            yield extra_utils_1.completeVideoCheck(servers[2], video, unlistedCheckAttributes);
+            yield (0, extra_utils_1.completeVideoCheck)(servers[2], video, unlistedCheckAttributes);
         });
     });
     it('Should send comments on a video to server 3, and automatically fetch the video', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(25000);
             yield commentCommands[0].addReply({ videoId: missedVideo2.uuid, toCommentId: commentIdServer1, text: 'comment 1-3' });
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.waitJobs)(servers);
             yield servers[2].videos.get({ id: missedVideo2.uuid });
             {
                 const { data } = yield servers[2].comments.listThreads({ videoId: missedVideo2.uuid });
@@ -187,10 +187,10 @@ describe('Test handle downs', function () {
         });
     });
     it('Should correctly reply to the comment', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(15000);
             yield servers[2].comments.addReply({ videoId: missedVideo2.uuid, toCommentId: commentIdServer2, text: 'comment 1-4' });
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.waitJobs)(servers);
             const tree = yield commentCommands[0].getThread({ videoId: missedVideo2.uuid, threadId: threadIdServer1 });
             expect(tree.comment.text).equal('thread 1');
             expect(tree.children).to.have.lengthOf(1);
@@ -209,33 +209,33 @@ describe('Test handle downs', function () {
         });
     });
     it('Should upload many videos on server 1', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(120000);
             for (let i = 0; i < 10; i++) {
                 const uuid = (yield servers[0].videos.quickUpload({ name: 'video ' + i })).uuid;
                 videoIdsServer1.push(uuid);
             }
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.waitJobs)(servers);
             for (const id of videoIdsServer1) {
                 yield servers[1].videos.get({ id });
             }
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.waitJobs)(servers);
             yield servers[1].sql.setActorFollowScores(20);
-            yield extra_utils_1.wait(11000);
+            yield (0, extra_utils_1.wait)(11000);
             yield servers[1].videos.get({ id: videoIdsServer1[0] });
-            yield extra_utils_1.waitJobs(servers);
+            yield (0, extra_utils_1.waitJobs)(servers);
         });
     });
     it('Should remove followings that are down', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(120000);
-            yield extra_utils_1.killallServers([servers[0]]);
-            yield extra_utils_1.wait(11000);
+            yield (0, extra_utils_1.killallServers)([servers[0]]);
+            yield (0, extra_utils_1.wait)(11000);
             for (let i = 0; i < 5; i++) {
                 try {
                     yield servers[1].videos.get({ id: videoIdsServer1[i] });
-                    yield extra_utils_1.waitJobs([servers[1]]);
-                    yield extra_utils_1.wait(1500);
+                    yield (0, extra_utils_1.waitJobs)([servers[1]]);
+                    yield (0, extra_utils_1.wait)(1500);
                 }
                 catch (_a) { }
             }
@@ -245,8 +245,8 @@ describe('Test handle downs', function () {
         });
     });
     after(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            yield extra_utils_1.cleanupTests(servers);
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            yield (0, extra_utils_1.cleanupTests)(servers);
         });
     });
 });

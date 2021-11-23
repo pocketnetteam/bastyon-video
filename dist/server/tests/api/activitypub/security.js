@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = tslib_1.__importStar(require("chai"));
+const chai = (0, tslib_1.__importStar)(require("chai"));
 const activitypub_1 = require("@server/helpers/activitypub");
 const peertube_crypto_1 = require("@server/helpers/peertube-crypto");
 const constants_1 = require("@server/initializers/constants");
@@ -26,7 +26,7 @@ function setUpdatedAtOfServer(onServer, ofServer, updatedAt) {
     ]);
 }
 function getAnnounceWithoutContext(server) {
-    const json = require(extra_utils_1.buildAbsoluteFixturePath('./ap-json/peertube/announce-without-context.json'));
+    const json = require((0, extra_utils_1.buildAbsoluteFixturePath)('./ap-json/peertube/announce-without-context.json'));
     const result = {};
     for (const key of Object.keys(json)) {
         if (Array.isArray(json[key])) {
@@ -41,8 +41,8 @@ function getAnnounceWithoutContext(server) {
 describe('Test ActivityPub security', function () {
     let servers;
     let url;
-    const keys = require(extra_utils_1.buildAbsoluteFixturePath('./ap-json/peertube/keys.json'));
-    const invalidKeys = require(extra_utils_1.buildAbsoluteFixturePath('./ap-json/peertube/invalid-keys.json'));
+    const keys = require((0, extra_utils_1.buildAbsoluteFixturePath)('./ap-json/peertube/keys.json'));
+    const invalidKeys = require((0, extra_utils_1.buildAbsoluteFixturePath)('./ap-json/peertube/invalid-keys.json'));
     const baseHttpSignature = () => ({
         algorithm: constants_1.HTTP_SIGNATURE.ALGORITHM,
         authorizationHeaderName: constants_1.HTTP_SIGNATURE.HEADER_NAME,
@@ -51,26 +51,26 @@ describe('Test ActivityPub security', function () {
         headers: constants_1.HTTP_SIGNATURE.HEADERS_TO_SIGN
     });
     before(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(60000);
-            servers = yield extra_utils_1.createMultipleServers(3);
+            servers = yield (0, extra_utils_1.createMultipleServers)(3);
             url = servers[0].url + '/inbox';
             yield setKeysOfServer(servers[0], servers[1], keys.publicKey, null);
             yield setKeysOfServer(servers[1], servers[1], keys.publicKey, keys.privateKey);
             const to = { url: 'http://localhost:' + servers[0].port + '/accounts/peertube' };
             const by = { url: 'http://localhost:' + servers[1].port + '/accounts/peertube', privateKey: keys.privateKey };
-            yield activitypub_2.makeFollowRequest(to, by);
+            yield (0, activitypub_2.makeFollowRequest)(to, by);
         });
     });
     describe('When checking HTTP signature', function () {
         it('Should fail with an invalid digest', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                const body = activitypub_1.activityPubContextify(getAnnounceWithoutContext(servers[1]));
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                const body = (0, activitypub_1.activityPubContextify)(getAnnounceWithoutContext(servers[1]));
                 const headers = {
-                    Digest: peertube_crypto_1.buildDigest({ hello: 'coucou' })
+                    Digest: (0, peertube_crypto_1.buildDigest)({ hello: 'coucou' })
                 };
                 try {
-                    yield activitypub_2.makePOSTAPRequest(url, body, baseHttpSignature(), headers);
+                    yield (0, activitypub_2.makePOSTAPRequest)(url, body, baseHttpSignature(), headers);
                     expect(true, 'Did not throw').to.be.false;
                 }
                 catch (err) {
@@ -79,12 +79,12 @@ describe('Test ActivityPub security', function () {
             });
         });
         it('Should fail with an invalid date', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                const body = activitypub_1.activityPubContextify(getAnnounceWithoutContext(servers[1]));
-                const headers = activitypub_http_utils_1.buildGlobalHeaders(body);
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                const body = (0, activitypub_1.activityPubContextify)(getAnnounceWithoutContext(servers[1]));
+                const headers = (0, activitypub_http_utils_1.buildGlobalHeaders)(body);
                 headers['date'] = 'Wed, 21 Oct 2015 07:28:00 GMT';
                 try {
-                    yield activitypub_2.makePOSTAPRequest(url, body, baseHttpSignature(), headers);
+                    yield (0, activitypub_2.makePOSTAPRequest)(url, body, baseHttpSignature(), headers);
                     expect(true, 'Did not throw').to.be.false;
                 }
                 catch (err) {
@@ -93,13 +93,13 @@ describe('Test ActivityPub security', function () {
             });
         });
         it('Should fail with bad keys', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 yield setKeysOfServer(servers[0], servers[1], invalidKeys.publicKey, invalidKeys.privateKey);
                 yield setKeysOfServer(servers[1], servers[1], invalidKeys.publicKey, invalidKeys.privateKey);
-                const body = activitypub_1.activityPubContextify(getAnnounceWithoutContext(servers[1]));
-                const headers = activitypub_http_utils_1.buildGlobalHeaders(body);
+                const body = (0, activitypub_1.activityPubContextify)(getAnnounceWithoutContext(servers[1]));
+                const headers = (0, activitypub_http_utils_1.buildGlobalHeaders)(body);
                 try {
-                    yield activitypub_2.makePOSTAPRequest(url, body, baseHttpSignature(), headers);
+                    yield (0, activitypub_2.makePOSTAPRequest)(url, body, baseHttpSignature(), headers);
                     expect(true, 'Did not throw').to.be.false;
                 }
                 catch (err) {
@@ -108,11 +108,11 @@ describe('Test ActivityPub security', function () {
             });
         });
         it('Should reject requests without appropriate signed headers', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 yield setKeysOfServer(servers[0], servers[1], keys.publicKey, keys.privateKey);
                 yield setKeysOfServer(servers[1], servers[1], keys.publicKey, keys.privateKey);
-                const body = activitypub_1.activityPubContextify(getAnnounceWithoutContext(servers[1]));
-                const headers = activitypub_http_utils_1.buildGlobalHeaders(body);
+                const body = (0, activitypub_1.activityPubContextify)(getAnnounceWithoutContext(servers[1]));
+                const headers = (0, activitypub_http_utils_1.buildGlobalHeaders)(body);
                 const signatureOptions = baseHttpSignature();
                 const badHeadersMatrix = [
                     ['(request-target)', 'date', 'digest'],
@@ -122,7 +122,7 @@ describe('Test ActivityPub security', function () {
                 for (const badHeaders of badHeadersMatrix) {
                     signatureOptions.headers = badHeaders;
                     try {
-                        yield activitypub_2.makePOSTAPRequest(url, body, signatureOptions, headers);
+                        yield (0, activitypub_2.makePOSTAPRequest)(url, body, signatureOptions, headers);
                         expect(true, 'Did not throw').to.be.false;
                     }
                     catch (err) {
@@ -132,24 +132,24 @@ describe('Test ActivityPub security', function () {
             });
         });
         it('Should succeed with a valid HTTP signature', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                const body = activitypub_1.activityPubContextify(getAnnounceWithoutContext(servers[1]));
-                const headers = activitypub_http_utils_1.buildGlobalHeaders(body);
-                const { statusCode } = yield activitypub_2.makePOSTAPRequest(url, body, baseHttpSignature(), headers);
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                const body = (0, activitypub_1.activityPubContextify)(getAnnounceWithoutContext(servers[1]));
+                const headers = (0, activitypub_http_utils_1.buildGlobalHeaders)(body);
+                const { statusCode } = yield (0, activitypub_2.makePOSTAPRequest)(url, body, baseHttpSignature(), headers);
                 expect(statusCode).to.equal(models_1.HttpStatusCode.NO_CONTENT_204);
             });
         });
         it('Should refresh the actor keys', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(20000);
                 yield setKeysOfServer(servers[1], servers[1], invalidKeys.publicKey, invalidKeys.privateKey);
                 yield setUpdatedAtOfServer(servers[0], servers[1], '2015-07-17 22:00:00+00');
-                yield extra_utils_1.killallServers([servers[1]]);
+                yield (0, extra_utils_1.killallServers)([servers[1]]);
                 yield servers[1].run();
-                const body = activitypub_1.activityPubContextify(getAnnounceWithoutContext(servers[1]));
-                const headers = activitypub_http_utils_1.buildGlobalHeaders(body);
+                const body = (0, activitypub_1.activityPubContextify)(getAnnounceWithoutContext(servers[1]));
+                const headers = (0, activitypub_http_utils_1.buildGlobalHeaders)(body);
                 try {
-                    yield activitypub_2.makePOSTAPRequest(url, body, baseHttpSignature(), headers);
+                    yield (0, activitypub_2.makePOSTAPRequest)(url, body, baseHttpSignature(), headers);
                     expect(true, 'Did not throw').to.be.false;
                 }
                 catch (err) {
@@ -161,28 +161,28 @@ describe('Test ActivityPub security', function () {
     });
     describe('When checking Linked Data Signature', function () {
         before(function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 yield setKeysOfServer(servers[0], servers[1], keys.publicKey, keys.privateKey);
                 yield setKeysOfServer(servers[1], servers[1], keys.publicKey, keys.privateKey);
                 yield setKeysOfServer(servers[2], servers[2], keys.publicKey, keys.privateKey);
                 const to = { url: 'http://localhost:' + servers[0].port + '/accounts/peertube' };
                 const by = { url: 'http://localhost:' + servers[2].port + '/accounts/peertube', privateKey: keys.privateKey };
-                yield activitypub_2.makeFollowRequest(to, by);
+                yield (0, activitypub_2.makeFollowRequest)(to, by);
             });
         });
         it('Should fail with bad keys', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 yield setKeysOfServer(servers[0], servers[2], invalidKeys.publicKey, invalidKeys.privateKey);
                 yield setKeysOfServer(servers[2], servers[2], invalidKeys.publicKey, invalidKeys.privateKey);
                 const body = getAnnounceWithoutContext(servers[1]);
                 body.actor = 'http://localhost:' + servers[2].port + '/accounts/peertube';
                 const signer = { privateKey: invalidKeys.privateKey, url: 'http://localhost:' + servers[2].port + '/accounts/peertube' };
-                const signedBody = yield activitypub_1.buildSignedActivity(signer, body);
-                const headers = activitypub_http_utils_1.buildGlobalHeaders(signedBody);
+                const signedBody = yield (0, activitypub_1.buildSignedActivity)(signer, body);
+                const headers = (0, activitypub_http_utils_1.buildGlobalHeaders)(signedBody);
                 try {
-                    yield activitypub_2.makePOSTAPRequest(url, signedBody, baseHttpSignature(), headers);
+                    yield (0, activitypub_2.makePOSTAPRequest)(url, signedBody, baseHttpSignature(), headers);
                     expect(true, 'Did not throw').to.be.false;
                 }
                 catch (err) {
@@ -191,18 +191,18 @@ describe('Test ActivityPub security', function () {
             });
         });
         it('Should fail with an altered body', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 yield setKeysOfServer(servers[0], servers[2], keys.publicKey, keys.privateKey);
                 yield setKeysOfServer(servers[0], servers[2], keys.publicKey, keys.privateKey);
                 const body = getAnnounceWithoutContext(servers[1]);
                 body.actor = 'http://localhost:' + servers[2].port + '/accounts/peertube';
                 const signer = { privateKey: keys.privateKey, url: 'http://localhost:' + servers[2].port + '/accounts/peertube' };
-                const signedBody = yield activitypub_1.buildSignedActivity(signer, body);
+                const signedBody = yield (0, activitypub_1.buildSignedActivity)(signer, body);
                 signedBody.actor = 'http://localhost:' + servers[2].port + '/account/peertube';
-                const headers = activitypub_http_utils_1.buildGlobalHeaders(signedBody);
+                const headers = (0, activitypub_http_utils_1.buildGlobalHeaders)(signedBody);
                 try {
-                    yield activitypub_2.makePOSTAPRequest(url, signedBody, baseHttpSignature(), headers);
+                    yield (0, activitypub_2.makePOSTAPRequest)(url, signedBody, baseHttpSignature(), headers);
                     expect(true, 'Did not throw').to.be.false;
                 }
                 catch (err) {
@@ -211,29 +211,29 @@ describe('Test ActivityPub security', function () {
             });
         });
         it('Should succeed with a valid signature', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 const body = getAnnounceWithoutContext(servers[1]);
                 body.actor = 'http://localhost:' + servers[2].port + '/accounts/peertube';
                 const signer = { privateKey: keys.privateKey, url: 'http://localhost:' + servers[2].port + '/accounts/peertube' };
-                const signedBody = yield activitypub_1.buildSignedActivity(signer, body);
-                const headers = activitypub_http_utils_1.buildGlobalHeaders(signedBody);
-                const { statusCode } = yield activitypub_2.makePOSTAPRequest(url, signedBody, baseHttpSignature(), headers);
+                const signedBody = yield (0, activitypub_1.buildSignedActivity)(signer, body);
+                const headers = (0, activitypub_http_utils_1.buildGlobalHeaders)(signedBody);
+                const { statusCode } = yield (0, activitypub_2.makePOSTAPRequest)(url, signedBody, baseHttpSignature(), headers);
                 expect(statusCode).to.equal(models_1.HttpStatusCode.NO_CONTENT_204);
             });
         });
         it('Should refresh the actor keys', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(20000);
-                yield extra_utils_1.wait(10000);
+                yield (0, extra_utils_1.wait)(10000);
                 yield setKeysOfServer(servers[2], servers[2], invalidKeys.publicKey, invalidKeys.privateKey);
                 const body = getAnnounceWithoutContext(servers[1]);
                 body.actor = 'http://localhost:' + servers[2].port + '/accounts/peertube';
                 const signer = { privateKey: keys.privateKey, url: 'http://localhost:' + servers[2].port + '/accounts/peertube' };
-                const signedBody = yield activitypub_1.buildSignedActivity(signer, body);
-                const headers = activitypub_http_utils_1.buildGlobalHeaders(signedBody);
+                const signedBody = yield (0, activitypub_1.buildSignedActivity)(signer, body);
+                const headers = (0, activitypub_http_utils_1.buildGlobalHeaders)(signedBody);
                 try {
-                    yield activitypub_2.makePOSTAPRequest(url, signedBody, baseHttpSignature(), headers);
+                    yield (0, activitypub_2.makePOSTAPRequest)(url, signedBody, baseHttpSignature(), headers);
                     expect(true, 'Did not throw').to.be.false;
                 }
                 catch (err) {
@@ -243,9 +243,9 @@ describe('Test ActivityPub security', function () {
         });
     });
     after(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(10000);
-            yield extra_utils_1.cleanupTests(servers);
+            yield (0, extra_utils_1.cleanupTests)(servers);
         });
     });
 });

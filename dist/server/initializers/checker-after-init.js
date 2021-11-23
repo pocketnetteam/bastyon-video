@@ -15,8 +15,8 @@ const oauth_client_1 = require("../models/oauth/oauth-client");
 const config_2 = require("./config");
 const constants_1 = require("./constants");
 function checkActivityPubUrls() {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        const actor = yield application_1.getServerActor();
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        const actor = yield (0, application_1.getServerActor)();
         const parsed = new url_1.URL(actor.url);
         if (constants_1.WEBSERVER.HOST !== parsed.host) {
             const NODE_ENV = config_1.util.getEnv('NODE_ENV');
@@ -29,10 +29,10 @@ function checkActivityPubUrls() {
 }
 exports.checkActivityPubUrls = checkActivityPubUrls;
 function checkConfig() {
-    if (config_1.has('services.csp-logger')) {
+    if ((0, config_1.has)('services.csp-logger')) {
         logger_1.logger.warn('services.csp-logger configuration has been renamed to csp.report_uri. Please update your configuration file.');
     }
-    if (!config_2.isEmailEnabled()) {
+    if (!(0, config_2.isEmailEnabled)()) {
         if (config_2.CONFIG.SIGNUP.ENABLED && config_2.CONFIG.SIGNUP.REQUIRES_EMAIL_VERIFICATION) {
             return 'Emailer is disabled but you require signup email verification.';
         }
@@ -48,17 +48,17 @@ function checkConfig() {
         }
     }
     const redundancyVideos = config_2.CONFIG.REDUNDANCY.VIDEOS.STRATEGIES;
-    if (misc_1.isArray(redundancyVideos)) {
+    if ((0, misc_1.isArray)(redundancyVideos)) {
         const available = ['most-views', 'trending', 'recently-added'];
         for (const r of redundancyVideos) {
             if (available.includes(r.strategy) === false) {
                 return 'Videos redundancy should have ' + available.join(' or ') + ' strategy instead of ' + r.strategy;
             }
-            if (!core_utils_1.isTestInstance() && r.minLifetime < 1000 * 3600 * 10) {
+            if (!(0, core_utils_1.isTestInstance)() && r.minLifetime < 1000 * 3600 * 10) {
                 r.minLifetime = 1000 * 3600 * 10;
             }
         }
-        const filtered = lodash_1.uniq(redundancyVideos.map(r => r.strategy));
+        const filtered = (0, lodash_1.uniq)(redundancyVideos.map(r => r.strategy));
         if (filtered.length !== redundancyVideos.length) {
             return 'Redundancy video entries should have unique strategies';
         }
@@ -75,8 +75,8 @@ function checkConfig() {
     if (acceptFromValues.has(acceptFrom) === false) {
         return 'remote_redundancy.videos.accept_from has an incorrect value';
     }
-    if (core_utils_1.isProdInstance()) {
-        const configStorage = config_1.get('storage');
+    if ((0, core_utils_1.isProdInstance)()) {
+        const configStorage = (0, config_1.get)('storage');
         for (const key of Object.keys(configStorage)) {
             if (configStorage[key].startsWith('storage/')) {
                 logger_1.logger.warn('Directory of %s should not be in the production directory of PeerTube. Please check your production configuration file.', key);
@@ -137,30 +137,30 @@ function checkConfig() {
 }
 exports.checkConfig = checkConfig;
 function clientsExist() {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const totalClients = yield oauth_client_1.OAuthClientModel.countTotal();
         return totalClients !== 0;
     });
 }
 exports.clientsExist = clientsExist;
 function usersExist() {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const totalUsers = yield user_1.UserModel.countTotal();
         return totalUsers !== 0;
     });
 }
 exports.usersExist = usersExist;
 function applicationExist() {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const totalApplication = yield application_1.ApplicationModel.countTotal();
         return totalApplication !== 0;
     });
 }
 exports.applicationExist = applicationExist;
 function checkFFmpegVersion() {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        const version = yield ffmpeg_utils_1.getFFmpegVersion();
-        const { major, minor } = core_utils_1.parseSemVersion(version);
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        const version = yield (0, ffmpeg_utils_1.getFFmpegVersion)();
+        const { major, minor } = (0, core_utils_1.parseSemVersion)(version);
         if (major < 4 || (major === 4 && minor < 1)) {
             logger_1.logger.warn('Your ffmpeg version (%s) is outdated. PeerTube supports ffmpeg >= 4.1. Please upgrade.', version);
         }

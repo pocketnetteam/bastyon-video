@@ -147,32 +147,32 @@ function root() {
     if (rootPath)
         return rootPath;
     rootPath = __dirname;
-    if (path_1.basename(rootPath) === 'helpers')
-        rootPath = path_1.resolve(rootPath, '..');
-    if (path_1.basename(rootPath) === 'server')
-        rootPath = path_1.resolve(rootPath, '..');
-    if (path_1.basename(rootPath) === 'dist')
-        rootPath = path_1.resolve(rootPath, '..');
+    if ((0, path_1.basename)(rootPath) === 'helpers')
+        rootPath = (0, path_1.resolve)(rootPath, '..');
+    if ((0, path_1.basename)(rootPath) === 'server')
+        rootPath = (0, path_1.resolve)(rootPath, '..');
+    if ((0, path_1.basename)(rootPath) === 'dist')
+        rootPath = (0, path_1.resolve)(rootPath, '..');
     return rootPath;
 }
 exports.root = root;
 function buildPath(path) {
-    if (path_1.isAbsolute(path))
+    if ((0, path_1.isAbsolute)(path))
         return path;
-    return path_1.join(root(), path);
+    return (0, path_1.join)(root(), path);
 }
 exports.buildPath = buildPath;
 function getLowercaseExtension(filename) {
-    const ext = path_1.extname(filename) || '';
+    const ext = (0, path_1.extname)(filename) || '';
     return ext.toLowerCase();
 }
 exports.getLowercaseExtension = getLowercaseExtension;
 function peertubeTruncate(str, options) {
-    const truncatedStr = lodash_1.truncate(str, options);
+    const truncatedStr = (0, lodash_1.truncate)(str, options);
     if (truncatedStr.length <= options.length)
         return truncatedStr;
     options.length -= truncatedStr.length - options.length;
-    return lodash_1.truncate(str, options);
+    return (0, lodash_1.truncate)(str, options);
 }
 exports.peertubeTruncate = peertubeTruncate;
 function pageToStartAndCount(page, itemsPerPage) {
@@ -190,16 +190,16 @@ function parseSemVersion(s) {
 }
 exports.parseSemVersion = parseSemVersion;
 function sha256(str, encoding = 'hex') {
-    return crypto_1.createHash('sha256').update(str).digest(encoding);
+    return (0, crypto_1.createHash)('sha256').update(str).digest(encoding);
 }
 exports.sha256 = sha256;
 function sha1(str, encoding = 'hex') {
-    return crypto_1.createHash('sha1').update(str).digest(encoding);
+    return (0, crypto_1.createHash)('sha1').update(str).digest(encoding);
 }
 exports.sha1 = sha1;
 function execShell(command, options) {
     return new Promise((res, rej) => {
-        child_process_1.exec(command, options, (err, stdout, stderr) => {
+        (0, child_process_1.exec)(command, options, (err, stdout, stderr) => {
             if (err)
                 return rej({ err, stdout, stderr });
             return res({ stdout, stderr });
@@ -251,5 +251,5 @@ const execPromise2 = promisify2(child_process_1.exec);
 exports.execPromise2 = execPromise2;
 const execPromise = promisify1(child_process_1.exec);
 exports.execPromise = execPromise;
-const pipelinePromise = util_1.promisify(stream_1.pipeline);
+const pipelinePromise = (0, util_1.promisify)(stream_1.pipeline);
 exports.pipelinePromise = pipelinePromise;

@@ -18,9 +18,9 @@ const redis_1 = require("./redis");
 const video_channel_1 = require("./video-channel");
 const video_playlist_1 = require("./video-playlist");
 function createUserAccountAndChannelAndPlaylist(parameters) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const { userToCreate, userDisplayName, channelNames, validateUser = true } = parameters;
-        const { user, account, videoChannel } = yield database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const { user, account, videoChannel } = yield database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const userOptions = {
                 transaction: t,
                 validate: validateUser
@@ -36,13 +36,13 @@ function createUserAccountAndChannelAndPlaylist(parameters) {
             });
             userCreated.Account = accountCreated;
             const channelAttributes = yield buildChannelAttributes(userCreated, t, channelNames);
-            const videoChannel = yield video_channel_1.createLocalVideoChannel(channelAttributes, accountCreated, t);
-            const videoPlaylist = yield video_playlist_1.createWatchLaterPlaylist(accountCreated, t);
+            const videoChannel = yield (0, video_channel_1.createLocalVideoChannel)(channelAttributes, accountCreated, t);
+            const videoPlaylist = yield (0, video_playlist_1.createWatchLaterPlaylist)(accountCreated, t);
             return { user: userCreated, account: accountCreated, videoChannel, videoPlaylist };
         }));
         const [accountActorWithKeys, channelActorWithKeys] = yield Promise.all([
-            actors_1.generateAndSaveActorKeys(account.Actor),
-            actors_1.generateAndSaveActorKeys(videoChannel.Actor)
+            (0, actors_1.generateAndSaveActorKeys)(account.Actor),
+            (0, actors_1.generateAndSaveActorKeys)(videoChannel.Actor)
         ]);
         account.Actor = accountActorWithKeys;
         videoChannel.Actor = channelActorWithKeys;
@@ -51,10 +51,10 @@ function createUserAccountAndChannelAndPlaylist(parameters) {
 }
 exports.createUserAccountAndChannelAndPlaylist = createUserAccountAndChannelAndPlaylist;
 function createLocalAccountWithoutKeys(parameters) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const { name, displayName, userId, applicationId, t, type = 'Person' } = parameters;
-        const url = url_1.getLocalAccountActivityPubUrl(name);
-        const actorInstance = local_actor_1.buildActorInstance(type, url, name);
+        const url = (0, url_1.getLocalAccountActivityPubUrl)(name);
+        const actorInstance = (0, local_actor_1.buildActorInstance)(type, url, name);
         const actorInstanceCreated = yield actorInstance.save({ transaction: t });
         const accountInstance = new account_1.AccountModel({
             name: displayName || name,
@@ -69,7 +69,7 @@ function createLocalAccountWithoutKeys(parameters) {
 }
 exports.createLocalAccountWithoutKeys = createLocalAccountWithoutKeys;
 function createApplicationActor(applicationId) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const accountCreated = yield createLocalAccountWithoutKeys({
             name: constants_1.SERVER_ACTOR_NAME,
             userId: null,
@@ -77,13 +77,13 @@ function createApplicationActor(applicationId) {
             t: undefined,
             type: 'Application'
         });
-        accountCreated.Actor = yield actors_1.generateAndSaveActorKeys(accountCreated.Actor);
+        accountCreated.Actor = yield (0, actors_1.generateAndSaveActorKeys)(accountCreated.Actor);
         return accountCreated;
     });
 }
 exports.createApplicationActor = createApplicationActor;
 function sendVerifyUserEmail(user, isPendingEmail = false) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const verificationString = yield redis_1.Redis.Instance.setVerifyEmailVerificationString(user.id);
         let url = constants_1.WEBSERVER.URL + '/verify-account/email?userId=' + user.id + '&verificationString=' + verificationString;
         if (isPendingEmail)
@@ -95,7 +95,7 @@ function sendVerifyUserEmail(user, isPendingEmail = false) {
 }
 exports.sendVerifyUserEmail = sendVerifyUserEmail;
 function getOriginalVideoFileTotalFromUser(user) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const query = user_1.UserModel.generateUserQuotaBaseSQL({
             withSelect: true,
             whereUserId: '$userId'
@@ -106,7 +106,7 @@ function getOriginalVideoFileTotalFromUser(user) {
 }
 exports.getOriginalVideoFileTotalFromUser = getOriginalVideoFileTotalFromUser;
 function getOriginalVideoFileTotalDailyFromUser(user) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const query = user_1.UserModel.generateUserQuotaBaseSQL({
             withSelect: true,
             whereUserId: '$userId',
@@ -118,7 +118,7 @@ function getOriginalVideoFileTotalDailyFromUser(user) {
 }
 exports.getOriginalVideoFileTotalDailyFromUser = getOriginalVideoFileTotalDailyFromUser;
 function isAbleToUploadVideo(userId, newVideoSize) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const user = yield user_1.UserModel.loadById(userId);
         if (user.videoQuota === -1 && user.videoQuotaDaily === -1)
             return Promise.resolve(true);
@@ -159,13 +159,13 @@ function createDefaultUserNotificationSettings(user, t) {
     return user_notification_setting_1.UserNotificationSettingModel.create(values, { transaction: t });
 }
 function buildChannelAttributes(user, transaction, channelNames) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         if (channelNames)
             return channelNames;
         let channelName = user.username + '_channel';
         const actor = yield actor_1.ActorModel.loadLocalByName(channelName, transaction);
         if (actor)
-            channelName = uuid_1.buildUUID();
+            channelName = (0, uuid_1.buildUUID)();
         const videoChannelDisplayName = `Main ${user.username} channel`;
         return {
             name: channelName,

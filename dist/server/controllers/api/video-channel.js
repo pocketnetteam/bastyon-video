@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.videoChannelRouter = void 0;
 const tslib_1 = require("tslib");
-const express_1 = tslib_1.__importDefault(require("express"));
+const express_1 = (0, tslib_1.__importDefault)(require("express"));
 const query_1 = require("@server/helpers/query");
 const hooks_1 = require("@server/lib/plugins/hooks");
 const application_1 = require("@server/models/application/application");
@@ -27,78 +27,78 @@ const account_1 = require("../../models/account/account");
 const video_1 = require("../../models/video/video");
 const video_channel_2 = require("../../models/video/video-channel");
 const video_playlist_1 = require("../../models/video/video-playlist");
-const auditLogger = audit_logger_1.auditLoggerFactory('channels');
-const reqAvatarFile = express_utils_1.createReqFiles(['avatarfile'], constants_1.MIMETYPES.IMAGE.MIMETYPE_EXT, { avatarfile: config_1.CONFIG.STORAGE.TMP_DIR });
-const reqBannerFile = express_utils_1.createReqFiles(['bannerfile'], constants_1.MIMETYPES.IMAGE.MIMETYPE_EXT, { bannerfile: config_1.CONFIG.STORAGE.TMP_DIR });
+const auditLogger = (0, audit_logger_1.auditLoggerFactory)('channels');
+const reqAvatarFile = (0, express_utils_1.createReqFiles)(['avatarfile'], constants_1.MIMETYPES.IMAGE.MIMETYPE_EXT, { avatarfile: config_1.CONFIG.STORAGE.TMP_DIR });
+const reqBannerFile = (0, express_utils_1.createReqFiles)(['bannerfile'], constants_1.MIMETYPES.IMAGE.MIMETYPE_EXT, { bannerfile: config_1.CONFIG.STORAGE.TMP_DIR });
 const videoChannelRouter = express_1.default.Router();
 exports.videoChannelRouter = videoChannelRouter;
-videoChannelRouter.get('/', middlewares_1.paginationValidator, middlewares_1.videoChannelsSortValidator, middlewares_1.setDefaultSort, middlewares_1.setDefaultPagination, validators_1.videoChannelsListValidator, middlewares_1.asyncMiddleware(listVideoChannels));
-videoChannelRouter.post('/', middlewares_1.authenticate, middlewares_1.asyncMiddleware(middlewares_1.videoChannelsAddValidator), middlewares_1.asyncRetryTransactionMiddleware(addVideoChannel));
-videoChannelRouter.post('/:nameWithHost/avatar/pick', middlewares_1.authenticate, reqAvatarFile, middlewares_1.asyncMiddleware(middlewares_1.videoChannelsUpdateValidator), actor_image_1.updateAvatarValidator, middlewares_1.asyncMiddleware(updateVideoChannelAvatar));
-videoChannelRouter.post('/:nameWithHost/banner/pick', middlewares_1.authenticate, reqBannerFile, middlewares_1.asyncMiddleware(middlewares_1.videoChannelsUpdateValidator), actor_image_1.updateBannerValidator, middlewares_1.asyncMiddleware(updateVideoChannelBanner));
-videoChannelRouter.delete('/:nameWithHost/avatar', middlewares_1.authenticate, middlewares_1.asyncMiddleware(middlewares_1.videoChannelsUpdateValidator), middlewares_1.asyncMiddleware(deleteVideoChannelAvatar));
-videoChannelRouter.delete('/:nameWithHost/banner', middlewares_1.authenticate, middlewares_1.asyncMiddleware(middlewares_1.videoChannelsUpdateValidator), middlewares_1.asyncMiddleware(deleteVideoChannelBanner));
-videoChannelRouter.put('/:nameWithHost', middlewares_1.authenticate, middlewares_1.asyncMiddleware(middlewares_1.videoChannelsUpdateValidator), middlewares_1.asyncRetryTransactionMiddleware(updateVideoChannel));
-videoChannelRouter.delete('/:nameWithHost', middlewares_1.authenticate, middlewares_1.asyncMiddleware(middlewares_1.videoChannelsRemoveValidator), middlewares_1.asyncRetryTransactionMiddleware(removeVideoChannel));
-videoChannelRouter.get('/:nameWithHost', middlewares_1.asyncMiddleware(validators_1.videoChannelsNameWithHostValidator), getVideoChannel);
-videoChannelRouter.get('/:nameWithHost/video-playlists', middlewares_1.asyncMiddleware(validators_1.videoChannelsNameWithHostValidator), middlewares_1.paginationValidator, middlewares_1.videoPlaylistsSortValidator, middlewares_1.setDefaultSort, middlewares_1.setDefaultPagination, video_playlists_1.commonVideoPlaylistFiltersValidator, middlewares_1.asyncMiddleware(listVideoChannelPlaylists));
-videoChannelRouter.get('/:nameWithHost/videos', middlewares_1.asyncMiddleware(validators_1.videoChannelsNameWithHostValidator), middlewares_1.paginationValidator, validators_1.videosSortValidator, middlewares_1.setDefaultVideosSort, middlewares_1.setDefaultPagination, middlewares_1.optionalAuthenticate, middlewares_1.commonVideosFiltersValidator, middlewares_1.asyncMiddleware(listVideoChannelVideos));
+videoChannelRouter.get('/', middlewares_1.paginationValidator, middlewares_1.videoChannelsSortValidator, middlewares_1.setDefaultSort, middlewares_1.setDefaultPagination, validators_1.videoChannelsListValidator, (0, middlewares_1.asyncMiddleware)(listVideoChannels));
+videoChannelRouter.post('/', middlewares_1.authenticate, (0, middlewares_1.asyncMiddleware)(middlewares_1.videoChannelsAddValidator), (0, middlewares_1.asyncRetryTransactionMiddleware)(addVideoChannel));
+videoChannelRouter.post('/:nameWithHost/avatar/pick', middlewares_1.authenticate, reqAvatarFile, (0, middlewares_1.asyncMiddleware)(middlewares_1.videoChannelsUpdateValidator), actor_image_1.updateAvatarValidator, (0, middlewares_1.asyncMiddleware)(updateVideoChannelAvatar));
+videoChannelRouter.post('/:nameWithHost/banner/pick', middlewares_1.authenticate, reqBannerFile, (0, middlewares_1.asyncMiddleware)(middlewares_1.videoChannelsUpdateValidator), actor_image_1.updateBannerValidator, (0, middlewares_1.asyncMiddleware)(updateVideoChannelBanner));
+videoChannelRouter.delete('/:nameWithHost/avatar', middlewares_1.authenticate, (0, middlewares_1.asyncMiddleware)(middlewares_1.videoChannelsUpdateValidator), (0, middlewares_1.asyncMiddleware)(deleteVideoChannelAvatar));
+videoChannelRouter.delete('/:nameWithHost/banner', middlewares_1.authenticate, (0, middlewares_1.asyncMiddleware)(middlewares_1.videoChannelsUpdateValidator), (0, middlewares_1.asyncMiddleware)(deleteVideoChannelBanner));
+videoChannelRouter.put('/:nameWithHost', middlewares_1.authenticate, (0, middlewares_1.asyncMiddleware)(middlewares_1.videoChannelsUpdateValidator), (0, middlewares_1.asyncRetryTransactionMiddleware)(updateVideoChannel));
+videoChannelRouter.delete('/:nameWithHost', middlewares_1.authenticate, (0, middlewares_1.asyncMiddleware)(middlewares_1.videoChannelsRemoveValidator), (0, middlewares_1.asyncRetryTransactionMiddleware)(removeVideoChannel));
+videoChannelRouter.get('/:nameWithHost', (0, middlewares_1.asyncMiddleware)(validators_1.videoChannelsNameWithHostValidator), getVideoChannel);
+videoChannelRouter.get('/:nameWithHost/video-playlists', (0, middlewares_1.asyncMiddleware)(validators_1.videoChannelsNameWithHostValidator), middlewares_1.paginationValidator, middlewares_1.videoPlaylistsSortValidator, middlewares_1.setDefaultSort, middlewares_1.setDefaultPagination, video_playlists_1.commonVideoPlaylistFiltersValidator, (0, middlewares_1.asyncMiddleware)(listVideoChannelPlaylists));
+videoChannelRouter.get('/:nameWithHost/videos', (0, middlewares_1.asyncMiddleware)(validators_1.videoChannelsNameWithHostValidator), middlewares_1.paginationValidator, validators_1.videosSortValidator, middlewares_1.setDefaultVideosSort, middlewares_1.setDefaultPagination, middlewares_1.optionalAuthenticate, middlewares_1.commonVideosFiltersValidator, (0, middlewares_1.asyncMiddleware)(listVideoChannelVideos));
 function listVideoChannels(req, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        const serverActor = yield application_1.getServerActor();
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        const serverActor = yield (0, application_1.getServerActor)();
         const resultList = yield video_channel_2.VideoChannelModel.listForApi({
             actorId: serverActor.id,
             start: req.query.start,
             count: req.query.count,
             sort: req.query.sort
         });
-        return res.json(utils_1.getFormattedObjects(resultList.data, resultList.total));
+        return res.json((0, utils_1.getFormattedObjects)(resultList.data, resultList.total));
     });
 }
 function updateVideoChannelBanner(req, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const bannerPhysicalFile = req.files['bannerfile'][0];
         const videoChannel = res.locals.videoChannel;
         const oldVideoChannelAuditKeys = new audit_logger_1.VideoChannelAuditView(videoChannel.toFormattedJSON());
-        const banner = yield local_actor_1.updateLocalActorImageFile(videoChannel, bannerPhysicalFile, 2);
-        auditLogger.update(audit_logger_1.getAuditIdFromRes(res), new audit_logger_1.VideoChannelAuditView(videoChannel.toFormattedJSON()), oldVideoChannelAuditKeys);
+        const banner = yield (0, local_actor_1.updateLocalActorImageFile)(videoChannel, bannerPhysicalFile, 2);
+        auditLogger.update((0, audit_logger_1.getAuditIdFromRes)(res), new audit_logger_1.VideoChannelAuditView(videoChannel.toFormattedJSON()), oldVideoChannelAuditKeys);
         return res.json({ banner: banner.toFormattedJSON() });
     });
 }
 function updateVideoChannelAvatar(req, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const avatarPhysicalFile = req.files['avatarfile'][0];
         const videoChannel = res.locals.videoChannel;
         const oldVideoChannelAuditKeys = new audit_logger_1.VideoChannelAuditView(videoChannel.toFormattedJSON());
-        const avatar = yield local_actor_1.updateLocalActorImageFile(videoChannel, avatarPhysicalFile, 1);
-        auditLogger.update(audit_logger_1.getAuditIdFromRes(res), new audit_logger_1.VideoChannelAuditView(videoChannel.toFormattedJSON()), oldVideoChannelAuditKeys);
+        const avatar = yield (0, local_actor_1.updateLocalActorImageFile)(videoChannel, avatarPhysicalFile, 1);
+        auditLogger.update((0, audit_logger_1.getAuditIdFromRes)(res), new audit_logger_1.VideoChannelAuditView(videoChannel.toFormattedJSON()), oldVideoChannelAuditKeys);
         return res.json({ avatar: avatar.toFormattedJSON() });
     });
 }
 function deleteVideoChannelAvatar(req, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const videoChannel = res.locals.videoChannel;
-        yield local_actor_1.deleteLocalActorImageFile(videoChannel, 1);
+        yield (0, local_actor_1.deleteLocalActorImageFile)(videoChannel, 1);
         return res.status(http_error_codes_1.HttpStatusCode.NO_CONTENT_204).end();
     });
 }
 function deleteVideoChannelBanner(req, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const videoChannel = res.locals.videoChannel;
-        yield local_actor_1.deleteLocalActorImageFile(videoChannel, 2);
+        yield (0, local_actor_1.deleteLocalActorImageFile)(videoChannel, 2);
         return res.status(http_error_codes_1.HttpStatusCode.NO_CONTENT_204).end();
     });
 }
 function addVideoChannel(req, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const videoChannelInfo = req.body;
-        const videoChannelCreated = yield database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const videoChannelCreated = yield database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const account = yield account_1.AccountModel.load(res.locals.oauth.token.User.Account.id, t);
-            return video_channel_1.createLocalVideoChannel(videoChannelInfo, account, t);
+            return (0, video_channel_1.createLocalVideoChannel)(videoChannelInfo, account, t);
         }));
         const payload = { actorId: videoChannelCreated.actorId };
         yield job_queue_1.JobQueue.Instance.createJobWithPromise({ type: 'actor-keys', payload });
-        auditLogger.create(audit_logger_1.getAuditIdFromRes(res), new audit_logger_1.VideoChannelAuditView(videoChannelCreated.toFormattedJSON()));
+        auditLogger.create((0, audit_logger_1.getAuditIdFromRes)(res), new audit_logger_1.VideoChannelAuditView(videoChannelCreated.toFormattedJSON()));
         logger_1.logger.info('Video channel %s created.', videoChannelCreated.Actor.url);
         return res.json({
             videoChannel: {
@@ -108,14 +108,14 @@ function addVideoChannel(req, res) {
     });
 }
 function updateVideoChannel(req, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const videoChannelInstance = res.locals.videoChannel;
         const videoChannelFieldsSave = videoChannelInstance.toJSON();
         const oldVideoChannelAuditKeys = new audit_logger_1.VideoChannelAuditView(videoChannelInstance.toFormattedJSON());
         const videoChannelInfoToUpdate = req.body;
         let doBulkVideoUpdate = false;
         try {
-            yield database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 if (videoChannelInfoToUpdate.displayName !== undefined)
                     videoChannelInstance.name = videoChannelInfoToUpdate.displayName;
                 if (videoChannelInfoToUpdate.description !== undefined)
@@ -129,29 +129,29 @@ function updateVideoChannel(req, res) {
                     }
                 }
                 const videoChannelInstanceUpdated = yield videoChannelInstance.save({ transaction: t });
-                yield send_1.sendUpdateActor(videoChannelInstanceUpdated, t);
-                auditLogger.update(audit_logger_1.getAuditIdFromRes(res), new audit_logger_1.VideoChannelAuditView(videoChannelInstanceUpdated.toFormattedJSON()), oldVideoChannelAuditKeys);
+                yield (0, send_1.sendUpdateActor)(videoChannelInstanceUpdated, t);
+                auditLogger.update((0, audit_logger_1.getAuditIdFromRes)(res), new audit_logger_1.VideoChannelAuditView(videoChannelInstanceUpdated.toFormattedJSON()), oldVideoChannelAuditKeys);
                 logger_1.logger.info('Video channel %s updated.', videoChannelInstance.Actor.url);
             }));
         }
         catch (err) {
             logger_1.logger.debug('Cannot update the video channel.', { err });
-            database_utils_1.resetSequelizeInstance(videoChannelInstance, videoChannelFieldsSave);
+            (0, database_utils_1.resetSequelizeInstance)(videoChannelInstance, videoChannelFieldsSave);
             throw err;
         }
         res.type('json').status(http_error_codes_1.HttpStatusCode.NO_CONTENT_204).end();
         if (doBulkVideoUpdate) {
-            yield video_channel_1.federateAllVideosOfChannel(videoChannelInstance);
+            yield (0, video_channel_1.federateAllVideosOfChannel)(videoChannelInstance);
         }
     });
 }
 function removeVideoChannel(req, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const videoChannelInstance = res.locals.videoChannel;
-        yield database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        yield database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             yield video_playlist_1.VideoPlaylistModel.resetPlaylistsOfChannel(videoChannelInstance.id, t);
             yield videoChannelInstance.destroy({ transaction: t });
-            auditLogger.delete(audit_logger_1.getAuditIdFromRes(res), new audit_logger_1.VideoChannelAuditView(videoChannelInstance.toFormattedJSON()));
+            auditLogger.delete((0, audit_logger_1.getAuditIdFromRes)(res), new audit_logger_1.VideoChannelAuditView(videoChannelInstance.toFormattedJSON()));
             logger_1.logger.info('Video channel %s deleted.', videoChannelInstance.Actor.url);
         }));
         return res.type('json').status(http_error_codes_1.HttpStatusCode.NO_CONTENT_204).end();
@@ -165,8 +165,8 @@ function getVideoChannel(req, res) {
     return res.json(videoChannel.toFormattedJSON());
 }
 function listVideoChannelPlaylists(req, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        const serverActor = yield application_1.getServerActor();
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        const serverActor = yield (0, application_1.getServerActor)();
         const resultList = yield video_playlist_1.VideoPlaylistModel.listForApi({
             followerActorId: serverActor.id,
             start: req.query.start,
@@ -175,17 +175,17 @@ function listVideoChannelPlaylists(req, res) {
             videoChannelId: res.locals.videoChannel.id,
             type: req.query.playlistType
         });
-        return res.json(utils_1.getFormattedObjects(resultList.data, resultList.total));
+        return res.json((0, utils_1.getFormattedObjects)(resultList.data, resultList.total));
     });
 }
 function listVideoChannelVideos(req, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const videoChannelInstance = res.locals.videoChannel;
-        const followerActorId = express_utils_1.isUserAbleToSearchRemoteURI(res) ? null : undefined;
-        const countVideos = express_utils_1.getCountVideos(req);
-        const query = query_1.pickCommonVideoQuery(req.query);
-        const apiOptions = yield hooks_1.Hooks.wrapObject(Object.assign(Object.assign({}, query), { followerActorId, includeLocalVideos: true, nsfw: express_utils_1.buildNSFWFilter(res, query.nsfw), withFiles: false, videoChannelId: videoChannelInstance.id, user: res.locals.oauth ? res.locals.oauth.token.User : undefined, countVideos }), 'filter:api.video-channels.videos.list.params');
+        const followerActorId = (0, express_utils_1.isUserAbleToSearchRemoteURI)(res) ? null : undefined;
+        const countVideos = (0, express_utils_1.getCountVideos)(req);
+        const query = (0, query_1.pickCommonVideoQuery)(req.query);
+        const apiOptions = yield hooks_1.Hooks.wrapObject(Object.assign(Object.assign({}, query), { followerActorId, includeLocalVideos: true, nsfw: (0, express_utils_1.buildNSFWFilter)(res, query.nsfw), withFiles: false, videoChannelId: videoChannelInstance.id, user: res.locals.oauth ? res.locals.oauth.token.User : undefined, countVideos }), 'filter:api.video-channels.videos.list.params');
         const resultList = yield hooks_1.Hooks.wrapPromiseFun(video_1.VideoModel.listForApi, apiOptions, 'filter:api.video-channels.videos.list.result');
-        return res.json(utils_1.getFormattedObjects(resultList.data, resultList.total));
+        return res.json((0, utils_1.getFormattedObjects)(resultList.data, resultList.total));
     });
 }

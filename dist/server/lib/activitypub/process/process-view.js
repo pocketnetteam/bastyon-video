@@ -7,18 +7,18 @@ const utils_1 = require("../send/utils");
 const redis_1 = require("../../redis");
 const live_manager_1 = require("@server/lib/live/live-manager");
 function processViewActivity(options) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const { activity, byActor } = options;
         return processCreateView(activity, byActor);
     });
 }
 exports.processViewActivity = processViewActivity;
 function processCreateView(activity, byActor) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const videoObject = activity.type === 'View'
             ? activity.object
             : activity.object.object;
-        const { video } = yield videos_1.getOrCreateAPVideo({
+        const { video } = yield (0, videos_1.getOrCreateAPVideo)({
             videoObject,
             fetchType: 'only-video',
             allowRefresh: false
@@ -32,7 +32,7 @@ function processCreateView(activity, byActor) {
                 return;
             }
             const exceptions = [byActor];
-            yield utils_1.forwardVideoRelatedActivity(activity, undefined, exceptions, video);
+            yield (0, utils_1.forwardVideoRelatedActivity)(activity, undefined, exceptions, video);
         }
     });
 }

@@ -13,15 +13,15 @@ const logger_1 = require("../../helpers/logger");
 const constants_1 = require("../../initializers/constants");
 const shared_1 = require("./shared");
 const playlistPaths = [
-    path_1.join('videos', 'watch', 'playlist'),
-    path_1.join('w', 'p')
+    (0, path_1.join)('videos', 'watch', 'playlist'),
+    (0, path_1.join)('w', 'p')
 ];
 const videoPaths = [
-    path_1.join('videos', 'watch'),
+    (0, path_1.join)('videos', 'watch'),
     'w'
 ];
 function buildUrls(paths) {
-    return paths.map(p => constants_1.WEBSERVER.SCHEME + '://' + path_1.join(constants_1.WEBSERVER.HOST, p) + '/');
+    return paths.map(p => constants_1.WEBSERVER.SCHEME + '://' + (0, path_1.join)(constants_1.WEBSERVER.HOST, p) + '/');
 }
 const startPlaylistURLs = buildUrls(playlistPaths);
 const startVideoURLs = buildUrls(videoPaths);
@@ -30,17 +30,17 @@ const isURLOptions = {
     require_host: true,
     require_tld: true
 };
-if (core_utils_1.isTestInstance()) {
+if ((0, core_utils_1.isTestInstance)()) {
     isURLOptions.require_tld = false;
 }
 const oembedValidator = [
-    express_validator_1.query('url').isURL(isURLOptions).withMessage('Should have a valid url'),
-    express_validator_1.query('maxwidth').optional().isInt().withMessage('Should have a valid max width'),
-    express_validator_1.query('maxheight').optional().isInt().withMessage('Should have a valid max height'),
-    express_validator_1.query('format').optional().isIn(['xml', 'json']).withMessage('Should have a valid format'),
-    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    (0, express_validator_1.query)('url').isURL(isURLOptions).withMessage('Should have a valid url'),
+    (0, express_validator_1.query)('maxwidth').optional().isInt().withMessage('Should have a valid max width'),
+    (0, express_validator_1.query)('maxheight').optional().isInt().withMessage('Should have a valid max height'),
+    (0, express_validator_1.query)('format').optional().isIn(['xml', 'json']).withMessage('Should have a valid format'),
+    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking oembed parameters', { parameters: req.query });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
         if (req.query.format !== undefined && req.query.format !== 'json') {
             return res.fail({
@@ -78,12 +78,12 @@ const oembedValidator = [
                 }
             });
         }
-        const elementId = misc_1.toCompleteUUID(matches[1]);
-        if (misc_1.isIdOrUUIDValid(elementId) === false) {
+        const elementId = (0, misc_1.toCompleteUUID)(matches[1]);
+        if ((0, misc_1.isIdOrUUIDValid)(elementId) === false) {
             return res.fail({ message: 'Invalid video or playlist id.' });
         }
         if (isVideo) {
-            const video = yield model_loaders_1.loadVideo(elementId, 'all');
+            const video = yield (0, model_loaders_1.loadVideo)(elementId, 'all');
             if (!video) {
                 return res.fail({
                     status: http_error_codes_1.HttpStatusCode.NOT_FOUND_404,

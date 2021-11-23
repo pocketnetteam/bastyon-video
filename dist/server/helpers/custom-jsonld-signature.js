@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.jsonld = void 0;
 const tslib_1 = require("tslib");
-const async_lru_1 = tslib_1.__importDefault(require("async-lru"));
+const async_lru_1 = (0, tslib_1.__importDefault)(require("async-lru"));
 const logger_1 = require("./logger");
 const jsonld = require("jsonld");
 exports.jsonld = jsonld;

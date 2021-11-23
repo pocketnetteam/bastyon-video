@@ -9,7 +9,7 @@ const user_notification_1 = require("@server/models/user/user-notification");
 const abstract_notification_1 = require("../common/abstract-notification");
 class AbstractOwnedVideoPublication extends abstract_notification_1.AbstractNotification {
     prepare() {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.user = yield user_1.UserModel.loadByVideoId(this.payload.id);
         });
     }
@@ -25,7 +25,7 @@ class AbstractOwnedVideoPublication extends abstract_notification_1.AbstractNoti
         return [this.user];
     }
     createNotification(user) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const notification = yield user_notification_1.UserNotificationModel.create({
                 type: 6,
                 userId: user.id,

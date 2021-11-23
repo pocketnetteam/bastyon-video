@@ -76,8 +76,8 @@ let ServerBlocklistModel = ServerBlocklistModel_1 = class ServerBlocklistModel e
         const query = {
             offset: start,
             limit: count,
-            order: utils_1.getSort(sort),
-            where: Object.assign({ accountId }, utils_1.searchAttribute(search, '$BlockedServer.host$'))
+            order: (0, utils_1.getSort)(sort),
+            where: Object.assign({ accountId }, (0, utils_1.searchAttribute)(search, '$BlockedServer.host$'))
         };
         return ServerBlocklistModel_1
             .scope([ScopeNames.WITH_ACCOUNT, ScopeNames.WITH_SERVER])
@@ -94,45 +94,45 @@ let ServerBlocklistModel = ServerBlocklistModel_1 = class ServerBlocklistModel e
         };
     }
 };
-tslib_1.__decorate([
+(0, tslib_1.__decorate)([
     sequelize_typescript_1.CreatedAt,
-    tslib_1.__metadata("design:type", Date)
+    (0, tslib_1.__metadata)("design:type", Date)
 ], ServerBlocklistModel.prototype, "createdAt", void 0);
-tslib_1.__decorate([
+(0, tslib_1.__decorate)([
     sequelize_typescript_1.UpdatedAt,
-    tslib_1.__metadata("design:type", Date)
+    (0, tslib_1.__metadata)("design:type", Date)
 ], ServerBlocklistModel.prototype, "updatedAt", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.ForeignKey(() => account_1.AccountModel),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.ForeignKey)(() => account_1.AccountModel),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], ServerBlocklistModel.prototype, "accountId", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.BelongsTo(() => account_1.AccountModel, {
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.BelongsTo)(() => account_1.AccountModel, {
         foreignKey: {
             name: 'accountId',
             allowNull: false
         },
         onDelete: 'CASCADE'
     }),
-    tslib_1.__metadata("design:type", account_1.AccountModel)
+    (0, tslib_1.__metadata)("design:type", account_1.AccountModel)
 ], ServerBlocklistModel.prototype, "ByAccount", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.ForeignKey(() => server_1.ServerModel),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.ForeignKey)(() => server_1.ServerModel),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], ServerBlocklistModel.prototype, "targetServerId", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.BelongsTo(() => server_1.ServerModel, {
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.BelongsTo)(() => server_1.ServerModel, {
         foreignKey: {
             allowNull: false
         },
         onDelete: 'CASCADE'
     }),
-    tslib_1.__metadata("design:type", server_1.ServerModel)
+    (0, tslib_1.__metadata)("design:type", server_1.ServerModel)
 ], ServerBlocklistModel.prototype, "BlockedServer", void 0);
-ServerBlocklistModel = ServerBlocklistModel_1 = tslib_1.__decorate([
-    sequelize_typescript_1.Scopes(() => ({
+ServerBlocklistModel = ServerBlocklistModel_1 = (0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.Scopes)(() => ({
         [ScopeNames.WITH_ACCOUNT]: {
             include: [
                 {
@@ -150,7 +150,7 @@ ServerBlocklistModel = ServerBlocklistModel_1 = tslib_1.__decorate([
             ]
         }
     })),
-    sequelize_typescript_1.Table({
+    (0, sequelize_typescript_1.Table)({
         tableName: 'serverBlocklist',
         indexes: [
             {

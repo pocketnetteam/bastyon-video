@@ -3,9 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.createWebsocketTrackerServer = exports.trackerRouter = void 0;
 const tslib_1 = require("tslib");
 const bittorrent_tracker_1 = require("bittorrent-tracker");
-const express_1 = tslib_1.__importDefault(require("express"));
+const express_1 = (0, tslib_1.__importDefault)(require("express"));
 const http_1 = require("http");
-const proxy_addr_1 = tslib_1.__importDefault(require("proxy-addr"));
+const proxy_addr_1 = (0, tslib_1.__importDefault)(require("proxy-addr"));
 const ws_1 = require("ws");
 const redis_1 = require("@server/lib/redis");
 const logger_1 = require("../helpers/logger");
@@ -13,6 +13,7 @@ const config_1 = require("../initializers/config");
 const constants_1 = require("../initializers/constants");
 const video_file_1 = require("../models/video/video-file");
 const video_streaming_playlist_1 = require("../models/video/video-streaming-playlist");
+const image_1 = require("@server/models/image/image");
 const trackerRouter = express_1.default.Router();
 exports.trackerRouter = trackerRouter;
 let peersIps = {};
@@ -23,7 +24,7 @@ const trackerServer = new bittorrent_tracker_1.Server({
     udp: false,
     ws: false,
     filter: function (infoHash, params, cb) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             if (config_1.CONFIG.TRACKER.ENABLED === false) {
                 return cb(new Error('Tracker is disabled on this instance.'));
             }
@@ -48,6 +49,9 @@ const trackerServer = new bittorrent_tracker_1.Server({
                     return cb();
                 const playlistExists = yield video_streaming_playlist_1.VideoStreamingPlaylistModel.doesInfohashExistCached(infoHash);
                 if (playlistExists === true)
+                    return cb();
+                const imageExists = yield image_1.ImageModel.doesInfohashExistCached(infoHash);
+                if (imageExists === true)
                     return cb();
                 cb(new Error(`Unknown infoHash ${infoHash} requested by ip ${ip}`));
                 if (params.type === 'ws') {
@@ -75,15 +79,15 @@ const onHttpRequest = trackerServer.onHttpRequest.bind(trackerServer);
 trackerRouter.get('/tracker/announce', (req, res) => onHttpRequest(req, res, { action: 'announce' }));
 trackerRouter.get('/tracker/scrape', (req, res) => onHttpRequest(req, res, { action: 'scrape' }));
 function createWebsocketTrackerServer(app) {
-    const server = http_1.createServer(app);
+    const server = (0, http_1.createServer)(app);
     const wss = new ws_1.WebSocketServer({ noServer: true });
     wss.on('connection', function (ws, req) {
-        ws['ip'] = proxy_addr_1.default(req, config_1.CONFIG.TRUST_PROXY);
+        ws['ip'] = (0, proxy_addr_1.default)(req, config_1.CONFIG.TRUST_PROXY);
         trackerServer.onWebSocketConnection(ws);
     });
     server.on('upgrade', (request, socket, head) => {
         if (request.url === '/tracker/socket') {
-            const ip = proxy_addr_1.default(request, config_1.CONFIG.TRUST_PROXY);
+            const ip = (0, proxy_addr_1.default)(request, config_1.CONFIG.TRUST_PROXY);
             redis_1.Redis.Instance.doesTrackerBlockIPExist(ip)
                 .then(result => {
                 if (result === true) {

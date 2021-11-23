@@ -14,10 +14,10 @@ describe('Test server plugins API validators', function () {
     const themeName = 'background-red';
     let themeVersion;
     before(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(30000);
-            server = yield extra_utils_1.createSingleServer(1);
-            yield extra_utils_1.setAccessTokensToServers([server]);
+            server = yield (0, extra_utils_1.createSingleServer)(1);
+            yield (0, extra_utils_1.setAccessTokensToServers)([server]);
             const user = {
                 username: 'user1',
                 password: 'password'
@@ -38,7 +38,7 @@ describe('Test server plugins API validators', function () {
     });
     describe('With static plugin routes', function () {
         it('Should fail with an unknown plugin name/plugin version', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const paths = [
                     '/plugins/' + pluginName + '/0.0.1/auth/fake-auth',
                     '/plugins/' + pluginName + '/0.0.1/static/images/chocobo.png',
@@ -48,13 +48,13 @@ describe('Test server plugins API validators', function () {
                     '/themes/' + themeName + '/0.0.1/css/assets/style1.css'
                 ];
                 for (const p of paths) {
-                    yield extra_utils_1.makeGetRequest({ url: server.url, path: p, expectedStatus: models_1.HttpStatusCode.NOT_FOUND_404 });
+                    yield (0, extra_utils_1.makeGetRequest)({ url: server.url, path: p, expectedStatus: models_1.HttpStatusCode.NOT_FOUND_404 });
                 }
             });
         });
         it('Should fail when requesting a plugin in the theme path', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.makeGetRequest({
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.makeGetRequest)({
                     url: server.url,
                     path: '/themes/' + pluginName + '/' + npmVersion + '/static/images/chocobo.png',
                     expectedStatus: models_1.HttpStatusCode.NOT_FOUND_404
@@ -62,7 +62,7 @@ describe('Test server plugins API validators', function () {
             });
         });
         it('Should fail with invalid versions', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const paths = [
                     '/plugins/' + pluginName + '/0.0.1.1/auth/fake-auth',
                     '/plugins/' + pluginName + '/0.0.1.1/static/images/chocobo.png',
@@ -72,12 +72,12 @@ describe('Test server plugins API validators', function () {
                     '/themes/' + themeName + '/0.a.1/css/assets/style1.css'
                 ];
                 for (const p of paths) {
-                    yield extra_utils_1.makeGetRequest({ url: server.url, path: p, expectedStatus: models_1.HttpStatusCode.BAD_REQUEST_400 });
+                    yield (0, extra_utils_1.makeGetRequest)({ url: server.url, path: p, expectedStatus: models_1.HttpStatusCode.BAD_REQUEST_400 });
                 }
             });
         });
         it('Should fail with invalid paths', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const paths = [
                     '/plugins/' + pluginName + '/' + npmVersion + '/static/images/../chocobo.png',
                     '/plugins/' + pluginName + '/' + npmVersion + '/client-scripts/../client/common-client-plugin.js',
@@ -86,18 +86,18 @@ describe('Test server plugins API validators', function () {
                     '/themes/' + themeName + '/' + themeVersion + '/css/../assets/style1.css'
                 ];
                 for (const p of paths) {
-                    yield extra_utils_1.makeGetRequest({ url: server.url, path: p, expectedStatus: models_1.HttpStatusCode.BAD_REQUEST_400 });
+                    yield (0, extra_utils_1.makeGetRequest)({ url: server.url, path: p, expectedStatus: models_1.HttpStatusCode.BAD_REQUEST_400 });
                 }
             });
         });
         it('Should fail with an unknown auth name', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const path = '/plugins/' + pluginName + '/' + npmVersion + '/auth/bad-auth';
-                yield extra_utils_1.makeGetRequest({ url: server.url, path, expectedStatus: models_1.HttpStatusCode.NOT_FOUND_404 });
+                yield (0, extra_utils_1.makeGetRequest)({ url: server.url, path, expectedStatus: models_1.HttpStatusCode.NOT_FOUND_404 });
             });
         });
         it('Should fail with an unknown static file', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const paths = [
                     '/plugins/' + pluginName + '/' + npmVersion + '/static/fake/chocobo.png',
                     '/plugins/' + pluginName + '/' + npmVersion + '/client-scripts/client/fake.js',
@@ -105,13 +105,13 @@ describe('Test server plugins API validators', function () {
                     '/themes/' + themeName + '/' + themeVersion + '/client-scripts/client/fake.js'
                 ];
                 for (const p of paths) {
-                    yield extra_utils_1.makeGetRequest({ url: server.url, path: p, expectedStatus: models_1.HttpStatusCode.NOT_FOUND_404 });
+                    yield (0, extra_utils_1.makeGetRequest)({ url: server.url, path: p, expectedStatus: models_1.HttpStatusCode.NOT_FOUND_404 });
                 }
             });
         });
         it('Should fail with an unknown CSS file', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.makeGetRequest({
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.makeGetRequest)({
                     url: server.url,
                     path: '/themes/' + themeName + '/' + themeVersion + '/css/assets/fake.css',
                     expectedStatus: models_1.HttpStatusCode.NOT_FOUND_404
@@ -119,7 +119,7 @@ describe('Test server plugins API validators', function () {
             });
         });
         it('Should succeed with the correct parameters', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const paths = [
                     '/plugins/' + pluginName + '/' + npmVersion + '/static/images/chocobo.png',
                     '/plugins/' + pluginName + '/' + npmVersion + '/client-scripts/client/common-client-plugin.js',
@@ -128,10 +128,10 @@ describe('Test server plugins API validators', function () {
                     '/themes/' + themeName + '/' + themeVersion + '/css/assets/style1.css'
                 ];
                 for (const p of paths) {
-                    yield extra_utils_1.makeGetRequest({ url: server.url, path: p, expectedStatus: models_1.HttpStatusCode.OK_200 });
+                    yield (0, extra_utils_1.makeGetRequest)({ url: server.url, path: p, expectedStatus: models_1.HttpStatusCode.OK_200 });
                 }
                 const authPath = '/plugins/' + pluginName + '/' + npmVersion + '/auth/fake-auth';
-                yield extra_utils_1.makeGetRequest({ url: server.url, path: authPath, expectedStatus: models_1.HttpStatusCode.FOUND_302 });
+                yield (0, extra_utils_1.makeGetRequest)({ url: server.url, path: authPath, expectedStatus: models_1.HttpStatusCode.FOUND_302 });
             });
         });
     });
@@ -143,8 +143,8 @@ describe('Test server plugins API validators', function () {
             currentPeerTubeEngine: '1.2.3'
         };
         it('Should fail with an invalid token', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.makeGetRequest({
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.makeGetRequest)({
                     url: server.url,
                     path,
                     token: 'fake_token',
@@ -154,8 +154,8 @@ describe('Test server plugins API validators', function () {
             });
         });
         it('Should fail if the user is not an administrator', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.makeGetRequest({
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.makeGetRequest)({
                     url: server.url,
                     path,
                     token: userAccessToken,
@@ -165,24 +165,24 @@ describe('Test server plugins API validators', function () {
             });
         });
         it('Should fail with a bad start pagination', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.checkBadStartPagination(server.url, path, server.accessToken);
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.checkBadStartPagination)(server.url, path, server.accessToken);
             });
         });
         it('Should fail with a bad count pagination', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.checkBadCountPagination(server.url, path, server.accessToken);
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.checkBadCountPagination)(server.url, path, server.accessToken);
             });
         });
         it('Should fail with an incorrect sort', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.checkBadSortPagination(server.url, path, server.accessToken);
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.checkBadSortPagination)(server.url, path, server.accessToken);
             });
         });
         it('Should fail with an invalid plugin type', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const query = Object.assign(Object.assign({}, baseQuery), { pluginType: 5 });
-                yield extra_utils_1.makeGetRequest({
+                yield (0, extra_utils_1.makeGetRequest)({
                     url: server.url,
                     path,
                     token: server.accessToken,
@@ -191,9 +191,9 @@ describe('Test server plugins API validators', function () {
             });
         });
         it('Should fail with an invalid current peertube engine', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const query = Object.assign(Object.assign({}, baseQuery), { currentPeerTubeEngine: '1.0' });
-                yield extra_utils_1.makeGetRequest({
+                yield (0, extra_utils_1.makeGetRequest)({
                     url: server.url,
                     path,
                     token: server.accessToken,
@@ -202,8 +202,8 @@ describe('Test server plugins API validators', function () {
             });
         });
         it('Should success with the correct parameters', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.makeGetRequest({
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.makeGetRequest)({
                     url: server.url,
                     path,
                     token: server.accessToken,
@@ -219,8 +219,8 @@ describe('Test server plugins API validators', function () {
             pluginType: models_1.PluginType.THEME
         };
         it('Should fail with an invalid token', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.makeGetRequest({
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.makeGetRequest)({
                     url: server.url,
                     path,
                     token: 'fake_token',
@@ -230,8 +230,8 @@ describe('Test server plugins API validators', function () {
             });
         });
         it('Should fail if the user is not an administrator', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.makeGetRequest({
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.makeGetRequest)({
                     url: server.url,
                     path,
                     token: userAccessToken,
@@ -241,24 +241,24 @@ describe('Test server plugins API validators', function () {
             });
         });
         it('Should fail with a bad start pagination', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.checkBadStartPagination(server.url, path, server.accessToken);
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.checkBadStartPagination)(server.url, path, server.accessToken);
             });
         });
         it('Should fail with a bad count pagination', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.checkBadCountPagination(server.url, path, server.accessToken);
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.checkBadCountPagination)(server.url, path, server.accessToken);
             });
         });
         it('Should fail with an incorrect sort', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.checkBadSortPagination(server.url, path, server.accessToken);
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.checkBadSortPagination)(server.url, path, server.accessToken);
             });
         });
         it('Should fail with an invalid plugin type', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const query = Object.assign(Object.assign({}, baseQuery), { pluginType: 5 });
-                yield extra_utils_1.makeGetRequest({
+                yield (0, extra_utils_1.makeGetRequest)({
                     url: server.url,
                     path,
                     token: server.accessToken,
@@ -267,8 +267,8 @@ describe('Test server plugins API validators', function () {
             });
         });
         it('Should success with the correct parameters', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.makeGetRequest({
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.makeGetRequest)({
                     url: server.url,
                     path,
                     token: server.accessToken,
@@ -281,9 +281,9 @@ describe('Test server plugins API validators', function () {
     describe('When getting a plugin or the registered settings or public settings', function () {
         const path = '/api/v1/plugins/';
         it('Should fail with an invalid token', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 for (const suffix of [npmPlugin, `${npmPlugin}/registered-settings`]) {
-                    yield extra_utils_1.makeGetRequest({
+                    yield (0, extra_utils_1.makeGetRequest)({
                         url: server.url,
                         path: path + suffix,
                         token: 'fake_token',
@@ -293,9 +293,9 @@ describe('Test server plugins API validators', function () {
             });
         });
         it('Should fail if the user is not an administrator', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 for (const suffix of [npmPlugin, `${npmPlugin}/registered-settings`]) {
-                    yield extra_utils_1.makeGetRequest({
+                    yield (0, extra_utils_1.makeGetRequest)({
                         url: server.url,
                         path: path + suffix,
                         token: userAccessToken,
@@ -305,9 +305,9 @@ describe('Test server plugins API validators', function () {
             });
         });
         it('Should fail with an invalid npm name', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 for (const suffix of ['toto', 'toto/registered-settings', 'toto/public-settings']) {
-                    yield extra_utils_1.makeGetRequest({
+                    yield (0, extra_utils_1.makeGetRequest)({
                         url: server.url,
                         path: path + suffix,
                         token: server.accessToken,
@@ -315,7 +315,7 @@ describe('Test server plugins API validators', function () {
                     });
                 }
                 for (const suffix of ['peertube-plugin-TOTO', 'peertube-plugin-TOTO/registered-settings', 'peertube-plugin-TOTO/public-settings']) {
-                    yield extra_utils_1.makeGetRequest({
+                    yield (0, extra_utils_1.makeGetRequest)({
                         url: server.url,
                         path: path + suffix,
                         token: server.accessToken,
@@ -325,9 +325,9 @@ describe('Test server plugins API validators', function () {
             });
         });
         it('Should fail with an unknown plugin', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 for (const suffix of ['peertube-plugin-toto', 'peertube-plugin-toto/registered-settings', 'peertube-plugin-toto/public-settings']) {
-                    yield extra_utils_1.makeGetRequest({
+                    yield (0, extra_utils_1.makeGetRequest)({
                         url: server.url,
                         path: path + suffix,
                         token: server.accessToken,
@@ -337,9 +337,9 @@ describe('Test server plugins API validators', function () {
             });
         });
         it('Should succeed with the correct parameters', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 for (const suffix of [npmPlugin, `${npmPlugin}/registered-settings`, `${npmPlugin}/public-settings`]) {
-                    yield extra_utils_1.makeGetRequest({
+                    yield (0, extra_utils_1.makeGetRequest)({
                         url: server.url,
                         path: path + suffix,
                         token: server.accessToken,
@@ -353,8 +353,8 @@ describe('Test server plugins API validators', function () {
         const path = '/api/v1/plugins/';
         const settings = { setting1: 'value1' };
         it('Should fail with an invalid token', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.makePutBodyRequest({
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.makePutBodyRequest)({
                     url: server.url,
                     path: path + npmPlugin + '/settings',
                     fields: { settings },
@@ -364,8 +364,8 @@ describe('Test server plugins API validators', function () {
             });
         });
         it('Should fail if the user is not an administrator', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.makePutBodyRequest({
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.makePutBodyRequest)({
                     url: server.url,
                     path: path + npmPlugin + '/settings',
                     fields: { settings },
@@ -375,15 +375,15 @@ describe('Test server plugins API validators', function () {
             });
         });
         it('Should fail with an invalid npm name', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.makePutBodyRequest({
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.makePutBodyRequest)({
                     url: server.url,
                     path: path + 'toto/settings',
                     fields: { settings },
                     token: server.accessToken,
                     expectedStatus: models_1.HttpStatusCode.BAD_REQUEST_400
                 });
-                yield extra_utils_1.makePutBodyRequest({
+                yield (0, extra_utils_1.makePutBodyRequest)({
                     url: server.url,
                     path: path + 'peertube-plugin-TOTO/settings',
                     fields: { settings },
@@ -393,8 +393,8 @@ describe('Test server plugins API validators', function () {
             });
         });
         it('Should fail with an unknown plugin', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.makePutBodyRequest({
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.makePutBodyRequest)({
                     url: server.url,
                     path: path + 'peertube-plugin-toto/settings',
                     fields: { settings },
@@ -404,8 +404,8 @@ describe('Test server plugins API validators', function () {
             });
         });
         it('Should succeed with the correct parameters', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.makePutBodyRequest({
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.makePutBodyRequest)({
                     url: server.url,
                     path: path + npmPlugin + '/settings',
                     fields: { settings },
@@ -418,9 +418,9 @@ describe('Test server plugins API validators', function () {
     describe('When installing/updating/uninstalling a plugin', function () {
         const path = '/api/v1/plugins/';
         it('Should fail with an invalid token', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 for (const suffix of ['install', 'update', 'uninstall']) {
-                    yield extra_utils_1.makePostBodyRequest({
+                    yield (0, extra_utils_1.makePostBodyRequest)({
                         url: server.url,
                         path: path + suffix,
                         fields: { npmName: npmPlugin },
@@ -431,9 +431,9 @@ describe('Test server plugins API validators', function () {
             });
         });
         it('Should fail if the user is not an administrator', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 for (const suffix of ['install', 'update', 'uninstall']) {
-                    yield extra_utils_1.makePostBodyRequest({
+                    yield (0, extra_utils_1.makePostBodyRequest)({
                         url: server.url,
                         path: path + suffix,
                         fields: { npmName: npmPlugin },
@@ -444,9 +444,9 @@ describe('Test server plugins API validators', function () {
             });
         });
         it('Should fail with an invalid npm name', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 for (const suffix of ['install', 'update', 'uninstall']) {
-                    yield extra_utils_1.makePostBodyRequest({
+                    yield (0, extra_utils_1.makePostBodyRequest)({
                         url: server.url,
                         path: path + suffix,
                         fields: { npmName: 'toto' },
@@ -455,7 +455,7 @@ describe('Test server plugins API validators', function () {
                     });
                 }
                 for (const suffix of ['install', 'update', 'uninstall']) {
-                    yield extra_utils_1.makePostBodyRequest({
+                    yield (0, extra_utils_1.makePostBodyRequest)({
                         url: server.url,
                         path: path + suffix,
                         fields: { npmName: 'peertube-plugin-TOTO' },
@@ -466,7 +466,7 @@ describe('Test server plugins API validators', function () {
             });
         });
         it('Should succeed with the correct parameters', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 const it = [
                     { suffix: 'install', status: models_1.HttpStatusCode.OK_200 },
@@ -474,7 +474,7 @@ describe('Test server plugins API validators', function () {
                     { suffix: 'uninstall', status: models_1.HttpStatusCode.NO_CONTENT_204 }
                 ];
                 for (const obj of it) {
-                    yield extra_utils_1.makePostBodyRequest({
+                    yield (0, extra_utils_1.makePostBodyRequest)({
                         url: server.url,
                         path: path + obj.suffix,
                         fields: { npmName: npmPlugin },
@@ -486,8 +486,8 @@ describe('Test server plugins API validators', function () {
         });
     });
     after(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            yield extra_utils_1.cleanupTests([server]);
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            yield (0, extra_utils_1.cleanupTests)([server]);
         });
     });
 });

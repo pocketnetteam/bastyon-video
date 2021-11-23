@@ -7,7 +7,7 @@ const config_1 = require("../initializers/config");
 const user_1 = require("../models/user/user");
 const isCidr = require('is-cidr');
 function isSignupAllowed() {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         if (config_1.CONFIG.SIGNUP.ENABLED === false) {
             return { allowed: false };
         }
@@ -22,7 +22,7 @@ exports.isSignupAllowed = isSignupAllowed;
 function isSignupAllowedForCurrentIP(ip) {
     if (!ip)
         return false;
-    const addr = ipaddr_js_1.parse(ip);
+    const addr = (0, ipaddr_js_1.parse)(ip);
     const excludeList = ['blacklist'];
     let matched = '';
     if (config_1.CONFIG.SIGNUP.FILTERS.CIDR.WHITELIST.filter(cidr => isCidr(cidr)).length > 0) {
@@ -36,7 +36,7 @@ function isSignupAllowedForCurrentIP(ip) {
             blacklist: config_1.CONFIG.SIGNUP.FILTERS.CIDR.BLACKLIST.filter(cidr => isCidr.v4(cidr))
                 .map(cidr => ipaddr_js_1.IPv4.parseCIDR(cidr))
         };
-        matched = ipaddr_js_1.subnetMatch(addrV4, rangeList, 'unknown');
+        matched = (0, ipaddr_js_1.subnetMatch)(addrV4, rangeList, 'unknown');
     }
     else if (addr.kind() === 'ipv6') {
         const addrV6 = ipaddr_js_1.IPv6.parse(ip);
@@ -46,7 +46,7 @@ function isSignupAllowedForCurrentIP(ip) {
             blacklist: config_1.CONFIG.SIGNUP.FILTERS.CIDR.BLACKLIST.filter(cidr => isCidr.v6(cidr))
                 .map(cidr => ipaddr_js_1.IPv6.parseCIDR(cidr))
         };
-        matched = ipaddr_js_1.subnetMatch(addrV6, rangeList, 'unknown');
+        matched = (0, ipaddr_js_1.subnetMatch)(addrV6, rangeList, 'unknown');
     }
     return !excludeList.includes(matched);
 }

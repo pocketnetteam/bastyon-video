@@ -19,12 +19,12 @@ const baseDirectives = Object.assign({}, {
     frameSrc: ['\'self\''],
     workerSrc: ['\'self\'', 'blob:']
 }, config_1.CONFIG.CSP.REPORT_URI ? { reportUri: config_1.CONFIG.CSP.REPORT_URI } : {}, config_1.CONFIG.WEBSERVER.SCHEME === 'https' ? { upgradeInsecureRequests: [] } : {});
-const baseCSP = helmet_1.contentSecurityPolicy({
+const baseCSP = (0, helmet_1.contentSecurityPolicy)({
     directives: baseDirectives,
     reportOnly: config_1.CONFIG.CSP.REPORT_ONLY
 });
 exports.baseCSP = baseCSP;
-const embedCSP = helmet_1.contentSecurityPolicy({
+const embedCSP = (0, helmet_1.contentSecurityPolicy)({
     directives: Object.assign({}, baseDirectives, { frameAncestors: ['*'] }),
     reportOnly: config_1.CONFIG.CSP.REPORT_ONLY
 });

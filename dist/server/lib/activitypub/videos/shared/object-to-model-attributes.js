@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getVideoAttributesFromObject = exports.getCaptionAttributesFromObject = exports.getLiveAttributesFromObject = exports.getStreamingPlaylistAttributesFromObject = exports.getFileAttributesFromUrl = exports.getTagsFromObject = exports.getPreviewFromIcons = exports.getThumbnailFromIcons = void 0;
 const tslib_1 = require("tslib");
 const lodash_1 = require("lodash");
-const magnet_uri_1 = tslib_1.__importDefault(require("magnet-uri"));
+const magnet_uri_1 = (0, tslib_1.__importDefault)(require("magnet-uri"));
 const path_1 = require("path");
 const videos_1 = require("@server/helpers/custom-validators/activitypub/videos");
 const videos_2 = require("@server/helpers/custom-validators/videos");
@@ -18,12 +18,12 @@ function getThumbnailFromIcons(videoObject) {
     let validIcons = videoObject.icon.filter(i => i.width > constants_1.THUMBNAILS_SIZE.minWidth);
     if (validIcons.length === 0)
         validIcons = videoObject.icon;
-    return lodash_1.minBy(validIcons, 'width');
+    return (0, lodash_1.minBy)(validIcons, 'width');
 }
 exports.getThumbnailFromIcons = getThumbnailFromIcons;
 function getPreviewFromIcons(videoObject) {
     const validIcons = videoObject.icon.filter(i => i.width > constants_1.PREVIEWS_SIZE.minWidth);
-    return lodash_1.maxBy(validIcons, 'width');
+    return (0, lodash_1.maxBy)(validIcons, 'width');
 }
 exports.getPreviewFromIcons = getPreviewFromIcons;
 function getTagsFromObject(videoObject) {
@@ -43,7 +43,7 @@ function getFileAttributesFromUrl(videoOrPlaylist, urls) {
         if (!magnet)
             throw new Error('Cannot find associated magnet uri for file ' + fileUrl.href);
         const parsed = magnet_uri_1.default.decode(magnet.href);
-        if (!parsed || videos_2.isVideoFileInfoHashValid(parsed.infoHash) === false) {
+        if (!parsed || (0, videos_2.isVideoFileInfoHashValid)(parsed.infoHash) === false) {
             throw new Error('Cannot parse magnet URI ' + magnet.href);
         }
         const torrentUrl = Array.isArray(parsed.xs)
@@ -55,10 +55,10 @@ function getFileAttributesFromUrl(videoOrPlaylist, urls) {
                 u.fps === fileUrl.fps &&
                 u.rel.includes(fileUrl.mediaType);
         });
-        const extname = video_1.getExtFromMimetype(constants_1.MIMETYPES.VIDEO.MIMETYPE_EXT, fileUrl.mediaType);
+        const extname = (0, video_1.getExtFromMimetype)(constants_1.MIMETYPES.VIDEO.MIMETYPE_EXT, fileUrl.mediaType);
         const resolution = fileUrl.height;
-        const videoId = models_1.isStreamingPlaylist(videoOrPlaylist) ? null : videoOrPlaylist.id;
-        const videoStreamingPlaylistId = models_1.isStreamingPlaylist(videoOrPlaylist) ? videoOrPlaylist.id : null;
+        const videoId = (0, models_1.isStreamingPlaylist)(videoOrPlaylist) ? null : videoOrPlaylist.id;
+        const videoStreamingPlaylistId = (0, models_1.isStreamingPlaylist)(videoOrPlaylist) ? videoOrPlaylist.id : null;
         const attribute = {
             extname,
             infoHash: parsed.infoHash,
@@ -66,10 +66,10 @@ function getFileAttributesFromUrl(videoOrPlaylist, urls) {
             size: fileUrl.size,
             fps: fileUrl.fps || -1,
             metadataUrl: metadata === null || metadata === void 0 ? void 0 : metadata.href,
-            filename: path_1.basename(fileUrl.href),
+            filename: (0, path_1.basename)(fileUrl.href),
             fileUrl: fileUrl.href,
             torrentUrl,
-            torrentFilename: paths_1.generateTorrentFileName(videoOrPlaylist, resolution),
+            torrentFilename: (0, paths_1.generateTorrentFileName)(videoOrPlaylist, resolution),
             videoId,
             videoStreamingPlaylistId
         };
@@ -94,9 +94,9 @@ function getStreamingPlaylistAttributesFromObject(video, videoObject, videoFiles
         }
         const attribute = {
             type: 1,
-            playlistFilename: path_1.basename(playlistUrlObject.href),
+            playlistFilename: (0, path_1.basename)(playlistUrlObject.href),
             playlistUrl: playlistUrlObject.href,
-            segmentsSha256Filename: path_1.basename(segmentsSha256UrlObject.href),
+            segmentsSha256Filename: (0, path_1.basename)(segmentsSha256UrlObject.href),
             segmentsSha256Url: segmentsSha256UrlObject.href,
             p2pMediaLoaderInfohashes: video_streaming_playlist_1.VideoStreamingPlaylistModel.buildP2PMediaLoaderInfoHashes(playlistUrlObject.href, files),
             p2pMediaLoaderPeerVersion: constants_1.P2P_MEDIA_LOADER_PEER_VERSION,

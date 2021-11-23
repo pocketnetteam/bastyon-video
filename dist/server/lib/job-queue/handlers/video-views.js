@@ -9,9 +9,9 @@ const video_view_1 = require("../../../models/video/video-view");
 const core_utils_1 = require("../../../helpers/core-utils");
 const videos_1 = require("../../activitypub/videos");
 function processVideosViews() {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const lastHour = new Date();
-        if (!core_utils_1.isTestInstance())
+        if (!(0, core_utils_1.isTestInstance)())
             lastHour.setHours(lastHour.getHours() - 1);
         const hour = lastHour.getHours();
         const startDate = lastHour.setMinutes(0, 0, 0);
@@ -41,7 +41,7 @@ function processVideosViews() {
                         if (video.isOwned()) {
                             yield video_1.VideoModel.incrementViews(videoId, views);
                             video.views += views;
-                            yield videos_1.federateVideoIfNeeded(video, false);
+                            yield (0, videos_1.federateVideoIfNeeded)(video, false);
                         }
                     }
                     catch (err) {

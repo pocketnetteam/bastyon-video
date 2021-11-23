@@ -12,7 +12,7 @@ let AbuseMessageModel = AbuseMessageModel_1 = class AbuseMessageModel extends se
     static listForApi(abuseId) {
         const options = {
             where: { abuseId },
-            order: utils_1.getSort('createdAt'),
+            order: (0, utils_1.getSort)('createdAt'),
             include: [
                 {
                     model: account_1.AccountModel.scope(account_1.ScopeNames.SUMMARY),
@@ -44,57 +44,57 @@ let AbuseMessageModel = AbuseMessageModel_1 = class AbuseMessageModel extends se
         };
     }
 };
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(false),
-    sequelize_typescript_1.Is('AbuseMessage', value => utils_1.throwIfNotValid(value, abuses_1.isAbuseMessageValid, 'message')),
-    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.TEXT),
-    tslib_1.__metadata("design:type", String)
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(false),
+    (0, sequelize_typescript_1.Is)('AbuseMessage', value => (0, utils_1.throwIfNotValid)(value, abuses_1.isAbuseMessageValid, 'message')),
+    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.TEXT),
+    (0, tslib_1.__metadata)("design:type", String)
 ], AbuseMessageModel.prototype, "message", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(false),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(false),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Boolean)
+    (0, tslib_1.__metadata)("design:type", Boolean)
 ], AbuseMessageModel.prototype, "byModerator", void 0);
-tslib_1.__decorate([
+(0, tslib_1.__decorate)([
     sequelize_typescript_1.CreatedAt,
-    tslib_1.__metadata("design:type", Date)
+    (0, tslib_1.__metadata)("design:type", Date)
 ], AbuseMessageModel.prototype, "createdAt", void 0);
-tslib_1.__decorate([
+(0, tslib_1.__decorate)([
     sequelize_typescript_1.UpdatedAt,
-    tslib_1.__metadata("design:type", Date)
+    (0, tslib_1.__metadata)("design:type", Date)
 ], AbuseMessageModel.prototype, "updatedAt", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.ForeignKey(() => account_1.AccountModel),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.ForeignKey)(() => account_1.AccountModel),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], AbuseMessageModel.prototype, "accountId", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.BelongsTo(() => account_1.AccountModel, {
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.BelongsTo)(() => account_1.AccountModel, {
         foreignKey: {
             name: 'accountId',
             allowNull: true
         },
         onDelete: 'set null'
     }),
-    tslib_1.__metadata("design:type", account_1.AccountModel)
+    (0, tslib_1.__metadata)("design:type", account_1.AccountModel)
 ], AbuseMessageModel.prototype, "Account", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.ForeignKey(() => abuse_1.AbuseModel),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.ForeignKey)(() => abuse_1.AbuseModel),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], AbuseMessageModel.prototype, "abuseId", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.BelongsTo(() => abuse_1.AbuseModel, {
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.BelongsTo)(() => abuse_1.AbuseModel, {
         foreignKey: {
             name: 'abuseId',
             allowNull: false
         },
         onDelete: 'cascade'
     }),
-    tslib_1.__metadata("design:type", abuse_1.AbuseModel)
+    (0, tslib_1.__metadata)("design:type", abuse_1.AbuseModel)
 ], AbuseMessageModel.prototype, "Abuse", void 0);
-AbuseMessageModel = AbuseMessageModel_1 = tslib_1.__decorate([
-    sequelize_typescript_1.Table({
+AbuseMessageModel = AbuseMessageModel_1 = (0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.Table)({
         tableName: 'abuseMessage',
         indexes: [
             {

@@ -8,15 +8,15 @@ const misc_1 = require("../../../helpers/custom-validators/misc");
 const logger_1 = require("../../../helpers/logger");
 const shared_1 = require("../shared");
 const videoWatchingValidator = [
-    shared_1.isValidVideoIdParam('videoId'),
-    express_validator_1.body('currentTime')
+    (0, shared_1.isValidVideoIdParam)('videoId'),
+    (0, express_validator_1.body)('currentTime')
         .customSanitizer(misc_1.toIntOrNull)
         .isInt().withMessage('Should have correct current time'),
-    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking videoWatching parameters', { parameters: req.body });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
-        if (!(yield shared_1.doesVideoExist(req.params.videoId, res, 'id')))
+        if (!(yield (0, shared_1.doesVideoExist)(req.params.videoId, res, 'id')))
             return;
         const user = res.locals.oauth.token.User;
         if (user.videosHistoryEnabled === false) {

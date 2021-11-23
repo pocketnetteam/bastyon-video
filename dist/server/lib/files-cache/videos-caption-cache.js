@@ -17,17 +17,17 @@ class VideosCaptionCache extends abstract_video_static_file_cache_1.AbstractVide
         return this.instance || (this.instance = new this());
     }
     getFilePathImpl(filename) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const videoCaption = yield video_caption_1.VideoCaptionModel.loadWithVideoByFilename(filename);
             if (!videoCaption)
                 return undefined;
             if (videoCaption.isOwned())
-                return { isOwned: true, path: path_1.join(config_1.CONFIG.STORAGE.CAPTIONS_DIR, videoCaption.filename) };
+                return { isOwned: true, path: (0, path_1.join)(config_1.CONFIG.STORAGE.CAPTIONS_DIR, videoCaption.filename) };
             return this.loadRemoteFile(filename);
         });
     }
     loadRemoteFile(key) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const videoCaption = yield video_caption_1.VideoCaptionModel.loadWithVideoByFilename(key);
             if (!videoCaption)
                 return undefined;
@@ -37,8 +37,8 @@ class VideosCaptionCache extends abstract_video_static_file_cache_1.AbstractVide
             if (!video)
                 return undefined;
             const remoteUrl = videoCaption.getFileUrl(video);
-            const destPath = path_1.join(constants_1.FILES_CACHE.VIDEO_CAPTIONS.DIRECTORY, videoCaption.filename);
-            yield requests_1.doRequestAndSaveToFile(remoteUrl, destPath);
+            const destPath = (0, path_1.join)(constants_1.FILES_CACHE.VIDEO_CAPTIONS.DIRECTORY, videoCaption.filename);
+            yield (0, requests_1.doRequestAndSaveToFile)(remoteUrl, destPath);
             return { isOwned: false, path: destPath };
         });
     }

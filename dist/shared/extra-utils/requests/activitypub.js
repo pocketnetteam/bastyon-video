@@ -13,18 +13,18 @@ function makePOSTAPRequest(url, body, httpSignature, headers) {
         httpSignature,
         headers
     };
-    return requests_1.doRequest(url, options);
+    return (0, requests_1.doRequest)(url, options);
 }
 exports.makePOSTAPRequest = makePOSTAPRequest;
 function makeFollowRequest(to, by) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const follow = {
             type: 'Follow',
             id: by.url + '/' + new Date().getTime(),
             actor: by.url,
             object: to.url
         };
-        const body = activitypub_1.activityPubContextify(follow);
+        const body = (0, activitypub_1.activityPubContextify)(follow);
         const httpSignature = {
             algorithm: constants_1.HTTP_SIGNATURE.ALGORITHM,
             authorizationHeaderName: constants_1.HTTP_SIGNATURE.HEADER_NAME,
@@ -32,7 +32,7 @@ function makeFollowRequest(to, by) {
             key: by.privateKey,
             headers: constants_1.HTTP_SIGNATURE.HEADERS_TO_SIGN
         };
-        const headers = activitypub_http_utils_1.buildGlobalHeaders(body);
+        const headers = (0, activitypub_http_utils_1.buildGlobalHeaders)(body);
         return makePOSTAPRequest(to.url + '/inbox', body, httpSignature, headers);
     });
 }

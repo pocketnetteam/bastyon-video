@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.searchVideosRouter = void 0;
 const tslib_1 = require("tslib");
-const express_1 = tslib_1.__importDefault(require("express"));
+const express_1 = (0, tslib_1.__importDefault)(require("express"));
 const core_utils_1 = require("@server/helpers/core-utils");
 const query_1 = require("@server/helpers/query");
 const requests_1 = require("@server/helpers/requests");
@@ -19,21 +19,21 @@ const middlewares_1 = require("../../../middlewares");
 const video_1 = require("../../../models/video/video");
 const searchVideosRouter = express_1.default.Router();
 exports.searchVideosRouter = searchVideosRouter;
-searchVideosRouter.get('/videos', middlewares_1.openapiOperationDoc({ operationId: 'searchVideos' }), middlewares_1.paginationValidator, middlewares_1.setDefaultPagination, middlewares_1.videosSearchSortValidator, middlewares_1.setDefaultSearchSort, middlewares_1.optionalAuthenticate, middlewares_1.commonVideosFiltersValidator, middlewares_1.videosSearchValidator, middlewares_1.asyncMiddleware(searchVideos));
+searchVideosRouter.get('/videos', (0, middlewares_1.openapiOperationDoc)({ operationId: 'searchVideos' }), middlewares_1.paginationValidator, middlewares_1.setDefaultPagination, middlewares_1.videosSearchSortValidator, middlewares_1.setDefaultSearchSort, middlewares_1.optionalAuthenticate, middlewares_1.commonVideosFiltersValidator, middlewares_1.videosSearchValidator, (0, middlewares_1.asyncMiddleware)(searchVideos));
 function searchVideos(req, res) {
-    const query = query_1.pickSearchVideoQuery(req.query);
+    const query = (0, query_1.pickSearchVideoQuery)(req.query);
     const search = query.search;
-    if (search_1.isURISearch(search)) {
+    if ((0, search_1.isURISearch)(search)) {
         return searchVideoURI(search, res);
     }
-    if (search_1.isSearchIndexSearch(query)) {
+    if ((0, search_1.isSearchIndexSearch)(query)) {
         return searchVideosIndex(query, res);
     }
     return searchVideosDB(query, res);
 }
 function searchVideosIndex(query, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        const result = yield search_1.buildMutedForSearchIndex(res);
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        const result = yield (0, search_1.buildMutedForSearchIndex)(res);
         let body = Object.assign(Object.assign({}, query), result);
         if (!body.nsfw) {
             const nsfwPolicy = res.locals.oauth
@@ -44,10 +44,10 @@ function searchVideosIndex(query, res) {
                 : 'both';
         }
         body = yield hooks_1.Hooks.wrapObject(body, 'filter:api.search.videos.index.list.params');
-        const url = core_utils_1.sanitizeUrl(config_1.CONFIG.SEARCH.SEARCH_INDEX.URL) + '/api/v1/search/videos';
+        const url = (0, core_utils_1.sanitizeUrl)(config_1.CONFIG.SEARCH.SEARCH_INDEX.URL) + '/api/v1/search/videos';
         try {
             logger_1.logger.debug('Doing videos search index request on %s.', url, { body });
-            const { body: searchIndexResult } = yield requests_1.doJSONRequest(url, { method: 'POST', json: body });
+            const { body: searchIndexResult } = yield (0, requests_1.doJSONRequest)(url, { method: 'POST', json: body });
             const jsonResult = yield hooks_1.Hooks.wrapObject(searchIndexResult, 'filter:api.search.videos.index.list.result');
             return res.json(jsonResult);
         }
@@ -61,18 +61,18 @@ function searchVideosIndex(query, res) {
     });
 }
 function searchVideosDB(query, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        const apiOptions = yield hooks_1.Hooks.wrapObject(Object.assign(Object.assign({}, query), { includeLocalVideos: true, filter: query.filter, nsfw: express_utils_1.buildNSFWFilter(res, query.nsfw), user: res.locals.oauth
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        const apiOptions = yield hooks_1.Hooks.wrapObject(Object.assign(Object.assign({}, query), { includeLocalVideos: true, filter: query.filter, nsfw: (0, express_utils_1.buildNSFWFilter)(res, query.nsfw), user: res.locals.oauth
                 ? res.locals.oauth.token.User
                 : undefined }), 'filter:api.search.videos.local.list.params');
         const resultList = yield hooks_1.Hooks.wrapPromiseFun(video_1.VideoModel.searchAndPopulateAccountAndServer, apiOptions, 'filter:api.search.videos.local.list.result');
-        return res.json(utils_1.getFormattedObjects(resultList.data, resultList.total));
+        return res.json((0, utils_1.getFormattedObjects)(resultList.data, resultList.total));
     });
 }
 function searchVideoURI(url, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         let video;
-        if (express_utils_1.isUserAbleToSearchRemoteURI(res)) {
+        if ((0, express_utils_1.isUserAbleToSearchRemoteURI)(res)) {
             try {
                 const syncParam = {
                     likes: false,
@@ -82,7 +82,7 @@ function searchVideoURI(url, res) {
                     thumbnail: true,
                     refreshVideo: false
                 };
-                const result = yield videos_1.getOrCreateAPVideo({ videoObject: url, syncParam });
+                const result = yield (0, videos_1.getOrCreateAPVideo)({ videoObject: url, syncParam });
                 video = result ? result.video : undefined;
             }
             catch (err) {

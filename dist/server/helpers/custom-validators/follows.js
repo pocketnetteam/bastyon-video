@@ -3,13 +3,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.isEachUniqueHandleValid = exports.isRemoteHandleValid = exports.isFollowStateValid = void 0;
 const misc_1 = require("./misc");
 function isFollowStateValid(value) {
-    if (!misc_1.exists(value))
+    if (!(0, misc_1.exists)(value))
         return false;
     return value === 'pending' || value === 'accepted';
 }
 exports.isFollowStateValid = isFollowStateValid;
 function isRemoteHandleValid(value) {
-    if (!misc_1.exists(value))
+    if (!(0, misc_1.exists)(value))
         return false;
     if (typeof value !== 'string')
         return false;
@@ -17,7 +17,7 @@ function isRemoteHandleValid(value) {
 }
 exports.isRemoteHandleValid = isRemoteHandleValid;
 function isEachUniqueHandleValid(handles) {
-    return misc_1.isArray(handles) &&
+    return (0, misc_1.isArray)(handles) &&
         handles.every(handle => {
             return isRemoteHandleValid(handle) && handles.indexOf(handle) === handles.lastIndexOf(handle);
         });

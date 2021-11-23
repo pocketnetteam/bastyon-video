@@ -12,72 +12,72 @@ describe('Test plugin helpers', function () {
         '/plugins/test-five/0.0.1/router/'
     ];
     before(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(30000);
-            server = yield extra_utils_1.createSingleServer(1);
-            yield extra_utils_1.setAccessTokensToServers([server]);
+            server = yield (0, extra_utils_1.createSingleServer)(1);
+            yield (0, extra_utils_1.setAccessTokensToServers)([server]);
             yield server.plugins.install({ path: extra_utils_1.PluginsCommand.getPluginTestPath('-five') });
         });
     });
     it('Should answer "pong"', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             for (const path of basePaths) {
-                const res = yield extra_utils_1.makeGetRequest({
+                const res = yield (0, extra_utils_1.makeGetRequest)({
                     url: server.url,
                     path: path + 'ping',
                     expectedStatus: models_1.HttpStatusCode.OK_200
                 });
-                chai_1.expect(res.body.message).to.equal('pong');
+                (0, chai_1.expect)(res.body.message).to.equal('pong');
             }
         });
     });
     it('Should check if authenticated', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             for (const path of basePaths) {
-                const res = yield extra_utils_1.makeGetRequest({
+                const res = yield (0, extra_utils_1.makeGetRequest)({
                     url: server.url,
                     path: path + 'is-authenticated',
                     token: server.accessToken,
                     expectedStatus: 200
                 });
-                chai_1.expect(res.body.isAuthenticated).to.equal(true);
-                const secRes = yield extra_utils_1.makeGetRequest({
+                (0, chai_1.expect)(res.body.isAuthenticated).to.equal(true);
+                const secRes = yield (0, extra_utils_1.makeGetRequest)({
                     url: server.url,
                     path: path + 'is-authenticated',
                     expectedStatus: 200
                 });
-                chai_1.expect(secRes.body.isAuthenticated).to.equal(false);
+                (0, chai_1.expect)(secRes.body.isAuthenticated).to.equal(false);
             }
         });
     });
     it('Should mirror post body', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const body = {
                 hello: 'world',
                 riri: 'fifi',
                 loulou: 'picsou'
             };
             for (const path of basePaths) {
-                const res = yield extra_utils_1.makePostBodyRequest({
+                const res = yield (0, extra_utils_1.makePostBodyRequest)({
                     url: server.url,
                     path: path + 'form/post/mirror',
                     fields: body,
                     expectedStatus: models_1.HttpStatusCode.OK_200
                 });
-                chai_1.expect(res.body).to.deep.equal(body);
+                (0, chai_1.expect)(res.body).to.deep.equal(body);
             }
         });
     });
     it('Should remove the plugin and remove the routes', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             yield server.plugins.uninstall({ npmName: 'peertube-plugin-test-five' });
             for (const path of basePaths) {
-                yield extra_utils_1.makeGetRequest({
+                yield (0, extra_utils_1.makeGetRequest)({
                     url: server.url,
                     path: path + 'ping',
                     expectedStatus: models_1.HttpStatusCode.NOT_FOUND_404
                 });
-                yield extra_utils_1.makePostBodyRequest({
+                yield (0, extra_utils_1.makePostBodyRequest)({
                     url: server.url,
                     path: path + 'ping',
                     fields: {},
@@ -87,8 +87,8 @@ describe('Test plugin helpers', function () {
         });
     });
     after(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            yield extra_utils_1.cleanupTests([server]);
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            yield (0, extra_utils_1.cleanupTests)([server]);
         });
     });
 });

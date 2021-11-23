@@ -9,14 +9,14 @@ const logger_1 = require("../../../helpers/logger");
 const video_share_1 = require("../../../models/video/video-share");
 const shared_1 = require("../shared");
 const videosShareValidator = [
-    shared_1.isValidVideoIdParam('id'),
-    express_validator_1.param('actorId')
+    (0, shared_1.isValidVideoIdParam)('id'),
+    (0, express_validator_1.param)('actorId')
         .custom(misc_1.isIdValid).not().isEmpty().withMessage('Should have a valid actor id'),
-    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking videoShare parameters', { parameters: req.params });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
-        if (!(yield shared_1.doesVideoExist(req.params.id, res)))
+        if (!(yield (0, shared_1.doesVideoExist)(req.params.id, res)))
             return;
         const video = res.locals.videoAll;
         const share = yield video_share_1.VideoShareModel.load(req.params.actorId, video.id);

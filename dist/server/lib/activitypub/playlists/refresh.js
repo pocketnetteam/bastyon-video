@@ -14,19 +14,19 @@ function scheduleRefreshIfNeeded(playlist) {
 }
 exports.scheduleRefreshIfNeeded = scheduleRefreshIfNeeded;
 function refreshVideoPlaylistIfNeeded(videoPlaylist) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         if (!videoPlaylist.isOutdated())
             return videoPlaylist;
-        const lTags = logger_1.loggerTagsFactory('ap', 'video-playlist', 'refresh', videoPlaylist.uuid, videoPlaylist.url);
+        const lTags = (0, logger_1.loggerTagsFactory)('ap', 'video-playlist', 'refresh', videoPlaylist.uuid, videoPlaylist.url);
         logger_1.logger.info('Refreshing playlist %s.', videoPlaylist.url, lTags());
         try {
-            const { playlistObject } = yield shared_1.fetchRemoteVideoPlaylist(videoPlaylist.url);
+            const { playlistObject } = yield (0, shared_1.fetchRemoteVideoPlaylist)(videoPlaylist.url);
             if (playlistObject === undefined) {
                 logger_1.logger.warn('Cannot refresh remote playlist %s: invalid body.', videoPlaylist.url, lTags());
                 yield videoPlaylist.setAsRefreshed();
                 return videoPlaylist;
             }
-            yield create_update_1.createOrUpdateVideoPlaylist(playlistObject);
+            yield (0, create_update_1.createOrUpdateVideoPlaylist)(playlistObject);
             return videoPlaylist;
         }
         catch (err) {

@@ -10,20 +10,20 @@ describe('Official plugin auth-ldap', function () {
     let accessToken;
     let userId;
     before(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(30000);
-            server = yield extra_utils_1.createSingleServer(1);
-            yield extra_utils_1.setAccessTokensToServers([server]);
+            server = yield (0, extra_utils_1.createSingleServer)(1);
+            yield (0, extra_utils_1.setAccessTokensToServers)([server]);
             yield server.plugins.install({ npmName: 'peertube-plugin-auth-ldap' });
         });
     });
     it('Should not login with without LDAP settings', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             yield server.login.login({ user: { username: 'fry', password: 'fry' }, expectedStatus: models_1.HttpStatusCode.BAD_REQUEST_400 });
         });
     });
     it('Should not login with bad LDAP settings', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             yield server.plugins.updateSettings({
                 npmName: 'peertube-plugin-auth-ldap',
                 settings: {
@@ -41,7 +41,7 @@ describe('Official plugin auth-ldap', function () {
         });
     });
     it('Should not login with good LDAP settings but wrong username/password', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             yield server.plugins.updateSettings({
                 npmName: 'peertube-plugin-auth-ldap',
                 settings: {
@@ -60,30 +60,30 @@ describe('Official plugin auth-ldap', function () {
         });
     });
     it('Should login with the appropriate username/password', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             accessToken = yield server.login.getAccessToken({ username: 'fry', password: 'fry' });
         });
     });
     it('Should login with the appropriate email/password', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             accessToken = yield server.login.getAccessToken({ username: 'fry@planetexpress.com', password: 'fry' });
         });
     });
     it('Should login get my profile', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const body = yield server.users.getMyInfo({ token: accessToken });
-            chai_1.expect(body.username).to.equal('fry');
-            chai_1.expect(body.email).to.equal('fry@planetexpress.com');
+            (0, chai_1.expect)(body.username).to.equal('fry');
+            (0, chai_1.expect)(body.email).to.equal('fry@planetexpress.com');
             userId = body.id;
         });
     });
     it('Should upload a video', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             yield server.videos.upload({ token: accessToken, attributes: { name: 'my super video' } });
         });
     });
     it('Should not be able to login if the user is banned', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             yield server.users.banUser({ userId });
             yield server.login.login({
                 user: { username: 'fry@planetexpress.com', password: 'fry' },
@@ -92,13 +92,13 @@ describe('Official plugin auth-ldap', function () {
         });
     });
     it('Should be able to login if the user is unbanned', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             yield server.users.unbanUser({ userId });
             yield server.login.login({ user: { username: 'fry@planetexpress.com', password: 'fry' } });
         });
     });
     it('Should not login if the plugin is uninstalled', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             yield server.plugins.uninstall({ npmName: 'peertube-plugin-auth-ldap' });
             yield server.login.login({
                 user: { username: 'fry@planetexpress.com', password: 'fry' },
@@ -107,8 +107,8 @@ describe('Official plugin auth-ldap', function () {
         });
     });
     after(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            yield extra_utils_1.cleanupTests([server]);
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            yield (0, extra_utils_1.cleanupTests)([server]);
         });
     });
 });

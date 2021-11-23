@@ -9,10 +9,10 @@ describe('Test logs API validators', function () {
     let server;
     let userAccessToken = '';
     before(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(120000);
-            server = yield extra_utils_1.createSingleServer(1);
-            yield extra_utils_1.setAccessTokensToServers([server]);
+            server = yield (0, extra_utils_1.createSingleServer)(1);
+            yield (0, extra_utils_1.setAccessTokensToServers)([server]);
             const user = {
                 username: 'user1',
                 password: 'my super password'
@@ -23,8 +23,8 @@ describe('Test logs API validators', function () {
     });
     describe('When getting logs', function () {
         it('Should fail with a non authenticated user', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.makeGetRequest({
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.makeGetRequest)({
                     url: server.url,
                     path,
                     expectedStatus: models_1.HttpStatusCode.UNAUTHORIZED_401
@@ -32,8 +32,8 @@ describe('Test logs API validators', function () {
             });
         });
         it('Should fail with a non admin user', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.makeGetRequest({
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.makeGetRequest)({
                     url: server.url,
                     path,
                     token: userAccessToken,
@@ -42,8 +42,8 @@ describe('Test logs API validators', function () {
             });
         });
         it('Should fail with a missing startDate query', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.makeGetRequest({
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.makeGetRequest)({
                     url: server.url,
                     path,
                     token: server.accessToken,
@@ -52,8 +52,8 @@ describe('Test logs API validators', function () {
             });
         });
         it('Should fail with a bad startDate query', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.makeGetRequest({
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.makeGetRequest)({
                     url: server.url,
                     path,
                     token: server.accessToken,
@@ -63,8 +63,8 @@ describe('Test logs API validators', function () {
             });
         });
         it('Should fail with a bad endDate query', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.makeGetRequest({
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.makeGetRequest)({
                     url: server.url,
                     path,
                     token: server.accessToken,
@@ -74,8 +74,8 @@ describe('Test logs API validators', function () {
             });
         });
         it('Should fail with a bad level parameter', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.makeGetRequest({
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.makeGetRequest)({
                     url: server.url,
                     path,
                     token: server.accessToken,
@@ -85,8 +85,8 @@ describe('Test logs API validators', function () {
             });
         });
         it('Should succeed with the correct params', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.makeGetRequest({
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.makeGetRequest)({
                     url: server.url,
                     path,
                     token: server.accessToken,
@@ -97,8 +97,8 @@ describe('Test logs API validators', function () {
         });
     });
     after(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            yield extra_utils_1.cleanupTests([server]);
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            yield (0, extra_utils_1.cleanupTests)([server]);
         });
     });
 });

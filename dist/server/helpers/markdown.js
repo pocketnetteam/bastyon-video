@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.mdToPlainText = exports.toSafeHtml = void 0;
 const core_utils_1 = require("@shared/core-utils");
-const sanitizeOptions = core_utils_1.getSanitizeOptions();
+const sanitizeOptions = (0, core_utils_1.getSanitizeOptions)();
 const sanitizeHtml = require('sanitize-html');
 const markdownItEmoji = require('markdown-it-emoji/light');
 const MarkdownItClass = require('markdown-it');

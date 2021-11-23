@@ -28,7 +28,7 @@ class AbusesCommand extends shared_1.AbstractCommand {
             reason: options.reason,
             predefinedReasons: options.predefinedReasons
         };
-        return requests_1.unwrapBody(this.postBodyRequest(Object.assign(Object.assign({}, options), { path, fields: body, implicitToken: true, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 })));
+        return (0, requests_1.unwrapBody)(this.postBodyRequest(Object.assign(Object.assign({}, options), { path, fields: body, implicitToken: true, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 })));
     }
     getAdminList(options = {}) {
         const toPick = [
@@ -48,7 +48,7 @@ class AbusesCommand extends shared_1.AbstractCommand {
         ];
         const path = '/api/v1/abuses';
         const defaultQuery = { sort: 'createdAt' };
-        const query = Object.assign(Object.assign({}, defaultQuery), core_utils_1.pick(options, toPick));
+        const query = Object.assign(Object.assign({}, defaultQuery), (0, core_utils_1.pick)(options, toPick));
         return this.getRequestBody(Object.assign(Object.assign({}, options), { path,
             query, implicitToken: true, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 }));
     }
@@ -63,7 +63,7 @@ class AbusesCommand extends shared_1.AbstractCommand {
         ];
         const path = '/api/v1/users/me/abuses';
         const defaultQuery = { sort: 'createdAt' };
-        const query = Object.assign(Object.assign({}, defaultQuery), core_utils_1.pick(options, toPick));
+        const query = Object.assign(Object.assign({}, defaultQuery), (0, core_utils_1.pick)(options, toPick));
         return this.getRequestBody(Object.assign(Object.assign({}, options), { path,
             query, implicitToken: true, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 }));
     }

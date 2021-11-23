@@ -4,7 +4,7 @@ exports.getHLSPublicFileUrl = exports.replaceByBaseUrl = exports.getWebTorrentPu
 const config_1 = require("@server/initializers/config");
 const shared_1 = require("./shared");
 function getPrivateUrl(config, keyWithoutPrefix) {
-    return getBaseUrl(config) + shared_1.buildKey(keyWithoutPrefix, config);
+    return getBaseUrl(config) + (0, shared_1.buildKey)(keyWithoutPrefix, config);
 }
 exports.getPrivateUrl = getPrivateUrl;
 function getWebTorrentPublicFileUrl(fileUrl) {
@@ -24,7 +24,7 @@ exports.getHLSPublicFileUrl = getHLSPublicFileUrl;
 function getBaseUrl(bucketInfo, baseUrl) {
     if (baseUrl)
         return baseUrl;
-    return `${shared_1.getEndpointParsed().protocol}//${bucketInfo.BUCKET_NAME}.${shared_1.getEndpointParsed().host}/`;
+    return `${(0, shared_1.getEndpointParsed)().protocol}//${bucketInfo.BUCKET_NAME}.${(0, shared_1.getEndpointParsed)().host}/`;
 }
 const regex = new RegExp('https?://[^/]+');
 function replaceByBaseUrl(fileUrl, baseUrl) {

@@ -6,7 +6,7 @@ const fs_extra_1 = require("fs-extra");
 const miscs_1 = require("../miscs");
 const server_1 = require("./server");
 function createSingleServer(serverNumber, configOverride, options = {}) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const server = new server_1.PeerTubeServer({ serverNumber });
         yield server.flushAndRun(configOverride, options);
         return server;
@@ -22,16 +22,16 @@ function createMultipleServers(totalServers, configOverride, options = {}) {
 }
 exports.createMultipleServers = createMultipleServers;
 function killallServers(servers) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         return Promise.all(servers.map(s => s.kill()));
     });
 }
 exports.killallServers = killallServers;
 function cleanupTests(servers) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         yield killallServers(servers);
-        if (miscs_1.isGithubCI()) {
-            yield fs_extra_1.ensureDir('artifacts');
+        if ((0, miscs_1.isGithubCI)()) {
+            yield (0, fs_extra_1.ensureDir)('artifacts');
         }
         let p = [];
         for (const server of servers) {

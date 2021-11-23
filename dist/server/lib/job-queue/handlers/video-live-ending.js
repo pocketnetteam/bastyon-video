@@ -18,7 +18,7 @@ const video_live_1 = require("@server/models/video/video-live");
 const video_streaming_playlist_1 = require("@server/models/video/video-streaming-playlist");
 const logger_1 = require("../../../helpers/logger");
 function processVideoLiveEnding(job) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const payload = job.data;
         function logError() {
             logger_1.logger.warn('Video live %d does not exist anymore. Cannot process live ending.', payload.videoId);
@@ -36,20 +36,20 @@ function processVideoLiveEnding(job) {
         }
         live_1.LiveSegmentShaStore.Instance.cleanupShaSegments(video.uuid);
         if (live.saveReplay !== true) {
-            return live_1.cleanupLive(video, streamingPlaylist);
+            return (0, live_1.cleanupLive)(video, streamingPlaylist);
         }
         return saveLive(video, live, streamingPlaylist);
     });
 }
 exports.processVideoLiveEnding = processVideoLiveEnding;
 function saveLive(video, live, streamingPlaylist) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const replayDirectory = video_path_manager_1.VideoPathManager.Instance.getFSHLSOutputPath(video, constants_1.VIDEO_LIVE.REPLAY_DIRECTORY);
-        const rootFiles = yield fs_extra_1.readdir(paths_1.getLiveDirectory(video));
+        const rootFiles = yield (0, fs_extra_1.readdir)((0, paths_1.getLiveDirectory)(video));
         const playlistFiles = rootFiles.filter(file => {
             return file.endsWith('.m3u8') && file !== streamingPlaylist.playlistFilename;
         });
-        yield cleanupTMPLiveFiles(paths_1.getLiveDirectory(video));
+        yield cleanupTMPLiveFiles((0, paths_1.getLiveDirectory)(video));
         yield live.destroy();
         video.isLive = false;
         video.views = 0;
@@ -59,17 +59,17 @@ function saveLive(video, live, streamingPlaylist) {
         const hlsPlaylist = videoWithFiles.getHLSPlaylist();
         yield video_file_1.VideoFileModel.removeHLSFilesOfVideoId(hlsPlaylist.id);
         hlsPlaylist.VideoFiles = [];
-        hlsPlaylist.playlistFilename = paths_1.generateHLSMasterPlaylistFilename();
-        hlsPlaylist.segmentsSha256Filename = paths_1.generateHlsSha256SegmentsFilename();
+        hlsPlaylist.playlistFilename = (0, paths_1.generateHLSMasterPlaylistFilename)();
+        hlsPlaylist.segmentsSha256Filename = (0, paths_1.generateHlsSha256SegmentsFilename)();
         yield hlsPlaylist.save();
         let durationDone = false;
         for (const playlistFile of playlistFiles) {
-            const concatenatedTsFile = live_1.buildConcatenatedName(playlistFile);
-            const concatenatedTsFilePath = path_1.join(replayDirectory, concatenatedTsFile);
-            const probe = yield ffprobe_utils_1.ffprobePromise(concatenatedTsFilePath);
-            const { audioStream } = yield ffprobe_utils_1.getAudioStream(concatenatedTsFilePath, probe);
-            const { resolution, isPortraitMode } = yield ffprobe_utils_1.getVideoFileResolution(concatenatedTsFilePath, probe);
-            const { resolutionPlaylistPath: outputPath } = yield video_transcoding_1.generateHlsPlaylistResolutionFromTS({
+            const concatenatedTsFile = (0, live_1.buildConcatenatedName)(playlistFile);
+            const concatenatedTsFilePath = (0, path_1.join)(replayDirectory, concatenatedTsFile);
+            const probe = yield (0, ffprobe_utils_1.ffprobePromise)(concatenatedTsFilePath);
+            const { audioStream } = yield (0, ffprobe_utils_1.getAudioStream)(concatenatedTsFilePath, probe);
+            const { resolution, isPortraitMode } = yield (0, ffprobe_utils_1.getVideoFileResolution)(concatenatedTsFilePath, probe);
+            const { resolutionPlaylistPath: outputPath } = yield (0, video_transcoding_1.generateHlsPlaylistResolutionFromTS)({
                 video: videoWithFiles,
                 concatenatedTsFilePath,
                 resolution,
@@ -77,42 +77,42 @@ function saveLive(video, live, streamingPlaylist) {
                 isAAC: (audioStream === null || audioStream === void 0 ? void 0 : audioStream.codec_name) === 'aac'
             });
             if (!durationDone) {
-                videoWithFiles.duration = yield ffprobe_utils_1.getDurationFromVideoFile(outputPath);
+                videoWithFiles.duration = yield (0, ffprobe_utils_1.getDurationFromVideoFile)(outputPath);
                 yield videoWithFiles.save();
                 durationDone = true;
             }
         }
-        yield fs_extra_1.remove(replayDirectory);
+        yield (0, fs_extra_1.remove)(replayDirectory);
         if (videoWithFiles.getMiniature().automaticallyGenerated === true) {
-            yield thumbnail_1.generateVideoMiniature({
+            yield (0, thumbnail_1.generateVideoMiniature)({
                 video: videoWithFiles,
                 videoFile: videoWithFiles.getMaxQualityFile(),
                 type: 1
             });
         }
         if (videoWithFiles.getPreview().automaticallyGenerated === true) {
-            yield thumbnail_1.generateVideoMiniature({
+            yield (0, thumbnail_1.generateVideoMiniature)({
                 video: videoWithFiles,
                 videoFile: videoWithFiles.getMaxQualityFile(),
                 type: 2
             });
         }
-        yield video_state_1.moveToNextState(videoWithFiles, false);
+        yield (0, video_state_1.moveToNextState)(videoWithFiles, false);
     });
 }
 function cleanupTMPLiveFiles(hlsDirectory) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        if (!(yield fs_extra_1.pathExists(hlsDirectory)))
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        if (!(yield (0, fs_extra_1.pathExists)(hlsDirectory)))
             return;
-        const files = yield fs_extra_1.readdir(hlsDirectory);
+        const files = yield (0, fs_extra_1.readdir)(hlsDirectory);
         for (const filename of files) {
             if (filename.endsWith('.ts') ||
                 filename.endsWith('.m3u8') ||
                 filename.endsWith('.mpd') ||
                 filename.endsWith('.m4s') ||
                 filename.endsWith('.tmp')) {
-                const p = path_1.join(hlsDirectory, filename);
-                fs_extra_1.remove(p)
+                const p = (0, path_1.join)(hlsDirectory, filename);
+                (0, fs_extra_1.remove)(p)
                     .catch(err => logger_1.logger.error('Cannot remove %s.', p, { err }));
             }
         }

@@ -15,12 +15,12 @@ const models_1 = require("@shared/models");
 const logger_1 = require("../../../helpers/logger");
 const account_video_rate_1 = require("../../../models/account/account-video-rate");
 function processActivityPubCleaner(_job) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         logger_1.logger.info('Processing ActivityPub cleaner.');
         {
             const rateUrls = yield account_video_rate_1.AccountVideoRateModel.listRemoteRateUrlsOfLocalVideos();
             const { bodyValidator, deleter, updater } = rateOptionsFactory();
-            yield bluebird_1.map(rateUrls, (rateUrl) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield (0, bluebird_1.map)(rateUrls, (rateUrl) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 try {
                     const result = yield updateObjectIfNeeded(rateUrl, bodyValidator, updater, deleter);
                     if ((result === null || result === void 0 ? void 0 : result.status) === 'deleted') {
@@ -36,7 +36,7 @@ function processActivityPubCleaner(_job) {
         {
             const shareUrls = yield video_share_1.VideoShareModel.listRemoteShareUrlsOfLocalVideos();
             const { bodyValidator, deleter, updater } = shareOptionsFactory();
-            yield bluebird_1.map(shareUrls, (shareUrl) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield (0, bluebird_1.map)(shareUrls, (shareUrl) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 try {
                     yield updateObjectIfNeeded(shareUrl, bodyValidator, updater, deleter);
                 }
@@ -48,7 +48,7 @@ function processActivityPubCleaner(_job) {
         {
             const commentUrls = yield video_comment_1.VideoCommentModel.listRemoteCommentUrlsOfLocalVideos();
             const { bodyValidator, deleter, updater } = commentOptionsFactory();
-            yield bluebird_1.map(commentUrls, (commentUrl) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield (0, bluebird_1.map)(commentUrls, (commentUrl) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 try {
                     yield updateObjectIfNeeded(commentUrl, bodyValidator, updater, deleter);
                 }
@@ -61,14 +61,14 @@ function processActivityPubCleaner(_job) {
 }
 exports.processActivityPubCleaner = processActivityPubCleaner;
 function updateObjectIfNeeded(url, bodyValidator, updater, deleter) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        const on404OrTombstone = () => tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        const on404OrTombstone = () => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             logger_1.logger.info('Removing remote AP object %s.', url);
             const data = yield deleter(url);
             return { status: 'deleted', data };
         });
         try {
-            const { body } = yield requests_1.doJSONRequest(url, { activityPub: true });
+            const { body } = yield (0, requests_1.doJSONRequest)(url, { activityPub: true });
             if (!body || !body.id || !bodyValidator(body))
                 throw new Error(`Body or body id of ${url} is invalid`);
             if (body.type === 'Tombstone') {
@@ -76,7 +76,7 @@ function updateObjectIfNeeded(url, bodyValidator, updater, deleter) {
             }
             const newUrl = body.id;
             if (newUrl !== url) {
-                if (activitypub_1.checkUrlsSameHost(newUrl, url) !== true) {
+                if ((0, activitypub_1.checkUrlsSameHost)(newUrl, url) !== true) {
                     throw new Error(`New url ${newUrl} has not the same host than old url ${url}`);
                 }
                 logger_1.logger.info('Updating remote AP object %s.', url);
@@ -95,8 +95,8 @@ function updateObjectIfNeeded(url, bodyValidator, updater, deleter) {
 }
 function rateOptionsFactory() {
     return {
-        bodyValidator: (body) => activity_1.isLikeActivityValid(body) || activity_1.isDislikeActivityValid(body),
-        updater: (url, newUrl) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        bodyValidator: (body) => (0, activity_1.isLikeActivityValid)(body) || (0, activity_1.isDislikeActivityValid)(body),
+        updater: (url, newUrl) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const rate = yield account_video_rate_1.AccountVideoRateModel.loadByUrl(url, undefined);
             rate.url = newUrl;
             const videoId = rate.videoId;
@@ -104,7 +104,7 @@ function rateOptionsFactory() {
             yield rate.save();
             return { videoId, type };
         }),
-        deleter: (url) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        deleter: (url) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const rate = yield account_video_rate_1.AccountVideoRateModel.loadByUrl(url, undefined);
             const videoId = rate.videoId;
             const type = rate.type;
@@ -115,14 +115,14 @@ function rateOptionsFactory() {
 }
 function shareOptionsFactory() {
     return {
-        bodyValidator: (body) => activity_1.isAnnounceActivityValid(body),
-        updater: (url, newUrl) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        bodyValidator: (body) => (0, activity_1.isAnnounceActivityValid)(body),
+        updater: (url, newUrl) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const share = yield video_share_1.VideoShareModel.loadByUrl(url, undefined);
             share.url = newUrl;
             yield share.save();
             return undefined;
         }),
-        deleter: (url) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        deleter: (url) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const share = yield video_share_1.VideoShareModel.loadByUrl(url, undefined);
             yield share.destroy();
             return undefined;
@@ -131,14 +131,14 @@ function shareOptionsFactory() {
 }
 function commentOptionsFactory() {
     return {
-        bodyValidator: (body) => video_comments_1.sanitizeAndCheckVideoCommentObject(body),
-        updater: (url, newUrl) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        bodyValidator: (body) => (0, video_comments_1.sanitizeAndCheckVideoCommentObject)(body),
+        updater: (url, newUrl) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const comment = yield video_comment_1.VideoCommentModel.loadByUrlAndPopulateAccountAndVideo(url);
             comment.url = newUrl;
             yield comment.save();
             return undefined;
         }),
-        deleter: (url) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        deleter: (url) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const comment = yield video_comment_1.VideoCommentModel.loadByUrlAndPopulateAccountAndVideo(url);
             yield comment.destroy();
             return undefined;

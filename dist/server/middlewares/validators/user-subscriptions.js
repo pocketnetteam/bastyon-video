@@ -11,42 +11,42 @@ const constants_1 = require("../../initializers/constants");
 const actor_follow_1 = require("../../models/actor/actor-follow");
 const shared_1 = require("./shared");
 const userSubscriptionListValidator = [
-    express_validator_1.query('search').optional().not().isEmpty().withMessage('Should have a valid search'),
+    (0, express_validator_1.query)('search').optional().not().isEmpty().withMessage('Should have a valid search'),
     (req, res, next) => {
         logger_1.logger.debug('Checking userSubscriptionListValidator parameters', { parameters: req.query });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
         return next();
     }
 ];
 exports.userSubscriptionListValidator = userSubscriptionListValidator;
 const userSubscriptionAddValidator = [
-    express_validator_1.body('uri').custom(actor_1.isValidActorHandle).withMessage('Should have a valid URI to follow (username@domain)'),
+    (0, express_validator_1.body)('uri').custom(actor_1.isValidActorHandle).withMessage('Should have a valid URI to follow (username@domain)'),
     (req, res, next) => {
         logger_1.logger.debug('Checking userSubscriptionAddValidator parameters', { parameters: req.body });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
         return next();
     }
 ];
 exports.userSubscriptionAddValidator = userSubscriptionAddValidator;
 const areSubscriptionsExistValidator = [
-    express_validator_1.query('uris')
+    (0, express_validator_1.query)('uris')
         .customSanitizer(misc_1.toArray)
         .custom(actor_1.areValidActorHandles).withMessage('Should have a valid uri array'),
     (req, res, next) => {
         logger_1.logger.debug('Checking areSubscriptionsExistValidator parameters', { parameters: req.query });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
         return next();
     }
 ];
 exports.areSubscriptionsExistValidator = areSubscriptionsExistValidator;
 const userSubscriptionGetValidator = [
-    express_validator_1.param('uri').custom(actor_1.isValidActorHandle).withMessage('Should have a valid URI to unfollow'),
-    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    (0, express_validator_1.param)('uri').custom(actor_1.isValidActorHandle).withMessage('Should have a valid URI to unfollow'),
+    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking userSubscriptionGetValidator parameters', { parameters: req.params });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
         let [name, host] = req.params.uri.split('@');
         if (host === constants_1.WEBSERVER.HOST)

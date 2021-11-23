@@ -54,7 +54,7 @@ let VideoShareModel = VideoShareModel_1 = class VideoShareModel extends sequeliz
         const query = {
             where: {
                 [sequelize_1.Op.and]: [
-                    sequelize_1.literal(`EXISTS (` +
+                    (0, sequelize_1.literal)(`EXISTS (` +
                         `  SELECT 1 FROM "videoShare" ` +
                         `  INNER JOIN "video" ON "videoShare"."videoId" = "video"."id" ` +
                         `  INNER JOIN "videoChannel" ON "videoChannel"."id" = "video"."channelId" ` +
@@ -73,7 +73,7 @@ let VideoShareModel = VideoShareModel_1 = class VideoShareModel extends sequeliz
         const query = {
             where: {
                 [sequelize_1.Op.and]: [
-                    sequelize_1.literal(`EXISTS (` +
+                    (0, sequelize_1.literal)(`EXISTS (` +
                         `  SELECT 1 FROM "videoShare" ` +
                         `  INNER JOIN "video" ON "videoShare"."videoId" = "video"."id" ` +
                         `  WHERE "videoShare"."actorId" = "ActorModel"."id" AND "video"."channelId" = ${safeChannelId} ` +
@@ -113,57 +113,57 @@ let VideoShareModel = VideoShareModel_1 = class VideoShareModel extends sequeliz
                 },
                 videoId,
                 actorId: {
-                    [sequelize_1.Op.notIn]: utils_1.buildLocalActorIdsIn()
+                    [sequelize_1.Op.notIn]: (0, utils_1.buildLocalActorIdsIn)()
                 }
             }
         };
         return VideoShareModel_1.destroy(query);
     }
 };
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(false),
-    sequelize_typescript_1.Is('VideoShareUrl', value => utils_1.throwIfNotValid(value, misc_1.isActivityPubUrlValid, 'url')),
-    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.VIDEO_SHARE.URL.max)),
-    tslib_1.__metadata("design:type", String)
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(false),
+    (0, sequelize_typescript_1.Is)('VideoShareUrl', value => (0, utils_1.throwIfNotValid)(value, misc_1.isActivityPubUrlValid, 'url')),
+    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.VIDEO_SHARE.URL.max)),
+    (0, tslib_1.__metadata)("design:type", String)
 ], VideoShareModel.prototype, "url", void 0);
-tslib_1.__decorate([
+(0, tslib_1.__decorate)([
     sequelize_typescript_1.CreatedAt,
-    tslib_1.__metadata("design:type", Date)
+    (0, tslib_1.__metadata)("design:type", Date)
 ], VideoShareModel.prototype, "createdAt", void 0);
-tslib_1.__decorate([
+(0, tslib_1.__decorate)([
     sequelize_typescript_1.UpdatedAt,
-    tslib_1.__metadata("design:type", Date)
+    (0, tslib_1.__metadata)("design:type", Date)
 ], VideoShareModel.prototype, "updatedAt", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.ForeignKey(() => actor_1.ActorModel),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.ForeignKey)(() => actor_1.ActorModel),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], VideoShareModel.prototype, "actorId", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.BelongsTo(() => actor_1.ActorModel, {
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.BelongsTo)(() => actor_1.ActorModel, {
         foreignKey: {
             allowNull: false
         },
         onDelete: 'cascade'
     }),
-    tslib_1.__metadata("design:type", actor_1.ActorModel)
+    (0, tslib_1.__metadata)("design:type", actor_1.ActorModel)
 ], VideoShareModel.prototype, "Actor", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.ForeignKey(() => video_1.VideoModel),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.ForeignKey)(() => video_1.VideoModel),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], VideoShareModel.prototype, "videoId", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.BelongsTo(() => video_1.VideoModel, {
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.BelongsTo)(() => video_1.VideoModel, {
         foreignKey: {
             allowNull: false
         },
         onDelete: 'cascade'
     }),
-    tslib_1.__metadata("design:type", video_1.VideoModel)
+    (0, tslib_1.__metadata)("design:type", video_1.VideoModel)
 ], VideoShareModel.prototype, "Video", void 0);
-VideoShareModel = VideoShareModel_1 = tslib_1.__decorate([
-    sequelize_typescript_1.Scopes(() => ({
+VideoShareModel = VideoShareModel_1 = (0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.Scopes)(() => ({
         [ScopeNames.FULL]: {
             include: [
                 {
@@ -185,7 +185,7 @@ VideoShareModel = VideoShareModel_1 = tslib_1.__decorate([
             ]
         }
     })),
-    sequelize_typescript_1.Table({
+    (0, sequelize_typescript_1.Table)({
         tableName: 'videoShare',
         indexes: [
             {

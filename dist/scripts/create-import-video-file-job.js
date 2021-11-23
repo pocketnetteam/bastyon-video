@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const register_ts_paths_1 = require("../server/helpers/register-ts-paths");
-register_ts_paths_1.registerTSPaths();
+(0, register_ts_paths_1.registerTSPaths)();
 const commander_1 = require("commander");
 const path_1 = require("path");
 const video_1 = require("../server/models/video/video");
@@ -26,10 +26,10 @@ run()
     process.exit(-1);
 });
 function run() {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        yield database_1.initDatabaseModels(true);
-        const uuid = misc_1.toCompleteUUID(options.video);
-        if (misc_1.isUUIDValid(uuid) === false) {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        yield (0, database_1.initDatabaseModels)(true);
+        const uuid = (0, misc_1.toCompleteUUID)(options.video);
+        if ((0, misc_1.isUUIDValid)(uuid) === false) {
             console.error('%s is not a valid video UUID.', options.video);
             return;
         }
@@ -40,7 +40,7 @@ function run() {
             throw new Error('Cannot import files of a non owned video.');
         const dataInput = {
             videoUUID: video.uuid,
-            filePath: path_1.resolve(options.import)
+            filePath: (0, path_1.resolve)(options.import)
         };
         job_queue_1.JobQueue.Instance.init();
         yield job_queue_1.JobQueue.Instance.createJobWithPromise({ type: 'video-file-import', payload: dataInput });

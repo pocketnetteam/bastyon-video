@@ -20,8 +20,8 @@ class Emailer {
         if (this.initialized === true)
             return;
         this.initialized = true;
-        if (!config_1.isEmailEnabled()) {
-            if (!core_utils_1.isTestInstance()) {
+        if (!(0, config_1.isEmailEnabled)()) {
+            if (!(0, core_utils_1.isTestInstance)()) {
                 logger_1.logger.error('Cannot use SMTP server because of lack of configuration. PeerTube will not be able to send mails!');
             }
             return;
@@ -32,7 +32,7 @@ class Emailer {
             this.initSendmailTransport();
     }
     checkConnection() {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             if (!this.transporter || config_1.CONFIG.SMTP.TRANSPORT !== 'smtp')
                 return;
             logger_1.logger.info('Testing SMTP server...');
@@ -110,8 +110,8 @@ class Emailer {
         return job_queue_1.JobQueue.Instance.createJob({ type: 'email', payload: emailPayload });
     }
     sendMail(options) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            if (!config_1.isEmailEnabled()) {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            if (!(0, config_1.isEmailEnabled)()) {
                 throw new Error('Cannot send mail because SMTP is not configured.');
             }
             const fromDisplayName = options.from
@@ -124,11 +124,11 @@ class Emailer {
                 },
                 transport: this.transporter,
                 views: {
-                    root: path_1.join(core_utils_1.root(), 'dist', 'server', 'lib', 'emails')
+                    root: (0, path_1.join)((0, core_utils_1.root)(), 'dist', 'server', 'lib', 'emails')
                 },
                 subjectPrefix: config_1.CONFIG.EMAIL.SUBJECT.PREFIX
             });
-            const toEmails = lodash_1.isArray(options.to)
+            const toEmails = (0, lodash_1.isArray)(options.to)
                 ? options.to
                 : [options.to];
             for (const to of toEmails) {
@@ -148,7 +148,7 @@ class Emailer {
                         subject: options.subject
                     }
                 };
-                const sendOptions = lodash_1.merge(baseOptions, options);
+                const sendOptions = (0, lodash_1.merge)(baseOptions, options);
                 yield email.send(sendOptions)
                     .then(res => logger_1.logger.debug('Sent email.', { res }))
                     .catch(err => logger_1.logger.error('Error in email sender.', { err }));
@@ -163,7 +163,7 @@ class Emailer {
         let tls;
         if (config_1.CONFIG.SMTP.CA_FILE) {
             tls = {
-                ca: [fs_extra_1.readFileSync(config_1.CONFIG.SMTP.CA_FILE)]
+                ca: [(0, fs_extra_1.readFileSync)(config_1.CONFIG.SMTP.CA_FILE)]
             };
         }
         let auth;
@@ -173,7 +173,7 @@ class Emailer {
                 pass: config_1.CONFIG.SMTP.PASSWORD
             };
         }
-        this.transporter = nodemailer_1.createTransport({
+        this.transporter = (0, nodemailer_1.createTransport)({
             host: config_1.CONFIG.SMTP.HOSTNAME,
             port: config_1.CONFIG.SMTP.PORT,
             secure: config_1.CONFIG.SMTP.TLS,
@@ -186,7 +186,7 @@ class Emailer {
     }
     initSendmailTransport() {
         logger_1.logger.info('Using sendmail to send emails');
-        this.transporter = nodemailer_1.createTransport({
+        this.transporter = (0, nodemailer_1.createTransport)({
             sendmail: true,
             newline: 'unix',
             path: config_1.CONFIG.SMTP.SENDMAIL,

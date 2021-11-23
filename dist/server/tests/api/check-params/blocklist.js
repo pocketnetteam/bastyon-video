@@ -9,15 +9,15 @@ describe('Test blocklist API validators', function () {
     let server;
     let userAccessToken;
     before(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(60000);
-            servers = yield extra_utils_1.createMultipleServers(2);
-            yield extra_utils_1.setAccessTokensToServers(servers);
+            servers = yield (0, extra_utils_1.createMultipleServers)(2);
+            yield (0, extra_utils_1.setAccessTokensToServers)(servers);
             server = servers[0];
             const user = { username: 'user1', password: 'password' };
             yield server.users.create({ username: user.username, password: user.password });
             userAccessToken = yield server.login.getAccessToken(user);
-            yield extra_utils_1.doubleFollow(servers[0], servers[1]);
+            yield (0, extra_utils_1.doubleFollow)(servers[0], servers[1]);
         });
     });
     describe('When managing user blocklist', function () {
@@ -25,8 +25,8 @@ describe('Test blocklist API validators', function () {
             const path = '/api/v1/users/me/blocklist/accounts';
             describe('When listing blocked accounts', function () {
                 it('Should fail with an unauthenticated user', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makeGetRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makeGetRequest)({
                             url: server.url,
                             path,
                             expectedStatus: models_1.HttpStatusCode.UNAUTHORIZED_401
@@ -34,25 +34,25 @@ describe('Test blocklist API validators', function () {
                     });
                 });
                 it('Should fail with a bad start pagination', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.checkBadStartPagination(server.url, path, server.accessToken);
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.checkBadStartPagination)(server.url, path, server.accessToken);
                     });
                 });
                 it('Should fail with a bad count pagination', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.checkBadCountPagination(server.url, path, server.accessToken);
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.checkBadCountPagination)(server.url, path, server.accessToken);
                     });
                 });
                 it('Should fail with an incorrect sort', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.checkBadSortPagination(server.url, path, server.accessToken);
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.checkBadSortPagination)(server.url, path, server.accessToken);
                     });
                 });
             });
             describe('When blocking an account', function () {
                 it('Should fail with an unauthenticated user', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makePostBodyRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makePostBodyRequest)({
                             url: server.url,
                             path,
                             fields: { accountName: 'user1' },
@@ -61,8 +61,8 @@ describe('Test blocklist API validators', function () {
                     });
                 });
                 it('Should fail with an unknown account', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makePostBodyRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makePostBodyRequest)({
                             url: server.url,
                             token: server.accessToken,
                             path,
@@ -72,8 +72,8 @@ describe('Test blocklist API validators', function () {
                     });
                 });
                 it('Should fail to block ourselves', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makePostBodyRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makePostBodyRequest)({
                             url: server.url,
                             token: server.accessToken,
                             path,
@@ -83,8 +83,8 @@ describe('Test blocklist API validators', function () {
                     });
                 });
                 it('Should succeed with the correct params', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makePostBodyRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makePostBodyRequest)({
                             url: server.url,
                             token: server.accessToken,
                             path,
@@ -96,8 +96,8 @@ describe('Test blocklist API validators', function () {
             });
             describe('When unblocking an account', function () {
                 it('Should fail with an unauthenticated user', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makeDeleteRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makeDeleteRequest)({
                             url: server.url,
                             path: path + '/user1',
                             expectedStatus: models_1.HttpStatusCode.UNAUTHORIZED_401
@@ -105,8 +105,8 @@ describe('Test blocklist API validators', function () {
                     });
                 });
                 it('Should fail with an unknown account block', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makeDeleteRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makeDeleteRequest)({
                             url: server.url,
                             path: path + '/user2',
                             token: server.accessToken,
@@ -115,8 +115,8 @@ describe('Test blocklist API validators', function () {
                     });
                 });
                 it('Should succeed with the correct params', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makeDeleteRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makeDeleteRequest)({
                             url: server.url,
                             path: path + '/user1',
                             token: server.accessToken,
@@ -130,8 +130,8 @@ describe('Test blocklist API validators', function () {
             const path = '/api/v1/users/me/blocklist/servers';
             describe('When listing blocked servers', function () {
                 it('Should fail with an unauthenticated user', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makeGetRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makeGetRequest)({
                             url: server.url,
                             path,
                             expectedStatus: models_1.HttpStatusCode.UNAUTHORIZED_401
@@ -139,25 +139,25 @@ describe('Test blocklist API validators', function () {
                     });
                 });
                 it('Should fail with a bad start pagination', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.checkBadStartPagination(server.url, path, server.accessToken);
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.checkBadStartPagination)(server.url, path, server.accessToken);
                     });
                 });
                 it('Should fail with a bad count pagination', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.checkBadCountPagination(server.url, path, server.accessToken);
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.checkBadCountPagination)(server.url, path, server.accessToken);
                     });
                 });
                 it('Should fail with an incorrect sort', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.checkBadSortPagination(server.url, path, server.accessToken);
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.checkBadSortPagination)(server.url, path, server.accessToken);
                     });
                 });
             });
             describe('When blocking a server', function () {
                 it('Should fail with an unauthenticated user', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makePostBodyRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makePostBodyRequest)({
                             url: server.url,
                             path,
                             fields: { host: 'localhost:9002' },
@@ -166,8 +166,8 @@ describe('Test blocklist API validators', function () {
                     });
                 });
                 it('Should succeed with an unknown server', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makePostBodyRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makePostBodyRequest)({
                             url: server.url,
                             token: server.accessToken,
                             path,
@@ -177,8 +177,8 @@ describe('Test blocklist API validators', function () {
                     });
                 });
                 it('Should fail with our own server', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makePostBodyRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makePostBodyRequest)({
                             url: server.url,
                             token: server.accessToken,
                             path,
@@ -188,8 +188,8 @@ describe('Test blocklist API validators', function () {
                     });
                 });
                 it('Should succeed with the correct params', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makePostBodyRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makePostBodyRequest)({
                             url: server.url,
                             token: server.accessToken,
                             path,
@@ -201,8 +201,8 @@ describe('Test blocklist API validators', function () {
             });
             describe('When unblocking a server', function () {
                 it('Should fail with an unauthenticated user', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makeDeleteRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makeDeleteRequest)({
                             url: server.url,
                             path: path + '/localhost:' + servers[1].port,
                             expectedStatus: models_1.HttpStatusCode.UNAUTHORIZED_401
@@ -210,8 +210,8 @@ describe('Test blocklist API validators', function () {
                     });
                 });
                 it('Should fail with an unknown server block', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makeDeleteRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makeDeleteRequest)({
                             url: server.url,
                             path: path + '/localhost:9004',
                             token: server.accessToken,
@@ -220,8 +220,8 @@ describe('Test blocklist API validators', function () {
                     });
                 });
                 it('Should succeed with the correct params', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makeDeleteRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makeDeleteRequest)({
                             url: server.url,
                             path: path + '/localhost:' + servers[1].port,
                             token: server.accessToken,
@@ -237,8 +237,8 @@ describe('Test blocklist API validators', function () {
             const path = '/api/v1/server/blocklist/accounts';
             describe('When listing blocked accounts', function () {
                 it('Should fail with an unauthenticated user', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makeGetRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makeGetRequest)({
                             url: server.url,
                             path,
                             expectedStatus: models_1.HttpStatusCode.UNAUTHORIZED_401
@@ -246,8 +246,8 @@ describe('Test blocklist API validators', function () {
                     });
                 });
                 it('Should fail with a user without the appropriate rights', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makeGetRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makeGetRequest)({
                             url: server.url,
                             token: userAccessToken,
                             path,
@@ -256,25 +256,25 @@ describe('Test blocklist API validators', function () {
                     });
                 });
                 it('Should fail with a bad start pagination', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.checkBadStartPagination(server.url, path, server.accessToken);
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.checkBadStartPagination)(server.url, path, server.accessToken);
                     });
                 });
                 it('Should fail with a bad count pagination', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.checkBadCountPagination(server.url, path, server.accessToken);
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.checkBadCountPagination)(server.url, path, server.accessToken);
                     });
                 });
                 it('Should fail with an incorrect sort', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.checkBadSortPagination(server.url, path, server.accessToken);
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.checkBadSortPagination)(server.url, path, server.accessToken);
                     });
                 });
             });
             describe('When blocking an account', function () {
                 it('Should fail with an unauthenticated user', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makePostBodyRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makePostBodyRequest)({
                             url: server.url,
                             path,
                             fields: { accountName: 'user1' },
@@ -283,8 +283,8 @@ describe('Test blocklist API validators', function () {
                     });
                 });
                 it('Should fail with a user without the appropriate rights', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makePostBodyRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makePostBodyRequest)({
                             url: server.url,
                             token: userAccessToken,
                             path,
@@ -294,8 +294,8 @@ describe('Test blocklist API validators', function () {
                     });
                 });
                 it('Should fail with an unknown account', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makePostBodyRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makePostBodyRequest)({
                             url: server.url,
                             token: server.accessToken,
                             path,
@@ -305,8 +305,8 @@ describe('Test blocklist API validators', function () {
                     });
                 });
                 it('Should fail to block ourselves', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makePostBodyRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makePostBodyRequest)({
                             url: server.url,
                             token: server.accessToken,
                             path,
@@ -316,8 +316,8 @@ describe('Test blocklist API validators', function () {
                     });
                 });
                 it('Should succeed with the correct params', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makePostBodyRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makePostBodyRequest)({
                             url: server.url,
                             token: server.accessToken,
                             path,
@@ -329,8 +329,8 @@ describe('Test blocklist API validators', function () {
             });
             describe('When unblocking an account', function () {
                 it('Should fail with an unauthenticated user', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makeDeleteRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makeDeleteRequest)({
                             url: server.url,
                             path: path + '/user1',
                             expectedStatus: models_1.HttpStatusCode.UNAUTHORIZED_401
@@ -338,8 +338,8 @@ describe('Test blocklist API validators', function () {
                     });
                 });
                 it('Should fail with a user without the appropriate rights', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makeDeleteRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makeDeleteRequest)({
                             url: server.url,
                             path: path + '/user1',
                             token: userAccessToken,
@@ -348,8 +348,8 @@ describe('Test blocklist API validators', function () {
                     });
                 });
                 it('Should fail with an unknown account block', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makeDeleteRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makeDeleteRequest)({
                             url: server.url,
                             path: path + '/user2',
                             token: server.accessToken,
@@ -358,8 +358,8 @@ describe('Test blocklist API validators', function () {
                     });
                 });
                 it('Should succeed with the correct params', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makeDeleteRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makeDeleteRequest)({
                             url: server.url,
                             path: path + '/user1',
                             token: server.accessToken,
@@ -373,8 +373,8 @@ describe('Test blocklist API validators', function () {
             const path = '/api/v1/server/blocklist/servers';
             describe('When listing blocked servers', function () {
                 it('Should fail with an unauthenticated user', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makeGetRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makeGetRequest)({
                             url: server.url,
                             path,
                             expectedStatus: models_1.HttpStatusCode.UNAUTHORIZED_401
@@ -382,8 +382,8 @@ describe('Test blocklist API validators', function () {
                     });
                 });
                 it('Should fail with a user without the appropriate rights', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makeGetRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makeGetRequest)({
                             url: server.url,
                             token: userAccessToken,
                             path,
@@ -392,25 +392,25 @@ describe('Test blocklist API validators', function () {
                     });
                 });
                 it('Should fail with a bad start pagination', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.checkBadStartPagination(server.url, path, server.accessToken);
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.checkBadStartPagination)(server.url, path, server.accessToken);
                     });
                 });
                 it('Should fail with a bad count pagination', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.checkBadCountPagination(server.url, path, server.accessToken);
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.checkBadCountPagination)(server.url, path, server.accessToken);
                     });
                 });
                 it('Should fail with an incorrect sort', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.checkBadSortPagination(server.url, path, server.accessToken);
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.checkBadSortPagination)(server.url, path, server.accessToken);
                     });
                 });
             });
             describe('When blocking a server', function () {
                 it('Should fail with an unauthenticated user', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makePostBodyRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makePostBodyRequest)({
                             url: server.url,
                             path,
                             fields: { host: 'localhost:' + servers[1].port },
@@ -419,8 +419,8 @@ describe('Test blocklist API validators', function () {
                     });
                 });
                 it('Should fail with a user without the appropriate rights', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makePostBodyRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makePostBodyRequest)({
                             url: server.url,
                             token: userAccessToken,
                             path,
@@ -430,8 +430,8 @@ describe('Test blocklist API validators', function () {
                     });
                 });
                 it('Should succeed with an unknown server', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makePostBodyRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makePostBodyRequest)({
                             url: server.url,
                             token: server.accessToken,
                             path,
@@ -441,8 +441,8 @@ describe('Test blocklist API validators', function () {
                     });
                 });
                 it('Should fail with our own server', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makePostBodyRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makePostBodyRequest)({
                             url: server.url,
                             token: server.accessToken,
                             path,
@@ -452,8 +452,8 @@ describe('Test blocklist API validators', function () {
                     });
                 });
                 it('Should succeed with the correct params', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makePostBodyRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makePostBodyRequest)({
                             url: server.url,
                             token: server.accessToken,
                             path,
@@ -465,8 +465,8 @@ describe('Test blocklist API validators', function () {
             });
             describe('When unblocking a server', function () {
                 it('Should fail with an unauthenticated user', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makeDeleteRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makeDeleteRequest)({
                             url: server.url,
                             path: path + '/localhost:' + servers[1].port,
                             expectedStatus: models_1.HttpStatusCode.UNAUTHORIZED_401
@@ -474,8 +474,8 @@ describe('Test blocklist API validators', function () {
                     });
                 });
                 it('Should fail with a user without the appropriate rights', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makeDeleteRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makeDeleteRequest)({
                             url: server.url,
                             path: path + '/localhost:' + servers[1].port,
                             token: userAccessToken,
@@ -484,8 +484,8 @@ describe('Test blocklist API validators', function () {
                     });
                 });
                 it('Should fail with an unknown server block', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makeDeleteRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makeDeleteRequest)({
                             url: server.url,
                             path: path + '/localhost:9004',
                             token: server.accessToken,
@@ -494,8 +494,8 @@ describe('Test blocklist API validators', function () {
                     });
                 });
                 it('Should succeed with the correct params', function () {
-                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                        yield extra_utils_1.makeDeleteRequest({
+                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                        yield (0, extra_utils_1.makeDeleteRequest)({
                             url: server.url,
                             path: path + '/localhost:' + servers[1].port,
                             token: server.accessToken,
@@ -507,8 +507,8 @@ describe('Test blocklist API validators', function () {
         });
     });
     after(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            yield extra_utils_1.cleanupTests(servers);
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            yield (0, extra_utils_1.cleanupTests)(servers);
         });
     });
 });

@@ -19,10 +19,10 @@ class LoginCommand extends shared_1.AbstractCommand {
             grant_type: 'password',
             scope: 'upload'
         };
-        return requests_1.unwrapBody(this.postBodyRequest(Object.assign(Object.assign({}, options), { path, requestType: 'form', fields: body, implicitToken: false, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 })));
+        return (0, requests_1.unwrapBody)(this.postBodyRequest(Object.assign(Object.assign({}, options), { path, requestType: 'form', fields: body, implicitToken: false, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 })));
     }
     getAccessToken(arg1, password) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             let user;
             if (!arg1)
                 user = this.server.store.user;
@@ -55,7 +55,7 @@ class LoginCommand extends shared_1.AbstractCommand {
     }
     logout(options) {
         const path = '/api/v1/users/revoke-token';
-        return requests_1.unwrapBody(this.postBodyRequest(Object.assign(Object.assign({}, options), { path, requestType: 'form', implicitToken: false, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 })));
+        return (0, requests_1.unwrapBody)(this.postBodyRequest(Object.assign(Object.assign({}, options), { path, requestType: 'form', implicitToken: false, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 })));
     }
     refreshToken(options) {
         const path = '/api/v1/users/token';

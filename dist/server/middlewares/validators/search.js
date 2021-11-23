@@ -8,82 +8,82 @@ const misc_1 = require("../../helpers/custom-validators/misc");
 const logger_1 = require("../../helpers/logger");
 const shared_1 = require("./shared");
 const videosSearchValidator = [
-    express_validator_1.query('search').optional().not().isEmpty().withMessage('Should have a valid search'),
-    express_validator_1.query('host')
+    (0, express_validator_1.query)('search').optional().not().isEmpty().withMessage('Should have a valid search'),
+    (0, express_validator_1.query)('host')
         .optional()
         .custom(servers_1.isHostValid).withMessage('Should have a valid host'),
-    express_validator_1.query('startDate')
+    (0, express_validator_1.query)('startDate')
         .optional()
         .custom(misc_1.isDateValid).withMessage('Should have a start date that conforms to ISO 8601'),
-    express_validator_1.query('endDate')
+    (0, express_validator_1.query)('endDate')
         .optional()
         .custom(misc_1.isDateValid).withMessage('Should have a end date that conforms to ISO 8601'),
-    express_validator_1.query('originallyPublishedStartDate')
+    (0, express_validator_1.query)('originallyPublishedStartDate')
         .optional()
         .custom(misc_1.isDateValid).withMessage('Should have a published start date that conforms to ISO 8601'),
-    express_validator_1.query('originallyPublishedEndDate')
+    (0, express_validator_1.query)('originallyPublishedEndDate')
         .optional()
         .custom(misc_1.isDateValid).withMessage('Should have a published end date that conforms to ISO 8601'),
-    express_validator_1.query('durationMin')
+    (0, express_validator_1.query)('durationMin')
         .optional()
         .isInt().withMessage('Should have a valid min duration'),
-    express_validator_1.query('durationMax')
+    (0, express_validator_1.query)('durationMax')
         .optional()
         .isInt().withMessage('Should have a valid max duration'),
-    express_validator_1.query('uuids')
+    (0, express_validator_1.query)('uuids')
         .optional()
         .toArray()
         .customSanitizer(misc_1.toCompleteUUIDs)
         .custom(misc_1.areUUIDsValid).withMessage('Should have valid uuids'),
-    express_validator_1.query('searchTarget').optional().custom(search_1.isSearchTargetValid).withMessage('Should have a valid search target'),
+    (0, express_validator_1.query)('searchTarget').optional().custom(search_1.isSearchTargetValid).withMessage('Should have a valid search target'),
     (req, res, next) => {
         logger_1.logger.debug('Checking videos search query', { parameters: req.query });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
         return next();
     }
 ];
 exports.videosSearchValidator = videosSearchValidator;
 const videoChannelsListSearchValidator = [
-    express_validator_1.query('search')
+    (0, express_validator_1.query)('search')
         .optional()
         .not().isEmpty().withMessage('Should have a valid search'),
-    express_validator_1.query('host')
+    (0, express_validator_1.query)('host')
         .optional()
         .custom(servers_1.isHostValid).withMessage('Should have a valid host'),
-    express_validator_1.query('searchTarget')
+    (0, express_validator_1.query)('searchTarget')
         .optional()
         .custom(search_1.isSearchTargetValid).withMessage('Should have a valid search target'),
-    express_validator_1.query('handles')
+    (0, express_validator_1.query)('handles')
         .optional()
         .toArray()
         .custom(misc_1.isNotEmptyStringArray).withMessage('Should have valid handles'),
     (req, res, next) => {
         logger_1.logger.debug('Checking video channels search query', { parameters: req.query });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
         return next();
     }
 ];
 exports.videoChannelsListSearchValidator = videoChannelsListSearchValidator;
 const videoPlaylistsListSearchValidator = [
-    express_validator_1.query('search')
+    (0, express_validator_1.query)('search')
         .optional()
         .not().isEmpty().withMessage('Should have a valid search'),
-    express_validator_1.query('host')
+    (0, express_validator_1.query)('host')
         .optional()
         .custom(servers_1.isHostValid).withMessage('Should have a valid host'),
-    express_validator_1.query('searchTarget')
+    (0, express_validator_1.query)('searchTarget')
         .optional()
         .custom(search_1.isSearchTargetValid).withMessage('Should have a valid search target'),
-    express_validator_1.query('uuids')
+    (0, express_validator_1.query)('uuids')
         .optional()
         .toArray()
         .customSanitizer(misc_1.toCompleteUUIDs)
         .custom(misc_1.areUUIDsValid).withMessage('Should have valid uuids'),
     (req, res, next) => {
         logger_1.logger.debug('Checking video playlists search query', { parameters: req.query });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
         return next();
     }

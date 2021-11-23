@@ -10,14 +10,14 @@ const peertube_crypto_1 = require("../helpers/peertube-crypto");
 const constants_1 = require("../initializers/constants");
 const actors_1 = require("../lib/activitypub/actors");
 function checkSignature(req, res, next) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         try {
             const httpSignatureChecked = yield checkHttpSignature(req, res);
             if (httpSignatureChecked !== true)
                 return;
             const actor = res.locals.signature.actor;
             const bodyActor = req.body.actor;
-            const bodyActorId = activitypub_1.getAPId(bodyActor);
+            const bodyActorId = (0, activitypub_1.getAPId)(bodyActor);
             if (bodyActorId && bodyActorId !== actor.url) {
                 const jsonLDSignatureChecked = yield checkJsonLDSignature(req, res);
                 if (jsonLDSignatureChecked !== true)
@@ -27,7 +27,7 @@ function checkSignature(req, res, next) {
         }
         catch (err) {
             const activity = req.body;
-            if (actor_1.isActorDeleteActivityValid(activity) && activity.object === activity.actor) {
+            if ((0, actor_1.isActorDeleteActivityValid)(activity) && activity.object === activity.actor) {
                 logger_1.logger.debug('Handling signature error on actor delete activity', { err });
                 return res.status(http_error_codes_1.HttpStatusCode.NO_CONTENT_204).end();
             }
@@ -50,13 +50,13 @@ function executeIfActivityPub(req, res, next) {
 }
 exports.executeIfActivityPub = executeIfActivityPub;
 function checkHttpSignature(req, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const sig = req.headers[constants_1.HTTP_SIGNATURE.HEADER_NAME];
         if (sig && sig.startsWith('Signature ') === true)
             req.headers[constants_1.HTTP_SIGNATURE.HEADER_NAME] = sig.replace(/^Signature /, '');
         let parsed;
         try {
-            parsed = peertube_crypto_1.parseHTTPSignature(req, constants_1.HTTP_SIGNATURE.CLOCK_SKEW_SECONDS);
+            parsed = (0, peertube_crypto_1.parseHTTPSignature)(req, constants_1.HTTP_SIGNATURE.CLOCK_SKEW_SECONDS);
         }
         catch (err) {
             logger_1.logger.warn('Invalid signature because of exception in signature parser', { reqBody: req.body, err });
@@ -80,10 +80,10 @@ function checkHttpSignature(req, res) {
         logger_1.logger.debug('Checking HTTP signature of actor %s...', keyId);
         let [actorUrl] = keyId.split('#');
         if (actorUrl.startsWith('acct:')) {
-            actorUrl = yield actors_1.loadActorUrlOrGetFromWebfinger(actorUrl.replace(/^acct:/, ''));
+            actorUrl = yield (0, actors_1.loadActorUrlOrGetFromWebfinger)(actorUrl.replace(/^acct:/, ''));
         }
-        const actor = yield actors_1.getOrCreateAPActor(actorUrl);
-        const verified = peertube_crypto_1.isHTTPSignatureVerified(parsed, actor);
+        const actor = yield (0, actors_1.getOrCreateAPActor)(actorUrl);
+        const verified = (0, peertube_crypto_1.isHTTPSignatureVerified)(parsed, actor);
         if (verified !== true) {
             logger_1.logger.warn('Signature from %s is invalid', actorUrl, { parsed });
             res.fail({
@@ -101,7 +101,7 @@ function checkHttpSignature(req, res) {
 }
 exports.checkHttpSignature = checkHttpSignature;
 function checkJsonLDSignature(req, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const signatureObject = req.body.signature;
         if (!signatureObject || !signatureObject.creator) {
             res.fail({
@@ -112,8 +112,8 @@ function checkJsonLDSignature(req, res) {
         }
         const [creator] = signatureObject.creator.split('#');
         logger_1.logger.debug('Checking JsonLD signature of actor %s...', creator);
-        const actor = yield actors_1.getOrCreateAPActor(creator);
-        const verified = yield peertube_crypto_1.isJsonLDSignatureVerified(actor, req.body);
+        const actor = yield (0, actors_1.getOrCreateAPActor)(creator);
+        const verified = yield (0, peertube_crypto_1.isJsonLDSignatureVerified)(actor, req.body);
         if (verified !== true) {
             logger_1.logger.warn('Signature not verified.', req.body);
             res.fail({

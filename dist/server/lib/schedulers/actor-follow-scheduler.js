@@ -14,13 +14,13 @@ class ActorFollowScheduler extends abstract_scheduler_1.AbstractScheduler {
         this.schedulerIntervalMs = constants_1.SCHEDULER_INTERVALS_MS.actorFollowScores;
     }
     internalExecute() {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             yield this.processPendingScores();
             yield this.removeBadActorFollows();
         });
     }
     processPendingScores() {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const pendingScores = files_cache_1.ActorFollowScoreCache.Instance.getPendingFollowsScore();
             const badServerIds = files_cache_1.ActorFollowScoreCache.Instance.getBadFollowingServerIds();
             const goodServerIds = files_cache_1.ActorFollowScoreCache.Instance.getGoodFollowingServerIds();
@@ -35,8 +35,8 @@ class ActorFollowScheduler extends abstract_scheduler_1.AbstractScheduler {
         });
     }
     removeBadActorFollows() {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            if (!core_utils_1.isTestInstance())
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            if (!(0, core_utils_1.isTestInstance)())
                 logger_1.logger.info('Removing bad actor follows (scheduler).');
             try {
                 yield actor_follow_1.ActorFollowModel.removeBadActorFollows();

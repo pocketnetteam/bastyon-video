@@ -9,7 +9,7 @@ const user_notification_1 = require("@server/models/user/user-notification");
 const abstract_notification_1 = require("../common/abstract-notification");
 class RegistrationForModerators extends abstract_notification_1.AbstractNotification {
     prepare() {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.moderators = yield user_1.UserModel.listWithRight(1);
         });
     }
@@ -23,7 +23,7 @@ class RegistrationForModerators extends abstract_notification_1.AbstractNotifica
         return this.moderators;
     }
     createNotification(user) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const notification = yield user_notification_1.UserNotificationModel.create({
                 type: 9,
                 userId: user.id,

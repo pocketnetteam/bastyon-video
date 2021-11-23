@@ -7,8 +7,8 @@ const path_1 = require("path");
 const register_ts_paths_1 = require("../../server/helpers/register-ts-paths");
 const constants_1 = require("../../server/initializers/constants");
 const i18n_1 = require("../../shared/core-utils/i18n");
-register_ts_paths_1.registerTSPaths();
-const videojs = require(path_1.join(__dirname, '../../../client/src/locale/videojs.en-US.json'));
+(0, register_ts_paths_1.registerTSPaths)();
+const videojs = require((0, path_1.join)(__dirname, '../../../client/src/locale/videojs.en-US.json'));
 const playerKeys = {
     'Quality': 'Quality',
     'Auto': 'Auto',
@@ -47,13 +47,13 @@ const playerKeys = {
 };
 Object.assign(playerKeys, videojs);
 const serverKeys = {};
-lodash_1.values(constants_1.VIDEO_CATEGORIES)
-    .concat(lodash_1.values(constants_1.VIDEO_LICENCES))
-    .concat(lodash_1.values(constants_1.VIDEO_PRIVACIES))
-    .concat(lodash_1.values(constants_1.VIDEO_STATES))
-    .concat(lodash_1.values(constants_1.VIDEO_IMPORT_STATES))
-    .concat(lodash_1.values(constants_1.VIDEO_PLAYLIST_PRIVACIES))
-    .concat(lodash_1.values(constants_1.VIDEO_PLAYLIST_TYPES))
+(0, lodash_1.values)(constants_1.VIDEO_CATEGORIES)
+    .concat((0, lodash_1.values)(constants_1.VIDEO_LICENCES))
+    .concat((0, lodash_1.values)(constants_1.VIDEO_PRIVACIES))
+    .concat((0, lodash_1.values)(constants_1.VIDEO_STATES))
+    .concat((0, lodash_1.values)(constants_1.VIDEO_IMPORT_STATES))
+    .concat((0, lodash_1.values)(constants_1.VIDEO_PLAYLIST_PRIVACIES))
+    .concat((0, lodash_1.values)(constants_1.VIDEO_PLAYLIST_TYPES))
     .concat([
     'This video does not exist.',
     'We cannot fetch the video. Please try again later.',
@@ -71,7 +71,7 @@ Object.assign(serverKeys, {
     Unknown: 'Unknown'
 });
 const languageKeys = {};
-const languages = constants_1.buildLanguages();
+const languages = (0, constants_1.buildLanguages)();
 Object.keys(languages).forEach(k => { languageKeys[languages[k]] = languages[k]; });
 Object.assign(serverKeys, languageKeys);
 writeAll().catch(err => {
@@ -79,19 +79,19 @@ writeAll().catch(err => {
     process.exit(-1);
 });
 function writeAll() {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        const localePath = path_1.join(__dirname, '../../../client/src/locale');
-        yield fs_extra_1.writeJSON(path_1.join(localePath, 'player.en-US.json'), playerKeys, { spaces: 4 });
-        yield fs_extra_1.writeJSON(path_1.join(localePath, 'server.en-US.json'), serverKeys, { spaces: 4 });
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        const localePath = (0, path_1.join)(__dirname, '../../../client/src/locale');
+        yield (0, fs_extra_1.writeJSON)((0, path_1.join)(localePath, 'player.en-US.json'), playerKeys, { spaces: 4 });
+        yield (0, fs_extra_1.writeJSON)((0, path_1.join)(localePath, 'server.en-US.json'), serverKeys, { spaces: 4 });
         for (const key of Object.keys(i18n_1.I18N_LOCALES)) {
-            const playerJsonPath = path_1.join(localePath, `player.${key}.json`);
+            const playerJsonPath = (0, path_1.join)(localePath, `player.${key}.json`);
             const translatedPlayer = require(playerJsonPath);
             const newTranslatedPlayer = Object.assign({}, playerKeys, translatedPlayer);
-            yield fs_extra_1.writeJSON(playerJsonPath, newTranslatedPlayer, { spaces: 4 });
-            const serverJsonPath = path_1.join(localePath, `server.${key}.json`);
+            yield (0, fs_extra_1.writeJSON)(playerJsonPath, newTranslatedPlayer, { spaces: 4 });
+            const serverJsonPath = (0, path_1.join)(localePath, `server.${key}.json`);
             const translatedServer = require(serverJsonPath);
             const newTranslatedServer = Object.assign({}, serverKeys, translatedServer);
-            yield fs_extra_1.writeJSON(serverJsonPath, newTranslatedServer, { spaces: 4 });
+            yield (0, fs_extra_1.writeJSON)(serverJsonPath, newTranslatedServer, { spaces: 4 });
         }
     });
 }

@@ -4,7 +4,7 @@ exports.createOrUpdateCacheFile = void 0;
 const tslib_1 = require("tslib");
 const video_redundancy_1 = require("../../models/redundancy/video-redundancy");
 function createOrUpdateCacheFile(cacheFileObject, video, byActor, t) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const redundancyModel = yield video_redundancy_1.VideoRedundancyModel.loadByUrl(cacheFileObject.id, t);
         if (redundancyModel) {
             return updateCacheFile(cacheFileObject, redundancyModel, video, byActor, t);

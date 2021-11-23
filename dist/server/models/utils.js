@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.searchAttribute = exports.createSafeIn = exports.buildDirectionAndField = exports.getFollowsSort = exports.parseAggregateResult = exports.isOutdated = exports.buildWhereIdOrUUID = exports.buildTrigramSearchIndex = exports.buildServerIdsFollowedBy = exports.throwIfNotValid = exports.createSimilarityAttribute = exports.getBlacklistSort = exports.getVideoSort = exports.getCommentSort = exports.getSort = exports.buildLocalAccountIdsIn = exports.getPlaylistSort = exports.buildLocalActorIdsIn = exports.buildBlockedAccountSQLOptimized = exports.buildBlockedAccountSQL = void 0;
 const tslib_1 = require("tslib");
 const sequelize_1 = require("sequelize");
-const validator_1 = tslib_1.__importDefault(require("validator"));
+const validator_1 = (0, tslib_1.__importDefault)(require("validator"));
 function getSort(value, lastSort = ['id', 'ASC']) {
     const { direction, field } = buildDirectionAndField(value);
     let finalField;
@@ -70,7 +70,7 @@ exports.getVideoSort = getVideoSort;
 function getBlacklistSort(model, value, lastSort = ['id', 'ASC']) {
     const [firstSort] = getSort(value);
     if (model)
-        return [[sequelize_1.literal(`"${model}.${firstSort[0]}" ${firstSort[1]}`)], lastSort];
+        return [[(0, sequelize_1.literal)(`"${model}.${firstSort[0]}" ${firstSort[1]}`)], lastSort];
     return [firstSort, lastSort];
 }
 exports.getBlacklistSort = getBlacklistSort;
@@ -128,12 +128,12 @@ exports.buildBlockedAccountSQL = buildBlockedAccountSQL;
 function buildBlockedAccountSQLOptimized(columnNameJoin, blockerIds) {
     const blockerIdsString = blockerIds.join(', ');
     return [
-        sequelize_1.literal(`NOT EXISTS (` +
+        (0, sequelize_1.literal)(`NOT EXISTS (` +
             `  SELECT 1 FROM "accountBlocklist" ` +
             `  WHERE "targetAccountId" = ${columnNameJoin} ` +
             `  AND "accountId" IN (${blockerIdsString})` +
             `)`),
-        sequelize_1.literal(`NOT EXISTS (` +
+        (0, sequelize_1.literal)(`NOT EXISTS (` +
             `  SELECT 1 FROM "account" ` +
             `  INNER JOIN "actor" ON account."actorId" = actor.id ` +
             `  INNER JOIN "serverBlocklist" ON "actor"."serverId" = "serverBlocklist"."targetServerId" ` +
@@ -174,11 +174,11 @@ function createSafeIn(sequelize, stringArr) {
 }
 exports.createSafeIn = createSafeIn;
 function buildLocalAccountIdsIn() {
-    return sequelize_1.literal('(SELECT "account"."id" FROM "account" INNER JOIN "actor" ON "actor"."id" = "account"."actorId" AND "actor"."serverId" IS NULL)');
+    return (0, sequelize_1.literal)('(SELECT "account"."id" FROM "account" INNER JOIN "actor" ON "actor"."id" = "account"."actorId" AND "actor"."serverId" IS NULL)');
 }
 exports.buildLocalAccountIdsIn = buildLocalAccountIdsIn;
 function buildLocalActorIdsIn() {
-    return sequelize_1.literal('(SELECT "actor"."id" FROM "actor" WHERE "actor"."serverId" IS NULL)');
+    return (0, sequelize_1.literal)('(SELECT "actor"."id" FROM "actor" WHERE "actor"."serverId" IS NULL)');
 }
 exports.buildLocalActorIdsIn = buildLocalActorIdsIn;
 function buildDirectionAndField(value) {

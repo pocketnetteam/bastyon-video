@@ -8,11 +8,11 @@ const Hooks = {
     wrapObject: (result, hookName) => {
         return plugin_manager_1.PluginManager.Instance.runHook(hookName, result);
     },
-    wrapPromiseFun: (fun, params, hookName) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    wrapPromiseFun: (fun, params, hookName) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
         const result = yield fun(params);
         return plugin_manager_1.PluginManager.Instance.runHook(hookName, result, params);
     }),
-    wrapFun: (fun, params, hookName) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    wrapFun: (fun, params, hookName) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
         const result = fun(params);
         return plugin_manager_1.PluginManager.Instance.runHook(hookName, result, params);
     }),

@@ -9,7 +9,7 @@ const fs_extra_1 = require("fs-extra");
 function up(utils) {
     const torrentDir = config_1.CONFIG.STORAGE.TORRENTS_DIR;
     const videoFileDir = config_1.CONFIG.STORAGE.VIDEOS_DIR;
-    return fs_extra_1.readdir(videoFileDir)
+    return (0, fs_extra_1.readdir)(videoFileDir)
         .then(videoFiles => {
         const tasks = [];
         for (const videoFile of videoFiles) {
@@ -20,13 +20,13 @@ function up(utils) {
             }
             const uuid = matches[1];
             const ext = matches[2];
-            const p = ffprobe_utils_1.getVideoFileResolution(path_1.join(videoFileDir, videoFile))
-                .then(({ resolution }) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const p = (0, ffprobe_utils_1.getVideoFileResolution)((0, path_1.join)(videoFileDir, videoFile))
+                .then(({ resolution }) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const oldTorrentName = uuid + '.torrent';
                 const newTorrentName = uuid + '-' + resolution + '.torrent';
-                yield fs_extra_1.rename(path_1.join(torrentDir, oldTorrentName), path_1.join(torrentDir, newTorrentName)).then(() => resolution);
+                yield (0, fs_extra_1.rename)((0, path_1.join)(torrentDir, oldTorrentName), (0, path_1.join)(torrentDir, newTorrentName)).then(() => resolution);
                 const newVideoFileName = uuid + '-' + resolution + '.' + ext;
-                yield fs_extra_1.rename(path_1.join(videoFileDir, videoFile), path_1.join(videoFileDir, newVideoFileName)).then(() => resolution);
+                yield (0, fs_extra_1.rename)((0, path_1.join)(videoFileDir, videoFile), (0, path_1.join)(videoFileDir, newVideoFileName)).then(() => resolution);
                 const query = 'UPDATE "VideoFiles" SET "resolution" = ' + resolution +
                     ' WHERE "videoId" = (SELECT "id" FROM "Videos" WHERE "uuid" = \'' + uuid + '\')';
                 return utils.sequelize.query(query);

@@ -8,6 +8,6 @@ const imageMimeTypes = constants_1.CONSTRAINTS_FIELDS.ACTORS.IMAGE.EXTNAME
     .join('|');
 const imageMimeTypesRegex = `image/(${imageMimeTypes})`;
 function isActorImageFile(files, fieldname) {
-    return misc_1.isFileValid(files, imageMimeTypesRegex, fieldname, constants_1.CONSTRAINTS_FIELDS.ACTORS.IMAGE.FILE_SIZE.max);
+    return (0, misc_1.isFileValid)(files, imageMimeTypesRegex, fieldname, constants_1.CONSTRAINTS_FIELDS.ACTORS.IMAGE.FILE_SIZE.max);
 }
 exports.isActorImageFile = isActorImageFile;

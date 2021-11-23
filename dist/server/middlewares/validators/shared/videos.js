@@ -7,9 +7,9 @@ const video_channel_1 = require("@server/models/video/video-channel");
 const video_file_1 = require("@server/models/video/video-file");
 const models_1 = require("@shared/models");
 function doesVideoExist(id, res, fetchType = 'all') {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const userId = res.locals.oauth ? res.locals.oauth.token.User.id : undefined;
-        const video = yield model_loaders_1.loadVideo(id, fetchType, userId);
+        const video = yield (0, model_loaders_1.loadVideo)(id, fetchType, userId);
         if (video === null) {
             res.fail({
                 status: models_1.HttpStatusCode.NOT_FOUND_404,
@@ -39,7 +39,7 @@ function doesVideoExist(id, res, fetchType = 'all') {
 }
 exports.doesVideoExist = doesVideoExist;
 function doesVideoFileOfVideoExist(id, videoIdOrUUID, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         if (!(yield video_file_1.VideoFileModel.doesVideoExistForVideoFile(id, videoIdOrUUID))) {
             res.fail({
                 status: models_1.HttpStatusCode.NOT_FOUND_404,
@@ -52,7 +52,7 @@ function doesVideoFileOfVideoExist(id, videoIdOrUUID, res) {
 }
 exports.doesVideoFileOfVideoExist = doesVideoFileOfVideoExist;
 function doesVideoChannelOfAccountExist(channelId, user, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const videoChannel = yield video_channel_1.VideoChannelModel.loadAndPopulateAccount(channelId);
         if (videoChannel === null) {
             res.fail({ message: 'Unknown video "video channel" for this instance.' });

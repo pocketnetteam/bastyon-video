@@ -41,7 +41,7 @@ class StatsManager {
         this.inboxMessages.errorsPerType[type]++;
     }
     getStats() {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const { totalLocalVideos, totalLocalVideoViews, totalVideos } = yield video_1.VideoModel.getStats();
             const { totalLocalVideoComments, totalVideoComments } = yield video_comment_1.VideoCommentModel.getStats();
             const { totalUsers, totalDailyActiveUsers, totalWeeklyActiveUsers, totalMonthlyActiveUsers } = yield user_1.UserModel.getStats();
@@ -72,7 +72,7 @@ class StatsManager {
         });
     }
     getPerformanceStats() {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const waitTranscodingJobs = yield job_queue_1.JobQueue.Instance.count("waiting", "video-transcoding");
             const failTranscodingJobs = yield job_queue_1.JobQueue.Instance.count("failed", "video-transcoding");
             const waitImportsCount = yield job_queue_1.JobQueue.Instance.count("waiting", "video-import");
@@ -127,7 +127,7 @@ class StatsManager {
             size: r.size
         }));
         strategies.push({ strategy: "manual", size: null });
-        return bluebird_1.mapSeries(strategies, (r) => {
+        return (0, bluebird_1.mapSeries)(strategies, (r) => {
             return video_redundancy_1.VideoRedundancyModel.getStats(r.strategy).then((stats) => Object.assign(stats, { strategy: r.strategy, totalSize: r.size }));
         });
     }

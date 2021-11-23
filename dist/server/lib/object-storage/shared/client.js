@@ -38,7 +38,7 @@ function getClient() {
         step: 'build',
         priority: 'high'
     });
-    logger_1.logger.info('Initialized S3 client %s with region %s.', getEndpoint(), OBJECT_STORAGE.REGION, logger_2.lTags());
+    logger_1.logger.info('Initialized S3 client %s with region %s.', getEndpoint(), OBJECT_STORAGE.REGION, (0, logger_2.lTags)());
     return s3Client;
 }
 exports.getClient = getClient;

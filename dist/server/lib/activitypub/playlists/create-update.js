@@ -15,15 +15,15 @@ const actors_1 = require("../actors");
 const crawl_1 = require("../crawl");
 const videos_1 = require("../videos");
 const shared_1 = require("./shared");
-const lTags = logger_1.loggerTagsFactory('ap', 'video-playlist');
+const lTags = (0, logger_1.loggerTagsFactory)('ap', 'video-playlist');
 function createAccountPlaylists(playlistUrls) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        yield bluebird_1.map(playlistUrls, (playlistUrl) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        yield (0, bluebird_1.map)(playlistUrls, (playlistUrl) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             try {
                 const exists = yield video_playlist_1.VideoPlaylistModel.doesPlaylistExist(playlistUrl);
                 if (exists === true)
                     return;
-                const { playlistObject } = yield shared_1.fetchRemoteVideoPlaylist(playlistUrl);
+                const { playlistObject } = yield (0, shared_1.fetchRemoteVideoPlaylist)(playlistUrl);
                 if (playlistObject === undefined) {
                     throw new Error(`Cannot refresh remote playlist ${playlistUrl}: invalid body.`);
                 }
@@ -37,8 +37,8 @@ function createAccountPlaylists(playlistUrls) {
 }
 exports.createAccountPlaylists = createAccountPlaylists;
 function createOrUpdateVideoPlaylist(playlistObject, to) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        const playlistAttributes = shared_1.playlistObjectToDBAttributes(playlistObject, to || playlistObject.to);
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        const playlistAttributes = (0, shared_1.playlistObjectToDBAttributes)(playlistObject, to || playlistObject.to);
         yield setVideoChannel(playlistObject, playlistAttributes);
         const [upsertPlaylist] = yield video_playlist_1.VideoPlaylistModel.upsert(playlistAttributes, { returning: true });
         const playlistElementUrls = yield fetchElementUrls(playlistObject);
@@ -51,11 +51,11 @@ function createOrUpdateVideoPlaylist(playlistObject, to) {
 }
 exports.createOrUpdateVideoPlaylist = createOrUpdateVideoPlaylist;
 function setVideoChannel(playlistObject, playlistAttributes) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        if (!misc_1.isArray(playlistObject.attributedTo) || playlistObject.attributedTo.length !== 1) {
-            throw new Error('Not attributed to for playlist object ' + activitypub_1.getAPId(playlistObject));
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        if (!(0, misc_1.isArray)(playlistObject.attributedTo) || playlistObject.attributedTo.length !== 1) {
+            throw new Error('Not attributed to for playlist object ' + (0, activitypub_1.getAPId)(playlistObject));
         }
-        const actor = yield actors_1.getOrCreateAPActor(playlistObject.attributedTo[0], 'all');
+        const actor = yield (0, actors_1.getOrCreateAPActor)(playlistObject.attributedTo[0], 'all');
         if (!actor.VideoChannel) {
             logger_1.logger.warn('Playlist "attributedTo" %s is not a video channel.', playlistObject.id, Object.assign({ playlistObject }, lTags(playlistObject.id)));
             return;
@@ -65,9 +65,9 @@ function setVideoChannel(playlistObject, playlistAttributes) {
     });
 }
 function fetchElementUrls(playlistObject) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         let accItems = [];
-        yield crawl_1.crawlCollectionPage(playlistObject.id, items => {
+        yield (0, crawl_1.crawlCollectionPage)(playlistObject.id, items => {
             accItems = accItems.concat(items);
             return Promise.resolve();
         });
@@ -75,11 +75,11 @@ function fetchElementUrls(playlistObject) {
     });
 }
 function updatePlaylistThumbnail(playlistObject, playlist) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         if (playlistObject.icon) {
             let thumbnailModel;
             try {
-                thumbnailModel = yield thumbnail_1.updatePlaylistMiniatureFromUrl({ downloadUrl: playlistObject.icon.url, playlist });
+                thumbnailModel = yield (0, thumbnail_1.updatePlaylistMiniatureFromUrl)({ downloadUrl: playlistObject.icon.url, playlist });
                 yield playlist.setAndSaveThumbnail(thumbnailModel, undefined);
             }
             catch (err) {
@@ -96,9 +96,9 @@ function updatePlaylistThumbnail(playlistObject, playlist) {
     });
 }
 function rebuildVideoPlaylistElements(elementUrls, playlist) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const elementsToCreate = yield buildElementsDBAttributes(elementUrls, playlist);
-        yield database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        yield database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             yield video_playlist_element_1.VideoPlaylistElementModel.deleteAllOf(playlist.id, t);
             for (const element of elementsToCreate) {
                 yield video_playlist_element_1.VideoPlaylistElementModel.create(element, { transaction: t });
@@ -109,13 +109,13 @@ function rebuildVideoPlaylistElements(elementUrls, playlist) {
     });
 }
 function buildElementsDBAttributes(elementUrls, playlist) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const elementsToCreate = [];
-        yield bluebird_1.map(elementUrls, (elementUrl) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        yield (0, bluebird_1.map)(elementUrls, (elementUrl) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             try {
-                const { elementObject } = yield shared_1.fetchRemotePlaylistElement(elementUrl);
-                const { video } = yield videos_1.getOrCreateAPVideo({ videoObject: { id: elementObject.url }, fetchType: 'only-video' });
-                elementsToCreate.push(shared_1.playlistElementObjectToDBAttributes(elementObject, playlist, video));
+                const { elementObject } = yield (0, shared_1.fetchRemotePlaylistElement)(elementUrl);
+                const { video } = yield (0, videos_1.getOrCreateAPVideo)({ videoObject: { id: elementObject.url }, fetchType: 'only-video' });
+                elementsToCreate.push((0, shared_1.playlistElementObjectToDBAttributes)(elementObject, playlist, video));
             }
             catch (err) {
                 logger_1.logger.warn('Cannot add playlist element %s.', elementUrl, Object.assign({ err }, lTags(playlist.uuid, playlist.url)));

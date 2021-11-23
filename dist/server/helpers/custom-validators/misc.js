@@ -4,7 +4,7 @@ exports.isFileValid = exports.isFileMimeTypeValid = exports.isFileFieldValid = e
 const tslib_1 = require("tslib");
 require("multer");
 const path_1 = require("path");
-const validator_1 = tslib_1.__importDefault(require("validator"));
+const validator_1 = (0, tslib_1.__importDefault)(require("validator"));
 const uuid_1 = require("../uuid");
 function exists(value) {
     return value !== undefined && value !== null;
@@ -109,8 +109,8 @@ function isFileValid(files, mimeTypeRegex, field, maxSize, optional = false) {
 }
 exports.isFileValid = isFileValid;
 function toCompleteUUID(value) {
-    if (uuid_1.isShortUUID(value))
-        return uuid_1.shortToUUID(value);
+    if ((0, uuid_1.isShortUUID)(value))
+        return (0, uuid_1.shortToUUID)(value);
     return value;
 }
 exports.toCompleteUUID = toCompleteUUID;

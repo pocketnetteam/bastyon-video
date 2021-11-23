@@ -39,11 +39,11 @@ function decorateVideoLink(options) {
     const params = generateParams(window.location.search);
     if (options.startTime !== undefined && options.startTime !== null) {
         const startTimeInt = Math.floor(options.startTime);
-        params.set('start', date_1.secondsToTime(startTimeInt));
+        params.set('start', (0, date_1.secondsToTime)(startTimeInt));
     }
     if (options.stopTime) {
         const stopTimeInt = Math.floor(options.stopTime);
-        params.set('stop', date_1.secondsToTime(stopTimeInt));
+        params.set('stop', (0, date_1.secondsToTime)(stopTimeInt));
     }
     if (options.subtitle)
         params.set('subtitle', options.subtitle);

@@ -2,11 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.down = exports.up = void 0;
 const tslib_1 = require("tslib");
-const Sequelize = tslib_1.__importStar(require("sequelize"));
+const Sequelize = (0, tslib_1.__importStar)(require("sequelize"));
 const sequelize_typescript_1 = require("sequelize-typescript");
 const peertube_crypto_1 = require("../../helpers/peertube-crypto");
 function up(utils) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         {
             const queries = [
                 `DROP TYPE IF EXISTS enum_actor_type`,
@@ -215,7 +215,7 @@ function up(utils) {
             const options = { type: Sequelize.QueryTypes.SELECT };
             const [res] = yield utils.sequelize.query(query, options);
             for (const actor of res) {
-                const { privateKey, publicKey } = yield peertube_crypto_1.createPrivateAndPublicKeys();
+                const { privateKey, publicKey } = yield (0, peertube_crypto_1.createPrivateAndPublicKeys)();
                 const queryUpdate = `UPDATE "actor" SET "publicKey" = '${publicKey}', "privateKey" = '${privateKey}' WHERE id = ${actor.id}`;
                 yield utils.sequelize.query(queryUpdate);
             }

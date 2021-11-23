@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CustomConfigAuditView = exports.AbuseAuditView = exports.VideoAuditView = exports.UserAuditView = exports.CommentAuditView = exports.VideoChannelAuditView = exports.VideoImportAuditView = exports.auditLoggerFactory = exports.getAuditIdFromRes = void 0;
 const tslib_1 = require("tslib");
 const deep_object_diff_1 = require("deep-object-diff");
-const flat_1 = tslib_1.__importDefault(require("flat"));
+const flat_1 = (0, tslib_1.__importDefault)(require("flat"));
 const lodash_1 = require("lodash");
 const path_1 = require("path");
 const winston_1 = require("winston");
@@ -22,16 +22,16 @@ var AUDIT_TYPE;
 })(AUDIT_TYPE || (AUDIT_TYPE = {}));
 const colors = winston_1.config.npm.colors;
 colors.audit = winston_1.config.npm.colors.info;
-winston_1.addColors(colors);
-const auditLogger = winston_1.createLogger({
+(0, winston_1.addColors)(colors);
+const auditLogger = (0, winston_1.createLogger)({
     levels: { audit: 0 },
     transports: [
         new winston_1.transports.File({
-            filename: path_1.join(config_1.CONFIG.STORAGE.LOG_DIR, constants_1.AUDIT_LOG_FILENAME),
+            filename: (0, path_1.join)(config_1.CONFIG.STORAGE.LOG_DIR, constants_1.AUDIT_LOG_FILENAME),
             level: 'audit',
             maxsize: 5242880,
             maxFiles: 5,
-            format: winston_1.format.combine(winston_1.format.timestamp(), logger_1.labelFormatter(), winston_1.format.splat(), logger_1.jsonLoggerFormat)
+            format: winston_1.format.combine(winston_1.format.timestamp(), (0, logger_1.labelFormatter)(), winston_1.format.splat(), logger_1.jsonLoggerFormat)
         })
     ],
     exitOnError: true
@@ -40,7 +40,7 @@ function auditLoggerWrapper(domain, user, action, entity, oldEntity = null) {
     let entityInfos;
     if (action === AUDIT_TYPE.UPDATE && oldEntity) {
         const oldEntityKeys = oldEntity.toLogKeys();
-        const diffObject = deep_object_diff_1.diff(oldEntityKeys, entity.toLogKeys());
+        const diffObject = (0, deep_object_diff_1.diff)(oldEntityKeys, entity.toLogKeys());
         const diffKeys = Object.entries(diffObject).reduce((newKeys, entry) => {
             newKeys[`new-${entry[0]}`] = entry[1];
             return newKeys;
@@ -75,7 +75,7 @@ class EntityAuditView {
         this.entityInfos = entityInfos;
     }
     toLogKeys() {
-        return lodash_1.chain(flat_1.default(this.entityInfos, { delimiter: '-', safe: true }))
+        return (0, lodash_1.chain)((0, flat_1.default)(this.entityInfos, { delimiter: '-', safe: true }))
             .pick(this.keysToKeep)
             .mapKeys((_value, key) => `${this.prefix}-${key}`)
             .value();

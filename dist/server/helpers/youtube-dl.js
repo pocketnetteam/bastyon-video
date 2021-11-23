@@ -4,7 +4,7 @@ exports.YoutubeDL = void 0;
 const tslib_1 = require("tslib");
 const fs_1 = require("fs");
 const fs_extra_1 = require("fs-extra");
-const got_1 = tslib_1.__importDefault(require("got"));
+const got_1 = (0, tslib_1.__importDefault)(require("got"));
 const path_1 = require("path");
 const config_1 = require("@server/initializers/config");
 const http_error_codes_1 = require("../../shared/models/http/http-error-codes");
@@ -65,7 +65,7 @@ class YoutubeDL {
                             ...acc,
                             {
                                 language: matched[1],
-                                path: path_1.join(cwd, filename),
+                                path: (0, path_1.join)(cwd, filename),
                                 filename
                             }
                         ];
@@ -90,7 +90,7 @@ class YoutubeDL {
         ].join('/');
     }
     downloadYoutubeDLVideo(fileExt, timeout) {
-        const pathWithoutExtension = utils_1.generateVideoImportTmpPath(this.url, '');
+        const pathWithoutExtension = (0, utils_1.generateVideoImportTmpPath)(this.url, '');
         let timer;
         logger_1.logger.info('Importing youtubeDL video %s to %s', this.url, pathWithoutExtension);
         let options = ['-f', this.getYoutubeDLVideoFormat(), '-o', pathWithoutExtension];
@@ -102,15 +102,15 @@ class YoutubeDL {
         return new Promise((res, rej) => {
             YoutubeDL.safeGetYoutubeDL()
                 .then(youtubeDL => {
-                youtubeDL.exec(this.url, options, processOptions, (err) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+                youtubeDL.exec(this.url, options, processOptions, (err) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     clearTimeout(timer);
                     try {
-                        if (yield fs_extra_1.pathExists(pathWithoutExtension)) {
-                            yield fs_extra_1.move(pathWithoutExtension, pathWithoutExtension + '.mp4');
+                        if (yield (0, fs_extra_1.pathExists)(pathWithoutExtension)) {
+                            yield (0, fs_extra_1.move)(pathWithoutExtension, pathWithoutExtension + '.mp4');
                         }
                         const path = yield this.guessVideoPathWithExtension(pathWithoutExtension, fileExt);
                         if (err) {
-                            fs_extra_1.remove(path)
+                            (0, fs_extra_1.remove)(path)
                                 .catch(err => logger_1.logger.error('Cannot delete path on YoutubeDL error.', { err }));
                             return rej(err);
                         }
@@ -123,7 +123,7 @@ class YoutubeDL {
                 timer = setTimeout(() => {
                     const err = new Error('YoutubeDL download timeout.');
                     this.guessVideoPathWithExtension(pathWithoutExtension, fileExt)
-                        .then(path => fs_extra_1.remove(path))
+                        .then(path => (0, fs_extra_1.remove)(path))
                         .finally(() => rej(err))
                         .catch(err => {
                         logger_1.logger.error('Cannot remove file in youtubeDL timeout.', { err });
@@ -148,14 +148,14 @@ class YoutubeDL {
         return originallyPublishedAt;
     }
     guessVideoPathWithExtension(tmpPath, sourceExt) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            if (!videos_1.isVideoFileExtnameValid(sourceExt)) {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            if (!(0, videos_1.isVideoFileExtnameValid)(sourceExt)) {
                 throw new Error('Invalid video extension ' + sourceExt);
             }
             const extensions = [sourceExt, '.mp4', '.mkv', '.webm'];
             for (const extension of extensions) {
                 const path = tmpPath + extension;
-                if (yield fs_extra_1.pathExists(path))
+                if (yield (0, fs_extra_1.pathExists)(path))
                     return path;
             }
             throw new Error('Cannot guess path of ' + tmpPath);
@@ -191,7 +191,7 @@ class YoutubeDL {
         };
     }
     titleTruncation(title) {
-        return core_utils_1.peertubeTruncate(title, {
+        return (0, core_utils_1.peertubeTruncate)(title, {
             length: constants_1.CONSTRAINTS_FIELDS.VIDEOS.NAME.max,
             separator: /,? +/,
             omission: ' […]'
@@ -200,7 +200,7 @@ class YoutubeDL {
     descriptionTruncation(description) {
         if (!description || description.length < constants_1.CONSTRAINTS_FIELDS.VIDEOS.DESCRIPTION.min)
             return undefined;
-        return core_utils_1.peertubeTruncate(description, {
+        return (0, core_utils_1.peertubeTruncate)(description, {
             length: constants_1.CONSTRAINTS_FIELDS.VIDEOS.DESCRIPTION.max,
             separator: /,? +/,
             omission: ' […]'
@@ -255,15 +255,15 @@ class YoutubeDL {
         return options;
     }
     static updateYoutubeDLBinary() {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             logger_1.logger.info('Updating youtubeDL binary.');
-            const binDirectory = path_1.join(core_utils_1.root(), 'node_modules', 'youtube-dl', 'bin');
-            const bin = path_1.join(binDirectory, 'youtube-dl');
-            const detailsPath = path_1.join(binDirectory, 'details');
+            const binDirectory = (0, path_1.join)((0, core_utils_1.root)(), 'node_modules', 'youtube-dl', 'bin');
+            const bin = (0, path_1.join)(binDirectory, 'youtube-dl');
+            const detailsPath = (0, path_1.join)(binDirectory, 'details');
             const url = process.env.YOUTUBE_DL_DOWNLOAD_HOST || 'https://yt-dl.org/downloads/latest/youtube-dl';
-            yield fs_extra_1.ensureDir(binDirectory);
+            yield (0, fs_extra_1.ensureDir)(binDirectory);
             try {
-                const result = yield got_1.default(url, { followRedirect: false });
+                const result = yield (0, got_1.default)(url, { followRedirect: false });
                 if (result.statusCode !== http_error_codes_1.HttpStatusCode.FOUND_302) {
                     logger_1.logger.error('youtube-dl update error: did not get redirect for the latest version link. Status %d', result.statusCode);
                     return;
@@ -271,10 +271,10 @@ class YoutubeDL {
                 const newUrl = result.headers.location;
                 const newVersion = /\/(\d{4}\.\d\d\.\d\d(\.\d)?)\/youtube-dl$/.exec(newUrl)[1];
                 const downloadFileStream = got_1.default.stream(newUrl);
-                const writeStream = fs_1.createWriteStream(bin, { mode: 493 });
-                yield core_utils_1.pipelinePromise(downloadFileStream, writeStream);
+                const writeStream = (0, fs_1.createWriteStream)(bin, { mode: 493 });
+                yield (0, core_utils_1.pipelinePromise)(downloadFileStream, writeStream);
                 const details = JSON.stringify({ version: newVersion, path: bin, exec: 'youtube-dl' });
-                yield fs_extra_1.writeFile(detailsPath, details, { encoding: 'utf8' });
+                yield (0, fs_extra_1.writeFile)(detailsPath, details, { encoding: 'utf8' });
                 logger_1.logger.info('youtube-dl updated to version %s.', newVersion);
             }
             catch (err) {
@@ -283,7 +283,7 @@ class YoutubeDL {
         });
     }
     static safeGetYoutubeDL() {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             let youtubeDL;
             try {
                 youtubeDL = require('youtube-dl');

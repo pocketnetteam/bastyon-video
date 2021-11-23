@@ -10,26 +10,26 @@ describe('Test videos history API validator', function () {
     let watchingPath;
     let server;
     before(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(30000);
-            server = yield extra_utils_1.createSingleServer(1);
-            yield extra_utils_1.setAccessTokensToServers([server]);
+            server = yield (0, extra_utils_1.createSingleServer)(1);
+            yield (0, extra_utils_1.setAccessTokensToServers)([server]);
             const { uuid } = yield server.videos.upload();
             watchingPath = '/api/v1/videos/' + uuid + '/watching';
         });
     });
     describe('When notifying a user is watching a video', function () {
         it('Should fail with an unauthenticated user', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const fields = { currentTime: 5 };
-                yield extra_utils_1.makePutBodyRequest({ url: server.url, path: watchingPath, fields, expectedStatus: models_1.HttpStatusCode.UNAUTHORIZED_401 });
+                yield (0, extra_utils_1.makePutBodyRequest)({ url: server.url, path: watchingPath, fields, expectedStatus: models_1.HttpStatusCode.UNAUTHORIZED_401 });
             });
         });
         it('Should fail with an incorrect video id', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const fields = { currentTime: 5 };
                 const path = '/api/v1/videos/blabla/watching';
-                yield extra_utils_1.makePutBodyRequest({
+                yield (0, extra_utils_1.makePutBodyRequest)({
                     url: server.url,
                     path,
                     fields,
@@ -39,10 +39,10 @@ describe('Test videos history API validator', function () {
             });
         });
         it('Should fail with an unknown video', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const fields = { currentTime: 5 };
                 const path = '/api/v1/videos/d91fff41-c24d-4508-8e13-3bd5902c3b02/watching';
-                yield extra_utils_1.makePutBodyRequest({
+                yield (0, extra_utils_1.makePutBodyRequest)({
                     url: server.url,
                     path,
                     fields,
@@ -52,9 +52,9 @@ describe('Test videos history API validator', function () {
             });
         });
         it('Should fail with a bad current time', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const fields = { currentTime: 'hello' };
-                yield extra_utils_1.makePutBodyRequest({
+                yield (0, extra_utils_1.makePutBodyRequest)({
                     url: server.url,
                     path: watchingPath,
                     fields,
@@ -64,9 +64,9 @@ describe('Test videos history API validator', function () {
             });
         });
         it('Should succeed with the correct parameters', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const fields = { currentTime: 5 };
-                yield extra_utils_1.makePutBodyRequest({
+                yield (0, extra_utils_1.makePutBodyRequest)({
                     url: server.url,
                     path: watchingPath,
                     fields,
@@ -78,36 +78,36 @@ describe('Test videos history API validator', function () {
     });
     describe('When listing user videos history', function () {
         it('Should fail with a bad start pagination', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.checkBadStartPagination(server.url, myHistoryPath, server.accessToken);
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.checkBadStartPagination)(server.url, myHistoryPath, server.accessToken);
             });
         });
         it('Should fail with a bad count pagination', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.checkBadCountPagination(server.url, myHistoryPath, server.accessToken);
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.checkBadCountPagination)(server.url, myHistoryPath, server.accessToken);
             });
         });
         it('Should fail with an unauthenticated user', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.makeGetRequest({ url: server.url, path: myHistoryPath, expectedStatus: models_1.HttpStatusCode.UNAUTHORIZED_401 });
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.makeGetRequest)({ url: server.url, path: myHistoryPath, expectedStatus: models_1.HttpStatusCode.UNAUTHORIZED_401 });
             });
         });
         it('Should succeed with the correct params', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.makeGetRequest({ url: server.url, token: server.accessToken, path: myHistoryPath, expectedStatus: models_1.HttpStatusCode.OK_200 });
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.makeGetRequest)({ url: server.url, token: server.accessToken, path: myHistoryPath, expectedStatus: models_1.HttpStatusCode.OK_200 });
             });
         });
     });
     describe('When removing user videos history', function () {
         it('Should fail with an unauthenticated user', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.makePostBodyRequest({ url: server.url, path: myHistoryPath + '/remove', expectedStatus: models_1.HttpStatusCode.UNAUTHORIZED_401 });
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.makePostBodyRequest)({ url: server.url, path: myHistoryPath + '/remove', expectedStatus: models_1.HttpStatusCode.UNAUTHORIZED_401 });
             });
         });
         it('Should fail with a bad beforeDate parameter', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const body = { beforeDate: '15' };
-                yield extra_utils_1.makePostBodyRequest({
+                yield (0, extra_utils_1.makePostBodyRequest)({
                     url: server.url,
                     token: server.accessToken,
                     path: myHistoryRemove,
@@ -117,9 +117,9 @@ describe('Test videos history API validator', function () {
             });
         });
         it('Should succeed with a valid beforeDate param', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const body = { beforeDate: new Date().toISOString() };
-                yield extra_utils_1.makePostBodyRequest({
+                yield (0, extra_utils_1.makePostBodyRequest)({
                     url: server.url,
                     token: server.accessToken,
                     path: myHistoryRemove,
@@ -129,8 +129,8 @@ describe('Test videos history API validator', function () {
             });
         });
         it('Should succeed without body', function () {
-            return tslib_1.__awaiter(this, void 0, void 0, function* () {
-                yield extra_utils_1.makePostBodyRequest({
+            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield (0, extra_utils_1.makePostBodyRequest)({
                     url: server.url,
                     token: server.accessToken,
                     path: myHistoryRemove,
@@ -140,8 +140,8 @@ describe('Test videos history API validator', function () {
         });
     });
     after(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            yield extra_utils_1.cleanupTests([server]);
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            yield (0, extra_utils_1.cleanupTests)([server]);
         });
     });
 });

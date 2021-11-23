@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.pluginRouter = void 0;
 const tslib_1 = require("tslib");
-const express_1 = tslib_1.__importDefault(require("express"));
+const express_1 = (0, tslib_1.__importDefault)(require("express"));
 const logger_1 = require("@server/helpers/logger");
 const utils_1 = require("@server/helpers/utils");
 const plugin_index_1 = require("@server/lib/plugins/plugin-index");
@@ -13,17 +13,17 @@ const plugin_1 = require("@server/models/server/plugin");
 const models_1 = require("@shared/models");
 const pluginRouter = express_1.default.Router();
 exports.pluginRouter = pluginRouter;
-pluginRouter.get('/available', middlewares_1.openapiOperationDoc({ operationId: 'getAvailablePlugins' }), middlewares_1.authenticate, middlewares_1.ensureUserHasRight(23), plugins_1.listAvailablePluginsValidator, middlewares_1.paginationValidator, middlewares_1.availablePluginsSortValidator, middlewares_1.setDefaultSort, middlewares_1.setDefaultPagination, middlewares_1.asyncMiddleware(listAvailablePlugins));
-pluginRouter.get('/', middlewares_1.openapiOperationDoc({ operationId: 'getPlugins' }), middlewares_1.authenticate, middlewares_1.ensureUserHasRight(23), plugins_1.listPluginsValidator, middlewares_1.paginationValidator, middlewares_1.pluginsSortValidator, middlewares_1.setDefaultSort, middlewares_1.setDefaultPagination, middlewares_1.asyncMiddleware(listPlugins));
-pluginRouter.get('/:npmName/registered-settings', middlewares_1.authenticate, middlewares_1.ensureUserHasRight(23), middlewares_1.asyncMiddleware(plugins_1.existingPluginValidator), getPluginRegisteredSettings);
-pluginRouter.get('/:npmName/public-settings', middlewares_1.asyncMiddleware(plugins_1.existingPluginValidator), getPublicPluginSettings);
-pluginRouter.put('/:npmName/settings', middlewares_1.authenticate, middlewares_1.ensureUserHasRight(23), plugins_1.updatePluginSettingsValidator, middlewares_1.asyncMiddleware(plugins_1.existingPluginValidator), middlewares_1.asyncMiddleware(updatePluginSettings));
-pluginRouter.get('/:npmName', middlewares_1.authenticate, middlewares_1.ensureUserHasRight(23), middlewares_1.asyncMiddleware(plugins_1.existingPluginValidator), getPlugin);
-pluginRouter.post('/install', middlewares_1.openapiOperationDoc({ operationId: 'addPlugin' }), middlewares_1.authenticate, middlewares_1.ensureUserHasRight(23), plugins_1.installOrUpdatePluginValidator, middlewares_1.asyncMiddleware(installPlugin));
-pluginRouter.post('/update', middlewares_1.openapiOperationDoc({ operationId: 'updatePlugin' }), middlewares_1.authenticate, middlewares_1.ensureUserHasRight(23), plugins_1.installOrUpdatePluginValidator, middlewares_1.asyncMiddleware(updatePlugin));
-pluginRouter.post('/uninstall', middlewares_1.openapiOperationDoc({ operationId: 'uninstallPlugin' }), middlewares_1.authenticate, middlewares_1.ensureUserHasRight(23), plugins_1.uninstallPluginValidator, middlewares_1.asyncMiddleware(uninstallPlugin));
+pluginRouter.get('/available', (0, middlewares_1.openapiOperationDoc)({ operationId: 'getAvailablePlugins' }), middlewares_1.authenticate, (0, middlewares_1.ensureUserHasRight)(23), plugins_1.listAvailablePluginsValidator, middlewares_1.paginationValidator, middlewares_1.availablePluginsSortValidator, middlewares_1.setDefaultSort, middlewares_1.setDefaultPagination, (0, middlewares_1.asyncMiddleware)(listAvailablePlugins));
+pluginRouter.get('/', (0, middlewares_1.openapiOperationDoc)({ operationId: 'getPlugins' }), middlewares_1.authenticate, (0, middlewares_1.ensureUserHasRight)(23), plugins_1.listPluginsValidator, middlewares_1.paginationValidator, middlewares_1.pluginsSortValidator, middlewares_1.setDefaultSort, middlewares_1.setDefaultPagination, (0, middlewares_1.asyncMiddleware)(listPlugins));
+pluginRouter.get('/:npmName/registered-settings', middlewares_1.authenticate, (0, middlewares_1.ensureUserHasRight)(23), (0, middlewares_1.asyncMiddleware)(plugins_1.existingPluginValidator), getPluginRegisteredSettings);
+pluginRouter.get('/:npmName/public-settings', (0, middlewares_1.asyncMiddleware)(plugins_1.existingPluginValidator), getPublicPluginSettings);
+pluginRouter.put('/:npmName/settings', middlewares_1.authenticate, (0, middlewares_1.ensureUserHasRight)(23), plugins_1.updatePluginSettingsValidator, (0, middlewares_1.asyncMiddleware)(plugins_1.existingPluginValidator), (0, middlewares_1.asyncMiddleware)(updatePluginSettings));
+pluginRouter.get('/:npmName', middlewares_1.authenticate, (0, middlewares_1.ensureUserHasRight)(23), (0, middlewares_1.asyncMiddleware)(plugins_1.existingPluginValidator), getPlugin);
+pluginRouter.post('/install', (0, middlewares_1.openapiOperationDoc)({ operationId: 'addPlugin' }), middlewares_1.authenticate, (0, middlewares_1.ensureUserHasRight)(23), plugins_1.installOrUpdatePluginValidator, (0, middlewares_1.asyncMiddleware)(installPlugin));
+pluginRouter.post('/update', (0, middlewares_1.openapiOperationDoc)({ operationId: 'updatePlugin' }), middlewares_1.authenticate, (0, middlewares_1.ensureUserHasRight)(23), plugins_1.installOrUpdatePluginValidator, (0, middlewares_1.asyncMiddleware)(updatePlugin));
+pluginRouter.post('/uninstall', (0, middlewares_1.openapiOperationDoc)({ operationId: 'uninstallPlugin' }), middlewares_1.authenticate, (0, middlewares_1.ensureUserHasRight)(23), plugins_1.uninstallPluginValidator, (0, middlewares_1.asyncMiddleware)(uninstallPlugin));
 function listPlugins(req, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const pluginType = req.query.pluginType;
         const uninstalled = req.query.uninstalled;
         const resultList = yield plugin_1.PluginModel.listForApi({
@@ -33,7 +33,7 @@ function listPlugins(req, res) {
             count: req.query.count,
             sort: req.query.sort
         });
-        return res.json(utils_1.getFormattedObjects(resultList.data, resultList.total));
+        return res.json((0, utils_1.getFormattedObjects)(resultList.data, resultList.total));
     });
 }
 function getPlugin(req, res) {
@@ -41,7 +41,7 @@ function getPlugin(req, res) {
     return res.json(plugin.toFormattedJSON());
 }
 function installPlugin(req, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const body = req.body;
         const fromDisk = !!body.path;
         const toInstall = body.npmName || body.path;
@@ -56,7 +56,7 @@ function installPlugin(req, res) {
     });
 }
 function updatePlugin(req, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const body = req.body;
         const fromDisk = !!body.path;
         const toUpdate = body.npmName || body.path;
@@ -71,7 +71,7 @@ function updatePlugin(req, res) {
     });
 }
 function uninstallPlugin(req, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const body = req.body;
         yield plugin_manager_1.PluginManager.Instance.uninstall(body.npmName);
         return res.status(models_1.HttpStatusCode.NO_CONTENT_204).end();
@@ -90,7 +90,7 @@ function getPluginRegisteredSettings(req, res) {
     return res.json(json);
 }
 function updatePluginSettings(req, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const plugin = res.locals.plugin;
         plugin.settings = req.body.settings;
         yield plugin.save();
@@ -99,9 +99,9 @@ function updatePluginSettings(req, res) {
     });
 }
 function listAvailablePlugins(req, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const query = req.query;
-        const resultList = yield plugin_index_1.listAvailablePluginsFromIndex(query);
+        const resultList = yield (0, plugin_index_1.listAvailablePluginsFromIndex)(query);
         if (!resultList) {
             return res.fail({
                 status: models_1.HttpStatusCode.SERVICE_UNAVAILABLE_503,

@@ -39,7 +39,7 @@ function getAudienceFromFollowersOf(actorsInvolvedInObject) {
 exports.getAudienceFromFollowersOf = getAudienceFromFollowersOf;
 function getActorsInvolvedInVideo(video, t) {
     var _a;
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const actors = yield video_share_1.VideoShareModel.loadActorsByShare(video.id, t);
         const videoAll = video;
         const videoActor = ((_a = videoAll.VideoChannel) === null || _a === void 0 ? void 0 : _a.Account)

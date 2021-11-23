@@ -19,32 +19,32 @@ const actor_1 = require("../../models/actor/actor");
 const user_1 = require("../../models/user/user");
 const shared_1 = require("./shared");
 const usersListValidator = [
-    express_validator_1.query('blocked')
+    (0, express_validator_1.query)('blocked')
         .optional()
         .customSanitizer(misc_1.toBooleanOrNull)
         .isBoolean().withMessage('Should be a valid boolean banned state'),
     (req, res, next) => {
         logger_1.logger.debug('Checking usersList parameters', { parameters: req.query });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
         return next();
     }
 ];
 exports.usersListValidator = usersListValidator;
 const usersAddValidator = [
-    express_validator_1.body('username').custom(users_2.isUserUsernameValid).withMessage('Should have a valid username (lowercase alphanumeric characters)'),
-    express_validator_1.body('password').custom(users_2.isUserPasswordValidOrEmpty).withMessage('Should have a valid password'),
-    express_validator_1.body('email').isEmail().withMessage('Should have a valid email'),
-    express_validator_1.body('channelName').optional().custom(video_channels_1.isVideoChannelUsernameValid).withMessage('Should have a valid channel name'),
-    express_validator_1.body('videoQuota').custom(users_2.isUserVideoQuotaValid).withMessage('Should have a valid user quota'),
-    express_validator_1.body('videoQuotaDaily').custom(users_2.isUserVideoQuotaDailyValid).withMessage('Should have a valid daily user quota'),
-    express_validator_1.body('role')
+    (0, express_validator_1.body)('username').custom(users_2.isUserUsernameValid).withMessage('Should have a valid username (lowercase alphanumeric characters)'),
+    (0, express_validator_1.body)('password').custom(users_2.isUserPasswordValidOrEmpty).withMessage('Should have a valid password'),
+    (0, express_validator_1.body)('email').isEmail().withMessage('Should have a valid email'),
+    (0, express_validator_1.body)('channelName').optional().custom(video_channels_1.isVideoChannelUsernameValid).withMessage('Should have a valid channel name'),
+    (0, express_validator_1.body)('videoQuota').custom(users_2.isUserVideoQuotaValid).withMessage('Should have a valid user quota'),
+    (0, express_validator_1.body)('videoQuotaDaily').custom(users_2.isUserVideoQuotaDailyValid).withMessage('Should have a valid daily user quota'),
+    (0, express_validator_1.body)('role')
         .customSanitizer(misc_1.toIntOrNull)
         .custom(users_2.isUserRoleValid).withMessage('Should have a valid role'),
-    express_validator_1.body('adminFlags').optional().custom(users_2.isUserAdminFlagsValid).withMessage('Should have a valid admin flags'),
-    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
-        logger_1.logger.debug('Checking usersAdd parameters', { parameters: lodash_1.omit(req.body, 'password') });
-        if (shared_1.areValidationErrors(req, res))
+    (0, express_validator_1.body)('adminFlags').optional().custom(users_2.isUserAdminFlagsValid).withMessage('Should have a valid admin flags'),
+    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
+        logger_1.logger.debug('Checking usersAdd parameters', { parameters: (0, lodash_1.omit)(req.body, 'password') });
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
         if (!(yield checkUserNameOrEmailDoesNotAlreadyExist(req.body.username, req.body.email, res)))
             return;
@@ -72,21 +72,21 @@ const usersAddValidator = [
 ];
 exports.usersAddValidator = usersAddValidator;
 const usersRegisterValidator = [
-    express_validator_1.body('username').custom(users_2.isUserUsernameValid).withMessage('Should have a valid username'),
-    express_validator_1.body('password').custom(users_2.isUserPasswordValid).withMessage('Should have a valid password'),
-    express_validator_1.body('email').isEmail().withMessage('Should have a valid email'),
-    express_validator_1.body('displayName')
+    (0, express_validator_1.body)('username').custom(users_2.isUserUsernameValid).withMessage('Should have a valid username'),
+    (0, express_validator_1.body)('password').custom(users_2.isUserPasswordValid).withMessage('Should have a valid password'),
+    (0, express_validator_1.body)('email').isEmail().withMessage('Should have a valid email'),
+    (0, express_validator_1.body)('displayName')
         .optional()
         .custom(users_2.isUserDisplayNameValid).withMessage('Should have a valid display name'),
-    express_validator_1.body('channel.name')
+    (0, express_validator_1.body)('channel.name')
         .optional()
         .custom(video_channels_1.isVideoChannelUsernameValid).withMessage('Should have a valid channel name'),
-    express_validator_1.body('channel.displayName')
+    (0, express_validator_1.body)('channel.displayName')
         .optional()
         .custom(video_channels_1.isVideoChannelDisplayNameValid).withMessage('Should have a valid display name'),
-    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
-        logger_1.logger.debug('Checking usersRegister parameters', { parameters: lodash_1.omit(req.body, 'password') });
-        if (shared_1.areValidationErrors(req, res))
+    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
+        logger_1.logger.debug('Checking usersRegister parameters', { parameters: (0, lodash_1.omit)(req.body, 'password') });
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
         if (!(yield checkUserNameOrEmailDoesNotAlreadyExist(req.body.username, req.body.email, res)))
             return;
@@ -111,10 +111,10 @@ const usersRegisterValidator = [
 ];
 exports.usersRegisterValidator = usersRegisterValidator;
 const usersRemoveValidator = [
-    express_validator_1.param('id').isInt().not().isEmpty().withMessage('Should have a valid id'),
-    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    (0, express_validator_1.param)('id').isInt().not().isEmpty().withMessage('Should have a valid id'),
+    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking usersRemove parameters', { parameters: req.params });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
         if (!(yield checkUserIdExist(req.params.id, res)))
             return;
@@ -127,11 +127,11 @@ const usersRemoveValidator = [
 ];
 exports.usersRemoveValidator = usersRemoveValidator;
 const usersBlockingValidator = [
-    express_validator_1.param('id').isInt().not().isEmpty().withMessage('Should have a valid id'),
-    express_validator_1.body('reason').optional().custom(users_2.isUserBlockedReasonValid).withMessage('Should have a valid blocking reason'),
-    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    (0, express_validator_1.param)('id').isInt().not().isEmpty().withMessage('Should have a valid id'),
+    (0, express_validator_1.body)('reason').optional().custom(users_2.isUserBlockedReasonValid).withMessage('Should have a valid blocking reason'),
+    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking usersBlocking parameters', { parameters: req.params });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
         if (!(yield checkUserIdExist(req.params.id, res)))
             return;
@@ -154,21 +154,21 @@ const deleteMeValidator = [
 ];
 exports.deleteMeValidator = deleteMeValidator;
 const usersUpdateValidator = [
-    express_validator_1.param('id').isInt().not().isEmpty().withMessage('Should have a valid id'),
-    express_validator_1.body('password').optional().custom(users_2.isUserPasswordValid).withMessage('Should have a valid password'),
-    express_validator_1.body('email').optional().isEmail().withMessage('Should have a valid email attribute'),
-    express_validator_1.body('emailVerified').optional().isBoolean().withMessage('Should have a valid email verified attribute'),
-    express_validator_1.body('videoQuota').optional().custom(users_2.isUserVideoQuotaValid).withMessage('Should have a valid user quota'),
-    express_validator_1.body('videoQuotaDaily').optional().custom(users_2.isUserVideoQuotaDailyValid).withMessage('Should have a valid daily user quota'),
-    express_validator_1.body('pluginAuth').optional(),
-    express_validator_1.body('role')
+    (0, express_validator_1.param)('id').isInt().not().isEmpty().withMessage('Should have a valid id'),
+    (0, express_validator_1.body)('password').optional().custom(users_2.isUserPasswordValid).withMessage('Should have a valid password'),
+    (0, express_validator_1.body)('email').optional().isEmail().withMessage('Should have a valid email attribute'),
+    (0, express_validator_1.body)('emailVerified').optional().isBoolean().withMessage('Should have a valid email verified attribute'),
+    (0, express_validator_1.body)('videoQuota').optional().custom(users_2.isUserVideoQuotaValid).withMessage('Should have a valid user quota'),
+    (0, express_validator_1.body)('videoQuotaDaily').optional().custom(users_2.isUserVideoQuotaDailyValid).withMessage('Should have a valid daily user quota'),
+    (0, express_validator_1.body)('pluginAuth').optional(),
+    (0, express_validator_1.body)('role')
         .optional()
         .customSanitizer(misc_1.toIntOrNull)
         .custom(users_2.isUserRoleValid).withMessage('Should have a valid role'),
-    express_validator_1.body('adminFlags').optional().custom(users_2.isUserAdminFlagsValid).withMessage('Should have a valid admin flags'),
-    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    (0, express_validator_1.body)('adminFlags').optional().custom(users_2.isUserAdminFlagsValid).withMessage('Should have a valid admin flags'),
+    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking usersUpdate parameters', { parameters: req.body });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
         if (!(yield checkUserIdExist(req.params.id, res)))
             return;
@@ -181,50 +181,50 @@ const usersUpdateValidator = [
 ];
 exports.usersUpdateValidator = usersUpdateValidator;
 const usersUpdateMeValidator = [
-    express_validator_1.body('displayName')
+    (0, express_validator_1.body)('displayName')
         .optional()
         .custom(users_2.isUserDisplayNameValid).withMessage('Should have a valid display name'),
-    express_validator_1.body('description')
+    (0, express_validator_1.body)('description')
         .optional()
         .custom(users_2.isUserDescriptionValid).withMessage('Should have a valid description'),
-    express_validator_1.body('currentPassword')
+    (0, express_validator_1.body)('currentPassword')
         .optional()
         .custom(users_2.isUserPasswordValid).withMessage('Should have a valid current password'),
-    express_validator_1.body('password')
+    (0, express_validator_1.body)('password')
         .optional()
         .custom(users_2.isUserPasswordValid).withMessage('Should have a valid password'),
-    express_validator_1.body('email')
+    (0, express_validator_1.body)('email')
         .optional()
         .isEmail().withMessage('Should have a valid email attribute'),
-    express_validator_1.body('nsfwPolicy')
+    (0, express_validator_1.body)('nsfwPolicy')
         .optional()
         .custom(users_2.isUserNSFWPolicyValid).withMessage('Should have a valid display Not Safe For Work policy'),
-    express_validator_1.body('autoPlayVideo')
+    (0, express_validator_1.body)('autoPlayVideo')
         .optional()
         .custom(users_2.isUserAutoPlayVideoValid).withMessage('Should have a valid automatically plays video attribute'),
-    express_validator_1.body('videoLanguages')
+    (0, express_validator_1.body)('videoLanguages')
         .optional()
         .custom(users_2.isUserVideoLanguages).withMessage('Should have a valid video languages attribute'),
-    express_validator_1.body('videosHistoryEnabled')
+    (0, express_validator_1.body)('videosHistoryEnabled')
         .optional()
         .custom(users_2.isUserVideosHistoryEnabledValid).withMessage('Should have a valid videos history enabled attribute'),
-    express_validator_1.body('theme')
+    (0, express_validator_1.body)('theme')
         .optional()
-        .custom(v => plugins_1.isThemeNameValid(v) && theme_utils_1.isThemeRegistered(v)).withMessage('Should have a valid theme'),
-    express_validator_1.body('noInstanceConfigWarningModal')
+        .custom(v => (0, plugins_1.isThemeNameValid)(v) && (0, theme_utils_1.isThemeRegistered)(v)).withMessage('Should have a valid theme'),
+    (0, express_validator_1.body)('noInstanceConfigWarningModal')
         .optional()
-        .custom(v => users_2.isUserNoModal(v)).withMessage('Should have a valid noInstanceConfigWarningModal boolean'),
-    express_validator_1.body('noWelcomeModal')
+        .custom(v => (0, users_2.isUserNoModal)(v)).withMessage('Should have a valid noInstanceConfigWarningModal boolean'),
+    (0, express_validator_1.body)('noWelcomeModal')
         .optional()
-        .custom(v => users_2.isUserNoModal(v)).withMessage('Should have a valid noWelcomeModal boolean'),
-    express_validator_1.body('noAccountSetupWarningModal')
+        .custom(v => (0, users_2.isUserNoModal)(v)).withMessage('Should have a valid noWelcomeModal boolean'),
+    (0, express_validator_1.body)('noAccountSetupWarningModal')
         .optional()
-        .custom(v => users_2.isUserNoModal(v)).withMessage('Should have a valid noAccountSetupWarningModal boolean'),
-    express_validator_1.body('autoPlayNextVideo')
+        .custom(v => (0, users_2.isUserNoModal)(v)).withMessage('Should have a valid noAccountSetupWarningModal boolean'),
+    (0, express_validator_1.body)('autoPlayNextVideo')
         .optional()
-        .custom(v => users_2.isUserAutoPlayNextVideoValid(v)).withMessage('Should have a valid autoPlayNextVideo boolean'),
-    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
-        logger_1.logger.debug('Checking usersUpdateMe parameters', { parameters: lodash_1.omit(req.body, 'password') });
+        .custom(v => (0, users_2.isUserAutoPlayNextVideoValid)(v)).withMessage('Should have a valid autoPlayNextVideo boolean'),
+    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
+        logger_1.logger.debug('Checking usersUpdateMe parameters', { parameters: (0, lodash_1.omit)(req.body, 'password') });
         const user = res.locals.oauth.token.User;
         if (req.body.password || req.body.email) {
             if (user.pluginAuth !== null) {
@@ -240,18 +240,18 @@ const usersUpdateMeValidator = [
                 });
             }
         }
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
         return next();
     })
 ];
 exports.usersUpdateMeValidator = usersUpdateMeValidator;
 const usersGetValidator = [
-    express_validator_1.param('id').isInt().not().isEmpty().withMessage('Should have a valid id'),
-    express_validator_1.query('withStats').optional().isBoolean().withMessage('Should have a valid stats flag'),
-    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    (0, express_validator_1.param)('id').isInt().not().isEmpty().withMessage('Should have a valid id'),
+    (0, express_validator_1.query)('withStats').optional().isBoolean().withMessage('Should have a valid stats flag'),
+    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking usersGet parameters', { parameters: req.params });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
         if (!(yield checkUserIdExist(req.params.id, res, req.query.withStats)))
             return;
@@ -260,19 +260,19 @@ const usersGetValidator = [
 ];
 exports.usersGetValidator = usersGetValidator;
 const usersVideoRatingValidator = [
-    shared_1.isValidVideoIdParam('videoId'),
-    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    (0, shared_1.isValidVideoIdParam)('videoId'),
+    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking usersVideoRating parameters', { parameters: req.params });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
-        if (!(yield shared_1.doesVideoExist(req.params.videoId, res, 'id')))
+        if (!(yield (0, shared_1.doesVideoExist)(req.params.videoId, res, 'id')))
             return;
         return next();
     })
 ];
 exports.usersVideoRatingValidator = usersVideoRatingValidator;
 const ensureUserRegistrationAllowed = [
-    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
         const allowedParams = {
             body: req.body,
             ip: req.ip
@@ -290,7 +290,7 @@ const ensureUserRegistrationAllowed = [
 exports.ensureUserRegistrationAllowed = ensureUserRegistrationAllowed;
 const ensureUserRegistrationAllowedForIP = [
     (req, res, next) => {
-        const allowed = signup_1.isSignupAllowedForCurrentIP(req.ip);
+        const allowed = (0, signup_1.isSignupAllowedForCurrentIP)(req.ip);
         if (allowed === false) {
             return res.fail({
                 status: http_error_codes_1.HttpStatusCode.FORBIDDEN_403,
@@ -302,10 +302,10 @@ const ensureUserRegistrationAllowedForIP = [
 ];
 exports.ensureUserRegistrationAllowedForIP = ensureUserRegistrationAllowedForIP;
 const usersAskResetPasswordValidator = [
-    express_validator_1.body('email').isEmail().not().isEmpty().withMessage('Should have a valid email'),
-    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    (0, express_validator_1.body)('email').isEmail().not().isEmpty().withMessage('Should have a valid email'),
+    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking usersAskResetPassword parameters', { parameters: req.body });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
         const exists = yield checkUserEmailExist(req.body.email, res, false);
         if (!exists) {
@@ -317,12 +317,12 @@ const usersAskResetPasswordValidator = [
 ];
 exports.usersAskResetPasswordValidator = usersAskResetPasswordValidator;
 const usersResetPasswordValidator = [
-    express_validator_1.param('id').isInt().not().isEmpty().withMessage('Should have a valid id'),
-    express_validator_1.body('verificationString').not().isEmpty().withMessage('Should have a valid verification string'),
-    express_validator_1.body('password').custom(users_2.isUserPasswordValid).withMessage('Should have a valid password'),
-    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    (0, express_validator_1.param)('id').isInt().not().isEmpty().withMessage('Should have a valid id'),
+    (0, express_validator_1.body)('verificationString').not().isEmpty().withMessage('Should have a valid verification string'),
+    (0, express_validator_1.body)('password').custom(users_2.isUserPasswordValid).withMessage('Should have a valid password'),
+    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking usersResetPassword parameters', { parameters: req.params });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
         if (!(yield checkUserIdExist(req.params.id, res)))
             return;
@@ -339,10 +339,10 @@ const usersResetPasswordValidator = [
 ];
 exports.usersResetPasswordValidator = usersResetPasswordValidator;
 const usersAskSendVerifyEmailValidator = [
-    express_validator_1.body('email').isEmail().not().isEmpty().withMessage('Should have a valid email'),
-    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    (0, express_validator_1.body)('email').isEmail().not().isEmpty().withMessage('Should have a valid email'),
+    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking askUsersSendVerifyEmail parameters', { parameters: req.body });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
         const exists = yield checkUserEmailExist(req.body.email, res, false);
         if (!exists) {
@@ -354,16 +354,16 @@ const usersAskSendVerifyEmailValidator = [
 ];
 exports.usersAskSendVerifyEmailValidator = usersAskSendVerifyEmailValidator;
 const usersVerifyEmailValidator = [
-    express_validator_1.param('id')
+    (0, express_validator_1.param)('id')
         .isInt().not().isEmpty().withMessage('Should have a valid id'),
-    express_validator_1.body('verificationString')
+    (0, express_validator_1.body)('verificationString')
         .not().isEmpty().withMessage('Should have a valid verification string'),
-    express_validator_1.body('isPendingEmail')
+    (0, express_validator_1.body)('isPendingEmail')
         .optional()
         .customSanitizer(misc_1.toBooleanOrNull),
-    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking usersVerifyEmail parameters', { parameters: req.params });
-        if (shared_1.areValidationErrors(req, res))
+        if ((0, shared_1.areValidationErrors)(req, res))
             return;
         if (!(yield checkUserIdExist(req.params.id, res)))
             return;
@@ -380,7 +380,7 @@ const usersVerifyEmailValidator = [
 ];
 exports.usersVerifyEmailValidator = usersVerifyEmailValidator;
 const userAutocompleteValidator = [
-    express_validator_1.param('search').isString().not().isEmpty().withMessage('Should have a search parameter')
+    (0, express_validator_1.param)('search').isString().not().isEmpty().withMessage('Should have a search parameter')
 ];
 exports.userAutocompleteValidator = userAutocompleteValidator;
 const ensureAuthUserOwnsAccountValidator = [
@@ -419,7 +419,7 @@ function checkUserEmailExist(email, res, abortResponse = true) {
     return checkUserExist(() => user_1.UserModel.loadByEmail(email), res, abortResponse);
 }
 function checkUserNameOrEmailDoesNotAlreadyExist(username, email, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const user = yield user_1.UserModel.loadByUsernameOrEmail(username, email);
         if (user) {
             res.fail({
@@ -440,7 +440,7 @@ function checkUserNameOrEmailDoesNotAlreadyExist(username, email, res) {
     });
 }
 function checkUserExist(finder, res, abortResponse = true) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const user = yield finder();
         if (!user) {
             if (abortResponse === true) {

@@ -4,7 +4,7 @@ exports.serveIndexHTML = exports.sendHTML = exports.ClientHtml = void 0;
 const tslib_1 = require("tslib");
 const fs_extra_1 = require("fs-extra");
 const path_1 = require("path");
-const validator_1 = tslib_1.__importDefault(require("validator"));
+const validator_1 = (0, tslib_1.__importDefault)(require("validator"));
 const renderer_1 = require("@shared/core-utils/renderer");
 const i18n_1 = require("../../shared/core-utils/i18n/i18n");
 const http_error_codes_1 = require("../../shared/models/http/http-error-codes");
@@ -26,7 +26,7 @@ class ClientHtml {
         ClientHtml.htmlCache = {};
     }
     static getDefaultHTMLPage(req, res, paramLang) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const html = paramLang
                 ? yield ClientHtml.getIndexHTML(req, res, paramLang)
                 : yield ClientHtml.getIndexHTML(req, res);
@@ -36,8 +36,8 @@ class ClientHtml {
         });
     }
     static getWatchHTMLPage(videoIdArg, req, res) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const videoId = misc_1.toCompleteUUID(videoIdArg);
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            const videoId = (0, misc_1.toCompleteUUID)(videoIdArg);
             if (!validator_1.default.isInt(videoId) && !validator_1.default.isUUID(videoId, 4)) {
                 res.status(http_error_codes_1.HttpStatusCode.NOT_FOUND_404);
                 return ClientHtml.getIndexHTML(req, res);
@@ -50,20 +50,20 @@ class ClientHtml {
                 res.status(http_error_codes_1.HttpStatusCode.NOT_FOUND_404);
                 return html;
             }
-            let customHtml = ClientHtml.addTitleTag(html, renderer_1.escapeHTML(video.name));
-            customHtml = ClientHtml.addDescriptionTag(customHtml, markdown_1.mdToPlainText(video.description));
+            let customHtml = ClientHtml.addTitleTag(html, (0, renderer_1.escapeHTML)(video.name));
+            customHtml = ClientHtml.addDescriptionTag(customHtml, (0, markdown_1.mdToPlainText)(video.description));
             const url = constants_1.WEBSERVER.URL + video.getWatchStaticPath();
             const originUrl = video.url;
-            const title = renderer_1.escapeHTML(video.name);
-            const siteName = renderer_1.escapeHTML(config_1.CONFIG.INSTANCE.NAME);
-            const description = markdown_1.mdToPlainText(video.description);
+            const title = (0, renderer_1.escapeHTML)(video.name);
+            const siteName = (0, renderer_1.escapeHTML)(config_1.CONFIG.INSTANCE.NAME);
+            const description = (0, markdown_1.mdToPlainText)(video.description);
             const image = {
                 url: constants_1.WEBSERVER.URL + video.getPreviewStaticPath()
             };
             const embed = {
                 url: constants_1.WEBSERVER.URL + video.getEmbedStaticPath(),
                 createdAt: video.createdAt.toISOString(),
-                duration: video_format_utils_1.getActivityStreamDuration(video.duration),
+                duration: (0, video_format_utils_1.getActivityStreamDuration)(video.duration),
                 views: video.views
             };
             const ogType = 'video';
@@ -85,8 +85,8 @@ class ClientHtml {
         });
     }
     static getWatchPlaylistHTMLPage(videoPlaylistIdArg, req, res) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const videoPlaylistId = misc_1.toCompleteUUID(videoPlaylistIdArg);
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            const videoPlaylistId = (0, misc_1.toCompleteUUID)(videoPlaylistIdArg);
             if (!validator_1.default.isInt(videoPlaylistId) && !validator_1.default.isUUID(videoPlaylistId, 4)) {
                 res.status(http_error_codes_1.HttpStatusCode.NOT_FOUND_404);
                 return ClientHtml.getIndexHTML(req, res);
@@ -99,13 +99,13 @@ class ClientHtml {
                 res.status(http_error_codes_1.HttpStatusCode.NOT_FOUND_404);
                 return html;
             }
-            let customHtml = ClientHtml.addTitleTag(html, renderer_1.escapeHTML(videoPlaylist.name));
-            customHtml = ClientHtml.addDescriptionTag(customHtml, markdown_1.mdToPlainText(videoPlaylist.description));
+            let customHtml = ClientHtml.addTitleTag(html, (0, renderer_1.escapeHTML)(videoPlaylist.name));
+            customHtml = ClientHtml.addDescriptionTag(customHtml, (0, markdown_1.mdToPlainText)(videoPlaylist.description));
             const url = constants_1.WEBSERVER.URL + videoPlaylist.getWatchStaticPath();
             const originUrl = videoPlaylist.url;
-            const title = renderer_1.escapeHTML(videoPlaylist.name);
-            const siteName = renderer_1.escapeHTML(config_1.CONFIG.INSTANCE.NAME);
-            const description = markdown_1.mdToPlainText(videoPlaylist.description);
+            const title = (0, renderer_1.escapeHTML)(videoPlaylist.name);
+            const siteName = (0, renderer_1.escapeHTML)(config_1.CONFIG.INSTANCE.NAME);
+            const description = (0, markdown_1.mdToPlainText)(videoPlaylist.description);
             const image = {
                 url: videoPlaylist.getThumbnailUrl()
             };
@@ -136,19 +136,19 @@ class ClientHtml {
         });
     }
     static getAccountHTMLPage(nameWithHost, req, res) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const accountModelPromise = account_1.AccountModel.loadByNameWithHost(nameWithHost);
             return this.getAccountOrChannelHTMLPage(() => accountModelPromise, req, res);
         });
     }
     static getVideoChannelHTMLPage(nameWithHost, req, res) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const videoChannelModelPromise = video_channel_1.VideoChannelModel.loadByNameWithHostAndPopulateAccount(nameWithHost);
             return this.getAccountOrChannelHTMLPage(() => videoChannelModelPromise, req, res);
         });
     }
     static getActorHTMLPage(nameWithHost, req, res) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const [account, channel] = yield Promise.all([
                 account_1.AccountModel.loadByNameWithHost(nameWithHost),
                 video_channel_1.VideoChannelModel.loadByNameWithHostAndPopulateAccount(nameWithHost)
@@ -157,11 +157,11 @@ class ClientHtml {
         });
     }
     static getEmbedHTML() {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const path = ClientHtml.getEmbedPath();
-            if (!core_utils_1.isTestInstance() && ClientHtml.htmlCache[path])
+            if (!(0, core_utils_1.isTestInstance)() && ClientHtml.htmlCache[path])
                 return ClientHtml.htmlCache[path];
-            const buffer = yield fs_extra_1.readFile(path);
+            const buffer = yield (0, fs_extra_1.readFile)(path);
             const serverConfig = yield server_config_manager_1.ServerConfigManager.Instance.getHTMLServerConfig();
             let html = buffer.toString();
             html = yield ClientHtml.addAsyncPluginCSS(html);
@@ -174,7 +174,7 @@ class ClientHtml {
         });
     }
     static getAccountOrChannelHTMLPage(loader, req, res) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const [html, entity] = yield Promise.all([
                 ClientHtml.getIndexHTML(req, res),
                 loader()
@@ -183,13 +183,13 @@ class ClientHtml {
                 res.status(http_error_codes_1.HttpStatusCode.NOT_FOUND_404);
                 return ClientHtml.getIndexHTML(req, res);
             }
-            let customHtml = ClientHtml.addTitleTag(html, renderer_1.escapeHTML(entity.getDisplayName()));
-            customHtml = ClientHtml.addDescriptionTag(customHtml, markdown_1.mdToPlainText(entity.description));
+            let customHtml = ClientHtml.addTitleTag(html, (0, renderer_1.escapeHTML)(entity.getDisplayName()));
+            customHtml = ClientHtml.addDescriptionTag(customHtml, (0, markdown_1.mdToPlainText)(entity.description));
             const url = entity.getLocalUrl();
             const originUrl = entity.Actor.url;
-            const siteName = renderer_1.escapeHTML(config_1.CONFIG.INSTANCE.NAME);
-            const title = renderer_1.escapeHTML(entity.getDisplayName());
-            const description = markdown_1.mdToPlainText(entity.description);
+            const siteName = (0, renderer_1.escapeHTML)(config_1.CONFIG.INSTANCE.NAME);
+            const title = (0, renderer_1.escapeHTML)(entity.getDisplayName());
+            const description = (0, markdown_1.mdToPlainText)(entity.description);
             const image = {
                 url: entity.Actor.getAvatarUrl(),
                 width: constants_1.ACTOR_IMAGES_SIZE.AVATARS.width,
@@ -214,11 +214,11 @@ class ClientHtml {
         });
     }
     static getIndexHTML(req, res, paramLang) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const path = ClientHtml.getIndexPath(req, res, paramLang);
-            if (!core_utils_1.isTestInstance() && ClientHtml.htmlCache[path])
+            if (!(0, core_utils_1.isTestInstance)() && ClientHtml.htmlCache[path])
                 return ClientHtml.htmlCache[path];
-            const buffer = yield fs_extra_1.readFile(path);
+            const buffer = yield (0, fs_extra_1.readFile)(path);
             const serverConfig = yield server_config_manager_1.ServerConfigManager.Instance.getHTMLServerConfig();
             let html = buffer.toString();
             if (paramLang)
@@ -235,7 +235,7 @@ class ClientHtml {
     }
     static getIndexPath(req, res, paramLang) {
         let lang;
-        if (paramLang && i18n_1.is18nLocale(paramLang)) {
+        if (paramLang && (0, i18n_1.is18nLocale)(paramLang)) {
             lang = paramLang;
             res.cookie('clientLanguage', lang, {
                 secure: constants_1.WEBSERVER.SCHEME === 'https',
@@ -243,16 +243,16 @@ class ClientHtml {
                 maxAge: 1000 * 3600 * 24 * 90
             });
         }
-        else if (req.cookies.clientLanguage && i18n_1.is18nLocale(req.cookies.clientLanguage)) {
+        else if (req.cookies.clientLanguage && (0, i18n_1.is18nLocale)(req.cookies.clientLanguage)) {
             lang = req.cookies.clientLanguage;
         }
         else {
-            lang = req.acceptsLanguages(i18n_1.POSSIBLE_LOCALES) || i18n_1.getDefaultLocale();
+            lang = req.acceptsLanguages(i18n_1.POSSIBLE_LOCALES) || (0, i18n_1.getDefaultLocale)();
         }
-        return path_1.join(__dirname, '../../../client/dist/' + i18n_1.buildFileLocale(lang) + '/index.html');
+        return (0, path_1.join)(__dirname, '../../../client/dist/' + (0, i18n_1.buildFileLocale)(lang) + '/index.html');
     }
     static getEmbedPath() {
-        return path_1.join(__dirname, '../../../client/dist/standalone/videos/embed.html');
+        return (0, path_1.join)(__dirname, '../../../client/dist/standalone/videos/embed.html');
     }
     static addHtmlLang(htmlStringPage, paramLang) {
         return htmlStringPage.replace('<html>', `<html lang="${paramLang}">`);
@@ -288,11 +288,11 @@ class ClientHtml {
         return htmlStringPage.replace(constants_1.CUSTOM_HTML_TAG_COMMENTS.SERVER_CONFIG, configScriptTag);
     }
     static addAsyncPluginCSS(htmlStringPage) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            const globalCSSContent = yield fs_extra_1.readFile(constants_1.PLUGIN_GLOBAL_CSS_PATH);
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            const globalCSSContent = yield (0, fs_extra_1.readFile)(constants_1.PLUGIN_GLOBAL_CSS_PATH);
             if (globalCSSContent.byteLength === 0)
                 return htmlStringPage;
-            const fileHash = core_utils_1.sha256(globalCSSContent);
+            const fileHash = (0, core_utils_1.sha256)(globalCSSContent);
             const linkTag = `<link rel="stylesheet" href="/plugins/global.css?hash=${fileHash}" />`;
             return htmlStringPage.replace('</head>', linkTag + '</head>');
         });
@@ -309,7 +309,7 @@ class ClientHtml {
             metaTags['og:image:height'] = tags.image.height;
         }
         metaTags['og:url'] = tags.url;
-        metaTags['og:description'] = markdown_1.mdToPlainText(tags.description);
+        metaTags['og:description'] = (0, markdown_1.mdToPlainText)(tags.description);
         if (tags.embed) {
             metaTags['og:video:url'] = tags.embed.url;
             metaTags['og:video:secure_url'] = tags.embed.url;
@@ -322,7 +322,7 @@ class ClientHtml {
     static generateStandardMetaTags(tags) {
         return {
             name: tags.title,
-            description: markdown_1.mdToPlainText(tags.description),
+            description: (0, markdown_1.mdToPlainText)(tags.description),
             image: tags.image.url
         };
     }
@@ -418,7 +418,7 @@ function sendHTML(html, res) {
 }
 exports.sendHTML = sendHTML;
 function serveIndexHTML(req, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         if (req.accepts(constants_1.ACCEPT_HEADERS) === 'html' ||
             !req.headers.accept) {
             try {
@@ -435,7 +435,7 @@ function serveIndexHTML(req, res) {
 }
 exports.serveIndexHTML = serveIndexHTML;
 function generateHTMLPage(req, res, paramLang) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const html = yield ClientHtml.getDefaultHTMLPage(req, res, paramLang);
         return sendHTML(html, res);
     });

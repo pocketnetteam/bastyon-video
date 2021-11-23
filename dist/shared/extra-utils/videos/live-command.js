@@ -21,7 +21,7 @@ class LiveCommand extends shared_1.AbstractCommand {
         return this.putBodyRequest(Object.assign(Object.assign({}, options), { path: path + '/' + videoId, fields, implicitToken: true, defaultExpectedStatus: models_1.HttpStatusCode.NO_CONTENT_204 }));
     }
     create(options) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const { fields } = options;
             const path = '/api/v1/videos/live';
             const attaches = {};
@@ -29,22 +29,22 @@ class LiveCommand extends shared_1.AbstractCommand {
                 attaches.thumbnailfile = fields.thumbnailfile;
             if (fields.previewfile)
                 attaches.previewfile = fields.previewfile;
-            const body = yield requests_1.unwrapBody(this.postUploadRequest(Object.assign(Object.assign({}, options), { path,
-                attaches, fields: lodash_1.omit(fields, 'thumbnailfile', 'previewfile'), implicitToken: true, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 })));
+            const body = yield (0, requests_1.unwrapBody)(this.postUploadRequest(Object.assign(Object.assign({}, options), { path,
+                attaches, fields: (0, lodash_1.omit)(fields, 'thumbnailfile', 'previewfile'), implicitToken: true, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 })));
             return body.video;
         });
     }
     sendRTMPStreamInVideo(options) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const { videoId, fixtureName, copyCodecs } = options;
             const videoLive = yield this.get({ videoId });
-            return live_1.sendRTMPStream({ rtmpBaseUrl: videoLive.rtmpUrl, streamKey: videoLive.streamKey, fixtureName, copyCodecs });
+            return (0, live_1.sendRTMPStream)({ rtmpBaseUrl: videoLive.rtmpUrl, streamKey: videoLive.streamKey, fixtureName, copyCodecs });
         });
     }
     runAndTestStreamError(options) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const command = yield this.sendRTMPStreamInVideo(options);
-            return live_1.testFfmpegStreamError(command, options.shouldHaveError);
+            return (0, live_1.testFfmpegStreamError)(command, options.shouldHaveError);
         });
     }
     waitUntilPublished(options) {
@@ -65,28 +65,28 @@ class LiveCommand extends shared_1.AbstractCommand {
         return this.server.servers.waitUntilLog(`${videoUUID}/${segmentName}`, 2, false);
     }
     waitUntilSaved(options) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             let video;
             do {
                 video = yield this.server.videos.getWithToken({ token: options.token, id: options.videoId });
-                yield miscs_1.wait(500);
+                yield (0, miscs_1.wait)(500);
             } while (video.isLive === true || video.state.id !== 1);
         });
     }
     countPlaylists(options) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const basePath = this.server.servers.buildDirectory('streaming-playlists');
-            const hlsPath = path_1.join(basePath, 'hls', options.videoUUID);
-            const files = yield fs_extra_1.readdir(hlsPath);
+            const hlsPath = (0, path_1.join)(basePath, 'hls', options.videoUUID);
+            const files = yield (0, fs_extra_1.readdir)(hlsPath);
             return files.filter(f => f.endsWith('.m3u8')).length;
         });
     }
     waitUntilState(options) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             let video;
             do {
                 video = yield this.server.videos.getWithToken({ token: options.token, id: options.videoId });
-                yield miscs_1.wait(500);
+                yield (0, miscs_1.wait)(500);
             } while (video.state.id !== options.state);
         });
     }

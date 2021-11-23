@@ -13,10 +13,10 @@ function sendAccept(actorFollow) {
         return;
     }
     logger_1.logger.info('Creating job to accept follower %s.', follower.url);
-    const followData = send_follow_1.buildFollowActivity(actorFollow.url, follower, me);
-    const url = url_1.getLocalActorFollowAcceptActivityPubUrl(actorFollow);
+    const followData = (0, send_follow_1.buildFollowActivity)(actorFollow.url, follower, me);
+    const url = (0, url_1.getLocalActorFollowAcceptActivityPubUrl)(actorFollow);
     const data = buildAcceptActivity(url, me, followData);
-    return utils_1.unicastTo(data, me, follower.inboxUrl);
+    return (0, utils_1.unicastTo)(data, me, follower.inboxUrl);
 }
 exports.sendAccept = sendAccept;
 function buildAcceptActivity(url, byActor, followActivityData) {

@@ -40,7 +40,7 @@ function buildPluginHelpers(pluginModel, npmName) {
 }
 exports.buildPluginHelpers = buildPluginHelpers;
 function buildPluginLogger(npmName) {
-    return logger_1.buildLogger(npmName);
+    return (0, logger_1.buildLogger)(npmName);
 }
 function buildDatabaseHelpers() {
     return {
@@ -49,7 +49,7 @@ function buildDatabaseHelpers() {
 }
 function buildServerHelpers() {
     return {
-        getServerActor: () => application_1.getServerActor()
+        getServerActor: () => (0, application_1.getServerActor)()
     };
 }
 function buildVideosHelpers() {
@@ -61,7 +61,7 @@ function buildVideosHelpers() {
             return video_1.VideoModel.load(id);
         },
         removeVideo: (id) => {
-            return database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+            return database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                 const video = yield video_1.VideoModel.loadAndPopulateAccountAndServerAndTags(id, t);
                 yield video.destroy({ transaction: t });
             }));
@@ -70,45 +70,45 @@ function buildVideosHelpers() {
 }
 function buildModerationHelpers() {
     return {
-        blockServer: (options) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        blockServer: (options) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const serverToBlock = yield server_1.ServerModel.loadOrCreateByHost(options.hostToBlock);
-            yield blocklist_1.addServerInBlocklist(options.byAccountId, serverToBlock.id);
+            yield (0, blocklist_1.addServerInBlocklist)(options.byAccountId, serverToBlock.id);
         }),
-        unblockServer: (options) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        unblockServer: (options) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const serverBlock = yield server_blocklist_1.ServerBlocklistModel.loadByAccountAndHost(options.byAccountId, options.hostToUnblock);
             if (!serverBlock)
                 return;
-            yield blocklist_1.removeServerFromBlocklist(serverBlock);
+            yield (0, blocklist_1.removeServerFromBlocklist)(serverBlock);
         }),
-        blockAccount: (options) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        blockAccount: (options) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const accountToBlock = yield account_1.AccountModel.loadByNameWithHost(options.handleToBlock);
             if (!accountToBlock)
                 return;
-            yield blocklist_1.addAccountInBlocklist(options.byAccountId, accountToBlock.id);
+            yield (0, blocklist_1.addAccountInBlocklist)(options.byAccountId, accountToBlock.id);
         }),
-        unblockAccount: (options) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        unblockAccount: (options) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const targetAccount = yield account_1.AccountModel.loadByNameWithHost(options.handleToUnblock);
             if (!targetAccount)
                 return;
             const accountBlock = yield account_blocklist_1.AccountBlocklistModel.loadByAccountAndTarget(options.byAccountId, targetAccount.id);
             if (!accountBlock)
                 return;
-            yield blocklist_1.removeAccountFromBlocklist(accountBlock);
+            yield (0, blocklist_1.removeAccountFromBlocklist)(accountBlock);
         }),
-        blacklistVideo: (options) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        blacklistVideo: (options) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const video = yield video_1.VideoModel.loadAndPopulateAccountAndServerAndTags(options.videoIdOrUUID);
             if (!video)
                 return;
-            yield video_blacklist_2.blacklistVideo(video, options.createOptions);
+            yield (0, video_blacklist_2.blacklistVideo)(video, options.createOptions);
         }),
-        unblacklistVideo: (options) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        unblacklistVideo: (options) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const video = yield video_1.VideoModel.loadAndPopulateAccountAndServerAndTags(options.videoIdOrUUID);
             if (!video)
                 return;
             const videoBlacklist = yield video_blacklist_1.VideoBlacklistModel.loadByVideoId(video.id);
             if (!videoBlacklist)
                 return;
-            yield video_blacklist_2.unblacklistVideo(videoBlacklist, video);
+            yield (0, video_blacklist_2.unblacklistVideo)(videoBlacklist, video);
         })
     };
 }
@@ -126,7 +126,7 @@ function buildPluginRelatedHelpers(plugin, npmName) {
     return {
         getBaseStaticRoute: () => `/plugins/${plugin.name}/${plugin.version}/static/`,
         getBaseRouterRoute: () => `/plugins/${plugin.name}/${plugin.version}/router/`,
-        getDataDirectoryPath: () => path_1.join(config_1.CONFIG.STORAGE.PLUGINS_DIR, 'data', npmName)
+        getDataDirectoryPath: () => (0, path_1.join)(config_1.CONFIG.STORAGE.PLUGINS_DIR, 'data', npmName)
     };
 }
 function buildUserHelpers() {

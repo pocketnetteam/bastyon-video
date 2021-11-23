@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.downloadImage = exports.doRequestAndSaveToFile = exports.doJSONRequest = exports.doRequest = void 0;
 const tslib_1 = require("tslib");
 const fs_extra_1 = require("fs-extra");
-const got_1 = tslib_1.__importDefault(require("got"));
+const got_1 = (0, tslib_1.__importDefault)(require("got"));
 const hpagent_1 = require("hpagent");
 const path_1 = require("path");
 const config_1 = require("../initializers/config");
@@ -81,14 +81,14 @@ function doJSONRequest(url, options = {}) {
 }
 exports.doJSONRequest = doJSONRequest;
 function doRequestAndSaveToFile(url, destPath, options = {}) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const gotOptions = buildGotOptions(options);
-        const outFile = fs_extra_1.createWriteStream(destPath);
+        const outFile = (0, fs_extra_1.createWriteStream)(destPath);
         try {
-            yield core_utils_1.pipelinePromise(peertubeGot.stream(url, gotOptions), outFile);
+            yield (0, core_utils_1.pipelinePromise)(peertubeGot.stream(url, gotOptions), outFile);
         }
         catch (err) {
-            fs_extra_1.remove(destPath)
+            (0, fs_extra_1.remove)(destPath)
                 .catch(err => logger_1.logger.error('Cannot remove %s after request failure.', destPath, { err }));
             throw buildRequestError(err);
         }
@@ -96,24 +96,24 @@ function doRequestAndSaveToFile(url, destPath, options = {}) {
 }
 exports.doRequestAndSaveToFile = doRequestAndSaveToFile;
 function downloadImage(url, destDir, destName, size) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        const tmpPath = path_1.join(config_1.CONFIG.STORAGE.TMP_DIR, 'pending-' + destName);
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        const tmpPath = (0, path_1.join)(config_1.CONFIG.STORAGE.TMP_DIR, 'pending-' + destName);
         yield doRequestAndSaveToFile(url, tmpPath);
-        const destPath = path_1.join(destDir, destName);
+        const destPath = (0, path_1.join)(destDir, destName);
         try {
-            yield image_utils_1.processImage(tmpPath, destPath, size);
+            yield (0, image_utils_1.processImage)(tmpPath, destPath, size);
         }
         catch (err) {
-            yield fs_extra_1.remove(tmpPath);
+            yield (0, fs_extra_1.remove)(tmpPath);
             throw err;
         }
     });
 }
 exports.downloadImage = downloadImage;
 function getAgent() {
-    if (!proxy_1.isProxyEnabled())
+    if (!(0, proxy_1.isProxyEnabled)())
         return {};
-    const proxy = proxy_1.getProxy();
+    const proxy = (0, proxy_1.getProxy)();
     logger_1.logger.info('Using proxy %s.', proxy);
     const proxyAgentOptions = {
         keepAlive: true,

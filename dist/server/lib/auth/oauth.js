@@ -12,7 +12,7 @@ const oAuthServer = new (require('oauth2-server'))({
     model: require('./oauth-model')
 });
 function handleOAuthToken(req, options) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const request = new oauth2_server_1.Request(req);
         const { refreshTokenAuthName, bypassLogin } = options;
         if (request.method !== 'POST') {
@@ -26,7 +26,7 @@ function handleOAuthToken(req, options) {
         if (!clientId || !clientSecret) {
             throw new oauth2_server_1.InvalidClientError('Invalid client: cannot retrieve client credentials');
         }
-        const client = yield oauth_model_1.getClient(clientId, clientSecret);
+        const client = yield (0, oauth_model_1.getClient)(clientId, clientSecret);
         if (!client) {
             throw new oauth2_server_1.InvalidClientError('Invalid client: client is invalid');
         }
@@ -63,7 +63,7 @@ function handleOAuthAuthenticate(req, res, authenticateInQuery = false) {
 }
 exports.handleOAuthAuthenticate = handleOAuthAuthenticate;
 function handlePasswordGrant(options) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const { request, client, bypassLogin } = options;
         if (!request.body.username) {
             throw new oauth2_server_1.InvalidRequestError('Missing parameter: `username`');
@@ -71,20 +71,20 @@ function handlePasswordGrant(options) {
         if (!bypassLogin && !request.body.password) {
             throw new oauth2_server_1.InvalidRequestError('Missing parameter: `password`');
         }
-        const user = yield oauth_model_1.getUser(request.body.username, request.body.password, bypassLogin);
+        const user = yield (0, oauth_model_1.getUser)(request.body.username, request.body.password, bypassLogin);
         if (!user)
             throw new oauth2_server_1.InvalidGrantError('Invalid grant: user credentials are invalid');
         const token = yield buildToken();
-        return oauth_model_1.saveToken(token, client, user, { bypassLogin });
+        return (0, oauth_model_1.saveToken)(token, client, user, { bypassLogin });
     });
 }
 function handleRefreshGrant(options) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const { request, client, refreshTokenAuthName } = options;
         if (!request.body.refresh_token) {
             throw new oauth2_server_1.InvalidRequestError('Missing parameter: `refresh_token`');
         }
-        const refreshToken = yield oauth_model_1.getRefreshToken(request.body.refresh_token);
+        const refreshToken = yield (0, oauth_model_1.getRefreshToken)(request.body.refresh_token);
         if (!refreshToken) {
             throw new oauth2_server_1.InvalidGrantError('Invalid grant: refresh token is invalid');
         }
@@ -94,14 +94,14 @@ function handleRefreshGrant(options) {
         if (refreshToken.refreshTokenExpiresAt && refreshToken.refreshTokenExpiresAt < new Date()) {
             throw new oauth2_server_1.InvalidGrantError('Invalid grant: refresh token has expired');
         }
-        yield oauth_model_1.revokeToken({ refreshToken: refreshToken.refreshToken });
+        yield (0, oauth_model_1.revokeToken)({ refreshToken: refreshToken.refreshToken });
         const token = yield buildToken();
-        return oauth_model_1.saveToken(token, client, refreshToken.user, { refreshTokenAuthName });
+        return (0, oauth_model_1.saveToken)(token, client, refreshToken.user, { refreshTokenAuthName });
     });
 }
 function generateRandomToken() {
-    return core_utils_1.randomBytesPromise(256)
-        .then(buffer => core_utils_1.sha1(buffer));
+    return (0, core_utils_1.randomBytesPromise)(256)
+        .then(buffer => (0, core_utils_1.sha1)(buffer));
 }
 function getTokenExpiresAt(type) {
     const lifetime = type === 'access'
@@ -110,7 +110,7 @@ function getTokenExpiresAt(type) {
     return new Date(Date.now() + lifetime * 1000);
 }
 function buildToken() {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const [accessToken, refreshToken] = yield Promise.all([generateRandomToken(), generateRandomToken()]);
         return {
             accessToken,

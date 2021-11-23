@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.feedsRouter = void 0;
 const tslib_1 = require("tslib");
-const express_1 = tslib_1.__importDefault(require("express"));
-const pfeed_1 = tslib_1.__importDefault(require("pfeed"));
+const express_1 = (0, tslib_1.__importDefault)(require("express"));
+const pfeed_1 = (0, tslib_1.__importDefault)(require("pfeed"));
 const video_format_utils_1 = require("@server/models/video/formatter/video-format-utils");
 const express_utils_1 = require("../helpers/express-utils");
 const config_1 = require("../initializers/config");
@@ -14,14 +14,14 @@ const video_1 = require("../models/video/video");
 const video_comment_1 = require("../models/video/video-comment");
 const feedsRouter = express_1.default.Router();
 exports.feedsRouter = feedsRouter;
-const cacheRoute = cache_1.cacheRouteFactory({
+const cacheRoute = (0, cache_1.cacheRouteFactory)({
     headerBlacklist: ['Content-Type']
 });
-feedsRouter.get('/feeds/video-comments.:format', middlewares_1.feedsFormatValidator, middlewares_1.setFeedFormatContentType, cacheRoute(constants_1.ROUTE_CACHE_LIFETIME.FEEDS), middlewares_1.asyncMiddleware(middlewares_1.videoFeedsValidator), middlewares_1.asyncMiddleware(middlewares_1.videoCommentsFeedsValidator), middlewares_1.asyncMiddleware(generateVideoCommentsFeed));
-feedsRouter.get('/feeds/videos.:format', middlewares_1.videosSortValidator, middlewares_1.setDefaultVideosSort, middlewares_1.feedsFormatValidator, middlewares_1.setFeedFormatContentType, cacheRoute(constants_1.ROUTE_CACHE_LIFETIME.FEEDS), middlewares_1.commonVideosFiltersValidator, middlewares_1.asyncMiddleware(middlewares_1.videoFeedsValidator), middlewares_1.asyncMiddleware(generateVideoFeed));
-feedsRouter.get('/feeds/subscriptions.:format', middlewares_1.videosSortValidator, middlewares_1.setDefaultVideosSort, middlewares_1.feedsFormatValidator, middlewares_1.setFeedFormatContentType, cacheRoute(constants_1.ROUTE_CACHE_LIFETIME.FEEDS), middlewares_1.commonVideosFiltersValidator, middlewares_1.asyncMiddleware(middlewares_1.videoSubscriptionFeedsValidator), middlewares_1.asyncMiddleware(generateVideoFeedForSubscriptions));
+feedsRouter.get('/feeds/video-comments.:format', middlewares_1.feedsFormatValidator, middlewares_1.setFeedFormatContentType, cacheRoute(constants_1.ROUTE_CACHE_LIFETIME.FEEDS), (0, middlewares_1.asyncMiddleware)(middlewares_1.videoFeedsValidator), (0, middlewares_1.asyncMiddleware)(middlewares_1.videoCommentsFeedsValidator), (0, middlewares_1.asyncMiddleware)(generateVideoCommentsFeed));
+feedsRouter.get('/feeds/videos.:format', middlewares_1.videosSortValidator, middlewares_1.setDefaultVideosSort, middlewares_1.feedsFormatValidator, middlewares_1.setFeedFormatContentType, cacheRoute(constants_1.ROUTE_CACHE_LIFETIME.FEEDS), middlewares_1.commonVideosFiltersValidator, (0, middlewares_1.asyncMiddleware)(middlewares_1.videoFeedsValidator), (0, middlewares_1.asyncMiddleware)(generateVideoFeed));
+feedsRouter.get('/feeds/subscriptions.:format', middlewares_1.videosSortValidator, middlewares_1.setDefaultVideosSort, middlewares_1.feedsFormatValidator, middlewares_1.setFeedFormatContentType, cacheRoute(constants_1.ROUTE_CACHE_LIFETIME.FEEDS), middlewares_1.commonVideosFiltersValidator, (0, middlewares_1.asyncMiddleware)(middlewares_1.videoSubscriptionFeedsValidator), (0, middlewares_1.asyncMiddleware)(generateVideoFeedForSubscriptions));
 function generateVideoCommentsFeed(req, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const start = 0;
         const video = res.locals.videoAll;
         const account = res.locals.account;
@@ -77,11 +77,11 @@ function generateVideoCommentsFeed(req, res) {
     });
 }
 function generateVideoFeed(req, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const start = 0;
         const account = res.locals.account;
         const videoChannel = res.locals.videoChannel;
-        const nsfw = express_utils_1.buildNSFWFilter(res, req.query.nsfw);
+        const nsfw = (0, express_utils_1.buildNSFWFilter)(res, req.query.nsfw);
         let name;
         let description;
         if (videoChannel) {
@@ -112,10 +112,10 @@ function generateVideoFeed(req, res) {
     });
 }
 function generateVideoFeedForSubscriptions(req, res) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const start = 0;
         const account = res.locals.account;
-        const nsfw = express_utils_1.buildNSFWFilter(res, req.query.nsfw);
+        const nsfw = (0, express_utils_1.buildNSFWFilter)(res, req.query.nsfw);
         const name = account.getDisplayName();
         const description = account.description;
         const feed = initFeed({
@@ -191,7 +191,7 @@ function addVideosToFeed(feed, videos) {
         if (video.category) {
             categories.push({
                 value: video.category,
-                label: video_format_utils_1.getCategoryLabel(video.category)
+                label: (0, video_format_utils_1.getCategoryLabel)(video.category)
             });
         }
         feed.addItem({

@@ -16,7 +16,7 @@ class AbstractScheduler {
         clearInterval(this.interval);
     }
     execute() {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             if (this.isRunning === true)
                 return;
             this.isRunning = true;

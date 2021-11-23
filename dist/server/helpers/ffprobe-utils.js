@@ -10,7 +10,7 @@ const constants_1 = require("../initializers/constants");
 const logger_1 = require("./logger");
 function ffprobePromise(path) {
     return new Promise((res, rej) => {
-        fluent_ffmpeg_1.ffprobe(path, (err, data) => {
+        (0, fluent_ffmpeg_1.ffprobe)(path, (err, data) => {
             if (err)
                 return rej(err);
             return res(data);
@@ -19,7 +19,7 @@ function ffprobePromise(path) {
 }
 exports.ffprobePromise = ffprobePromise;
 function getAudioStream(videoPath, existingProbe) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const data = existingProbe || (yield ffprobePromise(videoPath));
         if (Array.isArray(data.streams)) {
             const audioStream = data.streams.find(stream => stream['codec_type'] === 'audio');
@@ -59,7 +59,7 @@ function getMaxAudioBitrate(type, bitrate) {
 }
 exports.getMaxAudioBitrate = getMaxAudioBitrate;
 function getVideoStreamSize(path, existingProbe) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const videoStream = yield getVideoStreamFromFile(path, existingProbe);
         return videoStream === null
             ? { width: 0, height: 0 }
@@ -68,7 +68,7 @@ function getVideoStreamSize(path, existingProbe) {
 }
 exports.getVideoStreamSize = getVideoStreamSize;
 function getVideoStreamCodec(path) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const videoStream = yield getVideoStreamFromFile(path);
         if (!videoStream)
             return '';
@@ -106,7 +106,7 @@ function getVideoStreamCodec(path) {
 }
 exports.getVideoStreamCodec = getVideoStreamCodec;
 function getAudioStreamCodec(path, existingProbe) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const { audioStream } = yield getAudioStream(path, existingProbe);
         if (!audioStream)
             return '';
@@ -123,7 +123,7 @@ function getAudioStreamCodec(path, existingProbe) {
 }
 exports.getAudioStreamCodec = getAudioStreamCodec;
 function getVideoFileResolution(path, existingProbe) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const size = yield getVideoStreamSize(path, existingProbe);
         return {
             width: size.width,
@@ -136,7 +136,7 @@ function getVideoFileResolution(path, existingProbe) {
 }
 exports.getVideoFileResolution = getVideoFileResolution;
 function getVideoFileFPS(path, existingProbe) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const videoStream = yield getVideoStreamFromFile(path, existingProbe);
         if (videoStream === null)
             return 0;
@@ -156,14 +156,14 @@ function getVideoFileFPS(path, existingProbe) {
 }
 exports.getVideoFileFPS = getVideoFileFPS;
 function getMetadataFromFile(path, existingProbe) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const metadata = existingProbe || (yield ffprobePromise(path));
         return new videos_1.VideoFileMetadata(metadata);
     });
 }
 exports.getMetadataFromFile = getMetadataFromFile;
 function getVideoFileBitrate(path, existingProbe) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const metadata = yield getMetadataFromFile(path, existingProbe);
         let bitrate = metadata.format.bit_rate;
         if (bitrate && !isNaN(bitrate))
@@ -179,14 +179,14 @@ function getVideoFileBitrate(path, existingProbe) {
 }
 exports.getVideoFileBitrate = getVideoFileBitrate;
 function getDurationFromVideoFile(path, existingProbe) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const metadata = yield getMetadataFromFile(path, existingProbe);
         return Math.round(metadata.format.duration);
     });
 }
 exports.getDurationFromVideoFile = getDurationFromVideoFile;
 function getVideoStreamFromFile(path, existingProbe) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const metadata = yield getMetadataFromFile(path, existingProbe);
         return metadata.streams.find(s => s.codec_type === 'video') || null;
     });
@@ -217,7 +217,7 @@ function computeResolutionsToTranscode(videoFileResolution, type) {
 }
 exports.computeResolutionsToTranscode = computeResolutionsToTranscode;
 function canDoQuickTranscode(path) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         if (config_1.CONFIG.TRANSCODING.PROFILE !== 'default')
             return false;
         const probe = yield ffprobePromise(path);
@@ -227,7 +227,7 @@ function canDoQuickTranscode(path) {
 }
 exports.canDoQuickTranscode = canDoQuickTranscode;
 function canDoQuickVideoTranscode(path, probe) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const videoStream = yield getVideoStreamFromFile(path, probe);
         const fps = yield getVideoFileFPS(path, probe);
         const bitRate = yield getVideoFileBitrate(path, probe);
@@ -242,14 +242,14 @@ function canDoQuickVideoTranscode(path, probe) {
             return false;
         if (fps < constants_1.VIDEO_TRANSCODING_FPS.MIN || fps > constants_1.VIDEO_TRANSCODING_FPS.MAX)
             return false;
-        if (bitRate > core_utils_1.getMaxBitrate(Object.assign(Object.assign({}, resolutionData), { fps })))
+        if (bitRate > (0, core_utils_1.getMaxBitrate)(Object.assign(Object.assign({}, resolutionData), { fps })))
             return false;
         return true;
     });
 }
 exports.canDoQuickVideoTranscode = canDoQuickVideoTranscode;
 function canDoQuickAudioTranscode(path, probe) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const parsedAudio = yield getAudioStream(path, probe);
         if (!parsedAudio.audioStream)
             return true;

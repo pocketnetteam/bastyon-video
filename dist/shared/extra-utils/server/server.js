@@ -52,7 +52,7 @@ class PeerTubeServer {
     }
     setServerNumber(serverNumber) {
         this.serverNumber = serverNumber;
-        this.parallel = miscs_1.parallelTests();
+        this.parallel = (0, miscs_1.parallelTests)();
         this.internalServerNumber = this.parallel ? this.randomServer() : this.serverNumber;
         this.rtmpPort = this.parallel ? this.randomRTMP() : 1936;
         this.port = 9000 + this.internalServerNumber;
@@ -68,13 +68,13 @@ class PeerTubeServer {
         this.port = parseInt(parsed.port);
     }
     flushAndRun(configOverride, options = {}) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             yield servers_command_1.ServersCommand.flushTests(this.internalServerNumber);
             return this.run(configOverride, options);
         });
     }
     run(configOverrideArg, options = {}) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const serverRunString = {
                 'HTTP server listening': false
             };
@@ -106,7 +106,7 @@ class PeerTubeServer {
             };
             return new Promise((res, rej) => {
                 const self = this;
-                this.app = child_process_1.fork(path_1.join(core_utils_1.root(), 'dist', 'server.js'), options.peertubeArgs || [], forkOptions);
+                this.app = (0, child_process_1.fork)((0, path_1.join)((0, core_utils_1.root)(), 'dist', 'server.js'), options.peertubeArgs || [], forkOptions);
                 const onPeerTubeExit = () => rej(new Error('Process exited'));
                 const onParentExit = () => {
                     if (!this.app || !this.app.pid)
@@ -156,7 +156,7 @@ class PeerTubeServer {
         });
     }
     kill() {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             if (!this.app)
                 return;
             yield this.sql.cleanup();
@@ -167,20 +167,20 @@ class PeerTubeServer {
     randomServer() {
         const low = 10;
         const high = 10000;
-        return core_utils_2.randomInt(low, high);
+        return (0, core_utils_2.randomInt)(low, high);
     }
     randomRTMP() {
         const low = 1900;
         const high = 2100;
-        return core_utils_2.randomInt(low, high);
+        return (0, core_utils_2.randomInt)(low, high);
     }
     assignCustomConfigFile() {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             if (this.internalServerNumber === this.serverNumber)
                 return;
-            const basePath = path_1.join(core_utils_1.root(), 'config');
-            const tmpConfigFile = path_1.join(basePath, `test-${this.internalServerNumber}.yaml`);
-            yield fs_extra_1.copy(path_1.join(basePath, `test-${this.serverNumber}.yaml`), tmpConfigFile);
+            const basePath = (0, path_1.join)((0, core_utils_1.root)(), 'config');
+            const tmpConfigFile = (0, path_1.join)(basePath, `test-${this.internalServerNumber}.yaml`);
+            yield (0, fs_extra_1.copy)((0, path_1.join)(basePath, `test-${this.serverNumber}.yaml`), tmpConfigFile);
             this.customConfigFile = tmpConfigFile;
         });
     }

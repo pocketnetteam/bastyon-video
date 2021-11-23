@@ -31,7 +31,7 @@ function buildLocalVideoFromReq(videoInfo, channelId) {
 }
 exports.buildLocalVideoFromReq = buildLocalVideoFromReq;
 function buildVideoThumbnailsFromReq(options) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const { video, files, fallback, automaticallyGenerated } = options;
         const promises = [
             {
@@ -45,7 +45,7 @@ function buildVideoThumbnailsFromReq(options) {
         ].map(p => {
             const fields = files === null || files === void 0 ? void 0 : files[p.fieldName];
             if (fields) {
-                return thumbnail_1.updateVideoMiniatureFromExisting({
+                return (0, thumbnail_1.updateVideoMiniatureFromExisting)({
                     inputPath: fields[0].path,
                     video,
                     type: p.type,
@@ -59,7 +59,7 @@ function buildVideoThumbnailsFromReq(options) {
 }
 exports.buildVideoThumbnailsFromReq = buildVideoThumbnailsFromReq;
 function setVideoTags(options) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const { video, tags, transaction } = options;
         const internalTags = tags || [];
         const tagInstances = yield tag_1.TagModel.findOrCreateTags(internalTags, transaction);
@@ -69,7 +69,7 @@ function setVideoTags(options) {
 }
 exports.setVideoTags = setVideoTags;
 function addOptimizeOrMergeAudioJob(video, videoFile, user) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         let dataInput;
         if (videoFile.isAudio()) {
             dataInput = {
@@ -94,14 +94,14 @@ function addOptimizeOrMergeAudioJob(video, videoFile, user) {
 }
 exports.addOptimizeOrMergeAudioJob = addOptimizeOrMergeAudioJob;
 function addTranscodingJob(payload, options) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         yield video_job_info_1.VideoJobInfoModel.increaseOrCreate(payload.videoUUID, 'pendingTranscode');
         return job_queue_1.JobQueue.Instance.createJobWithPromise({ type: 'video-transcoding', payload: payload }, options);
     });
 }
 exports.addTranscodingJob = addTranscodingJob;
 function addMoveToObjectStorageJob(video, isNewVideo = true) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         yield video_job_info_1.VideoJobInfoModel.increaseOrCreate(video.uuid, 'pendingMove');
         const dataInput = { videoUUID: video.uuid, isNewVideo };
         return job_queue_1.JobQueue.Instance.createJobWithPromise({ type: 'move-to-object-storage', payload: dataInput });
@@ -109,7 +109,7 @@ function addMoveToObjectStorageJob(video, isNewVideo = true) {
 }
 exports.addMoveToObjectStorageJob = addMoveToObjectStorageJob;
 function getTranscodingJobPriority(user) {
-    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
         const now = new Date();
         const lastWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
         const videoUploadedByUser = yield video_1.VideoModel.countVideosUploadedByUserSince(user.id, lastWeek);

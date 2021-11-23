@@ -34,70 +34,70 @@ let ActorImageModel = ActorImageModel_1 = class ActorImageModel extends sequeliz
     }
     getStaticPath() {
         if (this.type === 1) {
-            return path_1.join(constants_1.LAZY_STATIC_PATHS.AVATARS, this.filename);
+            return (0, path_1.join)(constants_1.LAZY_STATIC_PATHS.AVATARS, this.filename);
         }
-        return path_1.join(constants_1.LAZY_STATIC_PATHS.BANNERS, this.filename);
+        return (0, path_1.join)(constants_1.LAZY_STATIC_PATHS.BANNERS, this.filename);
     }
     getPath() {
-        return path_1.join(config_1.CONFIG.STORAGE.ACTOR_IMAGES, this.filename);
+        return (0, path_1.join)(config_1.CONFIG.STORAGE.ACTOR_IMAGES, this.filename);
     }
     removeImage() {
-        const imagePath = path_1.join(config_1.CONFIG.STORAGE.ACTOR_IMAGES, this.filename);
-        return fs_extra_1.remove(imagePath);
+        const imagePath = (0, path_1.join)(config_1.CONFIG.STORAGE.ACTOR_IMAGES, this.filename);
+        return (0, fs_extra_1.remove)(imagePath);
     }
     isOwned() {
         return !this.fileUrl;
     }
 };
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(false),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(false),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", String)
+    (0, tslib_1.__metadata)("design:type", String)
 ], ActorImageModel.prototype, "filename", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(true),
-    sequelize_typescript_1.Default(null),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(true),
+    (0, sequelize_typescript_1.Default)(null),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], ActorImageModel.prototype, "height", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(true),
-    sequelize_typescript_1.Default(null),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(true),
+    (0, sequelize_typescript_1.Default)(null),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], ActorImageModel.prototype, "width", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(true),
-    sequelize_typescript_1.Is('ActorImageFileUrl', value => utils_1.throwIfNotValid(value, misc_1.isActivityPubUrlValid, 'fileUrl', true)),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(true),
+    (0, sequelize_typescript_1.Is)('ActorImageFileUrl', value => (0, utils_1.throwIfNotValid)(value, misc_1.isActivityPubUrlValid, 'fileUrl', true)),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", String)
+    (0, tslib_1.__metadata)("design:type", String)
 ], ActorImageModel.prototype, "fileUrl", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(false),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(false),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Boolean)
+    (0, tslib_1.__metadata)("design:type", Boolean)
 ], ActorImageModel.prototype, "onDisk", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(false),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(false),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], ActorImageModel.prototype, "type", void 0);
-tslib_1.__decorate([
+(0, tslib_1.__decorate)([
     sequelize_typescript_1.CreatedAt,
-    tslib_1.__metadata("design:type", Date)
+    (0, tslib_1.__metadata)("design:type", Date)
 ], ActorImageModel.prototype, "createdAt", void 0);
-tslib_1.__decorate([
+(0, tslib_1.__decorate)([
     sequelize_typescript_1.UpdatedAt,
-    tslib_1.__metadata("design:type", Date)
+    (0, tslib_1.__metadata)("design:type", Date)
 ], ActorImageModel.prototype, "updatedAt", void 0);
-tslib_1.__decorate([
+(0, tslib_1.__decorate)([
     sequelize_typescript_1.AfterDestroy,
-    tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [ActorImageModel]),
-    tslib_1.__metadata("design:returntype", void 0)
+    (0, tslib_1.__metadata)("design:type", Function),
+    (0, tslib_1.__metadata)("design:paramtypes", [ActorImageModel]),
+    (0, tslib_1.__metadata)("design:returntype", void 0)
 ], ActorImageModel, "removeFilesAndSendDelete", null);
-ActorImageModel = ActorImageModel_1 = tslib_1.__decorate([
-    sequelize_typescript_1.Table({
+ActorImageModel = ActorImageModel_1 = (0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.Table)({
         tableName: 'actorImage',
         indexes: [
             {

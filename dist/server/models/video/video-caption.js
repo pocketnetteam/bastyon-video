@@ -19,7 +19,7 @@ var ScopeNames;
 })(ScopeNames = exports.ScopeNames || (exports.ScopeNames = {}));
 let VideoCaptionModel = VideoCaptionModel_1 = class VideoCaptionModel extends sequelize_typescript_1.Model {
     static removeFiles(instance, options) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             if (!instance.Video) {
                 instance.Video = yield instance.$get('Video', { transaction: options.transaction });
             }
@@ -39,7 +39,7 @@ let VideoCaptionModel = VideoCaptionModel_1 = class VideoCaptionModel extends se
         const videoInclude = {
             model: video_1.VideoModel.unscoped(),
             attributes: ['id', 'remote', 'uuid'],
-            where: utils_1.buildWhereIdOrUUID(videoId)
+            where: (0, utils_1.buildWhereIdOrUUID)(videoId)
         };
         const query = {
             where: {
@@ -67,7 +67,7 @@ let VideoCaptionModel = VideoCaptionModel_1 = class VideoCaptionModel extends se
         return VideoCaptionModel_1.findOne(query);
     }
     static insertOrReplaceLanguage(caption, transaction) {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             const existing = yield VideoCaptionModel_1.loadByVideoIdAndLanguage(caption.videoId, caption.language, transaction);
             if (existing)
                 yield existing.destroy({ transaction });
@@ -97,7 +97,7 @@ let VideoCaptionModel = VideoCaptionModel_1 = class VideoCaptionModel extends se
         return VideoCaptionModel_1.destroy(query);
     }
     static generateCaptionName(language) {
-        return `${uuid_1.buildUUID()}-${language}.vtt`;
+        return `${(0, uuid_1.buildUUID)()}-${language}.vtt`;
     }
     isOwned() {
         return this.Video.remote === false;
@@ -112,10 +112,10 @@ let VideoCaptionModel = VideoCaptionModel_1 = class VideoCaptionModel extends se
         };
     }
     getCaptionStaticPath() {
-        return path_1.join(constants_1.LAZY_STATIC_PATHS.VIDEO_CAPTIONS, this.filename);
+        return (0, path_1.join)(constants_1.LAZY_STATIC_PATHS.VIDEO_CAPTIONS, this.filename);
     }
     removeCaptionFile() {
-        return fs_extra_1.remove(config_1.CONFIG.STORAGE.CAPTIONS_DIR + this.filename);
+        return (0, fs_extra_1.remove)(config_1.CONFIG.STORAGE.CAPTIONS_DIR + this.filename);
     }
     getFileUrl(video) {
         if (!this.Video)
@@ -130,52 +130,52 @@ let VideoCaptionModel = VideoCaptionModel_1 = class VideoCaptionModel extends se
         return this.filename === other.filename;
     }
 };
-tslib_1.__decorate([
+(0, tslib_1.__decorate)([
     sequelize_typescript_1.CreatedAt,
-    tslib_1.__metadata("design:type", Date)
+    (0, tslib_1.__metadata)("design:type", Date)
 ], VideoCaptionModel.prototype, "createdAt", void 0);
-tslib_1.__decorate([
+(0, tslib_1.__decorate)([
     sequelize_typescript_1.UpdatedAt,
-    tslib_1.__metadata("design:type", Date)
+    (0, tslib_1.__metadata)("design:type", Date)
 ], VideoCaptionModel.prototype, "updatedAt", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(false),
-    sequelize_typescript_1.Is('VideoCaptionLanguage', value => utils_1.throwIfNotValid(value, video_captions_1.isVideoCaptionLanguageValid, 'language')),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(false),
+    (0, sequelize_typescript_1.Is)('VideoCaptionLanguage', value => (0, utils_1.throwIfNotValid)(value, video_captions_1.isVideoCaptionLanguageValid, 'language')),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", String)
+    (0, tslib_1.__metadata)("design:type", String)
 ], VideoCaptionModel.prototype, "language", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(false),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(false),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", String)
+    (0, tslib_1.__metadata)("design:type", String)
 ], VideoCaptionModel.prototype, "filename", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AllowNull(true),
-    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.COMMONS.URL.max)),
-    tslib_1.__metadata("design:type", String)
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.AllowNull)(true),
+    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.COMMONS.URL.max)),
+    (0, tslib_1.__metadata)("design:type", String)
 ], VideoCaptionModel.prototype, "fileUrl", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.ForeignKey(() => video_1.VideoModel),
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.ForeignKey)(() => video_1.VideoModel),
     sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", Number)
+    (0, tslib_1.__metadata)("design:type", Number)
 ], VideoCaptionModel.prototype, "videoId", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.BelongsTo(() => video_1.VideoModel, {
+(0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.BelongsTo)(() => video_1.VideoModel, {
         foreignKey: {
             allowNull: false
         },
         onDelete: 'CASCADE'
     }),
-    tslib_1.__metadata("design:type", video_1.VideoModel)
+    (0, tslib_1.__metadata)("design:type", video_1.VideoModel)
 ], VideoCaptionModel.prototype, "Video", void 0);
-tslib_1.__decorate([
+(0, tslib_1.__decorate)([
     sequelize_typescript_1.BeforeDestroy,
-    tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [VideoCaptionModel, Object]),
-    tslib_1.__metadata("design:returntype", Promise)
+    (0, tslib_1.__metadata)("design:type", Function),
+    (0, tslib_1.__metadata)("design:paramtypes", [VideoCaptionModel, Object]),
+    (0, tslib_1.__metadata)("design:returntype", Promise)
 ], VideoCaptionModel, "removeFiles", null);
-VideoCaptionModel = VideoCaptionModel_1 = tslib_1.__decorate([
-    sequelize_typescript_1.Scopes(() => ({
+VideoCaptionModel = VideoCaptionModel_1 = (0, tslib_1.__decorate)([
+    (0, sequelize_typescript_1.Scopes)(() => ({
         [ScopeNames.WITH_VIDEO_UUID_AND_REMOTE]: {
             include: [
                 {
@@ -186,7 +186,7 @@ VideoCaptionModel = VideoCaptionModel_1 = tslib_1.__decorate([
             ]
         }
     })),
-    sequelize_typescript_1.Table({
+    (0, sequelize_typescript_1.Table)({
         tableName: 'videoCaption',
         indexes: [
             {

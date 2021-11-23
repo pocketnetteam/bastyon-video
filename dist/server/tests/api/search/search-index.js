@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = tslib_1.__importStar(require("chai"));
+const chai = (0, tslib_1.__importStar)(require("chai"));
 const extra_utils_1 = require("@shared/extra-utils");
 const expect = chai.expect;
 describe('Test videos search', function () {
@@ -10,18 +10,18 @@ describe('Test videos search', function () {
     let server = null;
     let command;
     before(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             this.timeout(30000);
-            server = yield extra_utils_1.createSingleServer(1);
-            yield extra_utils_1.setAccessTokensToServers([server]);
+            server = yield (0, extra_utils_1.createSingleServer)(1);
+            yield (0, extra_utils_1.setAccessTokensToServers)([server]);
             yield server.videos.upload({ attributes: { name: localVideoName } });
             command = server.search;
         });
     });
     describe('Default search', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             it('Should make a local videos search by default', function () {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     this.timeout(10000);
                     yield server.config.updateCustomSubConfig({
                         newConfig: {
@@ -40,7 +40,7 @@ describe('Test videos search', function () {
                 });
             });
             it('Should make a local channels search by default', function () {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     const body = yield command.searchChannels({ search: 'root' });
                     expect(body.total).to.equal(1);
                     expect(body.data[0].name).to.equal('root_channel');
@@ -48,7 +48,7 @@ describe('Test videos search', function () {
                 });
             });
             it('Should make an index videos search by default', function () {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     yield server.config.updateCustomSubConfig({
                         newConfig: {
                             search: {
@@ -65,13 +65,13 @@ describe('Test videos search', function () {
                 });
             });
             it('Should make an index channels search by default', function () {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     const body = yield command.searchChannels({ search: 'root' });
                     expect(body.total).to.be.greaterThan(2);
                 });
             });
             it('Should make an index videos search if local search is disabled', function () {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     yield server.config.updateCustomSubConfig({
                         newConfig: {
                             search: {
@@ -88,7 +88,7 @@ describe('Test videos search', function () {
                 });
             });
             it('Should make an index channels search if local search is disabled', function () {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     const body = yield command.searchChannels({ search: 'root' });
                     expect(body.total).to.be.greaterThan(2);
                 });
@@ -96,9 +96,9 @@ describe('Test videos search', function () {
         });
     });
     describe('Videos search', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             function check(search, exists = true) {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     const body = yield command.advancedVideoSearch({ search });
                     if (exists === false) {
                         expect(body.total).to.equal(0);
@@ -135,43 +135,43 @@ describe('Test videos search', function () {
                 endDate: '2018-10-01T10:55:46.396Z'
             };
             it('Should make a simple search and not have results', function () {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     const body = yield command.searchVideos({ search: 'djidane'.repeat(50) });
                     expect(body.total).to.equal(0);
                     expect(body.data).to.have.lengthOf(0);
                 });
             });
             it('Should make a simple search and have results', function () {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     const body = yield command.searchVideos({ search: 'What is PeerTube' });
                     expect(body.total).to.be.greaterThan(1);
                 });
             });
             it('Should make a simple search', function () {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     yield check(baseSearch);
                 });
             });
             it('Should search by start date', function () {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     const search = Object.assign(Object.assign({}, baseSearch), { startDate: '2018-10-01T10:54:46.396Z' });
                     yield check(search, false);
                 });
             });
             it('Should search by tags', function () {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     const search = Object.assign(Object.assign({}, baseSearch), { tagsAllOf: ['toto', 'framasoft'] });
                     yield check(search, false);
                 });
             });
             it('Should search by duration', function () {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     const search = Object.assign(Object.assign({}, baseSearch), { durationMin: 2000 });
                     yield check(search, false);
                 });
             });
             it('Should search by nsfw attribute', function () {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     {
                         const search = Object.assign(Object.assign({}, baseSearch), { nsfw: 'true' });
                         yield check(search, false);
@@ -187,7 +187,7 @@ describe('Test videos search', function () {
                 });
             });
             it('Should search by host', function () {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     {
                         const search = Object.assign(Object.assign({}, baseSearch), { host: 'example.com' });
                         yield check(search, false);
@@ -199,7 +199,7 @@ describe('Test videos search', function () {
                 });
             });
             it('Should search by uuids', function () {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     const goodUUID = '9c9de5e8-0a1e-484a-b099-e80766180a6d';
                     const goodShortUUID = 'kkGMgK9ZtnKfYAgnEtQxbv';
                     const badUUID = 'c29c5b77-4a04-493d-96a9-2e9267e308f0';
@@ -229,7 +229,7 @@ describe('Test videos search', function () {
                 });
             });
             it('Should have a correct pagination', function () {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     const search = {
                         search: 'video',
                         start: 0,
@@ -241,7 +241,7 @@ describe('Test videos search', function () {
                 });
             });
             it('Should use the nsfw instance policy as default', function () {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     let nsfwUUID;
                     {
                         yield server.config.updateCustomSubConfig({
@@ -275,9 +275,9 @@ describe('Test videos search', function () {
         });
     });
     describe('Channels search', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             function check(search, exists = true) {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     const body = yield command.advancedChannelSearch({ search });
                     if (exists === false) {
                         expect(body.total).to.equal(0);
@@ -298,32 +298,32 @@ describe('Test videos search', function () {
                 });
             }
             it('Should make a simple search and not have results', function () {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     const body = yield command.searchChannels({ search: 'a'.repeat(500) });
                     expect(body.total).to.equal(0);
                     expect(body.data).to.have.lengthOf(0);
                 });
             });
             it('Should make a search and have results', function () {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     yield check({ search: 'Framasoft', sort: 'createdAt' }, true);
                 });
             });
             it('Should make host search and have appropriate results', function () {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     yield check({ search: 'Framasoft', host: 'example.com' }, false);
                     yield check({ search: 'Framasoft', host: 'framatube.org' }, true);
                 });
             });
             it('Should make handles search and have appropriate results', function () {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     yield check({ handles: ['bf54d359-cfad-4935-9d45-9d6be93f63e8@framatube.org'] }, true);
                     yield check({ handles: ['jeanine', 'bf54d359-cfad-4935-9d45-9d6be93f63e8@framatube.org'] }, true);
                     yield check({ handles: ['jeanine', 'chocobozzz_channel2@peertube2.cpy.re'] }, false);
                 });
             });
             it('Should have a correct pagination', function () {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     const body = yield command.advancedChannelSearch({ search: { search: 'root', start: 0, count: 2 } });
                     expect(body.total).to.be.greaterThan(2);
                     expect(body.data).to.have.lengthOf(2);
@@ -332,9 +332,9 @@ describe('Test videos search', function () {
         });
     });
     describe('Playlists search', function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
             function check(search, exists = true) {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     const body = yield command.advancedPlaylistSearch({ search });
                     if (exists === false) {
                         expect(body.total).to.equal(0);
@@ -365,25 +365,25 @@ describe('Test videos search', function () {
                 });
             }
             it('Should make a simple search and not have results', function () {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     const body = yield command.searchPlaylists({ search: 'a'.repeat(500) });
                     expect(body.total).to.equal(0);
                     expect(body.data).to.have.lengthOf(0);
                 });
             });
             it('Should make a search and have results', function () {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     yield check({ search: 'E2E playlist', sort: '-match' }, true);
                 });
             });
             it('Should make host search and have appropriate results', function () {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     yield check({ search: 'E2E playlist', host: 'example.com' }, false);
                     yield check({ search: 'E2E playlist', host: 'peertube2.cpy.re', sort: '-match' }, true);
                 });
             });
             it('Should make a search by uuids and have appropriate results', function () {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     const goodUUID = '73804a40-da9a-40c2-b1eb-2c6d9eec8f0a';
                     const goodShortUUID = 'fgei1ws1oa6FCaJ2qZPG29';
                     const badUUID = 'c29c5b77-4a04-493d-96a9-2e9267e308f0';
@@ -413,7 +413,7 @@ describe('Test videos search', function () {
                 });
             });
             it('Should have a correct pagination', function () {
-                return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
                     const body = yield command.advancedChannelSearch({ search: { search: 'root', start: 0, count: 2 } });
                     expect(body.total).to.be.greaterThan(2);
                     expect(body.data).to.have.lengthOf(2);
@@ -422,8 +422,8 @@ describe('Test videos search', function () {
         });
     });
     after(function () {
-        return tslib_1.__awaiter(this, void 0, void 0, function* () {
-            yield extra_utils_1.cleanupTests([server]);
+        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            yield (0, extra_utils_1.cleanupTests)([server]);
         });
     });
 });
