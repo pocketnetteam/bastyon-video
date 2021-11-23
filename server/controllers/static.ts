@@ -40,6 +40,17 @@ staticRouter.use(
   express.static(torrentsPhysicalPath, { maxAge: 0 }) // Don't cache because we could regenerate the torrent file
 )
 
+// Images
+staticRouter.use(
+  STATIC_PATHS.IMAGES,
+  express.static(CONFIG.STORAGE.IMAGES_DIR, { fallthrough: false })
+)
+// Images path for webseed
+staticRouter.use(
+  STATIC_PATHS.IMAGES_WEBSEED,
+  express.static(CONFIG.STORAGE.IMAGES_DIR, { fallthrough: false }) // 404 because we don't have this video
+)
+
 // Videos path for webseed
 staticRouter.use(
   STATIC_PATHS.WEBSEED,

@@ -63,6 +63,7 @@ const CONFIG = {
     ACTOR_IMAGES: buildPath(config.get<string>('storage.avatars')),
     LOG_DIR: buildPath(config.get<string>('storage.logs')),
     VIDEOS_DIR: buildPath(config.get<string>('storage.videos')),
+    IMAGES_DIR: buildPath(config.get<string>('storage.images')),
     STREAMING_PLAYLISTS_DIR: buildPath(config.get<string>('storage.streaming_playlists')),
     REDUNDANCY_DIR: buildPath(config.get<string>('storage.redundancy')),
     THUMBNAILS_DIR: buildPath(config.get<string>('storage.thumbnails')),
@@ -142,6 +143,10 @@ const CONFIG = {
     VIDEOS: {
       CHECK_INTERVAL: parseDurationToMs(config.get<string>('redundancy.videos.check_interval')),
       STRATEGIES: buildVideosRedundancy(config.get<any[]>('redundancy.videos.strategies'))
+    },
+    IMAGES: {
+      CHECK_INTERVAL: parseDurationToMs(config.get<string>('redundancy.images.check_interval')),
+      NB_IMAGES_PER_REQ: config.get<number>('redundancy.images.nb_images_per_req')
     }
   },
   REMOTE_REDUNDANCY: {

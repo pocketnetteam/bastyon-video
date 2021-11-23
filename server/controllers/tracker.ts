@@ -9,6 +9,7 @@ import { CONFIG } from '../initializers/config'
 import { TRACKER_RATE_LIMITS } from '../initializers/constants'
 import { VideoFileModel } from '../models/video/video-file'
 import { VideoStreamingPlaylistModel } from '../models/video/video-streaming-playlist'
+import { ImageModel } from '@server/models/image/image'
 
 const trackerRouter = express.Router()
 
@@ -50,6 +51,9 @@ const trackerServer = new TrackerServer({
 
       const playlistExists = await VideoStreamingPlaylistModel.doesInfohashExistCached(infoHash)
       if (playlistExists === true) return cb()
+
+      const imageExists = await ImageModel.doesInfohashExistCached(infoHash)
+      if (imageExists === true) return cb()
 
       cb(new Error(`Unknown infoHash ${infoHash} requested by ip ${ip}`))
 

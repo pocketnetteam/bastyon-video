@@ -582,6 +582,8 @@ const NSFW_POLICY_TYPES: { [ id: string ]: NSFWPolicyType } = {
 const STATIC_PATHS = {
   THUMBNAILS: '/static/thumbnails/',
   TORRENTS: '/static/torrents/',
+  IMAGES: '/static/images',
+  IMAGES_WEBSEED: '/static/images_webseed',
   WEBSEED: '/static/webseed/',
   REDUNDANCY: '/static/redundancy/',
   STREAMING_PLAYLISTS: {
