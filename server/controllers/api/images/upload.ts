@@ -128,6 +128,7 @@ async function addImage (options: {
 
     // Done
     return res.json({
+      status: 'success',
       image: {
         id: imageFile.imageId,
         url: imageStaticUrl,
