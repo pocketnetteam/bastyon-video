@@ -194,3 +194,34 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+
+## Images
+
+PeerTube has been modified to handle images.
+
+### Get root access token
+
+Simply follow:  [https://docs.joinpeertube.org/api-rest-reference.html#operation/getOAuthToken](https://docs.joinpeertube.org/api-rest-reference.html#operation/getOAuthToken)
+
+### Upload an image
+
+```
+curl "https://{serverUrl}/api/v1/images/upload" -X POST -H "Authorization: Bearer {access_token}" --form imagefile=@"./path/to/image.jpg" -s
+```
+
+Response example:
+
+```json
+{
+  "image": {
+    "id": "87fab76aae3d2a254a811740a0127213",
+    "url": "http://test.peertube.pocketnet.app:443/static/images/87fab76aae3d2a254a811740a0127213/87fab76aae3d2a254a811740a0127213.jpg",
+    "thumbnailUrl": "http://test.peertube.pocketnet.app:443/static/images/87fab76aae3d2a254a811740a0127213/87fab76aae3d2a254a811740a0127213-thumbnail.jpg"
+  }
+}
+```
+
+The `url` field contains the static link to the image at full quality.
+
+While the `thumbnailUrl` field contains a static link to a smaller version of the image (max width or height: 200px)
