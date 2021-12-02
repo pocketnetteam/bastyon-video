@@ -1,5 +1,5 @@
 import express from 'express'
-import { move, ensureDir } from 'fs-extra'
+import { move, remove, ensureDir } from 'fs-extra'
 import { join, parse } from 'path'
 import { HttpStatusCode } from '../../../../shared/models'
 import { createReqFiles } from '../../../helpers/express-utils'
@@ -10,7 +10,10 @@ import { asyncRetryTransactionMiddleware, authenticate } from '../../../middlewa
 import * as Jimp from 'jimp'
 import { ImageModel } from '@server/models/image/image'
 
-const THUMBNAIL_SIZE = 256;
+// All images will have a thumbnail version
+var THUMBNAIL_SIZE = 256;
+// Only images with size > 600 will have a regular version
+var REGULAR_SIZE = 600;
 
 const uploadRouter = express.Router()
 
@@ -55,14 +58,23 @@ export async function addImageLegacy (req: express.Request, res: express.Respons
 
   const imageFile = req.files['imagefile'][0]
 
-  return addImage({ res, imageFile })
+  return addImage({ req, res, imageFile })
 }
 
 async function addImage (options: {
+  req: express.Request
   res: express.Response
   imageFile: any
 }) {
-  const { res, imageFile } = options
+  const { req, res, imageFile } = options
+
+  // Check if we are uploading an avatar image
+  var isAvatar =  false;
+  if (req && req.query && req.query.type == "avatar") {
+    isAvatar = true;
+    THUMBNAIL_SIZE = 44;
+    REGULAR_SIZE = 100;
+  }
 
   // Get image ID
   imageFile.imageId = parse(imageFile.filename).name;
@@ -94,28 +106,28 @@ async function addImage (options: {
 
   Jimp.read(imageFile.path).then(async (destImage) => {
 
-    var w = destImage.getWidth(), h = destImage.getHeight();
-    var newW = w, newH = h;
-    // If image thumbnail needs resizing (it must be small)
-    if (w > THUMBNAIL_SIZE || h > THUMBNAIL_SIZE) {
-      // Set width and height to the max
-      newW = newH = THUMBNAIL_SIZE;
-      // If image has a 1:1 ratio, nothing to change
-      // Else, we must calculate a new size to keep the right ratio
-      if (w != h) {
-        var ratio = (w > h) ? w / h : h / w;
-        if (w > h)
-          newH = THUMBNAIL_SIZE / ratio;
-        else
-          newW = THUMBNAIL_SIZE / ratio;
-      }
-    }
+    var originalSize = { w: destImage.getWidth(), h: destImage.getHeight() };
+
     // Create the thumbnail image
-    destImage.scaleToFit(newW, newH).quality(90).write(join(imageFile.destination, image.thumbnailname));
+    var thumbnailSize = calculateImageSizeReduction(originalSize, THUMBNAIL_SIZE);
+    destImage.scaleToFit(thumbnailSize.w, thumbnailSize.h).quality(90).write(join(imageFile.destination, image.thumbnailname));
 
     // Determine images static path
-    const imageStaticUrl = ImageModel.getImageStaticUrl(imageFile.imageId, imageFile.filename);
-    const thumbnailStaticUrl = ImageModel.getImageStaticUrl(imageFile.imageId, image.thumbnailname);
+    var imageStaticUrl = ImageModel.getImageStaticUrl(imageFile.imageId, imageFile.filename);
+    var thumbnailStaticUrl = ImageModel.getImageStaticUrl(imageFile.imageId, image.thumbnailname);
+
+    // If image is smaller than 600, delete original and use the thumbnail only
+    if (isAvatar == false && originalSize.w < 600 && originalSize.h < 600) {
+      await remove(imageFile.path);
+      image.filename = image.thumbnailname;
+      imageFile.path = join(imageFile.destination, image.filename);
+      imageStaticUrl = thumbnailStaticUrl;
+    }
+    // Else, we keep the original image, but we lower its size
+    else {
+      var regularSize = calculateImageSizeReduction(originalSize, REGULAR_SIZE);
+      destImage.scaleToFit(regularSize.w, regularSize.h).write(join(imageFile.destination, imageFile.filename));
+    }
 
     // We can now generate the torrent file
     const torrentHash = await ImageModel.generateTorrentForImage(imageFile.imageId, imageFile.destination);
@@ -142,4 +154,25 @@ async function addImage (options: {
     return res.sendStatus(HttpStatusCode.INTERNAL_SERVER_ERROR_500);
   });
 
+}
+
+// Take the "destImage" size, and reduce it (if needed) to not exceed the "maxSize" passed in parameter
+function calculateImageSizeReduction(destImage, maxSize) {
+  var w = destImage.w, h = destImage.h;
+  var newW = w, newH = h;
+  // If image needs resizing
+  if (w > maxSize || h > maxSize) {
+    // Set width and height to the max
+    newW = newH = maxSize;
+    // If image has a 1:1 ratio, nothing to change
+    // Else, we must calculate a new size to keep the right ratio
+    if (w != h) {
+      var ratio = (w > h) ? w / h : h / w;
+      if (w > h)
+        newH = maxSize / ratio;
+      else
+        newW = maxSize / ratio;
+    }
+  }
+  return { w: newW, h: newH };
 }
