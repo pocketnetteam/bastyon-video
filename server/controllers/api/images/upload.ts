@@ -11,9 +11,9 @@ import * as Jimp from 'jimp'
 import { ImageModel } from '@server/models/image/image'
 
 // All images will have a thumbnail version
-const THUMBNAIL_SIZE = 256;
+var THUMBNAIL_SIZE = 256;
 // Only images with size > 600 will have a regular version
-const REGULAR_SIZE = 600;
+var REGULAR_SIZE = 600;
 
 const uploadRouter = express.Router()
 
@@ -58,14 +58,23 @@ export async function addImageLegacy (req: express.Request, res: express.Respons
 
   const imageFile = req.files['imagefile'][0]
 
-  return addImage({ res, imageFile })
+  return addImage({ req, res, imageFile })
 }
 
 async function addImage (options: {
+  req: express.Request
   res: express.Response
   imageFile: any
 }) {
-  const { res, imageFile } = options
+  const { req, res, imageFile } = options
+
+  // Check if we are uploading an avatar image
+  var isAvatar =  false;
+  if (req && req.query && req.query.type == "avatar") {
+    isAvatar = true;
+    THUMBNAIL_SIZE = 44;
+    REGULAR_SIZE = 100;
+  }
 
   // Get image ID
   imageFile.imageId = parse(imageFile.filename).name;
@@ -108,7 +117,7 @@ async function addImage (options: {
     var thumbnailStaticUrl = ImageModel.getImageStaticUrl(imageFile.imageId, image.thumbnailname);
 
     // If image is smaller than 600, delete original and use the thumbnail only
-    if (originalSize.w < 600 && originalSize.h < 600) {
+    if (isAvatar == false && originalSize.w < 600 && originalSize.h < 600) {
       await remove(imageFile.path);
       image.filename = image.thumbnailname;
       imageFile.path = join(imageFile.destination, image.filename);
