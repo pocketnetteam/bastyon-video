@@ -80,10 +80,10 @@ export class ImageModel extends Model {
   infoHash: string
 
   static getImageStaticUrl(imageId, imageName, webServUrl = WEBSERVER.URL) {
-    return webServUrl + join(STATIC_PATHS.IMAGES, imageId, imageName);
+    return webServUrl.replace('http:', 'https:') + join(STATIC_PATHS.IMAGES, imageId, imageName);
   }
   static getTorrentStaticUrl(imageId, webServUrl = WEBSERVER.URL) {
-    return webServUrl + join(STATIC_PATHS.TORRENTS, imageId + '.torrent');
+    return webServUrl.replace('http:', 'https:') + join(STATIC_PATHS.TORRENTS, imageId + '.torrent');
   }
 
   static getImageStaticPath(imageId, imageName) {
