@@ -69,11 +69,11 @@ async function addImage (options: {
   const { req, res, imageFile } = options
 
   // Check if we are uploading an avatar image
-  var isAvatar =  false;
+  var isAvatar =  false, thumbnailSize = THUMBNAIL_SIZE, regularSize = REGULAR_SIZE;
   if (req && req.query && req.query.type == "avatar") {
     isAvatar = true;
-    THUMBNAIL_SIZE = 44;
-    REGULAR_SIZE = 100;
+    thumbnailSize = 44;
+    regularSize = 100;
   }
 
   // Get image ID
@@ -109,7 +109,7 @@ async function addImage (options: {
     var originalSize = { w: destImage.getWidth(), h: destImage.getHeight() };
 
     // Create the thumbnail image
-    var thumbnailSize = calculateImageSizeReduction(originalSize, THUMBNAIL_SIZE);
+    var thumbnailSize = calculateImageSizeReduction(originalSize, thumbnailSize);
     destImage.scaleToFit(thumbnailSize.w, thumbnailSize.h).quality(90).write(join(imageFile.destination, image.thumbnailname));
 
     // Determine images static path
@@ -125,7 +125,7 @@ async function addImage (options: {
     }
     // Else, we keep the original image, but we lower its size
     else {
-      var regularSize = calculateImageSizeReduction(originalSize, REGULAR_SIZE);
+      var regularSize = calculateImageSizeReduction(originalSize, regularSize);
       destImage.scaleToFit(regularSize.w, regularSize.h).write(join(imageFile.destination, imageFile.filename));
     }
 
