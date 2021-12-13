@@ -145,9 +145,10 @@ class JobQueue {
         }
 
         return fetch(LOGGER_ENDPOINT, {
-          body: {
+          method: 'post',
+          body: JSON.stringify({
             ...errorData
-          }
+          })
         })
       })
 
