@@ -1,15 +1,26 @@
-import { createWriteStream, remove } from 'fs-extra'
-import got, { CancelableRequest, Options as GotOptions, RequestError } from 'got'
-import { HttpProxyAgent, HttpsProxyAgent } from 'hpagent'
-import { join } from 'path'
-import { CONFIG } from '../initializers/config'
-import { ACTIVITY_PUB, PEERTUBE_VERSION, REQUEST_TIMEOUT, WEBSERVER } from '../initializers/constants'
-import { pipelinePromise } from './core-utils'
-import { processImage } from './image-utils'
-import { logger } from './logger'
-import { getProxy, isProxyEnabled } from './proxy'
+import { createWriteStream, remove } from "fs-extra"
+import got, {
+  CancelableRequest,
+  Options as GotOptions,
+  RequestError
+} from "got"
+import { HttpProxyAgent, HttpsProxyAgent } from "hpagent"
+import { join } from "path"
+import { CONFIG } from "../initializers/config"
+import {
+  ACTIVITY_PUB,
+  PEERTUBE_VERSION,
+  REQUEST_TIMEOUT,
+  WEBSERVER,
+  LOGGER_ENDPOINT
+} from "../initializers/constants"
+import { pipelinePromise } from "./core-utils"
+import { processImage } from "./image-utils"
+import { logger } from "./logger"
+import { getProxy, isProxyEnabled } from "./proxy"
+import fetch from "node-fetch"
 
-const httpSignature = require('http-signature')
+const httpSignature = require("http-signature")
 
 export interface PeerTubeRequestError extends Error {
   statusCode?: number
@@ -18,7 +29,7 @@ export interface PeerTubeRequestError extends Error {
 
 type PeerTubeRequestOptions = {
   activityPub?: boolean
-  bodyKBLimit?: number // 1MB
+  bodyKBLimit?: number; // 1MB
   httpSignature?: {
     algorithm: string
     authorizationHeaderName: string
@@ -27,25 +38,25 @@ type PeerTubeRequestOptions = {
     headers: string[]
   }
   jsonResponse?: boolean
-} & Pick<GotOptions, 'headers' | 'json' | 'method' | 'searchParams'>
+} & Pick<GotOptions, "headers" | "json" | "method" | "searchParams">
 
 const peertubeGot = got.extend({
   ...getAgent(),
 
   headers: {
-    'user-agent': getUserAgent()
+    "user-agent": getUserAgent()
   },
 
   handlers: [
     (options, next) => {
       const promiseOrStream = next(options) as CancelableRequest<any>
       const bodyKBLimit = options.context?.bodyKBLimit as number
-      if (!bodyKBLimit) throw new Error('No KB limit for this request')
+      if (!bodyKBLimit) throw new Error("No KB limit for this request")
 
       const bodyLimit = bodyKBLimit * 1000
 
       /* eslint-disable @typescript-eslint/no-floating-promises */
-      promiseOrStream.on('downloadProgress', progress => {
+      promiseOrStream.on("downloadProgress", (progress) => {
         if (progress.transferred > bodyLimit && progress.percent !== 1) {
           const message = `Exceeded the download limit of ${bodyLimit} B`
           logger.warn(message)
@@ -67,34 +78,39 @@ const peertubeGot = got.extend({
 
   hooks: {
     beforeRequest: [
-      options => {
+      (options) => {
         const headers = options.headers || {}
-        headers['host'] = options.url.host
+        headers["host"] = options.url.host
       },
 
-      options => {
+      (options) => {
         const httpSignatureOptions = options.context?.httpSignature
 
         if (httpSignatureOptions) {
-          const method = options.method ?? 'GET'
+          const method = options.method ?? "GET"
           const path = options.path ?? options.url.pathname
 
           if (!method || !path) {
-            throw new Error(`Cannot sign request without method (${method}) or path (${path}) ${options}`)
+            throw new Error(
+              `Cannot sign request without method (${method}) or path (${path}) ${options}`
+            )
           }
 
-          httpSignature.signRequest({
-            getHeader: function (header) {
-              return options.headers[header]
-            },
+          httpSignature.signRequest(
+            {
+              getHeader: function (header) {
+                return options.headers[header]
+              },
 
-            setHeader: function (header, value) {
-              options.headers[header] = value
-            },
+              setHeader: function (header, value) {
+                options.headers[header] = value
+              },
 
-            method,
-            path
-          }, httpSignatureOptions)
+              method,
+              path
+            },
+            httpSignatureOptions
+          )
         }
       },
 
@@ -108,15 +124,27 @@ const peertubeGot = got.extend({
 function doRequest (url: string, options: PeerTubeRequestOptions = {}) {
   const gotOptions = buildGotOptions(options)
 
-  return peertubeGot(url, gotOptions)
-    .catch(err => { throw buildRequestError(err) })
+  return peertubeGot(url, gotOptions).catch((err) => {
+    fetch(LOGGER_ENDPOINT, {
+      method: "post",
+      body: JSON.stringify({
+        type: "BrodcastFail",
+        err
+      })
+    })
+
+    throw buildRequestError(err)
+  })
 }
 
-function doJSONRequest <T> (url: string, options: PeerTubeRequestOptions = {}) {
+function doJSONRequest<T> (url: string, options: PeerTubeRequestOptions = {}) {
   const gotOptions = buildGotOptions(options)
 
-  return peertubeGot<T>(url, { ...gotOptions, responseType: 'json' })
-    .catch(err => { throw buildRequestError(err) })
+  return peertubeGot<T>(url, { ...gotOptions, responseType: "json" }).catch(
+    (err) => {
+      throw buildRequestError(err)
+    }
+  )
 }
 
 async function doRequestAndSaveToFile (
@@ -129,20 +157,23 @@ async function doRequestAndSaveToFile (
   const outFile = createWriteStream(destPath)
 
   try {
-    await pipelinePromise(
-      peertubeGot.stream(url, gotOptions),
-      outFile
-    )
+    await pipelinePromise(peertubeGot.stream(url, gotOptions), outFile)
   } catch (err) {
-    remove(destPath)
-      .catch(err => logger.error('Cannot remove %s after request failure.', destPath, { err }))
+    remove(destPath).catch((err) =>
+      logger.error("Cannot remove %s after request failure.", destPath, { err })
+    )
 
     throw buildRequestError(err)
   }
 }
 
-async function downloadImage (url: string, destDir: string, destName: string, size: { width: number, height: number }) {
-  const tmpPath = join(CONFIG.STORAGE.TMP_DIR, 'pending-' + destName)
+async function downloadImage (
+  url: string,
+  destDir: string,
+  destName: string,
+  size: { width: number, height: number }
+) {
+  const tmpPath = join(CONFIG.STORAGE.TMP_DIR, "pending-" + destName)
   await doRequestAndSaveToFile(url, tmpPath)
 
   const destPath = join(destDir, destName)
@@ -161,14 +192,14 @@ function getAgent () {
 
   const proxy = getProxy()
 
-  logger.info('Using proxy %s.', proxy)
+  logger.info("Using proxy %s.", proxy)
 
   const proxyAgentOptions = {
     keepAlive: true,
     keepAliveMsecs: 1000,
     maxSockets: 256,
     maxFreeSockets: 256,
-    scheduling: 'lifo' as 'lifo',
+    scheduling: "lifo" as "lifo",
     proxy
   }
 
@@ -186,12 +217,7 @@ function getUserAgent () {
 
 // ---------------------------------------------------------------------------
 
-export {
-  doRequest,
-  doJSONRequest,
-  doRequestAndSaveToFile,
-  downloadImage
-}
+export { doRequest, doJSONRequest, doRequestAndSaveToFile, downloadImage }
 
 // ---------------------------------------------------------------------------
 
