@@ -11,14 +11,12 @@ import {
   ACTIVITY_PUB,
   PEERTUBE_VERSION,
   REQUEST_TIMEOUT,
-  WEBSERVER,
-  LOGGER_ENDPOINT
+  WEBSERVER
 } from "../initializers/constants"
 import { pipelinePromise } from "./core-utils"
 import { processImage } from "./image-utils"
 import { logger } from "./logger"
 import { getProxy, isProxyEnabled } from "./proxy"
-import fetch from "node-fetch"
 
 const httpSignature = require("http-signature")
 
@@ -29,7 +27,7 @@ export interface PeerTubeRequestError extends Error {
 
 type PeerTubeRequestOptions = {
   activityPub?: boolean
-  bodyKBLimit?: number; // 1MB
+  bodyKBLimit?: number // 1MB
   httpSignature?: {
     algorithm: string
     authorizationHeaderName: string
@@ -125,14 +123,6 @@ function doRequest (url: string, options: PeerTubeRequestOptions = {}) {
   const gotOptions = buildGotOptions(options)
 
   return peertubeGot(url, gotOptions).catch((err) => {
-    fetch(LOGGER_ENDPOINT, {
-      method: "post",
-      body: JSON.stringify({
-        type: "BrodcastFail",
-        err
-      })
-    })
-
     throw buildRequestError(err)
   })
 }
