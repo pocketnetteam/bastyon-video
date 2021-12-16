@@ -5,13 +5,13 @@ require("mocha");
 const chai_1 = require("chai");
 const extra_utils_1 = require("@shared/extra-utils");
 function check(server, videoUUID, exists = true) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { data } = yield server.videos.list();
         const video = data.find(v => v.uuid === videoUUID);
         if (exists)
-            (0, chai_1.expect)(video).to.not.be.undefined;
+            chai_1.expect(video).to.not.be.undefined;
         else
-            (0, chai_1.expect)(video).to.be.undefined;
+            chai_1.expect(video).to.be.undefined;
     });
 }
 describe('Official plugin auto-block videos', function () {
@@ -21,10 +21,10 @@ describe('Official plugin auto-block videos', function () {
     let server2Videos = [];
     let port;
     before(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(60000);
-            servers = yield (0, extra_utils_1.createMultipleServers)(2);
-            yield (0, extra_utils_1.setAccessTokensToServers)(servers);
+            servers = yield extra_utils_1.createMultipleServers(2);
+            yield extra_utils_1.setAccessTokensToServers(servers);
             for (const server of servers) {
                 yield server.plugins.install({ npmName: 'peertube-plugin-auto-block-videos' });
             }
@@ -42,11 +42,11 @@ describe('Official plugin auto-block videos', function () {
                 const { data } = yield servers[1].videos.list();
                 server2Videos = data.map(v => Object.assign(v, { url: servers[1].url + '/videos/watch/' + v.uuid }));
             }
-            yield (0, extra_utils_1.doubleFollow)(servers[0], servers[1]);
+            yield extra_utils_1.doubleFollow(servers[0], servers[1]);
         });
     });
     it('Should update plugin settings', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             yield servers[0].plugins.updateSettings({
                 npmName: 'peertube-plugin-auto-block-videos',
                 settings: {
@@ -57,7 +57,7 @@ describe('Official plugin auto-block videos', function () {
         });
     });
     it('Should auto block a video', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(10000);
             yield check(servers[0], server2Videos[0].uuid, true);
             blocklistServer.replace({
@@ -67,21 +67,21 @@ describe('Official plugin auto-block videos', function () {
                     }
                 ]
             });
-            yield (0, extra_utils_1.wait)(2000);
+            yield extra_utils_1.wait(2000);
             yield check(servers[0], server2Videos[0].uuid, false);
         });
     });
     it('Should have video in blacklists', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const body = yield servers[0].blacklist.list();
             const videoBlacklists = body.data;
-            (0, chai_1.expect)(videoBlacklists).to.have.lengthOf(1);
-            (0, chai_1.expect)(videoBlacklists[0].reason).to.contains('Automatically blocked from auto block plugin');
-            (0, chai_1.expect)(videoBlacklists[0].video.name).to.equal(server2Videos[0].name);
+            chai_1.expect(videoBlacklists).to.have.lengthOf(1);
+            chai_1.expect(videoBlacklists[0].reason).to.contains('Automatically blocked from auto block plugin');
+            chai_1.expect(videoBlacklists[0].video.name).to.equal(server2Videos[0].name);
         });
     });
     it('Should not block a local video', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(10000);
             yield check(servers[0], server1Videos[0].uuid, true);
             blocklistServer.replace({
@@ -91,12 +91,12 @@ describe('Official plugin auto-block videos', function () {
                     }
                 ]
             });
-            yield (0, extra_utils_1.wait)(2000);
+            yield extra_utils_1.wait(2000);
             yield check(servers[0], server1Videos[0].uuid, true);
         });
     });
     it('Should remove a video block', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(10000);
             yield check(servers[0], server2Videos[0].uuid, false);
             blocklistServer.replace({
@@ -107,12 +107,12 @@ describe('Official plugin auto-block videos', function () {
                     }
                 ]
             });
-            yield (0, extra_utils_1.wait)(2000);
+            yield extra_utils_1.wait(2000);
             yield check(servers[0], server2Videos[0].uuid, true);
         });
     });
     it('Should auto block a video, manually unblock it and do not reblock it automatically', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(20000);
             const video = server2Videos[1];
             yield check(servers[0], video.uuid, true);
@@ -124,20 +124,20 @@ describe('Official plugin auto-block videos', function () {
                     }
                 ]
             });
-            yield (0, extra_utils_1.wait)(2000);
+            yield extra_utils_1.wait(2000);
             yield check(servers[0], video.uuid, false);
             yield servers[0].blacklist.remove({ videoId: video.uuid });
             yield check(servers[0], video.uuid, true);
-            yield (0, extra_utils_1.killallServers)([servers[0]]);
+            yield extra_utils_1.killallServers([servers[0]]);
             yield servers[0].run();
-            yield (0, extra_utils_1.wait)(2000);
+            yield extra_utils_1.wait(2000);
             yield check(servers[0], video.uuid, true);
         });
     });
     after(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             yield blocklistServer.terminate();
-            yield (0, extra_utils_1.cleanupTests)(servers);
+            yield extra_utils_1.cleanupTests(servers);
         });
     });
 });

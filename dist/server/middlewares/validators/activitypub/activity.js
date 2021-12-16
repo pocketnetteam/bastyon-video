@@ -7,13 +7,13 @@ const http_error_codes_1 = require("../../../../shared/models/http/http-error-co
 const activity_1 = require("../../../helpers/custom-validators/activitypub/activity");
 const logger_1 = require("../../../helpers/logger");
 function activityPubValidator(req, res, next) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         logger_1.logger.debug('Checking activity pub parameters');
-        if (!(0, activity_1.isRootActivityValid)(req.body)) {
+        if (!activity_1.isRootActivityValid(req.body)) {
             logger_1.logger.warn('Incorrect activity parameters.', { activity: req.body });
             return res.fail({ message: 'Incorrect activity' });
         }
-        const serverActor = yield (0, application_1.getServerActor)();
+        const serverActor = yield application_1.getServerActor();
         const remoteActor = res.locals.signature.actor;
         if (serverActor.id === remoteActor.id || remoteActor.serverId === null) {
             logger_1.logger.error('Receiving request in INBOX by ourselves!', req.body);

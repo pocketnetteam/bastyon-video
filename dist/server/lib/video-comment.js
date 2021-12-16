@@ -10,11 +10,11 @@ const send_1 = require("./activitypub/send");
 const url_1 = require("./activitypub/url");
 const hooks_1 = require("./plugins/hooks");
 function removeComment(videoCommentInstance) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        const videoCommentInstanceBefore = (0, lodash_1.cloneDeep)(videoCommentInstance);
-        yield database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const videoCommentInstanceBefore = lodash_1.cloneDeep(videoCommentInstance);
+        yield database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (videoCommentInstance.isOwned() || videoCommentInstance.Video.isOwned()) {
-                yield (0, send_1.sendDeleteVideoComment)(videoCommentInstance, t);
+                yield send_1.sendDeleteVideoComment(videoCommentInstance, t);
             }
             videoCommentInstance.markAsDeleted();
             yield videoCommentInstance.save({ transaction: t });
@@ -25,7 +25,7 @@ function removeComment(videoCommentInstance) {
 }
 exports.removeComment = removeComment;
 function createVideoComment(obj, t) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         let originCommentId = null;
         let inReplyToCommentId = null;
         if (obj.inReplyToComment && obj.inReplyToComment !== null) {
@@ -40,12 +40,12 @@ function createVideoComment(obj, t) {
             accountId: obj.account.id,
             url: new Date().toISOString()
         }, { transaction: t, validate: false });
-        comment.url = (0, url_1.getLocalVideoCommentActivityPubUrl)(obj.video, comment);
+        comment.url = url_1.getLocalVideoCommentActivityPubUrl(obj.video, comment);
         const savedComment = yield comment.save({ transaction: t });
         savedComment.InReplyToVideoComment = obj.inReplyToComment;
         savedComment.Video = obj.video;
         savedComment.Account = obj.account;
-        yield (0, send_1.sendCreateVideoComment)(savedComment, t);
+        yield send_1.sendCreateVideoComment(savedComment, t);
         return savedComment;
     });
 }

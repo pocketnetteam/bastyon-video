@@ -8,9 +8,9 @@ const stat_manager_1 = require("../stat-manager");
 const process_1 = require("./process");
 class InboxManager {
     constructor() {
-        this.inboxQueue = (0, async_1.queue)((task, cb) => {
+        this.inboxQueue = async_1.queue((task, cb) => {
             const options = { signatureActor: task.signatureActor, inboxActor: task.inboxActor };
-            (0, process_1.processActivities)(task.activities, options)
+            process_1.processActivities(task.activities, options)
                 .then(() => cb())
                 .catch(err => {
                 logger_1.logger.error('Error in process activities.', { err });

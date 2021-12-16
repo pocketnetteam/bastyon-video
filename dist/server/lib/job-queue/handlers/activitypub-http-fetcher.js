@@ -14,19 +14,19 @@ const share_1 = require("../../activitypub/share");
 const video_comments_1 = require("../../activitypub/video-comments");
 const video_rates_1 = require("../../activitypub/video-rates");
 function processActivityPubHttpFetcher(job) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         logger_1.logger.info('Processing ActivityPub fetcher in job %d.', job.id);
         const payload = job.data;
         let video;
         if (payload.videoId)
             video = yield video_1.VideoModel.loadAndPopulateAccountAndServerAndTags(payload.videoId);
         const fetcherType = {
-            'activity': items => (0, process_1.processActivities)(items, { outboxUrl: payload.uri, fromFetch: true }),
-            'video-likes': items => (0, video_rates_1.createRates)(items, video, 'like'),
-            'video-dislikes': items => (0, video_rates_1.createRates)(items, video, 'dislike'),
-            'video-shares': items => (0, share_1.addVideoShares)(items, video),
-            'video-comments': items => (0, video_comments_1.addVideoComments)(items),
-            'account-playlists': items => (0, playlists_1.createAccountPlaylists)(items)
+            'activity': items => process_1.processActivities(items, { outboxUrl: payload.uri, fromFetch: true }),
+            'video-likes': items => video_rates_1.createRates(items, video, 'like'),
+            'video-dislikes': items => video_rates_1.createRates(items, video, 'dislike'),
+            'video-shares': items => share_1.addVideoShares(items, video),
+            'video-comments': items => video_comments_1.addVideoComments(items),
+            'account-playlists': items => playlists_1.createAccountPlaylists(items)
         };
         const cleanerType = {
             'video-likes': crawlStartDate => account_video_rate_1.AccountVideoRateModel.cleanOldRatesOf(video.id, 'like', crawlStartDate),
@@ -34,7 +34,7 @@ function processActivityPubHttpFetcher(job) {
             'video-shares': crawlStartDate => video_share_1.VideoShareModel.cleanOldSharesOf(video.id, crawlStartDate),
             'video-comments': crawlStartDate => video_comment_1.VideoCommentModel.cleanOldCommentsOf(video.id, crawlStartDate)
         };
-        return (0, crawl_1.crawlCollectionPage)(payload.uri, fetcherType[payload.type], cleanerType[payload.type]);
+        return crawl_1.crawlCollectionPage(payload.uri, fetcherType[payload.type], cleanerType[payload.type]);
     });
 }
 exports.processActivityPubHttpFetcher = processActivityPubHttpFetcher;

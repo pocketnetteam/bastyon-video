@@ -8,14 +8,14 @@ const models_1 = require("@shared/models");
 const logger_1 = require("../../helpers/logger");
 const shared_1 = require("./shared");
 const bulkRemoveCommentsOfValidator = [
-    (0, express_validator_1.body)('accountName').exists().withMessage('Should have an account name with host'),
-    (0, express_validator_1.body)('scope')
+    express_validator_1.body('accountName').exists().withMessage('Should have an account name with host'),
+    express_validator_1.body('scope')
         .custom(bulk_1.isBulkRemoveCommentsOfScopeValid).withMessage('Should have a valid scope'),
-    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
+    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking bulkRemoveCommentsOfValidator parameters', { parameters: req.body });
-        if ((0, shared_1.areValidationErrors)(req, res))
+        if (shared_1.areValidationErrors(req, res))
             return;
-        if (!(yield (0, shared_1.doesAccountNameWithHostExist)(req.body.accountName, res)))
+        if (!(yield shared_1.doesAccountNameWithHostExist(req.body.accountName, res)))
             return;
         const user = res.locals.oauth.token.User;
         const body = req.body;

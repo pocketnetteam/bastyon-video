@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.pickSearchChannelQuery = exports.pickSearchPlaylistQuery = exports.pickSearchVideoQuery = exports.pickCommonVideoQuery = void 0;
 const core_utils_1 = require("@shared/core-utils");
 function pickCommonVideoQuery(query) {
-    return (0, core_utils_1.pick)(query, [
+    return core_utils_1.pick(query, [
         'start',
         'count',
         'sort',
@@ -20,7 +20,7 @@ function pickCommonVideoQuery(query) {
 }
 exports.pickCommonVideoQuery = pickCommonVideoQuery;
 function pickSearchVideoQuery(query) {
-    return Object.assign(Object.assign({}, pickCommonVideoQuery(query)), (0, core_utils_1.pick)(query, [
+    return Object.assign(Object.assign({}, pickCommonVideoQuery(query)), core_utils_1.pick(query, [
         'searchTarget',
         'search',
         'host',
@@ -35,7 +35,7 @@ function pickSearchVideoQuery(query) {
 }
 exports.pickSearchVideoQuery = pickSearchVideoQuery;
 function pickSearchChannelQuery(query) {
-    return (0, core_utils_1.pick)(query, [
+    return core_utils_1.pick(query, [
         'searchTarget',
         'search',
         'start',
@@ -47,7 +47,7 @@ function pickSearchChannelQuery(query) {
 }
 exports.pickSearchChannelQuery = pickSearchChannelQuery;
 function pickSearchPlaylistQuery(query) {
-    return (0, core_utils_1.pick)(query, [
+    return core_utils_1.pick(query, [
         'searchTarget',
         'search',
         'start',

@@ -19,12 +19,12 @@ const video_transcoding_profiles_1 = require("./video-transcoding-profiles");
 function optimizeOriginalVideofile(video, inputVideoFile, job) {
     const transcodeDirectory = config_1.CONFIG.STORAGE.TMP_DIR;
     const newExtname = '.mp4';
-    return video_path_manager_1.VideoPathManager.Instance.makeAvailableVideoFile(video, inputVideoFile, (videoInputPath) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        const videoTranscodedPath = (0, path_1.join)(transcodeDirectory, video.id + '-transcoded' + newExtname);
-        const transcodeType = (yield (0, ffprobe_utils_1.canDoQuickTranscode)(videoInputPath))
+    return video_path_manager_1.VideoPathManager.Instance.makeAvailableVideoFile(video, inputVideoFile, (videoInputPath) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const videoTranscodedPath = path_1.join(transcodeDirectory, video.id + '-transcoded' + newExtname);
+        const transcodeType = (yield ffprobe_utils_1.canDoQuickTranscode(videoInputPath))
             ? 'quick-transcode'
             : 'video';
-        const resolution = (0, core_utils_1.toEven)(inputVideoFile.resolution);
+        const resolution = core_utils_1.toEven(inputVideoFile.resolution);
         const transcodeOptions = {
             type: transcodeType,
             inputPath: videoInputPath,
@@ -34,13 +34,13 @@ function optimizeOriginalVideofile(video, inputVideoFile, job) {
             resolution,
             job
         };
-        yield (0, ffmpeg_utils_1.transcode)(transcodeOptions);
+        yield ffmpeg_utils_1.transcode(transcodeOptions);
         inputVideoFile.extname = newExtname;
-        inputVideoFile.filename = (0, paths_1.generateWebTorrentVideoFilename)(resolution, newExtname);
+        inputVideoFile.filename = paths_1.generateWebTorrentVideoFilename(resolution, newExtname);
         inputVideoFile.storage = 0;
         const videoOutputPath = video_path_manager_1.VideoPathManager.Instance.getFSVideoFileOutputPath(video, inputVideoFile);
         const { videoFile } = yield onWebTorrentVideoFileTranscoding(video, inputVideoFile, videoTranscodedPath, videoOutputPath);
-        yield (0, fs_extra_1.remove)(videoInputPath);
+        yield fs_extra_1.remove(videoInputPath);
         return { transcodeType, videoFile };
     }));
 }
@@ -48,16 +48,16 @@ exports.optimizeOriginalVideofile = optimizeOriginalVideofile;
 function transcodeNewWebTorrentResolution(video, resolution, isPortrait, job) {
     const transcodeDirectory = config_1.CONFIG.STORAGE.TMP_DIR;
     const extname = '.mp4';
-    return video_path_manager_1.VideoPathManager.Instance.makeAvailableVideoFile(video, video.getMaxQualityFile(), (videoInputPath) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return video_path_manager_1.VideoPathManager.Instance.makeAvailableVideoFile(video, video.getMaxQualityFile(), (videoInputPath) => tslib_1.__awaiter(this, void 0, void 0, function* () {
         const newVideoFile = new video_file_1.VideoFileModel({
             resolution,
             extname,
-            filename: (0, paths_1.generateWebTorrentVideoFilename)(resolution, extname),
+            filename: paths_1.generateWebTorrentVideoFilename(resolution, extname),
             size: 0,
             videoId: video.id
         });
         const videoOutputPath = video_path_manager_1.VideoPathManager.Instance.getFSVideoFileOutputPath(video, newVideoFile);
-        const videoTranscodedPath = (0, path_1.join)(transcodeDirectory, newVideoFile.filename);
+        const videoTranscodedPath = path_1.join(transcodeDirectory, newVideoFile.filename);
         const transcodeOptions = resolution === 0
             ? {
                 type: 'only-audio',
@@ -78,7 +78,7 @@ function transcodeNewWebTorrentResolution(video, resolution, isPortrait, job) {
                 isPortraitMode: isPortrait,
                 job
             };
-        yield (0, ffmpeg_utils_1.transcode)(transcodeOptions);
+        yield ffmpeg_utils_1.transcode(transcodeOptions);
         return onWebTorrentVideoFileTranscoding(video, newVideoFile, videoTranscodedPath, videoOutputPath);
     }));
 }
@@ -87,11 +87,11 @@ function mergeAudioVideofile(video, resolution, job) {
     const transcodeDirectory = config_1.CONFIG.STORAGE.TMP_DIR;
     const newExtname = '.mp4';
     const inputVideoFile = video.getMinQualityFile();
-    return video_path_manager_1.VideoPathManager.Instance.makeAvailableVideoFile(video, inputVideoFile, (audioInputPath) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        const videoTranscodedPath = (0, path_1.join)(transcodeDirectory, video.id + '-transcoded' + newExtname);
+    return video_path_manager_1.VideoPathManager.Instance.makeAvailableVideoFile(video, inputVideoFile, (audioInputPath) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const videoTranscodedPath = path_1.join(transcodeDirectory, video.id + '-transcoded' + newExtname);
         const previewPath = video.getPreview().getPath();
-        const tmpPreviewPath = (0, path_1.join)(config_1.CONFIG.STORAGE.TMP_DIR, (0, path_1.basename)(previewPath));
-        yield (0, fs_extra_1.copyFile)(previewPath, tmpPreviewPath);
+        const tmpPreviewPath = path_1.join(config_1.CONFIG.STORAGE.TMP_DIR, path_1.basename(previewPath));
+        yield fs_extra_1.copyFile(previewPath, tmpPreviewPath);
         const transcodeOptions = {
             type: 'merge-audio',
             inputPath: tmpPreviewPath,
@@ -103,25 +103,25 @@ function mergeAudioVideofile(video, resolution, job) {
             job
         };
         try {
-            yield (0, ffmpeg_utils_1.transcode)(transcodeOptions);
-            yield (0, fs_extra_1.remove)(audioInputPath);
-            yield (0, fs_extra_1.remove)(tmpPreviewPath);
+            yield ffmpeg_utils_1.transcode(transcodeOptions);
+            yield fs_extra_1.remove(audioInputPath);
+            yield fs_extra_1.remove(tmpPreviewPath);
         }
         catch (err) {
-            yield (0, fs_extra_1.remove)(tmpPreviewPath);
+            yield fs_extra_1.remove(tmpPreviewPath);
             throw err;
         }
         inputVideoFile.extname = newExtname;
-        inputVideoFile.filename = (0, paths_1.generateWebTorrentVideoFilename)(inputVideoFile.resolution, newExtname);
+        inputVideoFile.filename = paths_1.generateWebTorrentVideoFilename(inputVideoFile.resolution, newExtname);
         const videoOutputPath = video_path_manager_1.VideoPathManager.Instance.getFSVideoFileOutputPath(video, inputVideoFile);
-        video.duration = yield (0, ffprobe_utils_1.getDurationFromVideoFile)(videoTranscodedPath);
+        video.duration = yield ffprobe_utils_1.getDurationFromVideoFile(videoTranscodedPath);
         yield video.save();
         return onWebTorrentVideoFileTranscoding(video, inputVideoFile, videoTranscodedPath, videoOutputPath);
     }));
 }
 exports.mergeAudioVideofile = mergeAudioVideofile;
 function generateHlsPlaylistResolutionFromTS(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         return generateHlsPlaylistCommon({
             video: options.video,
             resolution: options.resolution,
@@ -146,29 +146,29 @@ function generateHlsPlaylistResolution(options) {
 }
 exports.generateHlsPlaylistResolution = generateHlsPlaylistResolution;
 function onWebTorrentVideoFileTranscoding(video, videoFile, transcodingPath, outputPath) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        const stats = yield (0, fs_extra_1.stat)(transcodingPath);
-        const fps = yield (0, ffprobe_utils_1.getVideoFileFPS)(transcodingPath);
-        const metadata = yield (0, ffprobe_utils_1.getMetadataFromFile)(transcodingPath);
-        yield (0, fs_extra_1.move)(transcodingPath, outputPath, { overwrite: true });
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const stats = yield fs_extra_1.stat(transcodingPath);
+        const fps = yield ffprobe_utils_1.getVideoFileFPS(transcodingPath);
+        const metadata = yield ffprobe_utils_1.getMetadataFromFile(transcodingPath);
+        yield fs_extra_1.move(transcodingPath, outputPath, { overwrite: true });
         videoFile.size = stats.size;
         videoFile.fps = fps;
         videoFile.metadata = metadata;
-        yield (0, webtorrent_1.createTorrentAndSetInfoHash)(video, videoFile);
+        yield webtorrent_1.createTorrentAndSetInfoHash(video, videoFile);
         yield video_file_1.VideoFileModel.customUpsert(videoFile, 'video', undefined);
         video.VideoFiles = yield video.$get('VideoFiles');
         return { video, videoFile };
     });
 }
 function generateHlsPlaylistCommon(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { type, video, inputPath, resolution, copyCodecs, isPortraitMode, isAAC, job } = options;
         const transcodeDirectory = config_1.CONFIG.STORAGE.TMP_DIR;
-        const videoTranscodedBasePath = (0, path_1.join)(transcodeDirectory, type);
-        yield (0, fs_extra_1.ensureDir)(videoTranscodedBasePath);
-        const videoFilename = (0, paths_1.generateHLSVideoFilename)(resolution);
-        const resolutionPlaylistFilename = (0, paths_1.getHlsResolutionPlaylistFilename)(videoFilename);
-        const resolutionPlaylistFileTranscodePath = (0, path_1.join)(videoTranscodedBasePath, resolutionPlaylistFilename);
+        const videoTranscodedBasePath = path_1.join(transcodeDirectory, type);
+        yield fs_extra_1.ensureDir(videoTranscodedBasePath);
+        const videoFilename = paths_1.generateHLSVideoFilename(resolution);
+        const resolutionPlaylistFilename = paths_1.getHlsResolutionPlaylistFilename(videoFilename);
+        const resolutionPlaylistFileTranscodePath = path_1.join(videoTranscodedBasePath, resolutionPlaylistFilename);
         const transcodeOptions = {
             type,
             inputPath,
@@ -184,19 +184,19 @@ function generateHlsPlaylistCommon(options) {
             },
             job
         };
-        yield (0, ffmpeg_utils_1.transcode)(transcodeOptions);
+        yield ffmpeg_utils_1.transcode(transcodeOptions);
         const playlist = yield video_streaming_playlist_1.VideoStreamingPlaylistModel.loadOrGenerate(video);
         if (!playlist.playlistFilename) {
-            playlist.playlistFilename = (0, paths_1.generateHLSMasterPlaylistFilename)(video.isLive);
+            playlist.playlistFilename = paths_1.generateHLSMasterPlaylistFilename(video.isLive);
         }
         if (!playlist.segmentsSha256Filename) {
-            playlist.segmentsSha256Filename = (0, paths_1.generateHlsSha256SegmentsFilename)(video.isLive);
+            playlist.segmentsSha256Filename = paths_1.generateHlsSha256SegmentsFilename(video.isLive);
         }
         playlist.p2pMediaLoaderInfohashes = [];
         playlist.p2pMediaLoaderPeerVersion = constants_1.P2P_MEDIA_LOADER_PEER_VERSION;
         playlist.type = 1;
         yield playlist.save();
-        const extname = (0, path_1.extname)(videoFilename);
+        const extname = path_1.extname(videoFilename);
         const newVideoFile = new video_file_1.VideoFileModel({
             resolution,
             extname,
@@ -206,23 +206,23 @@ function generateHlsPlaylistCommon(options) {
             videoStreamingPlaylistId: playlist.id
         });
         const videoFilePath = video_path_manager_1.VideoPathManager.Instance.getFSVideoFileOutputPath(playlist, newVideoFile);
-        yield (0, fs_extra_1.ensureDir)(video_path_manager_1.VideoPathManager.Instance.getFSHLSOutputPath(video));
+        yield fs_extra_1.ensureDir(video_path_manager_1.VideoPathManager.Instance.getFSHLSOutputPath(video));
         const resolutionPlaylistPath = video_path_manager_1.VideoPathManager.Instance.getFSHLSOutputPath(video, resolutionPlaylistFilename);
-        yield (0, fs_extra_1.move)(resolutionPlaylistFileTranscodePath, resolutionPlaylistPath, { overwrite: true });
-        yield (0, fs_extra_1.move)((0, path_1.join)(videoTranscodedBasePath, videoFilename), videoFilePath, { overwrite: true });
-        const stats = yield (0, fs_extra_1.stat)(videoFilePath);
+        yield fs_extra_1.move(resolutionPlaylistFileTranscodePath, resolutionPlaylistPath, { overwrite: true });
+        yield fs_extra_1.move(path_1.join(videoTranscodedBasePath, videoFilename), videoFilePath, { overwrite: true });
+        const stats = yield fs_extra_1.stat(videoFilePath);
         newVideoFile.size = stats.size;
-        newVideoFile.fps = yield (0, ffprobe_utils_1.getVideoFileFPS)(videoFilePath);
-        newVideoFile.metadata = yield (0, ffprobe_utils_1.getMetadataFromFile)(videoFilePath);
-        yield (0, webtorrent_1.createTorrentAndSetInfoHash)(playlist, newVideoFile);
+        newVideoFile.fps = yield ffprobe_utils_1.getVideoFileFPS(videoFilePath);
+        newVideoFile.metadata = yield ffprobe_utils_1.getMetadataFromFile(videoFilePath);
+        yield webtorrent_1.createTorrentAndSetInfoHash(playlist, newVideoFile);
         const savedVideoFile = yield video_file_1.VideoFileModel.customUpsert(newVideoFile, 'streaming-playlist', undefined);
         const playlistWithFiles = playlist;
         playlistWithFiles.VideoFiles = yield playlist.$get('VideoFiles');
         playlist.assignP2PMediaLoaderInfoHashes(video, playlistWithFiles.VideoFiles);
         yield playlist.save();
         video.setHLSPlaylist(playlist);
-        yield (0, hls_1.updateMasterHLSPlaylist)(video, playlistWithFiles);
-        yield (0, hls_1.updateSha256VODSegments)(video, playlistWithFiles);
+        yield hls_1.updateMasterHLSPlaylist(video, playlistWithFiles);
+        yield hls_1.updateSha256VODSegments(video, playlistWithFiles);
         return { resolutionPlaylistPath, videoFile: savedVideoFile };
     });
 }

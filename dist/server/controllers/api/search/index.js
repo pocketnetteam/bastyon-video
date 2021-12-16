@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.searchRouter = void 0;
 const tslib_1 = require("tslib");
-const express_1 = (0, tslib_1.__importDefault)(require("express"));
+const express_1 = tslib_1.__importDefault(require("express"));
 const search_video_channels_1 = require("./search-video-channels");
 const search_video_playlists_1 = require("./search-video-playlists");
 const search_videos_1 = require("./search-videos");

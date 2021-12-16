@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AbstractVideosModelQueryBuilder = void 0;
 const tslib_1 = require("tslib");
-const validator_1 = (0, tslib_1.__importDefault)(require("validator"));
+const validator_1 = tslib_1.__importDefault(require("validator"));
 const abstract_videos_query_builder_1 = require("./abstract-videos-query-builder");
 const video_tables_1 = require("./video-tables");
 class AbstractVideosModelQueryBuilder extends abstract_videos_query_builder_1.AbstractVideosQueryBuilder {

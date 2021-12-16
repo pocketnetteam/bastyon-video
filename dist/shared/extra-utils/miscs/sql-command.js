@@ -11,7 +11,7 @@ class SQLCommand extends abstract_command_1.AbstractCommand {
         return seq.query(`DELETE FROM "${table}"`, options);
     }
     getCount(table) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const seq = this.getSequelize();
             const options = { type: sequelize_1.QueryTypes.SELECT };
             const [{ total }] = yield seq.query(`SELECT COUNT(*) as total FROM "${table}"`, options);
@@ -36,7 +36,7 @@ class SQLCommand extends abstract_command_1.AbstractCommand {
         return seq.query(`UPDATE "videoPlaylist" SET "${field}" = '${value}' WHERE uuid = '${uuid}'`, options);
     }
     countVideoViewsOf(uuid) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const seq = this.getSequelize();
             const query = 'SELECT SUM("videoView"."views") AS "total" FROM "videoView" ' +
                 `INNER JOIN "video" ON "video"."id" = "videoView"."videoId" WHERE "video"."uuid" = '${uuid}'`;
@@ -83,7 +83,7 @@ class SQLCommand extends abstract_command_1.AbstractCommand {
         return seq.query(`UPDATE "oAuthToken" SET "${field}" = '${value}' WHERE "accessToken" = '${accessToken}'`, options);
     }
     cleanup() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (!this.sequelize)
                 return;
             yield this.sequelize.close();

@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = (0, tslib_1.__importStar)(require("chai"));
+const chai = tslib_1.__importStar(require("chai"));
 const lodash_1 = require("lodash");
 const models_1 = require("@shared/models");
 const extra_utils_1 = require("../../shared/extra-utils");
@@ -11,7 +11,7 @@ function checkIndexTags(html, title, description, css, config) {
     expect(html).to.contain('<title>' + title + '</title>');
     expect(html).to.contain('<meta name="description" content="' + description + '" />');
     expect(html).to.contain('<style class="custom-css-style">' + css + '</style>');
-    const htmlConfig = (0, lodash_1.omit)(config, 'signup');
+    const htmlConfig = lodash_1.omit(config, 'signup');
     const configObjectString = JSON.stringify(htmlConfig);
     const configEscapedString = JSON.stringify(configObjectString);
     expect(html).to.contain(`<script type="application/javascript">window.PeerTubeServerConfig = ${configEscapedString}</script>`);
@@ -31,12 +31,12 @@ describe('Test a client controllers', function () {
     let videoIds = [];
     let playlistIds = [];
     before(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(120000);
-            servers = yield (0, extra_utils_1.createMultipleServers)(2);
-            yield (0, extra_utils_1.setAccessTokensToServers)(servers);
-            yield (0, extra_utils_1.doubleFollow)(servers[0], servers[1]);
-            yield (0, extra_utils_1.setDefaultVideoChannel)(servers);
+            servers = yield extra_utils_1.createMultipleServers(2);
+            yield extra_utils_1.setAccessTokensToServers(servers);
+            yield extra_utils_1.doubleFollow(servers[0], servers[1]);
+            yield extra_utils_1.setDefaultVideoChannel(servers);
             yield servers[0].channels.update({
                 channelName: servers[0].store.channel.name,
                 attributes: { description: channelDescription }
@@ -65,15 +65,15 @@ describe('Test a client controllers', function () {
                 yield servers[0].users.updateMe({ description: 'my account description' });
                 account = yield servers[0].accounts.get({ accountName: `${servers[0].store.user.username}@${servers[0].host}` });
             }
-            yield (0, extra_utils_1.waitJobs)(servers);
+            yield extra_utils_1.waitJobs(servers);
         });
     });
     describe('oEmbed', function () {
         it('Should have valid oEmbed discovery tags for videos', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 for (const basePath of watchVideoBasePaths) {
                     for (const id of videoIds) {
-                        const res = yield (0, extra_utils_1.makeGetRequest)({
+                        const res = yield extra_utils_1.makeGetRequest({
                             url: servers[0].url,
                             path: basePath + id,
                             accept: 'text/html',
@@ -89,10 +89,10 @@ describe('Test a client controllers', function () {
             });
         });
         it('Should have valid oEmbed discovery tags for a playlist', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 for (const basePath of watchPlaylistBasePaths) {
                     for (const id of playlistIds) {
-                        const res = yield (0, extra_utils_1.makeGetRequest)({
+                        const res = yield extra_utils_1.makeGetRequest({
                             url: servers[0].url,
                             path: basePath + id,
                             accept: 'text/html',
@@ -110,8 +110,8 @@ describe('Test a client controllers', function () {
     });
     describe('Open Graph', function () {
         function accountPageTest(path) {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                const res = yield (0, extra_utils_1.makeGetRequest)({ url: servers[0].url, path, accept: 'text/html', expectedStatus: models_1.HttpStatusCode.OK_200 });
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                const res = yield extra_utils_1.makeGetRequest({ url: servers[0].url, path, accept: 'text/html', expectedStatus: models_1.HttpStatusCode.OK_200 });
                 const text = res.text;
                 expect(text).to.contain(`<meta property="og:title" content="${account.displayName}" />`);
                 expect(text).to.contain(`<meta property="og:description" content="${account.description}" />`);
@@ -120,8 +120,8 @@ describe('Test a client controllers', function () {
             });
         }
         function channelPageTest(path) {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                const res = yield (0, extra_utils_1.makeGetRequest)({ url: servers[0].url, path, accept: 'text/html', expectedStatus: models_1.HttpStatusCode.OK_200 });
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                const res = yield extra_utils_1.makeGetRequest({ url: servers[0].url, path, accept: 'text/html', expectedStatus: models_1.HttpStatusCode.OK_200 });
                 const text = res.text;
                 expect(text).to.contain(`<meta property="og:title" content="${servers[0].store.channel.displayName}" />`);
                 expect(text).to.contain(`<meta property="og:description" content="${channelDescription}" />`);
@@ -130,8 +130,8 @@ describe('Test a client controllers', function () {
             });
         }
         function watchVideoPageTest(path) {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                const res = yield (0, extra_utils_1.makeGetRequest)({ url: servers[0].url, path, accept: 'text/html', expectedStatus: models_1.HttpStatusCode.OK_200 });
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                const res = yield extra_utils_1.makeGetRequest({ url: servers[0].url, path, accept: 'text/html', expectedStatus: models_1.HttpStatusCode.OK_200 });
                 const text = res.text;
                 expect(text).to.contain(`<meta property="og:title" content="${videoName}" />`);
                 expect(text).to.contain(`<meta property="og:description" content="${videoDescriptionPlainText}" />`);
@@ -140,8 +140,8 @@ describe('Test a client controllers', function () {
             });
         }
         function watchPlaylistPageTest(path) {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                const res = yield (0, extra_utils_1.makeGetRequest)({ url: servers[0].url, path, accept: 'text/html', expectedStatus: models_1.HttpStatusCode.OK_200 });
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                const res = yield extra_utils_1.makeGetRequest({ url: servers[0].url, path, accept: 'text/html', expectedStatus: models_1.HttpStatusCode.OK_200 });
                 const text = res.text;
                 expect(text).to.contain(`<meta property="og:title" content="${playlistName}" />`);
                 expect(text).to.contain(`<meta property="og:description" content="${playlistDescription}" />`);
@@ -150,21 +150,21 @@ describe('Test a client controllers', function () {
             });
         }
         it('Should have valid Open Graph tags on the account page', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 yield accountPageTest('/accounts/' + servers[0].store.user.username);
                 yield accountPageTest('/a/' + servers[0].store.user.username);
                 yield accountPageTest('/@' + servers[0].store.user.username);
             });
         });
         it('Should have valid Open Graph tags on the channel page', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 yield channelPageTest('/video-channels/' + servers[0].store.channel.name);
                 yield channelPageTest('/c/' + servers[0].store.channel.name);
                 yield channelPageTest('/@' + servers[0].store.channel.name);
             });
         });
         it('Should have valid Open Graph tags on the watch page', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 for (const path of watchVideoBasePaths) {
                     for (const id of videoIds) {
                         yield watchVideoPageTest(path + id);
@@ -173,7 +173,7 @@ describe('Test a client controllers', function () {
             });
         });
         it('Should have valid Open Graph tags on the watch playlist page', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 for (const path of watchPlaylistBasePaths) {
                     for (const id of playlistIds) {
                         yield watchPlaylistPageTest(path + id);
@@ -183,11 +183,11 @@ describe('Test a client controllers', function () {
         });
     });
     describe('Twitter card', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             describe('Not whitelisted', function () {
                 function accountPageTest(path) {
-                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                        const res = yield (0, extra_utils_1.makeGetRequest)({ url: servers[0].url, path, accept: 'text/html', expectedStatus: models_1.HttpStatusCode.OK_200 });
+                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                        const res = yield extra_utils_1.makeGetRequest({ url: servers[0].url, path, accept: 'text/html', expectedStatus: models_1.HttpStatusCode.OK_200 });
                         const text = res.text;
                         expect(text).to.contain('<meta property="twitter:card" content="summary" />');
                         expect(text).to.contain('<meta property="twitter:site" content="@Chocobozzz" />');
@@ -196,8 +196,8 @@ describe('Test a client controllers', function () {
                     });
                 }
                 function channelPageTest(path) {
-                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                        const res = yield (0, extra_utils_1.makeGetRequest)({ url: servers[0].url, path, accept: 'text/html', expectedStatus: models_1.HttpStatusCode.OK_200 });
+                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                        const res = yield extra_utils_1.makeGetRequest({ url: servers[0].url, path, accept: 'text/html', expectedStatus: models_1.HttpStatusCode.OK_200 });
                         const text = res.text;
                         expect(text).to.contain('<meta property="twitter:card" content="summary" />');
                         expect(text).to.contain('<meta property="twitter:site" content="@Chocobozzz" />');
@@ -206,8 +206,8 @@ describe('Test a client controllers', function () {
                     });
                 }
                 function watchVideoPageTest(path) {
-                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                        const res = yield (0, extra_utils_1.makeGetRequest)({ url: servers[0].url, path, accept: 'text/html', expectedStatus: models_1.HttpStatusCode.OK_200 });
+                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                        const res = yield extra_utils_1.makeGetRequest({ url: servers[0].url, path, accept: 'text/html', expectedStatus: models_1.HttpStatusCode.OK_200 });
                         const text = res.text;
                         expect(text).to.contain('<meta property="twitter:card" content="summary_large_image" />');
                         expect(text).to.contain('<meta property="twitter:site" content="@Chocobozzz" />');
@@ -216,8 +216,8 @@ describe('Test a client controllers', function () {
                     });
                 }
                 function watchPlaylistPageTest(path) {
-                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                        const res = yield (0, extra_utils_1.makeGetRequest)({ url: servers[0].url, path, accept: 'text/html', expectedStatus: models_1.HttpStatusCode.OK_200 });
+                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                        const res = yield extra_utils_1.makeGetRequest({ url: servers[0].url, path, accept: 'text/html', expectedStatus: models_1.HttpStatusCode.OK_200 });
                         const text = res.text;
                         expect(text).to.contain('<meta property="twitter:card" content="summary" />');
                         expect(text).to.contain('<meta property="twitter:site" content="@Chocobozzz" />');
@@ -226,7 +226,7 @@ describe('Test a client controllers', function () {
                     });
                 }
                 it('Should have valid twitter card on the watch video page', function () {
-                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
                         for (const path of watchVideoBasePaths) {
                             for (const id of videoIds) {
                                 yield watchVideoPageTest(path + id);
@@ -235,7 +235,7 @@ describe('Test a client controllers', function () {
                     });
                 });
                 it('Should have valid twitter card on the watch playlist page', function () {
-                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
                         for (const path of watchPlaylistBasePaths) {
                             for (const id of playlistIds) {
                                 yield watchPlaylistPageTest(path + id);
@@ -244,14 +244,14 @@ describe('Test a client controllers', function () {
                     });
                 });
                 it('Should have valid twitter card on the account page', function () {
-                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
                         yield accountPageTest('/accounts/' + account.name);
                         yield accountPageTest('/a/' + account.name);
                         yield accountPageTest('/@' + account.name);
                     });
                 });
                 it('Should have valid twitter card on the channel page', function () {
-                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
                         yield channelPageTest('/video-channels/' + servers[0].store.channel.name);
                         yield channelPageTest('/c/' + servers[0].store.channel.name);
                         yield channelPageTest('/@' + servers[0].store.channel.name);
@@ -260,7 +260,7 @@ describe('Test a client controllers', function () {
             });
             describe('Whitelisted', function () {
                 before(function () {
-                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
                         const config = yield servers[0].config.getCustomConfig();
                         config.services.twitter = {
                             username: '@Kuja',
@@ -270,39 +270,39 @@ describe('Test a client controllers', function () {
                     });
                 });
                 function accountPageTest(path) {
-                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                        const res = yield (0, extra_utils_1.makeGetRequest)({ url: servers[0].url, path, accept: 'text/html', expectedStatus: models_1.HttpStatusCode.OK_200 });
+                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                        const res = yield extra_utils_1.makeGetRequest({ url: servers[0].url, path, accept: 'text/html', expectedStatus: models_1.HttpStatusCode.OK_200 });
                         const text = res.text;
                         expect(text).to.contain('<meta property="twitter:card" content="summary" />');
                         expect(text).to.contain('<meta property="twitter:site" content="@Kuja" />');
                     });
                 }
                 function channelPageTest(path) {
-                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                        const res = yield (0, extra_utils_1.makeGetRequest)({ url: servers[0].url, path, accept: 'text/html', expectedStatus: models_1.HttpStatusCode.OK_200 });
+                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                        const res = yield extra_utils_1.makeGetRequest({ url: servers[0].url, path, accept: 'text/html', expectedStatus: models_1.HttpStatusCode.OK_200 });
                         const text = res.text;
                         expect(text).to.contain('<meta property="twitter:card" content="summary" />');
                         expect(text).to.contain('<meta property="twitter:site" content="@Kuja" />');
                     });
                 }
                 function watchVideoPageTest(path) {
-                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                        const res = yield (0, extra_utils_1.makeGetRequest)({ url: servers[0].url, path, accept: 'text/html', expectedStatus: models_1.HttpStatusCode.OK_200 });
+                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                        const res = yield extra_utils_1.makeGetRequest({ url: servers[0].url, path, accept: 'text/html', expectedStatus: models_1.HttpStatusCode.OK_200 });
                         const text = res.text;
                         expect(text).to.contain('<meta property="twitter:card" content="player" />');
                         expect(text).to.contain('<meta property="twitter:site" content="@Kuja" />');
                     });
                 }
                 function watchPlaylistPageTest(path) {
-                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                        const res = yield (0, extra_utils_1.makeGetRequest)({ url: servers[0].url, path, accept: 'text/html', expectedStatus: models_1.HttpStatusCode.OK_200 });
+                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                        const res = yield extra_utils_1.makeGetRequest({ url: servers[0].url, path, accept: 'text/html', expectedStatus: models_1.HttpStatusCode.OK_200 });
                         const text = res.text;
                         expect(text).to.contain('<meta property="twitter:card" content="player" />');
                         expect(text).to.contain('<meta property="twitter:site" content="@Kuja" />');
                     });
                 }
                 it('Should have valid twitter card on the watch video page', function () {
-                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
                         for (const path of watchVideoBasePaths) {
                             for (const id of videoIds) {
                                 yield watchVideoPageTest(path + id);
@@ -311,7 +311,7 @@ describe('Test a client controllers', function () {
                     });
                 });
                 it('Should have valid twitter card on the watch playlist page', function () {
-                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
                         for (const path of watchPlaylistBasePaths) {
                             for (const id of playlistIds) {
                                 yield watchPlaylistPageTest(path + id);
@@ -320,14 +320,14 @@ describe('Test a client controllers', function () {
                     });
                 });
                 it('Should have valid twitter card on the account page', function () {
-                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
                         yield accountPageTest('/accounts/' + account.name);
                         yield accountPageTest('/a/' + account.name);
                         yield accountPageTest('/@' + account.name);
                     });
                 });
                 it('Should have valid twitter card on the channel page', function () {
-                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
                         yield channelPageTest('/video-channels/' + servers[0].store.channel.name);
                         yield channelPageTest('/c/' + servers[0].store.channel.name);
                         yield channelPageTest('/@' + servers[0].store.channel.name);
@@ -338,15 +338,15 @@ describe('Test a client controllers', function () {
     });
     describe('Index HTML', function () {
         it('Should have valid index html tags (title, description...)', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const config = yield servers[0].config.getConfig();
-                const res = yield (0, extra_utils_1.makeHTMLRequest)(servers[0].url, '/videos/trending');
+                const res = yield extra_utils_1.makeHTMLRequest(servers[0].url, '/videos/trending');
                 const description = 'PeerTube, an ActivityPub-federated video streaming platform using P2P directly in your web browser.';
                 checkIndexTags(res.text, 'PeerTube', description, '', config);
             });
         });
         it('Should update the customized configuration and have the correct index html tags', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 yield servers[0].config.updateCustomSubConfig({
                     newConfig: {
                         instance: {
@@ -364,94 +364,94 @@ describe('Test a client controllers', function () {
                     }
                 });
                 const config = yield servers[0].config.getConfig();
-                const res = yield (0, extra_utils_1.makeHTMLRequest)(servers[0].url, '/videos/trending');
+                const res = yield extra_utils_1.makeHTMLRequest(servers[0].url, '/videos/trending');
                 checkIndexTags(res.text, 'PeerTube updated', 'my short description', 'body { background-color: red; }', config);
             });
         });
         it('Should have valid index html updated tags (title, description...)', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const config = yield servers[0].config.getConfig();
-                const res = yield (0, extra_utils_1.makeHTMLRequest)(servers[0].url, '/videos/trending');
+                const res = yield extra_utils_1.makeHTMLRequest(servers[0].url, '/videos/trending');
                 checkIndexTags(res.text, 'PeerTube updated', 'my short description', 'body { background-color: red; }', config);
             });
         });
         it('Should use the original video URL for the canonical tag', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 for (const basePath of watchVideoBasePaths) {
                     for (const id of videoIds) {
-                        const res = yield (0, extra_utils_1.makeHTMLRequest)(servers[1].url, basePath + id);
+                        const res = yield extra_utils_1.makeHTMLRequest(servers[1].url, basePath + id);
                         expect(res.text).to.contain(`<link rel="canonical" href="${servers[0].url}/videos/watch/${servers[0].store.video.uuid}" />`);
                     }
                 }
             });
         });
         it('Should use the original account URL for the canonical tag', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const accountURLtest = res => {
                     expect(res.text).to.contain(`<link rel="canonical" href="${servers[0].url}/accounts/root" />`);
                 };
-                accountURLtest(yield (0, extra_utils_1.makeHTMLRequest)(servers[1].url, '/accounts/root@' + servers[0].host));
-                accountURLtest(yield (0, extra_utils_1.makeHTMLRequest)(servers[1].url, '/a/root@' + servers[0].host));
-                accountURLtest(yield (0, extra_utils_1.makeHTMLRequest)(servers[1].url, '/@root@' + servers[0].host));
+                accountURLtest(yield extra_utils_1.makeHTMLRequest(servers[1].url, '/accounts/root@' + servers[0].host));
+                accountURLtest(yield extra_utils_1.makeHTMLRequest(servers[1].url, '/a/root@' + servers[0].host));
+                accountURLtest(yield extra_utils_1.makeHTMLRequest(servers[1].url, '/@root@' + servers[0].host));
             });
         });
         it('Should use the original channel URL for the canonical tag', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const channelURLtests = res => {
                     expect(res.text).to.contain(`<link rel="canonical" href="${servers[0].url}/video-channels/root_channel" />`);
                 };
-                channelURLtests(yield (0, extra_utils_1.makeHTMLRequest)(servers[1].url, '/video-channels/root_channel@' + servers[0].host));
-                channelURLtests(yield (0, extra_utils_1.makeHTMLRequest)(servers[1].url, '/c/root_channel@' + servers[0].host));
-                channelURLtests(yield (0, extra_utils_1.makeHTMLRequest)(servers[1].url, '/@root_channel@' + servers[0].host));
+                channelURLtests(yield extra_utils_1.makeHTMLRequest(servers[1].url, '/video-channels/root_channel@' + servers[0].host));
+                channelURLtests(yield extra_utils_1.makeHTMLRequest(servers[1].url, '/c/root_channel@' + servers[0].host));
+                channelURLtests(yield extra_utils_1.makeHTMLRequest(servers[1].url, '/@root_channel@' + servers[0].host));
             });
         });
         it('Should use the original playlist URL for the canonical tag', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 for (const basePath of watchPlaylistBasePaths) {
                     for (const id of playlistIds) {
-                        const res = yield (0, extra_utils_1.makeHTMLRequest)(servers[1].url, basePath + id);
+                        const res = yield extra_utils_1.makeHTMLRequest(servers[1].url, basePath + id);
                         expect(res.text).to.contain(`<link rel="canonical" href="${servers[0].url}/video-playlists/${playlist.uuid}" />`);
                     }
                 }
             });
         });
         it('Should add noindex meta tag for remote accounts', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const handle = 'root@' + servers[0].host;
                 const paths = ['/accounts/', '/a/', '/@'];
                 for (const path of paths) {
                     {
-                        const { text } = yield (0, extra_utils_1.makeHTMLRequest)(servers[1].url, path + handle);
+                        const { text } = yield extra_utils_1.makeHTMLRequest(servers[1].url, path + handle);
                         expect(text).to.contain('<meta name="robots" content="noindex" />');
                     }
                     {
-                        const { text } = yield (0, extra_utils_1.makeHTMLRequest)(servers[0].url, path + handle);
+                        const { text } = yield extra_utils_1.makeHTMLRequest(servers[0].url, path + handle);
                         expect(text).to.not.contain('<meta name="robots" content="noindex" />');
                     }
                 }
             });
         });
         it('Should add noindex meta tag for remote accounts', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const handle = 'root_channel@' + servers[0].host;
                 const paths = ['/video-channels/', '/c/', '/@'];
                 for (const path of paths) {
                     {
-                        const { text } = yield (0, extra_utils_1.makeHTMLRequest)(servers[1].url, path + handle);
+                        const { text } = yield extra_utils_1.makeHTMLRequest(servers[1].url, path + handle);
                         expect(text).to.contain('<meta name="robots" content="noindex" />');
                     }
                     {
-                        const { text } = yield (0, extra_utils_1.makeHTMLRequest)(servers[0].url, path + handle);
+                        const { text } = yield extra_utils_1.makeHTMLRequest(servers[0].url, path + handle);
                         expect(text).to.not.contain('<meta name="robots" content="noindex" />');
                     }
                 }
             });
         });
         it('Should add noindex header for some paths', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const paths = ['/about/peertube'];
                 for (const path of paths) {
-                    const { headers } = yield (0, extra_utils_1.makeHTMLRequest)(servers[0].url, path);
+                    const { headers } = yield extra_utils_1.makeHTMLRequest(servers[0].url, path);
                     expect(headers['x-robots-tag']).to.equal('noindex');
                 }
             });
@@ -459,16 +459,16 @@ describe('Test a client controllers', function () {
     });
     describe('Embed HTML', function () {
         it('Should have the correct embed html tags', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const config = yield servers[0].config.getConfig();
-                const res = yield (0, extra_utils_1.makeHTMLRequest)(servers[0].url, servers[0].store.video.embedPath);
+                const res = yield extra_utils_1.makeHTMLRequest(servers[0].url, servers[0].store.video.embedPath);
                 checkIndexTags(res.text, 'PeerTube updated', 'my short description', 'body { background-color: red; }', config);
             });
         });
     });
     after(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            yield (0, extra_utils_1.cleanupTests)(servers);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield extra_utils_1.cleanupTests(servers);
         });
     });
 });

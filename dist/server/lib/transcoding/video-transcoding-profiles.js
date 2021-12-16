@@ -10,7 +10,7 @@ const defaultX264VODOptionsBuilder = (options) => {
     const { fps, inputRatio, inputBitrate } = options;
     if (!fps)
         return { outputOptions: [] };
-    const targetBitrate = capBitrate(inputBitrate, (0, core_utils_1.getAverageBitrate)(Object.assign(Object.assign({}, options), { fps, ratio: inputRatio })));
+    const targetBitrate = capBitrate(inputBitrate, core_utils_1.getAverageBitrate(Object.assign(Object.assign({}, options), { fps, ratio: inputRatio })));
     return {
         outputOptions: [
             `-preset veryfast`,
@@ -22,35 +22,35 @@ const defaultX264VODOptionsBuilder = (options) => {
 };
 const defaultX264LiveOptionsBuilder = (options) => {
     const { streamNum, fps, inputBitrate, inputRatio } = options;
-    const targetBitrate = capBitrate(inputBitrate, (0, core_utils_1.getAverageBitrate)(Object.assign(Object.assign({}, options), { fps, ratio: inputRatio })));
+    const targetBitrate = capBitrate(inputBitrate, core_utils_1.getAverageBitrate(Object.assign(Object.assign({}, options), { fps, ratio: inputRatio })));
     return {
         outputOptions: [
             `-preset ultrafast`,
-            `${(0, ffmpeg_utils_1.buildStreamSuffix)('-r:v', streamNum)} ${fps}`,
-            `${(0, ffmpeg_utils_1.buildStreamSuffix)('-b:v', streamNum)} ${targetBitrate}`,
+            `${ffmpeg_utils_1.buildStreamSuffix('-r:v', streamNum)} ${fps}`,
+            `${ffmpeg_utils_1.buildStreamSuffix('-b:v', streamNum)} ${targetBitrate}`,
             `-maxrate ${targetBitrate}`,
             `-bufsize ${targetBitrate * 2}`,
             `-tune fastdecode`
         ]
     };
 };
-const defaultAACOptionsBuilder = ({ input, streamNum }) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
-    const probe = yield (0, ffprobe_utils_1.ffprobePromise)(input);
-    if (yield (0, ffprobe_utils_1.canDoQuickAudioTranscode)(input, probe)) {
+const defaultAACOptionsBuilder = ({ input, streamNum }) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+    const probe = yield ffprobe_utils_1.ffprobePromise(input);
+    if (yield ffprobe_utils_1.canDoQuickAudioTranscode(input, probe)) {
         logger_1.logger.debug('Copy audio stream %s by AAC encoder.', input);
         return { copy: true, outputOptions: [] };
     }
-    const parsedAudio = yield (0, ffprobe_utils_1.getAudioStream)(input, probe);
+    const parsedAudio = yield ffprobe_utils_1.getAudioStream(input, probe);
     const audioCodecName = parsedAudio.audioStream['codec_name'];
-    const bitrate = (0, ffprobe_utils_1.getMaxAudioBitrate)(audioCodecName, parsedAudio.bitrate);
+    const bitrate = ffprobe_utils_1.getMaxAudioBitrate(audioCodecName, parsedAudio.bitrate);
     logger_1.logger.debug('Calculating audio bitrate of %s by AAC encoder.', input, { bitrate: parsedAudio.bitrate, audioCodecName });
     if (bitrate !== undefined && bitrate !== -1) {
-        return { outputOptions: [(0, ffmpeg_utils_1.buildStreamSuffix)('-b:a', streamNum), bitrate + 'k'] };
+        return { outputOptions: [ffmpeg_utils_1.buildStreamSuffix('-b:a', streamNum), bitrate + 'k'] };
     }
     return { outputOptions: [] };
 });
 const defaultLibFDKAACVODOptionsBuilder = ({ streamNum }) => {
-    return { outputOptions: [(0, ffmpeg_utils_1.buildStreamSuffix)('-q:a', streamNum), '5'] };
+    return { outputOptions: [ffmpeg_utils_1.buildStreamSuffix('-q:a', streamNum), '5'] };
 };
 class VideoTranscodingProfilesManager {
     constructor() {
@@ -118,12 +118,12 @@ class VideoTranscodingProfilesManager {
     }
     addEncoderPriority(type, streamType, encoder, priority) {
         this.encodersPriorities[type][streamType].push({ name: encoder, priority });
-        (0, ffmpeg_utils_1.resetSupportedEncoders)();
+        ffmpeg_utils_1.resetSupportedEncoders();
     }
     removeEncoderPriority(type, streamType, encoder, priority) {
         this.encodersPriorities[type][streamType] = this.encodersPriorities[type][streamType]
             .filter(o => o.name !== encoder && o.priority !== priority);
-        (0, ffmpeg_utils_1.resetSupportedEncoders)();
+        ffmpeg_utils_1.resetSupportedEncoders();
     }
     getEncodersByPriority(type, streamType) {
         return this.encodersPriorities[type][streamType]

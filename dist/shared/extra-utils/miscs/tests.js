@@ -39,18 +39,18 @@ function areObjectStorageTestsDisabled() {
 }
 exports.areObjectStorageTestsDisabled = areObjectStorageTestsDisabled;
 function buildAbsoluteFixturePath(path, customCIPath = false) {
-    if ((0, path_1.isAbsolute)(path))
+    if (path_1.isAbsolute(path))
         return path;
     if (customCIPath && process.env.GITHUB_WORKSPACE) {
-        return (0, path_1.join)(process.env.GITHUB_WORKSPACE, 'fixtures', path);
+        return path_1.join(process.env.GITHUB_WORKSPACE, 'fixtures', path);
     }
-    return (0, path_1.join)(root(), 'server', 'tests', 'fixtures', path);
+    return path_1.join(root(), 'server', 'tests', 'fixtures', path);
 }
 exports.buildAbsoluteFixturePath = buildAbsoluteFixturePath;
 function root() {
-    let root = (0, path_1.join)(__dirname, '..', '..', '..');
-    if ((0, path_1.basename)(root) === 'dist')
-        root = (0, path_1.resolve)(root, '..');
+    let root = path_1.join(__dirname, '..', '..', '..');
+    if (path_1.basename(root) === 'dist')
+        root = path_1.resolve(root, '..');
     return root;
 }
 exports.root = root;
@@ -59,8 +59,8 @@ function wait(milliseconds) {
 }
 exports.wait = wait;
 function getFileSize(path) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        const stats = yield (0, fs_extra_1.stat)(path);
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const stats = yield fs_extra_1.stat(path);
         return stats.size;
     });
 }

@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.searchPlaylistsRouter = void 0;
 const tslib_1 = require("tslib");
-const express_1 = (0, tslib_1.__importDefault)(require("express"));
+const express_1 = tslib_1.__importDefault(require("express"));
 const core_utils_1 = require("@server/helpers/core-utils");
 const express_utils_1 = require("@server/helpers/express-utils");
 const logger_1 = require("@server/helpers/logger");
@@ -20,25 +20,25 @@ const models_1 = require("@shared/models");
 const middlewares_1 = require("../../../middlewares");
 const searchPlaylistsRouter = express_1.default.Router();
 exports.searchPlaylistsRouter = searchPlaylistsRouter;
-searchPlaylistsRouter.get('/video-playlists', (0, middlewares_1.openapiOperationDoc)({ operationId: 'searchPlaylists' }), middlewares_1.paginationValidator, middlewares_1.setDefaultPagination, middlewares_1.videoPlaylistsSearchSortValidator, middlewares_1.setDefaultSearchSort, middlewares_1.optionalAuthenticate, middlewares_1.videoPlaylistsListSearchValidator, (0, middlewares_1.asyncMiddleware)(searchVideoPlaylists));
+searchPlaylistsRouter.get('/video-playlists', middlewares_1.openapiOperationDoc({ operationId: 'searchPlaylists' }), middlewares_1.paginationValidator, middlewares_1.setDefaultPagination, middlewares_1.videoPlaylistsSearchSortValidator, middlewares_1.setDefaultSearchSort, middlewares_1.optionalAuthenticate, middlewares_1.videoPlaylistsListSearchValidator, middlewares_1.asyncMiddleware(searchVideoPlaylists));
 function searchVideoPlaylists(req, res) {
-    const query = (0, query_1.pickSearchPlaylistQuery)(req.query);
+    const query = query_1.pickSearchPlaylistQuery(req.query);
     const search = query.search;
-    if ((0, search_1.isURISearch)(search))
+    if (search_1.isURISearch(search))
         return searchVideoPlaylistsURI(search, res);
-    if ((0, search_1.isSearchIndexSearch)(query)) {
+    if (search_1.isSearchIndexSearch(query)) {
         return searchVideoPlaylistsIndex(query, res);
     }
     return searchVideoPlaylistsDB(query, res);
 }
 function searchVideoPlaylistsIndex(query, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        const result = yield (0, search_1.buildMutedForSearchIndex)(res);
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const result = yield search_1.buildMutedForSearchIndex(res);
         const body = yield hooks_1.Hooks.wrapObject(Object.assign(query, result), 'filter:api.search.video-playlists.index.list.params');
-        const url = (0, core_utils_1.sanitizeUrl)(config_1.CONFIG.SEARCH.SEARCH_INDEX.URL) + '/api/v1/search/video-playlists';
+        const url = core_utils_1.sanitizeUrl(config_1.CONFIG.SEARCH.SEARCH_INDEX.URL) + '/api/v1/search/video-playlists';
         try {
             logger_1.logger.debug('Doing video playlists search index request on %s.', url, { body });
-            const { body: searchIndexResult } = yield (0, requests_1.doJSONRequest)(url, { method: 'POST', json: body });
+            const { body: searchIndexResult } = yield requests_1.doJSONRequest(url, { method: 'POST', json: body });
             const jsonResult = yield hooks_1.Hooks.wrapObject(searchIndexResult, 'filter:api.search.video-playlists.index.list.result');
             return res.json(jsonResult);
         }
@@ -52,19 +52,19 @@ function searchVideoPlaylistsIndex(query, res) {
     });
 }
 function searchVideoPlaylistsDB(query, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        const serverActor = yield (0, application_1.getServerActor)();
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const serverActor = yield application_1.getServerActor();
         const apiOptions = yield hooks_1.Hooks.wrapObject(Object.assign(Object.assign({}, query), { followerActorId: serverActor.id }), 'filter:api.search.video-playlists.local.list.params');
         const resultList = yield hooks_1.Hooks.wrapPromiseFun(video_playlist_1.VideoPlaylistModel.searchForApi, apiOptions, 'filter:api.search.video-playlists.local.list.result');
-        return res.json((0, utils_1.getFormattedObjects)(resultList.data, resultList.total));
+        return res.json(utils_1.getFormattedObjects(resultList.data, resultList.total));
     });
 }
 function searchVideoPlaylistsURI(search, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         let videoPlaylist;
-        if ((0, express_utils_1.isUserAbleToSearchRemoteURI)(res)) {
+        if (express_utils_1.isUserAbleToSearchRemoteURI(res)) {
             try {
-                videoPlaylist = yield (0, get_1.getOrCreateAPVideoPlaylist)(search);
+                videoPlaylist = yield get_1.getOrCreateAPVideoPlaylist(search);
             }
             catch (err) {
                 logger_1.logger.info('Cannot search remote video playlist %s.', search, { err });

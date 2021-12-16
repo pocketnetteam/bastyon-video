@@ -41,7 +41,7 @@ class StatsManager {
         this.inboxMessages.errorsPerType[type]++;
     }
     getStats() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const { totalLocalVideos, totalLocalVideoViews, totalVideos } = yield video_1.VideoModel.getStats();
             const { totalLocalVideoComments, totalVideoComments } = yield video_comment_1.VideoCommentModel.getStats();
             const { totalUsers, totalDailyActiveUsers, totalWeeklyActiveUsers, totalMonthlyActiveUsers } = yield user_1.UserModel.getStats();
@@ -72,7 +72,7 @@ class StatsManager {
         });
     }
     getPerformanceStats() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const waitTranscodingJobs = yield job_queue_1.JobQueue.Instance.count("waiting", "video-transcoding");
             const failTranscodingJobs = yield job_queue_1.JobQueue.Instance.count("failed", "video-transcoding");
             const waitImportsCount = yield job_queue_1.JobQueue.Instance.count("waiting", "video-import");
@@ -86,13 +86,13 @@ class StatsManager {
             });
             const speedByResolution = {};
             completedTranscodingJobs.forEach((job) => {
-                var _a, _b, _c;
+                var _a, _b, _c, _d, _e;
                 if (job.data.type !== constants_1.TRANSCODING_JOB_TYPE)
                     return;
                 const targetResolution = job.data.resolution;
                 const executionTime = (job.finishedOn - job.timestamp) / 1000;
                 logger_1.logger.info("Calculated time for %s : %s", targetResolution, executionTime);
-                const fileSize = ((_c = (_b = (_a = job.returnvalue) === null || _a === void 0 ? void 0 : _a.VideoStreamingPlaylists[0]) === null || _b === void 0 ? void 0 : _b.VideoFiles[0]) === null || _c === void 0 ? void 0 : _c.size) || 0;
+                const fileSize = ((_e = (_d = (_c = (_b = (_a = job.returnvalue) === null || _a === void 0 ? void 0 : _a.VideoStreamingPlaylists) === null || _b === void 0 ? void 0 : _b[0]) === null || _c === void 0 ? void 0 : _c.VideoFiles) === null || _d === void 0 ? void 0 : _d[0]) === null || _e === void 0 ? void 0 : _e.size) || 0;
                 if (!fileSize)
                     return;
                 const mbpsSpeed = (fileSize * 8) / (1000000 * executionTime);
@@ -113,6 +113,7 @@ class StatsManager {
                 failImportsCount,
                 speedByResolution
             };
+            logger_1.logger.info("Speed %s ", speedByResolution);
             return data;
         });
     }
@@ -127,7 +128,7 @@ class StatsManager {
             size: r.size
         }));
         strategies.push({ strategy: "manual", size: null });
-        return (0, bluebird_1.mapSeries)(strategies, (r) => {
+        return bluebird_1.mapSeries(strategies, (r) => {
             return video_redundancy_1.VideoRedundancyModel.getStats(r.strategy).then((stats) => Object.assign(stats, { strategy: r.strategy, totalSize: r.size }));
         });
     }

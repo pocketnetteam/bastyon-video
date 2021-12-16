@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.rateVideoRouter = void 0;
 const tslib_1 = require("tslib");
-const express_1 = (0, tslib_1.__importDefault)(require("express"));
+const express_1 = tslib_1.__importDefault(require("express"));
 const http_error_codes_1 = require("../../../../shared/models/http/http-error-codes");
 const logger_1 = require("../../../helpers/logger");
 const constants_1 = require("../../../initializers/constants");
@@ -13,14 +13,14 @@ const account_1 = require("../../../models/account/account");
 const account_video_rate_1 = require("../../../models/account/account-video-rate");
 const rateVideoRouter = express_1.default.Router();
 exports.rateVideoRouter = rateVideoRouter;
-rateVideoRouter.put('/:id/rate', middlewares_1.authenticate, (0, middlewares_1.asyncMiddleware)(middlewares_1.videoUpdateRateValidator), (0, middlewares_1.asyncRetryTransactionMiddleware)(rateVideo));
+rateVideoRouter.put('/:id/rate', middlewares_1.authenticate, middlewares_1.asyncMiddleware(middlewares_1.videoUpdateRateValidator), middlewares_1.asyncRetryTransactionMiddleware(rateVideo));
 function rateVideo(req, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const body = req.body;
         const rateType = body.rating;
         const videoInstance = res.locals.videoAll;
         const userAccount = res.locals.oauth.token.User.Account;
-        yield database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        yield database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
             const sequelizeOptions = { transaction: t };
             const accountInstance = yield account_1.AccountModel.load(userAccount.id, t);
             const previousRate = yield account_video_rate_1.AccountVideoRateModel.load(accountInstance.id, videoInstance.id, t);
@@ -42,7 +42,7 @@ function rateVideo(req, res) {
                 }
                 else {
                     previousRate.type = rateType;
-                    previousRate.url = (0, video_rates_1.getLocalRateUrl)(rateType, userAccount.Actor, videoInstance);
+                    previousRate.url = video_rates_1.getLocalRateUrl(rateType, userAccount.Actor, videoInstance);
                     yield previousRate.save(sequelizeOptions);
                 }
             }
@@ -51,7 +51,7 @@ function rateVideo(req, res) {
                     accountId: accountInstance.id,
                     videoId: videoInstance.id,
                     type: rateType,
-                    url: (0, video_rates_1.getLocalRateUrl)(rateType, userAccount.Actor, videoInstance)
+                    url: video_rates_1.getLocalRateUrl(rateType, userAccount.Actor, videoInstance)
                 };
                 yield account_video_rate_1.AccountVideoRateModel.create(query, sequelizeOptions);
             }
@@ -60,7 +60,7 @@ function rateVideo(req, res) {
                 dislikes: dislikesToIncrement
             };
             yield videoInstance.increment(incrementQuery, sequelizeOptions);
-            yield (0, video_rates_1.sendVideoRateChange)(accountInstance, videoInstance, likesToIncrement, dislikesToIncrement, t);
+            yield video_rates_1.sendVideoRateChange(accountInstance, videoInstance, likesToIncrement, dislikesToIncrement, t);
             logger_1.logger.info('Account video rate for video %s of account %s updated.', videoInstance.name, accountInstance.name);
         }));
         return res.type('json')

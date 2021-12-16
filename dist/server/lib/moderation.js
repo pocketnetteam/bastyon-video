@@ -43,9 +43,9 @@ function isPostImportVideoAccepted(object) {
 }
 exports.isPostImportVideoAccepted = isPostImportVideoAccepted;
 function createVideoAbuse(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { baseAbuse, videoInstance, startAt, endAt, transaction, reporterAccount } = options;
-        const associateFun = (abuseInstance) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        const associateFun = (abuseInstance) => tslib_1.__awaiter(this, void 0, void 0, function* () {
             const videoAbuseInstance = yield video_abuse_1.VideoAbuseModel.create({
                 abuseId: abuseInstance.id,
                 videoId: videoInstance.id,
@@ -68,7 +68,7 @@ function createVideoAbuse(options) {
 exports.createVideoAbuse = createVideoAbuse;
 function createVideoCommentAbuse(options) {
     const { baseAbuse, commentInstance, transaction, reporterAccount } = options;
-    const associateFun = (abuseInstance) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    const associateFun = (abuseInstance) => tslib_1.__awaiter(this, void 0, void 0, function* () {
         const commentAbuseInstance = yield video_comment_abuse_1.VideoCommentAbuseModel.create({
             abuseId: abuseInstance.id,
             videoCommentId: commentInstance.id
@@ -101,20 +101,20 @@ function createAccountAbuse(options) {
 }
 exports.createAccountAbuse = createAccountAbuse;
 function createAbuse(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { base, reporterAccount, flaggedAccount, associateFun, transaction } = options;
-        const auditLogger = (0, audit_logger_1.auditLoggerFactory)('abuse');
+        const auditLogger = audit_logger_1.auditLoggerFactory('abuse');
         const abuseAttributes = Object.assign({}, base, { flaggedAccountId: flaggedAccount.id });
         const abuseInstance = yield abuse_1.AbuseModel.create(abuseAttributes, { transaction });
         abuseInstance.ReporterAccount = reporterAccount;
         abuseInstance.FlaggedAccount = flaggedAccount;
         const { isOwned } = yield associateFun(abuseInstance);
         if (isOwned === false) {
-            (0, send_flag_1.sendAbuse)(reporterAccount.Actor, abuseInstance, abuseInstance.FlaggedAccount, transaction);
+            send_flag_1.sendAbuse(reporterAccount.Actor, abuseInstance, abuseInstance.FlaggedAccount, transaction);
         }
         const abuseJSON = abuseInstance.toFormattedAdminJSON();
         auditLogger.create(reporterAccount.Actor.getIdentifier(), new audit_logger_1.AbuseAuditView(abuseJSON));
-        (0, database_utils_1.afterCommitIfTransaction)(transaction, () => {
+        database_utils_1.afterCommitIfTransaction(transaction, () => {
             notifier_1.Notifier.Instance.notifyOnNewAbuse({
                 abuse: abuseJSON,
                 abuseInstance,

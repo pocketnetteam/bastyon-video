@@ -2,19 +2,19 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadActorUrlOrGetFromWebfinger = exports.getUrlFromWebfinger = void 0;
 const tslib_1 = require("tslib");
-const webfinger_js_1 = (0, tslib_1.__importDefault)(require("webfinger.js"));
+const webfinger_js_1 = tslib_1.__importDefault(require("webfinger.js"));
 const core_utils_1 = require("@server/helpers/core-utils");
 const misc_1 = require("@server/helpers/custom-validators/activitypub/misc");
 const constants_1 = require("@server/initializers/constants");
 const actor_1 = require("@server/models/actor/actor");
 const webfinger = new webfinger_js_1.default({
     webfist_fallback: false,
-    tls_only: (0, core_utils_1.isProdInstance)(),
+    tls_only: core_utils_1.isProdInstance(),
     uri_fallback: false,
     request_timeout: constants_1.REQUEST_TIMEOUT
 });
 function loadActorUrlOrGetFromWebfinger(uriArg) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const uri = uriArg.startsWith('@') ? uriArg.slice(1) : uriArg;
         const [name, host] = uri.split('@');
         let actor;
@@ -31,7 +31,7 @@ function loadActorUrlOrGetFromWebfinger(uriArg) {
 }
 exports.loadActorUrlOrGetFromWebfinger = loadActorUrlOrGetFromWebfinger;
 function getUrlFromWebfinger(uri) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const webfingerData = yield webfingerLookup(uri);
         return getLinkOrThrow(webfingerData);
     });
@@ -41,7 +41,7 @@ function getLinkOrThrow(webfingerData) {
     if (Array.isArray(webfingerData.links) === false)
         throw new Error('WebFinger links is not an array.');
     const selfLink = webfingerData.links.find(l => l.rel === 'self');
-    if (selfLink === undefined || (0, misc_1.isActivityPubUrlValid)(selfLink.href) === false) {
+    if (selfLink === undefined || misc_1.isActivityPubUrlValid(selfLink.href) === false) {
         throw new Error('Cannot find self link or href is not a valid URL.');
     }
     return selfLink.href;

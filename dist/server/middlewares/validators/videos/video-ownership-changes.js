@@ -11,14 +11,14 @@ const account_1 = require("@server/models/account/account");
 const models_1 = require("@shared/models");
 const shared_1 = require("../shared");
 const videosChangeOwnershipValidator = [
-    (0, shared_1.isValidVideoIdParam)('videoId'),
-    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
+    shared_1.isValidVideoIdParam('videoId'),
+    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking changeOwnership parameters', { parameters: req.params });
-        if ((0, shared_1.areValidationErrors)(req, res))
+        if (shared_1.areValidationErrors(req, res))
             return;
-        if (!(yield (0, shared_1.doesVideoExist)(req.params.videoId, res)))
+        if (!(yield shared_1.doesVideoExist(req.params.videoId, res)))
             return;
-        if (!(0, shared_1.checkUserCanManageVideo)(res.locals.oauth.token.User, res.locals.videoAll, 22, res))
+        if (!shared_1.checkUserCanManageVideo(res.locals.oauth.token.User, res.locals.videoAll, 22, res))
             return;
         const nextOwner = yield account_1.AccountModel.loadLocalByName(req.body.username);
         if (!nextOwner) {
@@ -31,15 +31,15 @@ const videosChangeOwnershipValidator = [
 ];
 exports.videosChangeOwnershipValidator = videosChangeOwnershipValidator;
 const videosTerminateChangeOwnershipValidator = [
-    (0, express_validator_1.param)('id')
+    express_validator_1.param('id')
         .custom(misc_1.isIdValid).withMessage('Should have a valid id'),
-    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
+    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking changeOwnership parameters', { parameters: req.params });
-        if ((0, shared_1.areValidationErrors)(req, res))
+        if (shared_1.areValidationErrors(req, res))
             return;
-        if (!(yield (0, shared_1.doesChangeVideoOwnershipExist)(req.params.id, res)))
+        if (!(yield shared_1.doesChangeVideoOwnershipExist(req.params.id, res)))
             return;
-        if (!(0, video_ownership_1.checkUserCanTerminateOwnershipChange)(res.locals.oauth.token.User, res.locals.videoChangeOwnership, res))
+        if (!video_ownership_1.checkUserCanTerminateOwnershipChange(res.locals.oauth.token.User, res.locals.videoChangeOwnership, res))
             return;
         const videoChangeOwnership = res.locals.videoChangeOwnership;
         if (videoChangeOwnership.status !== "WAITING") {
@@ -54,9 +54,9 @@ const videosTerminateChangeOwnershipValidator = [
 ];
 exports.videosTerminateChangeOwnershipValidator = videosTerminateChangeOwnershipValidator;
 const videosAcceptChangeOwnershipValidator = [
-    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
+    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
         const body = req.body;
-        if (!(yield (0, shared_1.doesVideoChannelOfAccountExist)(body.channelId, res.locals.oauth.token.User, res)))
+        if (!(yield shared_1.doesVideoChannelOfAccountExist(body.channelId, res.locals.oauth.token.User, res)))
             return;
         const videoChangeOwnership = res.locals.videoChangeOwnership;
         const video = videoChangeOwnership.Video;
@@ -67,7 +67,7 @@ const videosAcceptChangeOwnershipValidator = [
 ];
 exports.videosAcceptChangeOwnershipValidator = videosAcceptChangeOwnershipValidator;
 function checkCanAccept(video, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         if (video.isLive) {
             if (video.state !== 4) {
                 res.fail({
@@ -79,7 +79,7 @@ function checkCanAccept(video, res) {
             return true;
         }
         const user = res.locals.oauth.token.User;
-        if (!(yield (0, user_1.isAbleToUploadVideo)(user.id, video.getMaxQualityFile().size))) {
+        if (!(yield user_1.isAbleToUploadVideo(user.id, video.getMaxQualityFile().size))) {
             res.fail({
                 status: models_1.HttpStatusCode.PAYLOAD_TOO_LARGE_413,
                 message: 'The user video quota is exceeded with this video.',

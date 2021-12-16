@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = (0, tslib_1.__importStar)(require("chai"));
+const chai = tslib_1.__importStar(require("chai"));
 const extra_utils_1 = require("@shared/extra-utils");
 const expect = chai.expect;
 describe('Test abuses', function () {
@@ -11,17 +11,17 @@ describe('Test abuses', function () {
     let abuseServer2;
     let commands;
     before(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(50000);
-            servers = yield (0, extra_utils_1.createMultipleServers)(2);
-            yield (0, extra_utils_1.setAccessTokensToServers)(servers);
-            yield (0, extra_utils_1.doubleFollow)(servers[0], servers[1]);
+            servers = yield extra_utils_1.createMultipleServers(2);
+            yield extra_utils_1.setAccessTokensToServers(servers);
+            yield extra_utils_1.doubleFollow(servers[0], servers[1]);
             commands = servers.map(s => s.abuses);
         });
     });
     describe('Video abuses', function () {
         before(function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(50000);
                 {
                     const attributes = {
@@ -37,7 +37,7 @@ describe('Test abuses', function () {
                     };
                     yield servers[1].videos.upload({ attributes });
                 }
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 const { data } = yield servers[0].videos.list();
                 expect(data.length).to.equal(2);
                 servers[0].store.videoCreated = data.find(video => video.name === 'my super name for server 1');
@@ -45,7 +45,7 @@ describe('Test abuses', function () {
             });
         });
         it('Should not have abuses', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const body = yield commands[0].getAdminList();
                 expect(body.total).to.equal(0);
                 expect(body.data).to.be.an('array');
@@ -53,15 +53,15 @@ describe('Test abuses', function () {
             });
         });
         it('Should report abuse on a local video', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(15000);
                 const reason = 'my super bad reason';
                 yield commands[0].report({ videoId: servers[0].store.videoCreated.id, reason });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
             });
         });
         it('Should have 1 video abuses on server 1 and 0 on server 2', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 {
                     const body = yield commands[0].getAdminList();
                     expect(body.total).to.equal(1);
@@ -90,16 +90,16 @@ describe('Test abuses', function () {
             });
         });
         it('Should report abuse on a remote video', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 const reason = 'my super bad reason 2';
                 const videoId = yield servers[0].videos.getId({ uuid: servers[1].store.videoCreated.uuid });
                 yield commands[0].report({ videoId, reason });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
             });
         });
         it('Should have 2 video abuses on server 1 and 1 on server 2', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 {
                     const body = yield commands[0].getAdminList();
                     expect(body.total).to.equal(2);
@@ -146,12 +146,12 @@ describe('Test abuses', function () {
             });
         });
         it('Should hide video abuses from blocked accounts', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 {
                     const videoId = yield servers[1].videos.getId({ uuid: servers[0].store.videoCreated.uuid });
                     yield commands[1].report({ videoId, reason: 'will mute this' });
-                    yield (0, extra_utils_1.waitJobs)(servers);
+                    yield extra_utils_1.waitJobs(servers);
                     const body = yield commands[0].getAdminList();
                     expect(body.total).to.equal(3);
                 }
@@ -171,7 +171,7 @@ describe('Test abuses', function () {
             });
         });
         it('Should hide video abuses from blocked servers', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const serverToBlock = servers[1].host;
                 {
                     yield servers[0].blocklist.addToServerBlocklist({ server: serverToBlock });
@@ -188,10 +188,10 @@ describe('Test abuses', function () {
             });
         });
         it('Should keep the video abuse when deleting the video', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 yield servers[1].videos.remove({ id: abuseServer2.video.uuid });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 const body = yield commands[1].getAdminList();
                 expect(body.total).to.equal(2, "wrong number of videos returned");
                 expect(body.data).to.have.lengthOf(2, "wrong number of videos returned");
@@ -203,7 +203,7 @@ describe('Test abuses', function () {
             });
         });
         it('Should include counts of reports from reporter and reportee', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 const user = { username: 'user2', password: 'password' };
                 yield servers[0].users.create(Object.assign({}, user));
@@ -233,7 +233,7 @@ describe('Test abuses', function () {
             });
         });
         it('Should list predefined reasons as well as timestamps for the reported video', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 const reason5 = 'my super bad reason 5';
                 const predefinedReasons5 = ['violentOrRepulsive', 'captions'];
@@ -255,10 +255,10 @@ describe('Test abuses', function () {
             });
         });
         it('Should delete the video abuse', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 yield commands[1].delete({ abuseId: abuseServer2.id });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 {
                     const body = yield commands[1].getAdminList();
                     expect(body.total).to.equal(1);
@@ -272,10 +272,10 @@ describe('Test abuses', function () {
             });
         });
         it('Should list and filter video abuses', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 function list(query) {
-                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
                         const body = yield commands[0].getAdminList(query);
                         return body.data;
                     });
@@ -302,7 +302,7 @@ describe('Test abuses', function () {
     });
     describe('Comment abuses', function () {
         function getComment(server, videoIdArg) {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const videoId = typeof videoIdArg === 'string'
                     ? yield server.videos.getId({ uuid: videoIdArg })
                     : videoIdArg;
@@ -311,26 +311,26 @@ describe('Test abuses', function () {
             });
         }
         before(function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(50000);
                 servers[0].store.videoCreated = yield servers[0].videos.quickUpload({ name: 'server 1' });
                 servers[1].store.videoCreated = yield servers[1].videos.quickUpload({ name: 'server 2' });
                 yield servers[0].comments.createThread({ videoId: servers[0].store.videoCreated.id, text: 'comment server 1' });
                 yield servers[1].comments.createThread({ videoId: servers[1].store.videoCreated.id, text: 'comment server 2' });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
             });
         });
         it('Should report abuse on a comment', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(15000);
                 const comment = yield getComment(servers[0], servers[0].store.videoCreated.id);
                 const reason = 'it is a bad comment';
                 yield commands[0].report({ commentId: comment.id, reason });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
             });
         });
         it('Should have 1 comment abuse on server 1 and 0 on server 2', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 {
                     const comment = yield getComment(servers[0], servers[0].store.videoCreated.id);
                     const body = yield commands[0].getAdminList({ filter: 'comment' });
@@ -358,16 +358,16 @@ describe('Test abuses', function () {
             });
         });
         it('Should report abuse on a remote comment', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 const comment = yield getComment(servers[0], servers[1].store.videoCreated.uuid);
                 const reason = 'it is a really bad comment';
                 yield commands[0].report({ commentId: comment.id, reason });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
             });
         });
         it('Should have 2 comment abuses on server 1 and 1 on server 2', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const commentServer2 = yield getComment(servers[0], servers[1].store.videoCreated.id);
                 {
                     const body = yield commands[0].getAdminList({ filter: 'comment' });
@@ -410,11 +410,11 @@ describe('Test abuses', function () {
             });
         });
         it('Should keep the comment abuse when deleting the comment', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 const commentServer2 = yield getComment(servers[0], servers[1].store.videoCreated.id);
                 yield servers[0].comments.delete({ videoId: servers[1].store.videoCreated.uuid, commentId: commentServer2.id });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 const body = yield commands[0].getAdminList({ filter: 'comment' });
                 expect(body.total).to.equal(2);
                 expect(body.data).to.have.lengthOf(2);
@@ -426,10 +426,10 @@ describe('Test abuses', function () {
             });
         });
         it('Should delete the comment abuse', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 yield commands[1].delete({ abuseId: abuseServer2.id });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 {
                     const body = yield commands[1].getAdminList({ filter: 'comment' });
                     expect(body.total).to.equal(0);
@@ -442,7 +442,7 @@ describe('Test abuses', function () {
             });
         });
         it('Should list and filter video abuses', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 {
                     const body = yield commands[0].getAdminList({ filter: 'comment', searchReportee: 'foo' });
                     expect(body.total).to.equal(0);
@@ -469,25 +469,25 @@ describe('Test abuses', function () {
             return server.accounts.get({ accountName: targetName + '@' + targetServer.host });
         }
         before(function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(50000);
                 yield servers[0].users.create({ username: 'user_1', password: 'donald' });
                 const token = yield servers[1].users.generateUserAndToken('user_2');
                 yield servers[1].videos.upload({ token, attributes: { name: 'super video' } });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
             });
         });
         it('Should report abuse on an account', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(15000);
                 const account = yield getAccountFromServer(servers[0], 'user_1', servers[0]);
                 const reason = 'it is a bad account';
                 yield commands[0].report({ accountId: account.id, reason });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
             });
         });
         it('Should have 1 account abuse on server 1 and 0 on server 2', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 {
                     const body = yield commands[0].getAdminList({ filter: 'account' });
                     expect(body.total).to.equal(1);
@@ -509,16 +509,16 @@ describe('Test abuses', function () {
             });
         });
         it('Should report abuse on a remote account', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 const account = yield getAccountFromServer(servers[0], 'user_2', servers[1]);
                 const reason = 'it is a really bad account';
                 yield commands[0].report({ accountId: account.id, reason });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
             });
         });
         it('Should have 2 comment abuses on server 1 and 1 on server 2', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 {
                     const body = yield commands[0].getAdminList({ filter: 'account' });
                     expect(body.total).to.equal(2);
@@ -550,11 +550,11 @@ describe('Test abuses', function () {
             });
         });
         it('Should keep the account abuse when deleting the account', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 const account = yield getAccountFromServer(servers[1], 'user_2', servers[1]);
                 yield servers[1].users.remove({ userId: account.userId });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 const body = yield commands[0].getAdminList({ filter: 'account' });
                 expect(body.total).to.equal(2);
                 expect(body.data).to.have.lengthOf(2);
@@ -563,10 +563,10 @@ describe('Test abuses', function () {
             });
         });
         it('Should delete the account abuse', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 yield commands[1].delete({ abuseId: abuseServer2.id });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 {
                     const body = yield commands[1].getAdminList({ filter: 'account' });
                     expect(body.total).to.equal(0);
@@ -582,14 +582,14 @@ describe('Test abuses', function () {
     });
     describe('Common actions on abuses', function () {
         it('Should update the state of an abuse', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 yield commands[0].update({ abuseId: abuseServer1.id, body: { state: 2 } });
                 const body = yield commands[0].getAdminList({ id: abuseServer1.id });
                 expect(body.data[0].state.id).to.equal(2);
             });
         });
         it('Should add a moderation comment', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 yield commands[0].update({ abuseId: abuseServer1.id, body: { state: 3, moderationComment: 'Valid' } });
                 const body = yield commands[0].getAdminList({ id: abuseServer1.id });
                 expect(body.data[0].state.id).to.equal(3);
@@ -598,11 +598,11 @@ describe('Test abuses', function () {
         });
     });
     describe('My abuses', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             let abuseId1;
             let userAccessToken;
             before(function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     userAccessToken = yield servers[0].users.generateUserAndToken('user_42');
                     yield commands[0].report({ token: userAccessToken, videoId: servers[0].store.videoCreated.id, reason: 'user reason 1' });
                     const videoId = yield servers[0].videos.getId({ uuid: servers[1].store.videoCreated.uuid });
@@ -610,7 +610,7 @@ describe('Test abuses', function () {
                 });
             });
             it('Should correctly list my abuses', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     {
                         const body = yield commands[0].getUserList({ token: userAccessToken, start: 0, count: 5, sort: 'createdAt' });
                         expect(body.total).to.equal(2);
@@ -634,7 +634,7 @@ describe('Test abuses', function () {
                 });
             });
             it('Should correctly filter my abuses by id', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     const body = yield commands[0].getUserList({ token: userAccessToken, id: abuseId1 });
                     expect(body.total).to.equal(1);
                     const abuses = body.data;
@@ -642,7 +642,7 @@ describe('Test abuses', function () {
                 });
             });
             it('Should correctly filter my abuses by search', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     const body = yield commands[0].getUserList({ token: userAccessToken, search: 'server 2' });
                     expect(body.total).to.equal(1);
                     const abuses = body.data;
@@ -650,7 +650,7 @@ describe('Test abuses', function () {
                 });
             });
             it('Should correctly filter my abuses by state', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     yield commands[0].update({ abuseId: abuseId1, body: { state: 2 } });
                     const body = yield commands[0].getUserList({ token: userAccessToken, state: 2 });
                     expect(body.total).to.equal(1);
@@ -661,20 +661,20 @@ describe('Test abuses', function () {
         });
     });
     describe('Abuse messages', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             let abuseId;
             let userToken;
             let abuseMessageUserId;
             let abuseMessageModerationId;
             before(function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     userToken = yield servers[0].users.generateUserAndToken('user_43');
                     const body = yield commands[0].report({ token: userToken, videoId: servers[0].store.videoCreated.id, reason: 'user 43 reason 1' });
                     abuseId = body.abuse.id;
                 });
             });
             it('Should create some messages on the abuse', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     yield commands[0].addMessage({ token: userToken, abuseId, message: 'message 1' });
                     yield commands[0].addMessage({ abuseId, message: 'message 2' });
                     yield commands[0].addMessage({ abuseId, message: 'message 3' });
@@ -682,7 +682,7 @@ describe('Test abuses', function () {
                 });
             });
             it('Should have the correct messages count when listing abuses', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     const results = yield Promise.all([
                         commands[0].getAdminList({ start: 0, count: 50 }),
                         commands[0].getUserList({ token: userToken, start: 0, count: 50 })
@@ -695,7 +695,7 @@ describe('Test abuses', function () {
                 });
             });
             it('Should correctly list messages of this abuse', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     const results = yield Promise.all([
                         commands[0].listMessages({ abuseId }),
                         commands[0].listMessages({ token: userToken, abuseId })
@@ -721,7 +721,7 @@ describe('Test abuses', function () {
                 });
             });
             it('Should delete messages', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     yield commands[0].deleteMessage({ abuseId, messageId: abuseMessageModerationId });
                     yield commands[0].deleteMessage({ token: userToken, abuseId, messageId: abuseMessageUserId });
                     const results = yield Promise.all([
@@ -739,8 +739,8 @@ describe('Test abuses', function () {
         });
     });
     after(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            yield (0, extra_utils_1.cleanupTests)(servers);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield extra_utils_1.cleanupTests(servers);
         });
     });
 });

@@ -9,11 +9,11 @@ const constants_1 = require("../../../initializers/constants");
 const url_1 = require("../../../lib/activitypub/url");
 const video_caption_1 = require("../video-caption");
 function videoModelToFormattedJSON(video, options) {
-    const userHistory = (0, misc_1.isArray)(video.UserVideoHistories) ? video.UserVideoHistories[0] : undefined;
+    const userHistory = misc_1.isArray(video.UserVideoHistories) ? video.UserVideoHistories[0] : undefined;
     const videoObject = {
         id: video.id,
         uuid: video.uuid,
-        shortUUID: (0, uuid_1.uuidToShort)(video.uuid),
+        shortUUID: uuid_1.uuidToShort(video.uuid),
         name: video.name,
         category: {
             id: video.category,
@@ -112,11 +112,11 @@ function videoModelToFormattedDetailsJSON(video) {
 }
 exports.videoModelToFormattedDetailsJSON = videoModelToFormattedDetailsJSON;
 function streamingPlaylistsModelToFormattedJSON(video, playlists) {
-    if ((0, misc_1.isArray)(playlists) === false)
+    if (misc_1.isArray(playlists) === false)
         return [];
     return playlists
         .map(playlist => {
-        const redundancies = (0, misc_1.isArray)(playlist.RedundancyVideos)
+        const redundancies = misc_1.isArray(playlist.RedundancyVideos)
             ? playlist.RedundancyVideos.map(r => ({ baseUrl: r.fileUrl }))
             : [];
         const files = videoFilesModelToFormattedJSON(video, playlist.VideoFiles);
@@ -152,7 +152,7 @@ function videoFilesModelToFormattedJSON(video, videoFiles, includeMagnet = true)
                 label: videoFile.resolution === 0 ? 'Audio' : `${videoFile.resolution}p`
             },
             magnetUri: includeMagnet && videoFile.hasTorrent()
-                ? (0, webtorrent_1.generateMagnetUri)(video, videoFile, trackerUrls)
+                ? webtorrent_1.generateMagnetUri(video, videoFile, trackerUrls)
                 : undefined,
             size: videoFile.size,
             fps: videoFile.fps,
@@ -160,7 +160,7 @@ function videoFilesModelToFormattedJSON(video, videoFiles, includeMagnet = true)
             torrentDownloadUrl: videoFile.getTorrentDownloadUrl(),
             fileUrl: videoFile.getFileUrl(video),
             fileDownloadUrl: videoFile.getFileDownloadUrl(video),
-            metadataUrl: (_a = videoFile.metadataUrl) !== null && _a !== void 0 ? _a : (0, video_urls_1.getLocalVideoFileMetadataUrl)(video, videoFile)
+            metadataUrl: (_a = videoFile.metadataUrl) !== null && _a !== void 0 ? _a : video_urls_1.getLocalVideoFileMetadataUrl(video, videoFile)
         };
     });
 }
@@ -183,7 +183,7 @@ function addVideoFilesInAPAcc(acc, video, files) {
             type: 'Link',
             rel: ['metadata', constants_1.MIMETYPES.VIDEO.EXT_MIMETYPE[file.extname]],
             mediaType: 'application/json',
-            href: (0, video_urls_1.getLocalVideoFileMetadataUrl)(video, file),
+            href: video_urls_1.getLocalVideoFileMetadataUrl(video, file),
             height: file.resolution,
             fps: file.fps
         });
@@ -197,7 +197,7 @@ function addVideoFilesInAPAcc(acc, video, files) {
             acc.push({
                 type: 'Link',
                 mediaType: 'application/x-bittorrent;x-scheme-handler/magnet',
-                href: (0, webtorrent_1.generateMagnetUri)(video, file, trackerUrls),
+                href: webtorrent_1.generateMagnetUri(video, file, trackerUrls),
                 height: file.resolution
             });
         }
@@ -317,10 +317,10 @@ function videoModelToActivityPubObject(video) {
             height: i.height
         })),
         url,
-        likes: (0, url_1.getLocalVideoLikesActivityPubUrl)(video),
-        dislikes: (0, url_1.getLocalVideoDislikesActivityPubUrl)(video),
-        shares: (0, url_1.getLocalVideoSharesActivityPubUrl)(video),
-        comments: (0, url_1.getLocalVideoCommentsActivityPubUrl)(video),
+        likes: url_1.getLocalVideoLikesActivityPubUrl(video),
+        dislikes: url_1.getLocalVideoDislikesActivityPubUrl(video),
+        shares: url_1.getLocalVideoSharesActivityPubUrl(video),
+        comments: url_1.getLocalVideoCommentsActivityPubUrl(video),
         attributedTo: [
             {
                 type: 'Person',

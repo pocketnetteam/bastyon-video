@@ -14,7 +14,7 @@ const video_state_1 = require("@server/lib/video-state");
 const video_1 = require("@server/models/video/video");
 const video_job_info_1 = require("@server/models/video/video-job-info");
 function processMoveToObjectStorage(job) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const payload = job.data;
         logger_1.logger.info('Moving video %s in job %d.', payload.videoUUID, job.id);
         const video = yield video_1.VideoModel.loadWithFiles(payload.videoUUID);
@@ -38,57 +38,57 @@ function processMoveToObjectStorage(job) {
 }
 exports.processMoveToObjectStorage = processMoveToObjectStorage;
 function moveWebTorrentFiles(video) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         for (const file of video.VideoFiles) {
             if (file.storage !== 0)
                 continue;
-            const fileUrl = yield (0, object_storage_1.storeWebTorrentFile)(file.filename);
-            const oldPath = (0, path_1.join)(config_1.CONFIG.STORAGE.VIDEOS_DIR, file.filename);
+            const fileUrl = yield object_storage_1.storeWebTorrentFile(file.filename);
+            const oldPath = path_1.join(config_1.CONFIG.STORAGE.VIDEOS_DIR, file.filename);
             yield onFileMoved({ videoOrPlaylist: video, file, fileUrl, oldPath });
         }
     });
 }
 function moveHLSFiles(video) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         for (const playlist of video.VideoStreamingPlaylists) {
             for (const file of playlist.VideoFiles) {
                 if (file.storage !== 0)
                     continue;
-                const playlistFilename = (0, paths_1.getHlsResolutionPlaylistFilename)(file.filename);
-                yield (0, object_storage_1.storeHLSFile)(playlist, video, playlistFilename);
-                const fileUrl = yield (0, object_storage_1.storeHLSFile)(playlist, video, file.filename);
-                const oldPath = (0, path_1.join)((0, paths_1.getHLSDirectory)(video), file.filename);
+                const playlistFilename = paths_1.getHlsResolutionPlaylistFilename(file.filename);
+                yield object_storage_1.storeHLSFile(playlist, video, playlistFilename);
+                const fileUrl = yield object_storage_1.storeHLSFile(playlist, video, file.filename);
+                const oldPath = path_1.join(paths_1.getHLSDirectory(video), file.filename);
                 yield onFileMoved({ videoOrPlaylist: Object.assign(playlist, { Video: video }), file, fileUrl, oldPath });
             }
         }
     });
 }
 function doAfterLastJob(video, isNewVideo) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         for (const playlist of video.VideoStreamingPlaylists) {
             if (playlist.storage === 1)
                 continue;
-            playlist.playlistUrl = yield (0, object_storage_1.storeHLSFile)(playlist, video, playlist.playlistFilename);
-            playlist.segmentsSha256Url = yield (0, object_storage_1.storeHLSFile)(playlist, video, playlist.segmentsSha256Filename);
+            playlist.playlistUrl = yield object_storage_1.storeHLSFile(playlist, video, playlist.playlistFilename);
+            playlist.segmentsSha256Url = yield object_storage_1.storeHLSFile(playlist, video, playlist.segmentsSha256Filename);
             playlist.storage = 1;
             playlist.assignP2PMediaLoaderInfoHashes(video, playlist.VideoFiles);
             playlist.p2pMediaLoaderPeerVersion = constants_1.P2P_MEDIA_LOADER_PEER_VERSION;
             yield playlist.save();
         }
         if (video.VideoStreamingPlaylists) {
-            yield (0, fs_extra_1.remove)((0, paths_1.getHLSDirectory)(video));
+            yield fs_extra_1.remove(paths_1.getHLSDirectory(video));
         }
-        yield (0, video_state_1.moveToNextState)(video, isNewVideo);
+        yield video_state_1.moveToNextState(video, isNewVideo);
     });
 }
 function onFileMoved(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { videoOrPlaylist, file, fileUrl, oldPath } = options;
         file.fileUrl = fileUrl;
         file.storage = 1;
-        yield (0, webtorrent_1.updateTorrentUrls)(videoOrPlaylist, file);
+        yield webtorrent_1.updateTorrentUrls(videoOrPlaylist, file);
         yield file.save();
         logger_1.logger.debug('Removing %s because it\'s now on object storage', oldPath);
-        yield (0, fs_extra_1.remove)(oldPath);
+        yield fs_extra_1.remove(oldPath);
     });
 }

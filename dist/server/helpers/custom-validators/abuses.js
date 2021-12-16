@@ -2,18 +2,18 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isAbuseVideoIsValid = exports.isAbuseStateValid = exports.isAbuseModerationCommentValid = exports.isAbuseTimestampCoherent = exports.isAbuseTimestampValid = exports.areAbusePredefinedReasonsValid = exports.isAbuseMessageValid = exports.isAbusePredefinedReasonValid = exports.isAbuseFilterValid = exports.isAbuseReasonValid = void 0;
 const tslib_1 = require("tslib");
-const validator_1 = (0, tslib_1.__importDefault)(require("validator"));
+const validator_1 = tslib_1.__importDefault(require("validator"));
 const abuse_1 = require("@shared/core-utils/abuse");
 const constants_1 = require("../../initializers/constants");
 const misc_1 = require("./misc");
 const ABUSES_CONSTRAINTS_FIELDS = constants_1.CONSTRAINTS_FIELDS.ABUSES;
 const ABUSE_MESSAGES_CONSTRAINTS_FIELDS = constants_1.CONSTRAINTS_FIELDS.ABUSE_MESSAGES;
 function isAbuseReasonValid(value) {
-    return (0, misc_1.exists)(value) && validator_1.default.isLength(value, ABUSES_CONSTRAINTS_FIELDS.REASON);
+    return misc_1.exists(value) && validator_1.default.isLength(value, ABUSES_CONSTRAINTS_FIELDS.REASON);
 }
 exports.isAbuseReasonValid = isAbuseReasonValid;
 function isAbusePredefinedReasonValid(value) {
-    return (0, misc_1.exists)(value) && value in abuse_1.abusePredefinedReasonsMap;
+    return misc_1.exists(value) && value in abuse_1.abusePredefinedReasonsMap;
 }
 exports.isAbusePredefinedReasonValid = isAbusePredefinedReasonValid;
 function isAbuseFilterValid(value) {
@@ -21,32 +21,32 @@ function isAbuseFilterValid(value) {
 }
 exports.isAbuseFilterValid = isAbuseFilterValid;
 function areAbusePredefinedReasonsValid(value) {
-    return (0, misc_1.exists)(value) && (0, misc_1.isArray)(value) && value.every(v => v in abuse_1.abusePredefinedReasonsMap);
+    return misc_1.exists(value) && misc_1.isArray(value) && value.every(v => v in abuse_1.abusePredefinedReasonsMap);
 }
 exports.areAbusePredefinedReasonsValid = areAbusePredefinedReasonsValid;
 function isAbuseTimestampValid(value) {
-    return value === null || ((0, misc_1.exists)(value) && validator_1.default.isInt('' + value, { min: 0 }));
+    return value === null || (misc_1.exists(value) && validator_1.default.isInt('' + value, { min: 0 }));
 }
 exports.isAbuseTimestampValid = isAbuseTimestampValid;
 function isAbuseTimestampCoherent(endAt, { req }) {
     const startAt = req.body.video.startAt;
-    return (0, misc_1.exists)(startAt) && endAt > startAt;
+    return misc_1.exists(startAt) && endAt > startAt;
 }
 exports.isAbuseTimestampCoherent = isAbuseTimestampCoherent;
 function isAbuseModerationCommentValid(value) {
-    return (0, misc_1.exists)(value) && validator_1.default.isLength(value, ABUSES_CONSTRAINTS_FIELDS.MODERATION_COMMENT);
+    return misc_1.exists(value) && validator_1.default.isLength(value, ABUSES_CONSTRAINTS_FIELDS.MODERATION_COMMENT);
 }
 exports.isAbuseModerationCommentValid = isAbuseModerationCommentValid;
 function isAbuseStateValid(value) {
-    return (0, misc_1.exists)(value) && constants_1.ABUSE_STATES[value] !== undefined;
+    return misc_1.exists(value) && constants_1.ABUSE_STATES[value] !== undefined;
 }
 exports.isAbuseStateValid = isAbuseStateValid;
 function isAbuseVideoIsValid(value) {
-    return (0, misc_1.exists)(value) && (value === 'deleted' ||
+    return misc_1.exists(value) && (value === 'deleted' ||
         value === 'blacklisted');
 }
 exports.isAbuseVideoIsValid = isAbuseVideoIsValid;
 function isAbuseMessageValid(value) {
-    return (0, misc_1.exists)(value) && validator_1.default.isLength(value, ABUSE_MESSAGES_CONSTRAINTS_FIELDS.MESSAGE);
+    return misc_1.exists(value) && validator_1.default.isLength(value, ABUSE_MESSAGES_CONSTRAINTS_FIELDS.MESSAGE);
 }
 exports.isAbuseMessageValid = isAbuseMessageValid;

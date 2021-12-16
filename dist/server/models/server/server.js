@@ -27,7 +27,7 @@ let ServerModel = ServerModel_1 = class ServerModel extends sequelize_typescript
         return ServerModel_1.findOne(query);
     }
     static loadOrCreateByHost(host) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             let server = yield ServerModel_1.loadByHost(host);
             if (!server)
                 server = yield ServerModel_1.create({ host });
@@ -43,28 +43,28 @@ let ServerModel = ServerModel_1 = class ServerModel extends sequelize_typescript
         };
     }
 };
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(false),
-    (0, sequelize_typescript_1.Is)('Host', value => (0, utils_1.throwIfNotValid)(value, servers_1.isHostValid, 'valid host')),
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(false),
+    sequelize_typescript_1.Is('Host', value => utils_1.throwIfNotValid(value, servers_1.isHostValid, 'valid host')),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", String)
+    tslib_1.__metadata("design:type", String)
 ], ServerModel.prototype, "host", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(false),
-    (0, sequelize_typescript_1.Default)(false),
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(false),
+    sequelize_typescript_1.Default(false),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", Boolean)
+    tslib_1.__metadata("design:type", Boolean)
 ], ServerModel.prototype, "redundancyAllowed", void 0);
-(0, tslib_1.__decorate)([
+tslib_1.__decorate([
     sequelize_typescript_1.CreatedAt,
-    (0, tslib_1.__metadata)("design:type", Date)
+    tslib_1.__metadata("design:type", Date)
 ], ServerModel.prototype, "createdAt", void 0);
-(0, tslib_1.__decorate)([
+tslib_1.__decorate([
     sequelize_typescript_1.UpdatedAt,
-    (0, tslib_1.__metadata)("design:type", Date)
+    tslib_1.__metadata("design:type", Date)
 ], ServerModel.prototype, "updatedAt", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.HasMany)(() => actor_1.ActorModel, {
+tslib_1.__decorate([
+    sequelize_typescript_1.HasMany(() => actor_1.ActorModel, {
         foreignKey: {
             name: 'serverId',
             allowNull: true
@@ -72,19 +72,19 @@ let ServerModel = ServerModel_1 = class ServerModel extends sequelize_typescript
         onDelete: 'CASCADE',
         hooks: true
     }),
-    (0, tslib_1.__metadata)("design:type", Array)
+    tslib_1.__metadata("design:type", Array)
 ], ServerModel.prototype, "Actors", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.HasMany)(() => server_blocklist_1.ServerBlocklistModel, {
+tslib_1.__decorate([
+    sequelize_typescript_1.HasMany(() => server_blocklist_1.ServerBlocklistModel, {
         foreignKey: {
             allowNull: false
         },
         onDelete: 'CASCADE'
     }),
-    (0, tslib_1.__metadata)("design:type", Array)
+    tslib_1.__metadata("design:type", Array)
 ], ServerModel.prototype, "BlockedByAccounts", void 0);
-ServerModel = ServerModel_1 = (0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.Table)({
+ServerModel = ServerModel_1 = tslib_1.__decorate([
+    sequelize_typescript_1.Table({
         tableName: 'server',
         indexes: [
             {

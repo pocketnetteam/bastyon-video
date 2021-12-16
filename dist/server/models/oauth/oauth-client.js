@@ -22,40 +22,40 @@ let OAuthClientModel = OAuthClientModel_1 = class OAuthClientModel extends seque
         return OAuthClientModel_1.findOne(query);
     }
 };
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(false),
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(false),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", String)
+    tslib_1.__metadata("design:type", String)
 ], OAuthClientModel.prototype, "clientId", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(false),
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(false),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", String)
+    tslib_1.__metadata("design:type", String)
 ], OAuthClientModel.prototype, "clientSecret", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.ARRAY(sequelize_typescript_1.DataType.STRING)),
-    (0, tslib_1.__metadata)("design:type", Array)
+tslib_1.__decorate([
+    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.ARRAY(sequelize_typescript_1.DataType.STRING)),
+    tslib_1.__metadata("design:type", Array)
 ], OAuthClientModel.prototype, "grants", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.ARRAY(sequelize_typescript_1.DataType.STRING)),
-    (0, tslib_1.__metadata)("design:type", Array)
+tslib_1.__decorate([
+    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.ARRAY(sequelize_typescript_1.DataType.STRING)),
+    tslib_1.__metadata("design:type", Array)
 ], OAuthClientModel.prototype, "redirectUris", void 0);
-(0, tslib_1.__decorate)([
+tslib_1.__decorate([
     sequelize_typescript_1.CreatedAt,
-    (0, tslib_1.__metadata)("design:type", Date)
+    tslib_1.__metadata("design:type", Date)
 ], OAuthClientModel.prototype, "createdAt", void 0);
-(0, tslib_1.__decorate)([
+tslib_1.__decorate([
     sequelize_typescript_1.UpdatedAt,
-    (0, tslib_1.__metadata)("design:type", Date)
+    tslib_1.__metadata("design:type", Date)
 ], OAuthClientModel.prototype, "updatedAt", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.HasMany)(() => oauth_token_1.OAuthTokenModel, {
+tslib_1.__decorate([
+    sequelize_typescript_1.HasMany(() => oauth_token_1.OAuthTokenModel, {
         onDelete: 'cascade'
     }),
-    (0, tslib_1.__metadata)("design:type", Array)
+    tslib_1.__metadata("design:type", Array)
 ], OAuthClientModel.prototype, "OAuthTokens", void 0);
-OAuthClientModel = OAuthClientModel_1 = (0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.Table)({
+OAuthClientModel = OAuthClientModel_1 = tslib_1.__decorate([
+    sequelize_typescript_1.Table({
         tableName: 'oAuthClient',
         indexes: [
             {

@@ -3,9 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.down = exports.up = void 0;
 const tslib_1 = require("tslib");
 const uuid_1 = require("@server/helpers/uuid");
-const Sequelize = (0, tslib_1.__importStar)(require("sequelize"));
+const Sequelize = tslib_1.__importStar(require("sequelize"));
 function up(utils) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const q = utils.queryInterface;
         const dataAuthorUUID = {
             type: Sequelize.UUID,
@@ -16,7 +16,7 @@ function up(utils) {
         {
             const authors = yield utils.db.Author.findAll();
             for (const author of authors) {
-                author.uuid = (0, uuid_1.buildUUID)();
+                author.uuid = uuid_1.buildUUID();
                 yield author.save();
             }
         }

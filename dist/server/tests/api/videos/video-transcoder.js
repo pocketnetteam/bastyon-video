@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = (0, tslib_1.__importStar)(require("chai"));
+const chai = tslib_1.__importStar(require("chai"));
 const lodash_1 = require("lodash");
 const core_utils_1 = require("@shared/core-utils");
 const extra_utils_1 = require("@shared/extra-utils");
@@ -36,17 +36,17 @@ describe('Test video transcoding', function () {
     let servers = [];
     let video4k;
     before(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(30000);
-            servers = yield (0, extra_utils_1.createMultipleServers)(2);
-            yield (0, extra_utils_1.setAccessTokensToServers)(servers);
-            yield (0, extra_utils_1.doubleFollow)(servers[0], servers[1]);
+            servers = yield extra_utils_1.createMultipleServers(2);
+            yield extra_utils_1.setAccessTokensToServers(servers);
+            yield extra_utils_1.doubleFollow(servers[0], servers[1]);
             yield updateConfigForTranscoding(servers[1]);
         });
     });
     describe('Basic transcoding (or not)', function () {
         it('Should not transcode video on server 1', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(60000);
                 const attributes = {
                     name: 'my super name for server 1',
@@ -54,7 +54,7 @@ describe('Test video transcoding', function () {
                     fixture: 'video_short.webm'
                 };
                 yield servers[0].videos.upload({ attributes });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 for (const server of servers) {
                     const { data } = yield server.videos.list();
                     const video = data[0];
@@ -62,7 +62,7 @@ describe('Test video transcoding', function () {
                     expect(videoDetails.files).to.have.lengthOf(1);
                     const magnetUri = videoDetails.files[0].magnetUri;
                     expect(magnetUri).to.match(/\.webm/);
-                    const torrent = yield (0, extra_utils_1.webtorrentAdd)(magnetUri, true);
+                    const torrent = yield extra_utils_1.webtorrentAdd(magnetUri, true);
                     expect(torrent.files).to.be.an('array');
                     expect(torrent.files.length).to.equal(1);
                     expect(torrent.files[0].path).match(/\.webm$/);
@@ -70,7 +70,7 @@ describe('Test video transcoding', function () {
             });
         });
         it('Should transcode video on server 2', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(120000);
                 const attributes = {
                     name: 'my super name for server 2',
@@ -78,7 +78,7 @@ describe('Test video transcoding', function () {
                     fixture: 'video_short.webm'
                 };
                 yield servers[1].videos.upload({ attributes });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 for (const server of servers) {
                     const { data } = yield server.videos.list();
                     const video = data.find(v => v.name === attributes.name);
@@ -86,7 +86,7 @@ describe('Test video transcoding', function () {
                     expect(videoDetails.files).to.have.lengthOf(4);
                     const magnetUri = videoDetails.files[0].magnetUri;
                     expect(magnetUri).to.match(/\.mp4/);
-                    const torrent = yield (0, extra_utils_1.webtorrentAdd)(magnetUri, true);
+                    const torrent = yield extra_utils_1.webtorrentAdd(magnetUri, true);
                     expect(torrent.files).to.be.an('array');
                     expect(torrent.files.length).to.equal(1);
                     expect(torrent.files[0].path).match(/\.mp4$/);
@@ -94,7 +94,7 @@ describe('Test video transcoding', function () {
             });
         });
         it('Should wait for transcoding before publishing the video', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(160000);
                 {
                     const attributes = {
@@ -124,7 +124,7 @@ describe('Test video transcoding', function () {
                     }
                     yield servers[0].videos.get({ id: videoId, expectedStatus: models_1.HttpStatusCode.NOT_FOUND_404 });
                 }
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 for (const server of servers) {
                     const { data } = yield server.videos.list();
                     const videoToFind = data.find(v => v.name === 'waiting video');
@@ -137,7 +137,7 @@ describe('Test video transcoding', function () {
             });
         });
         it('Should accept and transcode additional extensions', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(300000);
                 for (const fixture of ['video_short.mkv', 'video_short.avi']) {
                     const attributes = {
@@ -145,7 +145,7 @@ describe('Test video transcoding', function () {
                         fixture
                     };
                     yield servers[1].videos.upload({ attributes });
-                    yield (0, extra_utils_1.waitJobs)(servers);
+                    yield extra_utils_1.waitJobs(servers);
                     for (const server of servers) {
                         const { data } = yield server.videos.list();
                         const video = data.find(v => v.name === attributes.name);
@@ -158,7 +158,7 @@ describe('Test video transcoding', function () {
             });
         });
         it('Should transcode a 4k video', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(200000);
                 const attributes = {
                     name: '4k video',
@@ -166,7 +166,7 @@ describe('Test video transcoding', function () {
                 };
                 const { uuid } = yield servers[1].videos.upload({ attributes });
                 video4k = uuid;
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 const resolutions = [240, 360, 480, 720, 1080, 1440, 2160];
                 for (const server of servers) {
                     const videoDetails = yield server.videos.get({ id: video4k });
@@ -181,14 +181,14 @@ describe('Test video transcoding', function () {
     });
     describe('Audio transcoding', function () {
         it('Should transcode high bit rate mp3 to proper bit rate', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(60000);
                 const attributes = {
                     name: 'mp3_256k',
                     fixture: 'video_short_mp3_256k.mp4'
                 };
                 yield servers[1].videos.upload({ attributes });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 for (const server of servers) {
                     const { data } = yield server.videos.list();
                     const video = data.find(v => v.name === attributes.name);
@@ -196,7 +196,7 @@ describe('Test video transcoding', function () {
                     expect(videoDetails.files).to.have.lengthOf(4);
                     const file = videoDetails.files.find(f => f.resolution.id === 240);
                     const path = servers[1].servers.buildWebTorrentFilePath(file.fileUrl);
-                    const probe = yield (0, ffprobe_utils_1.getAudioStream)(path);
+                    const probe = yield ffprobe_utils_1.getAudioStream(path);
                     if (probe.audioStream) {
                         expect(probe.audioStream['codec_name']).to.be.equal('aac');
                         expect(probe.audioStream['bit_rate']).to.be.at.most(384 * 8000);
@@ -208,47 +208,47 @@ describe('Test video transcoding', function () {
             });
         });
         it('Should transcode video with no audio and have no audio itself', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(60000);
                 const attributes = {
                     name: 'no_audio',
                     fixture: 'video_short_no_audio.mp4'
                 };
                 yield servers[1].videos.upload({ attributes });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 for (const server of servers) {
                     const { data } = yield server.videos.list();
                     const video = data.find(v => v.name === attributes.name);
                     const videoDetails = yield server.videos.get({ id: video.id });
                     const file = videoDetails.files.find(f => f.resolution.id === 240);
                     const path = servers[1].servers.buildWebTorrentFilePath(file.fileUrl);
-                    const probe = yield (0, ffprobe_utils_1.getAudioStream)(path);
+                    const probe = yield ffprobe_utils_1.getAudioStream(path);
                     expect(probe).to.not.have.property('audioStream');
                 }
             });
         });
         it('Should leave the audio untouched, but properly transcode the video', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(60000);
                 const attributes = {
                     name: 'untouched_audio',
                     fixture: 'video_short.mp4'
                 };
                 yield servers[1].videos.upload({ attributes });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 for (const server of servers) {
                     const { data } = yield server.videos.list();
                     const video = data.find(v => v.name === attributes.name);
                     const videoDetails = yield server.videos.get({ id: video.id });
                     expect(videoDetails.files).to.have.lengthOf(4);
-                    const fixturePath = (0, extra_utils_1.buildAbsoluteFixturePath)(attributes.fixture);
-                    const fixtureVideoProbe = yield (0, ffprobe_utils_1.getAudioStream)(fixturePath);
+                    const fixturePath = extra_utils_1.buildAbsoluteFixturePath(attributes.fixture);
+                    const fixtureVideoProbe = yield ffprobe_utils_1.getAudioStream(fixturePath);
                     const file = videoDetails.files.find(f => f.resolution.id === 240);
                     const path = servers[1].servers.buildWebTorrentFilePath(file.fileUrl);
-                    const videoProbe = yield (0, ffprobe_utils_1.getAudioStream)(path);
+                    const videoProbe = yield ffprobe_utils_1.getAudioStream(path);
                     if (videoProbe.audioStream && fixtureVideoProbe.audioStream) {
                         const toOmit = ['max_bit_rate', 'duration', 'duration_ts', 'nb_frames', 'start_time', 'start_pts'];
-                        expect((0, lodash_1.omit)(videoProbe.audioStream, toOmit)).to.be.deep.equal((0, lodash_1.omit)(fixtureVideoProbe.audioStream, toOmit));
+                        expect(lodash_1.omit(videoProbe.audioStream, toOmit)).to.be.deep.equal(lodash_1.omit(fixtureVideoProbe.audioStream, toOmit));
                     }
                     else {
                         this.fail('Could not retrieve the audio stream on ' + videoProbe.absolutePath);
@@ -260,7 +260,7 @@ describe('Test video transcoding', function () {
     describe('Audio upload', function () {
         function runSuite(mode) {
             before(function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     yield servers[1].config.updateCustomSubConfig({
                         newConfig: {
                             transcoding: {
@@ -282,43 +282,43 @@ describe('Test video transcoding', function () {
                 });
             });
             it('Should merge an audio file with the preview file', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     this.timeout(60000);
                     const attributes = { name: 'audio_with_preview', previewfile: 'preview.jpg', fixture: 'sample.ogg' };
                     yield servers[1].videos.upload({ attributes, mode });
-                    yield (0, extra_utils_1.waitJobs)(servers);
+                    yield extra_utils_1.waitJobs(servers);
                     for (const server of servers) {
                         const { data } = yield server.videos.list();
                         const video = data.find(v => v.name === 'audio_with_preview');
                         const videoDetails = yield server.videos.get({ id: video.id });
                         expect(videoDetails.files).to.have.lengthOf(1);
-                        yield (0, extra_utils_1.makeGetRequest)({ url: server.url, path: videoDetails.thumbnailPath, expectedStatus: models_1.HttpStatusCode.OK_200 });
-                        yield (0, extra_utils_1.makeGetRequest)({ url: server.url, path: videoDetails.previewPath, expectedStatus: models_1.HttpStatusCode.OK_200 });
+                        yield extra_utils_1.makeGetRequest({ url: server.url, path: videoDetails.thumbnailPath, expectedStatus: models_1.HttpStatusCode.OK_200 });
+                        yield extra_utils_1.makeGetRequest({ url: server.url, path: videoDetails.previewPath, expectedStatus: models_1.HttpStatusCode.OK_200 });
                         const magnetUri = videoDetails.files[0].magnetUri;
                         expect(magnetUri).to.contain('.mp4');
                     }
                 });
             });
             it('Should upload an audio file and choose a default background image', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     this.timeout(60000);
                     const attributes = { name: 'audio_without_preview', fixture: 'sample.ogg' };
                     yield servers[1].videos.upload({ attributes, mode });
-                    yield (0, extra_utils_1.waitJobs)(servers);
+                    yield extra_utils_1.waitJobs(servers);
                     for (const server of servers) {
                         const { data } = yield server.videos.list();
                         const video = data.find(v => v.name === 'audio_without_preview');
                         const videoDetails = yield server.videos.get({ id: video.id });
                         expect(videoDetails.files).to.have.lengthOf(1);
-                        yield (0, extra_utils_1.makeGetRequest)({ url: server.url, path: videoDetails.thumbnailPath, expectedStatus: models_1.HttpStatusCode.OK_200 });
-                        yield (0, extra_utils_1.makeGetRequest)({ url: server.url, path: videoDetails.previewPath, expectedStatus: models_1.HttpStatusCode.OK_200 });
+                        yield extra_utils_1.makeGetRequest({ url: server.url, path: videoDetails.thumbnailPath, expectedStatus: models_1.HttpStatusCode.OK_200 });
+                        yield extra_utils_1.makeGetRequest({ url: server.url, path: videoDetails.previewPath, expectedStatus: models_1.HttpStatusCode.OK_200 });
                         const magnetUri = videoDetails.files[0].magnetUri;
                         expect(magnetUri).to.contain('.mp4');
                     }
                 });
             });
             it('Should upload an audio file and create an audio version only', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     this.timeout(60000);
                     yield servers[1].config.updateCustomSubConfig({
                         newConfig: {
@@ -335,7 +335,7 @@ describe('Test video transcoding', function () {
                     });
                     const attributes = { name: 'audio_with_preview', previewfile: 'preview.jpg', fixture: 'sample.ogg' };
                     const { id } = yield servers[1].videos.upload({ attributes, mode });
-                    yield (0, extra_utils_1.waitJobs)(servers);
+                    yield extra_utils_1.waitJobs(servers);
                     for (const server of servers) {
                         const videoDetails = yield server.videos.get({ id });
                         for (const files of [videoDetails.files, videoDetails.streamingPlaylists[0].files]) {
@@ -356,7 +356,7 @@ describe('Test video transcoding', function () {
     });
     describe('Framerate', function () {
         it('Should transcode a 60 FPS video', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(60000);
                 const attributes = {
                     name: 'my super 30fps name for server 2',
@@ -364,7 +364,7 @@ describe('Test video transcoding', function () {
                     fixture: '60fps_720p_small.mp4'
                 };
                 yield servers[1].videos.upload({ attributes });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 for (const server of servers) {
                     const { data } = yield server.videos.list();
                     const video = data.find(v => v.name === attributes.name);
@@ -377,23 +377,23 @@ describe('Test video transcoding', function () {
                     for (const resolution of [240, 360, 480]) {
                         const file = videoDetails.files.find(f => f.resolution.id === resolution);
                         const path = servers[1].servers.buildWebTorrentFilePath(file.fileUrl);
-                        const fps = yield (0, ffprobe_utils_1.getVideoFileFPS)(path);
+                        const fps = yield ffprobe_utils_1.getVideoFileFPS(path);
                         expect(fps).to.be.below(31);
                     }
                     const file = videoDetails.files.find(f => f.resolution.id === 720);
                     const path = servers[1].servers.buildWebTorrentFilePath(file.fileUrl);
-                    const fps = yield (0, ffprobe_utils_1.getVideoFileFPS)(path);
+                    const fps = yield ffprobe_utils_1.getVideoFileFPS(path);
                     expect(fps).to.be.above(58).and.below(62);
                 }
             });
         });
         it('Should downscale to the closest divisor standard framerate', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(200000);
                 let tempFixturePath;
                 {
-                    tempFixturePath = yield (0, extra_utils_1.generateVideoWithFramerate)(59);
-                    const fps = yield (0, ffprobe_utils_1.getVideoFileFPS)(tempFixturePath);
+                    tempFixturePath = yield extra_utils_1.generateVideoWithFramerate(59);
+                    const fps = yield ffprobe_utils_1.getVideoFileFPS(tempFixturePath);
                     expect(fps).to.be.equal(59);
                 }
                 const attributes = {
@@ -402,7 +402,7 @@ describe('Test video transcoding', function () {
                     fixture: tempFixturePath
                 };
                 yield servers[1].videos.upload({ attributes });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 for (const server of servers) {
                     const { data } = yield server.videos.list();
                     const { id } = data.find(v => v.name === attributes.name);
@@ -410,13 +410,13 @@ describe('Test video transcoding', function () {
                     {
                         const file = video.files.find(f => f.resolution.id === 240);
                         const path = servers[1].servers.buildWebTorrentFilePath(file.fileUrl);
-                        const fps = yield (0, ffprobe_utils_1.getVideoFileFPS)(path);
+                        const fps = yield ffprobe_utils_1.getVideoFileFPS(path);
                         expect(fps).to.be.equal(25);
                     }
                     {
                         const file = video.files.find(f => f.resolution.id === 720);
                         const path = servers[1].servers.buildWebTorrentFilePath(file.fileUrl);
-                        const fps = yield (0, ffprobe_utils_1.getVideoFileFPS)(path);
+                        const fps = yield ffprobe_utils_1.getVideoFileFPS(path);
                         expect(fps).to.be.equal(59);
                     }
                 }
@@ -425,16 +425,16 @@ describe('Test video transcoding', function () {
     });
     describe('Bitrate control', function () {
         it('Should respect maximum bitrate values', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(160000);
-                const tempFixturePath = yield (0, extra_utils_1.generateHighBitrateVideo)();
+                const tempFixturePath = yield extra_utils_1.generateHighBitrateVideo();
                 const attributes = {
                     name: 'high bitrate video',
                     description: 'high bitrate video',
                     fixture: tempFixturePath
                 };
                 yield servers[1].videos.upload({ attributes });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 for (const server of servers) {
                     const { data } = yield server.videos.list();
                     const { id } = data.find(v => v.name === attributes.name);
@@ -442,18 +442,18 @@ describe('Test video transcoding', function () {
                     for (const resolution of [240, 360, 480, 720, 1080]) {
                         const file = video.files.find(f => f.resolution.id === resolution);
                         const path = servers[1].servers.buildWebTorrentFilePath(file.fileUrl);
-                        const bitrate = yield (0, ffprobe_utils_1.getVideoFileBitrate)(path);
-                        const fps = yield (0, ffprobe_utils_1.getVideoFileFPS)(path);
-                        const dataResolution = yield (0, ffprobe_utils_1.getVideoFileResolution)(path);
+                        const bitrate = yield ffprobe_utils_1.getVideoFileBitrate(path);
+                        const fps = yield ffprobe_utils_1.getVideoFileFPS(path);
+                        const dataResolution = yield ffprobe_utils_1.getVideoFileResolution(path);
                         expect(resolution).to.equal(resolution);
-                        const maxBitrate = (0, core_utils_1.getMaxBitrate)(Object.assign(Object.assign({}, dataResolution), { fps }));
+                        const maxBitrate = core_utils_1.getMaxBitrate(Object.assign(Object.assign({}, dataResolution), { fps }));
                         expect(bitrate).to.be.below(maxBitrate);
                     }
                 }
             });
         });
         it('Should not transcode to an higher bitrate than the original file', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(160000);
                 const newConfig = {
                     transcoding: {
@@ -477,13 +477,13 @@ describe('Test video transcoding', function () {
                     fixture: 'low-bitrate.mp4'
                 };
                 const { id } = yield servers[1].videos.upload({ attributes });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 const video = yield servers[1].videos.get({ id });
                 const resolutions = [240, 360, 480, 720, 1080];
                 for (const r of resolutions) {
                     const file = video.files.find(f => f.resolution.id === r);
                     const path = servers[1].servers.buildWebTorrentFilePath(file.fileUrl);
-                    const bitrate = yield (0, ffprobe_utils_1.getVideoFileBitrate)(path);
+                    const bitrate = yield ffprobe_utils_1.getVideoFileBitrate(path);
                     expect(bitrate, `${path} not below ${60000}`).to.be.below(60000);
                 }
             });
@@ -491,15 +491,15 @@ describe('Test video transcoding', function () {
     });
     describe('FFprobe', function () {
         it('Should provide valid ffprobe data', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(160000);
                 const videoUUID = (yield servers[1].videos.quickUpload({ name: 'ffprobe data' })).uuid;
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 {
                     const video = yield servers[1].videos.get({ id: videoUUID });
                     const file = video.files.find(f => f.resolution.id === 240);
                     const path = servers[1].servers.buildWebTorrentFilePath(file.fileUrl);
-                    const metadata = yield (0, ffprobe_utils_1.getMetadataFromFile)(path);
+                    const metadata = yield ffprobe_utils_1.getMetadataFromFile(path);
                     for (const p of [
                         'tags.encoder',
                         'format_long_name',
@@ -538,16 +538,16 @@ describe('Test video transcoding', function () {
             });
         });
         it('Should correctly detect if quick transcode is possible', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(10000);
-                expect(yield (0, ffprobe_utils_1.canDoQuickTranscode)((0, extra_utils_1.buildAbsoluteFixturePath)('video_short.mp4'))).to.be.true;
-                expect(yield (0, ffprobe_utils_1.canDoQuickTranscode)((0, extra_utils_1.buildAbsoluteFixturePath)('video_short.webm'))).to.be.false;
+                expect(yield ffprobe_utils_1.canDoQuickTranscode(extra_utils_1.buildAbsoluteFixturePath('video_short.mp4'))).to.be.true;
+                expect(yield ffprobe_utils_1.canDoQuickTranscode(extra_utils_1.buildAbsoluteFixturePath('video_short.webm'))).to.be.false;
             });
         });
     });
     describe('Transcoding job queue', function () {
         it('Should have the appropriate priorities for transcoding jobs', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const body = yield servers[1].jobs.list({
                     start: 0,
                     count: 100,
@@ -571,8 +571,8 @@ describe('Test video transcoding', function () {
         });
     });
     after(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            yield (0, extra_utils_1.cleanupTests)(servers);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield extra_utils_1.cleanupTests(servers);
         });
     });
 });

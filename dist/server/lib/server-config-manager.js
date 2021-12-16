@@ -16,7 +16,7 @@ class ServerConfigManager {
         this.homepageEnabled = false;
     }
     init() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const instanceHomepage = yield actor_custom_page_1.ActorCustomPageModel.loadInstanceHomepage();
             this.updateHomepageState(instanceHomepage === null || instanceHomepage === void 0 ? void 0 : instanceHomepage.content);
         });
@@ -25,10 +25,10 @@ class ServerConfigManager {
         this.homepageEnabled = !!content;
     }
     getHTMLServerConfig() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (this.serverCommit === undefined)
-                this.serverCommit = yield (0, utils_1.getServerCommit)();
-            const defaultTheme = (0, theme_utils_1.getThemeOrDefault)(config_1.CONFIG.THEME.DEFAULT, constants_1.DEFAULT_THEME_NAME);
+                this.serverCommit = yield utils_1.getServerCommit();
+            const defaultTheme = theme_utils_1.getThemeOrDefault(config_1.CONFIG.THEME.DEFAULT, constants_1.DEFAULT_THEME_NAME);
             return {
                 instance: {
                     name: config_1.CONFIG.INSTANCE.NAME,
@@ -63,7 +63,7 @@ class ServerConfigManager {
                     default: defaultTheme
                 },
                 email: {
-                    enabled: (0, config_1.isEmailEnabled)()
+                    enabled: config_1.isEmailEnabled()
                 },
                 contactForm: {
                     enabled: config_1.CONFIG.CONTACT_FORM.ENABLED
@@ -185,11 +185,11 @@ class ServerConfigManager {
         });
     }
     getServerConfig(ip) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const { allowed } = yield hooks_1.Hooks.wrapPromiseFun(signup_1.isSignupAllowed, {
                 ip
             }, 'filter:api.user.signup.allowed.result');
-            const allowedForCurrentIP = (0, signup_1.isSignupAllowedForCurrentIP)(ip);
+            const allowedForCurrentIP = signup_1.isSignupAllowedForCurrentIP(ip);
             const signup = {
                 allowed,
                 allowedForCurrentIP,

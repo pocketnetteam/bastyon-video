@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
-(0, tslib_1.__exportStar)(require("./account"), exports);
-(0, tslib_1.__exportStar)(require("./actor-custom-page"), exports);
-(0, tslib_1.__exportStar)(require("./account-blocklist"), exports);
+tslib_1.__exportStar(require("./account"), exports);
+tslib_1.__exportStar(require("./actor-custom-page"), exports);
+tslib_1.__exportStar(require("./account-blocklist"), exports);

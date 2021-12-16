@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = (0, tslib_1.__importStar)(require("chai"));
+const chai = tslib_1.__importStar(require("chai"));
 const extra_utils_1 = require("@shared/extra-utils");
 const expect = chai.expect;
 describe('Test channels search', function () {
@@ -10,15 +10,15 @@ describe('Test channels search', function () {
     let remoteServer;
     let command;
     before(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(120000);
             const servers = yield Promise.all([
-                (0, extra_utils_1.createSingleServer)(1),
-                (0, extra_utils_1.createSingleServer)(2, { transcoding: { enabled: false } })
+                extra_utils_1.createSingleServer(1),
+                extra_utils_1.createSingleServer(2, { transcoding: { enabled: false } })
             ]);
             server = servers[0];
             remoteServer = servers[1];
-            yield (0, extra_utils_1.setAccessTokensToServers)([server, remoteServer]);
+            yield extra_utils_1.setAccessTokensToServers([server, remoteServer]);
             {
                 yield server.users.create({ username: 'user1' });
                 const channel = {
@@ -36,19 +36,19 @@ describe('Test channels search', function () {
                 const { id } = yield remoteServer.channels.create({ attributes: channel });
                 yield remoteServer.videos.upload({ attributes: { channelId: id } });
             }
-            yield (0, extra_utils_1.doubleFollow)(server, remoteServer);
+            yield extra_utils_1.doubleFollow(server, remoteServer);
             command = server.search;
         });
     });
     it('Should make a simple search and not have results', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const body = yield command.searchChannels({ search: 'abc' });
             expect(body.total).to.equal(0);
             expect(body.data).to.have.lengthOf(0);
         });
     });
     it('Should make a search and have results', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             {
                 const search = {
                     search: 'Squall',
@@ -75,7 +75,7 @@ describe('Test channels search', function () {
         });
     });
     it('Should filter by host', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             {
                 const search = { search: 'channel', host: remoteServer.host };
                 const body = yield command.advancedChannelSearch({ search });
@@ -99,7 +99,7 @@ describe('Test channels search', function () {
         });
     });
     it('Should filter by names', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             {
                 const body = yield command.advancedChannelSearch({ search: { handles: ['squall_channel', 'zell_channel'] } });
                 expect(body.total).to.equal(1);
@@ -127,8 +127,8 @@ describe('Test channels search', function () {
         });
     });
     after(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            yield (0, extra_utils_1.cleanupTests)([server, remoteServer]);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield extra_utils_1.cleanupTests([server, remoteServer]);
         });
     });
 });

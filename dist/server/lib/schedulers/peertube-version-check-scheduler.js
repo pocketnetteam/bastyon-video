@@ -16,17 +16,17 @@ class PeerTubeVersionCheckScheduler extends abstract_scheduler_1.AbstractSchedul
         this.schedulerIntervalMs = constants_1.SCHEDULER_INTERVALS_MS.checkPeerTubeVersion;
     }
     internalExecute() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             return this.checkLatestVersion();
         });
     }
     checkLatestVersion() {
         var _a;
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (config_1.CONFIG.PEERTUBE.CHECK_LATEST_VERSION.ENABLED === false)
                 return;
             logger_1.logger.info('Checking latest PeerTube version.');
-            const { body } = yield (0, requests_1.doJSONRequest)(config_1.CONFIG.PEERTUBE.CHECK_LATEST_VERSION.URL);
+            const { body } = yield requests_1.doJSONRequest(config_1.CONFIG.PEERTUBE.CHECK_LATEST_VERSION.URL);
             if (!((_a = body === null || body === void 0 ? void 0 : body.peertube) === null || _a === void 0 ? void 0 : _a.latestVersion)) {
                 logger_1.logger.warn('Cannot check latest PeerTube version: body is invalid.', { body });
                 return;
@@ -35,7 +35,7 @@ class PeerTubeVersionCheckScheduler extends abstract_scheduler_1.AbstractSchedul
             const application = yield application_1.ApplicationModel.load();
             if (application.latestPeerTubeVersion === latestVersion)
                 return;
-            if ((0, core_utils_1.compareSemVer)(constants_1.PEERTUBE_VERSION, latestVersion) < 0) {
+            if (core_utils_1.compareSemVer(constants_1.PEERTUBE_VERSION, latestVersion) < 0) {
                 application.latestPeerTubeVersion = latestVersion;
                 yield application.save();
                 notifier_1.Notifier.Instance.notifyOfNewPeerTubeVersion(application, latestVersion);

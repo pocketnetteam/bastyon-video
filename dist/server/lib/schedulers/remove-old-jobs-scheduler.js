@@ -12,7 +12,7 @@ class RemoveOldJobsScheduler extends abstract_scheduler_1.AbstractScheduler {
         this.schedulerIntervalMs = constants_1.SCHEDULER_INTERVALS_MS.removeOldJobs;
     }
     internalExecute() {
-        if (!(0, core_utils_1.isTestInstance)())
+        if (!core_utils_1.isTestInstance())
             logger_1.logger.info('Removing old jobs in scheduler.');
         return job_queue_1.JobQueue.Instance.removeOldJobs();
     }

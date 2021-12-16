@@ -29,7 +29,7 @@ class NotificationsCommand extends shared_1.AbstractCommand {
         return this.postBodyRequest(Object.assign(Object.assign({}, options), { path, implicitToken: true, defaultExpectedStatus: models_1.HttpStatusCode.NO_CONTENT_204 }));
     }
     getLastest(options = {}) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const { total, data } = yield this.list(Object.assign(Object.assign({}, options), { start: 0, count: 1, sort: '-createdAt' }));
             if (total === 0)
                 return undefined;

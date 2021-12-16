@@ -9,10 +9,10 @@ describe('Test user subscriptions API validators', function () {
     let server;
     let userAccessToken = '';
     before(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(30000);
-            server = yield (0, extra_utils_1.createSingleServer)(1);
-            yield (0, extra_utils_1.setAccessTokensToServers)([server]);
+            server = yield extra_utils_1.createSingleServer(1);
+            yield extra_utils_1.setAccessTokensToServers([server]);
             const user = {
                 username: 'user1',
                 password: 'my super password'
@@ -23,23 +23,23 @@ describe('Test user subscriptions API validators', function () {
     });
     describe('When listing my subscriptions', function () {
         it('Should fail with a bad start pagination', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.checkBadStartPagination)(server.url, path, server.accessToken);
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.checkBadStartPagination(server.url, path, server.accessToken);
             });
         });
         it('Should fail with a bad count pagination', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.checkBadCountPagination)(server.url, path, server.accessToken);
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.checkBadCountPagination(server.url, path, server.accessToken);
             });
         });
         it('Should fail with an incorrect sort', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.checkBadSortPagination)(server.url, path, server.accessToken);
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.checkBadSortPagination(server.url, path, server.accessToken);
             });
         });
         it('Should fail with a non authenticated user', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makeGetRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makeGetRequest({
                     url: server.url,
                     path,
                     expectedStatus: models_1.HttpStatusCode.UNAUTHORIZED_401
@@ -47,8 +47,8 @@ describe('Test user subscriptions API validators', function () {
             });
         });
         it('Should succeed with the correct parameters', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makeGetRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makeGetRequest({
                     url: server.url,
                     path,
                     token: userAccessToken,
@@ -60,23 +60,23 @@ describe('Test user subscriptions API validators', function () {
     describe('When listing my subscriptions videos', function () {
         const path = '/api/v1/users/me/subscriptions/videos';
         it('Should fail with a bad start pagination', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.checkBadStartPagination)(server.url, path, server.accessToken);
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.checkBadStartPagination(server.url, path, server.accessToken);
             });
         });
         it('Should fail with a bad count pagination', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.checkBadCountPagination)(server.url, path, server.accessToken);
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.checkBadCountPagination(server.url, path, server.accessToken);
             });
         });
         it('Should fail with an incorrect sort', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.checkBadSortPagination)(server.url, path, server.accessToken);
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.checkBadSortPagination(server.url, path, server.accessToken);
             });
         });
         it('Should fail with a non authenticated user', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makeGetRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makeGetRequest({
                     url: server.url,
                     path,
                     expectedStatus: models_1.HttpStatusCode.UNAUTHORIZED_401
@@ -84,8 +84,8 @@ describe('Test user subscriptions API validators', function () {
             });
         });
         it('Should succeed with the correct parameters', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makeGetRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makeGetRequest({
                     url: server.url,
                     path,
                     token: userAccessToken,
@@ -96,8 +96,8 @@ describe('Test user subscriptions API validators', function () {
     });
     describe('When adding a subscription', function () {
         it('Should fail with a non authenticated user', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makePostBodyRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makePostBodyRequest({
                     url: server.url,
                     path,
                     fields: { uri: 'user1_channel@localhost:' + server.port },
@@ -106,22 +106,22 @@ describe('Test user subscriptions API validators', function () {
             });
         });
         it('Should fail with bad URIs', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makePostBodyRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makePostBodyRequest({
                     url: server.url,
                     path,
                     token: server.accessToken,
                     fields: { uri: 'root' },
                     expectedStatus: models_1.HttpStatusCode.BAD_REQUEST_400
                 });
-                yield (0, extra_utils_1.makePostBodyRequest)({
+                yield extra_utils_1.makePostBodyRequest({
                     url: server.url,
                     path,
                     token: server.accessToken,
                     fields: { uri: 'root@' },
                     expectedStatus: models_1.HttpStatusCode.BAD_REQUEST_400
                 });
-                yield (0, extra_utils_1.makePostBodyRequest)({
+                yield extra_utils_1.makePostBodyRequest({
                     url: server.url,
                     path,
                     token: server.accessToken,
@@ -131,23 +131,23 @@ describe('Test user subscriptions API validators', function () {
             });
         });
         it('Should succeed with the correct parameters', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(20000);
-                yield (0, extra_utils_1.makePostBodyRequest)({
+                yield extra_utils_1.makePostBodyRequest({
                     url: server.url,
                     path,
                     token: server.accessToken,
                     fields: { uri: 'user1_channel@localhost:' + server.port },
                     expectedStatus: models_1.HttpStatusCode.NO_CONTENT_204
                 });
-                yield (0, extra_utils_1.waitJobs)([server]);
+                yield extra_utils_1.waitJobs([server]);
             });
         });
     });
     describe('When getting a subscription', function () {
         it('Should fail with a non authenticated user', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makeGetRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makeGetRequest({
                     url: server.url,
                     path: path + '/user1_channel@localhost:' + server.port,
                     expectedStatus: models_1.HttpStatusCode.UNAUTHORIZED_401
@@ -155,20 +155,20 @@ describe('Test user subscriptions API validators', function () {
             });
         });
         it('Should fail with bad URIs', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makeGetRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makeGetRequest({
                     url: server.url,
                     path: path + '/root',
                     token: server.accessToken,
                     expectedStatus: models_1.HttpStatusCode.BAD_REQUEST_400
                 });
-                yield (0, extra_utils_1.makeGetRequest)({
+                yield extra_utils_1.makeGetRequest({
                     url: server.url,
                     path: path + '/root@',
                     token: server.accessToken,
                     expectedStatus: models_1.HttpStatusCode.BAD_REQUEST_400
                 });
-                yield (0, extra_utils_1.makeGetRequest)({
+                yield extra_utils_1.makeGetRequest({
                     url: server.url,
                     path: path + '/root@hello@',
                     token: server.accessToken,
@@ -177,8 +177,8 @@ describe('Test user subscriptions API validators', function () {
             });
         });
         it('Should fail with an unknown subscription', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makeGetRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makeGetRequest({
                     url: server.url,
                     path: path + '/root1@localhost:' + server.port,
                     token: server.accessToken,
@@ -187,8 +187,8 @@ describe('Test user subscriptions API validators', function () {
             });
         });
         it('Should succeed with the correct parameters', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makeGetRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makeGetRequest({
                     url: server.url,
                     path: path + '/user1_channel@localhost:' + server.port,
                     token: server.accessToken,
@@ -200,8 +200,8 @@ describe('Test user subscriptions API validators', function () {
     describe('When checking if subscriptions exist', function () {
         const existPath = path + '/exist';
         it('Should fail with a non authenticated user', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makeGetRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makeGetRequest({
                     url: server.url,
                     path: existPath,
                     expectedStatus: models_1.HttpStatusCode.UNAUTHORIZED_401
@@ -209,15 +209,15 @@ describe('Test user subscriptions API validators', function () {
             });
         });
         it('Should fail with bad URIs', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makeGetRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makeGetRequest({
                     url: server.url,
                     path: existPath,
                     query: { uris: 'toto' },
                     token: server.accessToken,
                     expectedStatus: models_1.HttpStatusCode.BAD_REQUEST_400
                 });
-                yield (0, extra_utils_1.makeGetRequest)({
+                yield extra_utils_1.makeGetRequest({
                     url: server.url,
                     path: existPath,
                     query: { 'uris[]': 1 },
@@ -227,8 +227,8 @@ describe('Test user subscriptions API validators', function () {
             });
         });
         it('Should succeed with the correct parameters', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makeGetRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makeGetRequest({
                     url: server.url,
                     path: existPath,
                     query: { 'uris[]': 'coucou@localhost:' + server.port },
@@ -240,8 +240,8 @@ describe('Test user subscriptions API validators', function () {
     });
     describe('When removing a subscription', function () {
         it('Should fail with a non authenticated user', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makeDeleteRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makeDeleteRequest({
                     url: server.url,
                     path: path + '/user1_channel@localhost:' + server.port,
                     expectedStatus: models_1.HttpStatusCode.UNAUTHORIZED_401
@@ -249,20 +249,20 @@ describe('Test user subscriptions API validators', function () {
             });
         });
         it('Should fail with bad URIs', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makeDeleteRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makeDeleteRequest({
                     url: server.url,
                     path: path + '/root',
                     token: server.accessToken,
                     expectedStatus: models_1.HttpStatusCode.BAD_REQUEST_400
                 });
-                yield (0, extra_utils_1.makeDeleteRequest)({
+                yield extra_utils_1.makeDeleteRequest({
                     url: server.url,
                     path: path + '/root@',
                     token: server.accessToken,
                     expectedStatus: models_1.HttpStatusCode.BAD_REQUEST_400
                 });
-                yield (0, extra_utils_1.makeDeleteRequest)({
+                yield extra_utils_1.makeDeleteRequest({
                     url: server.url,
                     path: path + '/root@hello@',
                     token: server.accessToken,
@@ -271,8 +271,8 @@ describe('Test user subscriptions API validators', function () {
             });
         });
         it('Should fail with an unknown subscription', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makeDeleteRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makeDeleteRequest({
                     url: server.url,
                     path: path + '/root1@localhost:' + server.port,
                     token: server.accessToken,
@@ -281,8 +281,8 @@ describe('Test user subscriptions API validators', function () {
             });
         });
         it('Should succeed with the correct parameters', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makeDeleteRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makeDeleteRequest({
                     url: server.url,
                     path: path + '/user1_channel@localhost:' + server.port,
                     token: server.accessToken,
@@ -292,8 +292,8 @@ describe('Test user subscriptions API validators', function () {
         });
     });
     after(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            yield (0, extra_utils_1.cleanupTests)([server]);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield extra_utils_1.cleanupTests([server]);
         });
     });
 });

@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = (0, tslib_1.__importStar)(require("chai"));
+const chai = tslib_1.__importStar(require("chai"));
 const path_1 = require("path");
 const core_utils_1 = require("@shared/core-utils");
 const extra_utils_1 = require("@shared/extra-utils");
@@ -11,7 +11,7 @@ const constants_1 = require("../../../initializers/constants");
 const expect = chai.expect;
 function checkHlsPlaylist(options) {
     var _a;
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { videoUUID, hlsOnly, objectStorageBaseUrl } = options;
         const resolutions = (_a = options.resolutions) !== null && _a !== void 0 ? _a : [240, 360, 480, 720];
         for (const server of options.servers) {
@@ -32,41 +32,41 @@ function checkHlsPlaylist(options) {
                 expect(file.magnetUri).to.have.lengthOf.above(2);
                 expect(file.torrentUrl).to.match(new RegExp(`http://${server.host}/lazy-static/torrents/${core_utils_1.uuidRegex}-${file.resolution.id}-hls.torrent`));
                 if (objectStorageBaseUrl) {
-                    (0, extra_utils_1.expectStartWith)(file.fileUrl, objectStorageBaseUrl);
+                    extra_utils_1.expectStartWith(file.fileUrl, objectStorageBaseUrl);
                 }
                 else {
                     expect(file.fileUrl).to.match(new RegExp(`${baseUrl}/static/streaming-playlists/hls/${videoDetails.uuid}/${core_utils_1.uuidRegex}-${file.resolution.id}-fragmented.mp4`));
                 }
                 expect(file.resolution.label).to.equal(resolution + 'p');
-                yield (0, extra_utils_1.makeRawRequest)(file.torrentUrl, models_1.HttpStatusCode.OK_200);
-                yield (0, extra_utils_1.makeRawRequest)(file.fileUrl, models_1.HttpStatusCode.OK_200);
-                const torrent = yield (0, extra_utils_1.webtorrentAdd)(file.magnetUri, true);
+                yield extra_utils_1.makeRawRequest(file.torrentUrl, models_1.HttpStatusCode.OK_200);
+                yield extra_utils_1.makeRawRequest(file.fileUrl, models_1.HttpStatusCode.OK_200);
+                const torrent = yield extra_utils_1.webtorrentAdd(file.magnetUri, true);
                 expect(torrent.files).to.be.an('array');
                 expect(torrent.files.length).to.equal(1);
                 expect(torrent.files[0].path).to.exist.and.to.not.equal('');
             }
             {
-                yield (0, extra_utils_1.checkResolutionsInMasterPlaylist)({ server, playlistUrl: hlsPlaylist.playlistUrl, resolutions });
+                yield extra_utils_1.checkResolutionsInMasterPlaylist({ server, playlistUrl: hlsPlaylist.playlistUrl, resolutions });
                 const masterPlaylist = yield server.streamingPlaylists.get({ url: hlsPlaylist.playlistUrl });
                 let i = 0;
                 for (const resolution of resolutions) {
                     expect(masterPlaylist).to.contain(`${resolution}.m3u8`);
                     expect(masterPlaylist).to.contain(`${resolution}.m3u8`);
                     const url = 'http://' + videoDetails.account.host;
-                    yield (0, extra_utils_1.hlsInfohashExist)(url, hlsPlaylist.playlistUrl, i);
+                    yield extra_utils_1.hlsInfohashExist(url, hlsPlaylist.playlistUrl, i);
                     i++;
                 }
             }
             {
                 for (const resolution of resolutions) {
                     const file = hlsFiles.find(f => f.resolution.id === resolution);
-                    const playlistName = (0, core_utils_1.removeFragmentedMP4Ext)((0, path_1.basename)(file.fileUrl)) + '.m3u8';
+                    const playlistName = core_utils_1.removeFragmentedMP4Ext(path_1.basename(file.fileUrl)) + '.m3u8';
                     const url = objectStorageBaseUrl
                         ? `${objectStorageBaseUrl}hls/${videoUUID}/${playlistName}`
                         : `${baseUrl}/static/streaming-playlists/hls/${videoUUID}/${playlistName}`;
                     const subPlaylist = yield server.streamingPlaylists.get({ url });
                     expect(subPlaylist).to.match(new RegExp(`${core_utils_1.uuidRegex}-${resolution}-fragmented.mp4`));
-                    expect(subPlaylist).to.contain((0, path_1.basename)(file.fileUrl));
+                    expect(subPlaylist).to.contain(path_1.basename(file.fileUrl));
                 }
             }
             {
@@ -74,7 +74,7 @@ function checkHlsPlaylist(options) {
                     ? objectStorageBaseUrl + 'hls/' + videoUUID
                     : baseUrl + '/static/streaming-playlists/hls/' + videoUUID;
                 for (const resolution of resolutions) {
-                    yield (0, extra_utils_1.checkSegmentHash)({
+                    yield extra_utils_1.checkSegmentHash({
                         server,
                         baseUrlPlaylist: baseUrlAndPath,
                         baseUrlSegment: baseUrlAndPath,
@@ -92,20 +92,20 @@ describe('Test HLS videos', function () {
     let videoAudioUUID = '';
     function runTestSuite(hlsOnly, objectStorageBaseUrl) {
         it('Should upload a video and transcode it to HLS', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(120000);
                 const { uuid } = yield servers[0].videos.upload({ attributes: { name: 'video 1', fixture: 'video_short.webm' } });
                 videoUUID = uuid;
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 yield checkHlsPlaylist({ servers, videoUUID, hlsOnly, objectStorageBaseUrl });
             });
         });
         it('Should upload an audio file and transcode it to HLS', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(120000);
                 const { uuid } = yield servers[0].videos.upload({ attributes: { name: 'video audio', fixture: 'sample.ogg' } });
                 videoAudioUUID = uuid;
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 yield checkHlsPlaylist({
                     servers,
                     videoUUID: videoAudioUUID,
@@ -116,19 +116,19 @@ describe('Test HLS videos', function () {
             });
         });
         it('Should update the video', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(30000);
                 yield servers[0].videos.update({ id: videoUUID, attributes: { name: 'video 1 updated' } });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 yield checkHlsPlaylist({ servers, videoUUID, hlsOnly, objectStorageBaseUrl });
             });
         });
         it('Should delete videos', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 yield servers[0].videos.remove({ id: videoUUID });
                 yield servers[0].videos.remove({ id: videoAudioUUID });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 for (const server of servers) {
                     yield server.videos.get({ id: videoUUID, expectedStatus: models_1.HttpStatusCode.NOT_FOUND_404 });
                     yield server.videos.get({ id: videoAudioUUID, expectedStatus: models_1.HttpStatusCode.NOT_FOUND_404 });
@@ -136,23 +136,23 @@ describe('Test HLS videos', function () {
             });
         });
         it('Should have the playlists/segment deleted from the disk', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 for (const server of servers) {
-                    yield (0, extra_utils_1.checkDirectoryIsEmpty)(server, 'videos');
-                    yield (0, extra_utils_1.checkDirectoryIsEmpty)(server, (0, path_1.join)('streaming-playlists', 'hls'));
+                    yield extra_utils_1.checkDirectoryIsEmpty(server, 'videos');
+                    yield extra_utils_1.checkDirectoryIsEmpty(server, path_1.join('streaming-playlists', 'hls'));
                 }
             });
         });
         it('Should have an empty tmp directory', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 for (const server of servers) {
-                    yield (0, extra_utils_1.checkTmpIsEmpty)(server);
+                    yield extra_utils_1.checkTmpIsEmpty(server);
                 }
             });
         });
     }
     before(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(120000);
             const configOverride = {
                 transcoding: {
@@ -163,9 +163,9 @@ describe('Test HLS videos', function () {
                     }
                 }
             };
-            servers = yield (0, extra_utils_1.createMultipleServers)(2, configOverride);
-            yield (0, extra_utils_1.setAccessTokensToServers)(servers);
-            yield (0, extra_utils_1.doubleFollow)(servers[0], servers[1]);
+            servers = yield extra_utils_1.createMultipleServers(2, configOverride);
+            yield extra_utils_1.setAccessTokensToServers(servers);
+            yield extra_utils_1.doubleFollow(servers[0], servers[1]);
         });
     });
     describe('With WebTorrent & HLS enabled', function () {
@@ -173,7 +173,7 @@ describe('Test HLS videos', function () {
     });
     describe('With only HLS enabled', function () {
         before(function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 yield servers[0].config.updateCustomSubConfig({
                     newConfig: {
                         transcoding: {
@@ -202,10 +202,10 @@ describe('Test HLS videos', function () {
         runTestSuite(true);
     });
     describe('With object storage enabled', function () {
-        if ((0, extra_utils_1.areObjectStorageTestsDisabled)())
+        if (extra_utils_1.areObjectStorageTestsDisabled())
             return;
         before(function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(120000);
                 const configOverride = extra_utils_1.ObjectStorageCommand.getDefaultConfig();
                 yield extra_utils_1.ObjectStorageCommand.prepareDefaultBuckets();
@@ -216,8 +216,8 @@ describe('Test HLS videos', function () {
         runTestSuite(true, extra_utils_1.ObjectStorageCommand.getPlaylistBaseUrl());
     });
     after(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            yield (0, extra_utils_1.cleanupTests)(servers);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield extra_utils_1.cleanupTests(servers);
         });
     });
 });

@@ -14,7 +14,7 @@ const video_1 = require("./video");
 let VideoImportModel = VideoImportModel_1 = class VideoImportModel extends sequelize_typescript_1.Model {
     static deleteVideoIfFailed(instance, options) {
         if (instance.state === 3) {
-            return (0, database_utils_1.afterCommitIfTransaction)(options.transaction, () => instance.Video.destroy());
+            return database_utils_1.afterCommitIfTransaction(options.transaction, () => instance.Video.destroy());
         }
         return undefined;
     }
@@ -33,7 +33,7 @@ let VideoImportModel = VideoImportModel_1 = class VideoImportModel extends seque
             ],
             offset: start,
             limit: count,
-            order: (0, utils_1.getSort)(sort),
+            order: utils_1.getSort(sort),
             where: {
                 userId
             }
@@ -76,83 +76,83 @@ let VideoImportModel = VideoImportModel_1 = class VideoImportModel extends seque
         return constants_1.VIDEO_IMPORT_STATES[id] || 'Unknown';
     }
 };
-(0, tslib_1.__decorate)([
+tslib_1.__decorate([
     sequelize_typescript_1.CreatedAt,
-    (0, tslib_1.__metadata)("design:type", Date)
+    tslib_1.__metadata("design:type", Date)
 ], VideoImportModel.prototype, "createdAt", void 0);
-(0, tslib_1.__decorate)([
+tslib_1.__decorate([
     sequelize_typescript_1.UpdatedAt,
-    (0, tslib_1.__metadata)("design:type", Date)
+    tslib_1.__metadata("design:type", Date)
 ], VideoImportModel.prototype, "updatedAt", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(true),
-    (0, sequelize_typescript_1.Default)(null),
-    (0, sequelize_typescript_1.Is)('VideoImportTargetUrl', value => (0, utils_1.throwIfNotValid)(value, video_imports_1.isVideoImportTargetUrlValid, 'targetUrl', true)),
-    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.VIDEO_IMPORTS.URL.max)),
-    (0, tslib_1.__metadata)("design:type", String)
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(true),
+    sequelize_typescript_1.Default(null),
+    sequelize_typescript_1.Is('VideoImportTargetUrl', value => utils_1.throwIfNotValid(value, video_imports_1.isVideoImportTargetUrlValid, 'targetUrl', true)),
+    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.VIDEO_IMPORTS.URL.max)),
+    tslib_1.__metadata("design:type", String)
 ], VideoImportModel.prototype, "targetUrl", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(true),
-    (0, sequelize_typescript_1.Default)(null),
-    (0, sequelize_typescript_1.Is)('VideoImportMagnetUri', value => (0, utils_1.throwIfNotValid)(value, videos_1.isVideoMagnetUriValid, 'magnetUri', true)),
-    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.VIDEO_IMPORTS.URL.max)),
-    (0, tslib_1.__metadata)("design:type", String)
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(true),
+    sequelize_typescript_1.Default(null),
+    sequelize_typescript_1.Is('VideoImportMagnetUri', value => utils_1.throwIfNotValid(value, videos_1.isVideoMagnetUriValid, 'magnetUri', true)),
+    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.VIDEO_IMPORTS.URL.max)),
+    tslib_1.__metadata("design:type", String)
 ], VideoImportModel.prototype, "magnetUri", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(true),
-    (0, sequelize_typescript_1.Default)(null),
-    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.VIDEO_IMPORTS.TORRENT_NAME.max)),
-    (0, tslib_1.__metadata)("design:type", String)
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(true),
+    sequelize_typescript_1.Default(null),
+    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.VIDEO_IMPORTS.TORRENT_NAME.max)),
+    tslib_1.__metadata("design:type", String)
 ], VideoImportModel.prototype, "torrentName", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(false),
-    (0, sequelize_typescript_1.Default)(null),
-    (0, sequelize_typescript_1.Is)('VideoImportState', value => (0, utils_1.throwIfNotValid)(value, video_imports_1.isVideoImportStateValid, 'state')),
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(false),
+    sequelize_typescript_1.Default(null),
+    sequelize_typescript_1.Is('VideoImportState', value => utils_1.throwIfNotValid(value, video_imports_1.isVideoImportStateValid, 'state')),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", Number)
+    tslib_1.__metadata("design:type", Number)
 ], VideoImportModel.prototype, "state", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(true),
-    (0, sequelize_typescript_1.Default)(null),
-    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.TEXT),
-    (0, tslib_1.__metadata)("design:type", String)
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(true),
+    sequelize_typescript_1.Default(null),
+    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.TEXT),
+    tslib_1.__metadata("design:type", String)
 ], VideoImportModel.prototype, "error", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.ForeignKey)(() => user_1.UserModel),
+tslib_1.__decorate([
+    sequelize_typescript_1.ForeignKey(() => user_1.UserModel),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", Number)
+    tslib_1.__metadata("design:type", Number)
 ], VideoImportModel.prototype, "userId", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.BelongsTo)(() => user_1.UserModel, {
+tslib_1.__decorate([
+    sequelize_typescript_1.BelongsTo(() => user_1.UserModel, {
         foreignKey: {
             allowNull: false
         },
         onDelete: 'cascade'
     }),
-    (0, tslib_1.__metadata)("design:type", user_1.UserModel)
+    tslib_1.__metadata("design:type", user_1.UserModel)
 ], VideoImportModel.prototype, "User", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.ForeignKey)(() => video_1.VideoModel),
+tslib_1.__decorate([
+    sequelize_typescript_1.ForeignKey(() => video_1.VideoModel),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", Number)
+    tslib_1.__metadata("design:type", Number)
 ], VideoImportModel.prototype, "videoId", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.BelongsTo)(() => video_1.VideoModel, {
+tslib_1.__decorate([
+    sequelize_typescript_1.BelongsTo(() => video_1.VideoModel, {
         foreignKey: {
             allowNull: true
         },
         onDelete: 'set null'
     }),
-    (0, tslib_1.__metadata)("design:type", video_1.VideoModel)
+    tslib_1.__metadata("design:type", video_1.VideoModel)
 ], VideoImportModel.prototype, "Video", void 0);
-(0, tslib_1.__decorate)([
+tslib_1.__decorate([
     sequelize_typescript_1.AfterUpdate,
-    (0, tslib_1.__metadata)("design:type", Function),
-    (0, tslib_1.__metadata)("design:paramtypes", [VideoImportModel, Object]),
-    (0, tslib_1.__metadata)("design:returntype", void 0)
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [VideoImportModel, Object]),
+    tslib_1.__metadata("design:returntype", void 0)
 ], VideoImportModel, "deleteVideoIfFailed", null);
-VideoImportModel = VideoImportModel_1 = (0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.DefaultScope)(() => ({
+VideoImportModel = VideoImportModel_1 = tslib_1.__decorate([
+    sequelize_typescript_1.DefaultScope(() => ({
         include: [
             {
                 model: user_1.UserModel.unscoped(),
@@ -168,7 +168,7 @@ VideoImportModel = VideoImportModel_1 = (0, tslib_1.__decorate)([
             }
         ]
     })),
-    (0, sequelize_typescript_1.Table)({
+    sequelize_typescript_1.Table({
         tableName: 'videoImport',
         indexes: [
             {

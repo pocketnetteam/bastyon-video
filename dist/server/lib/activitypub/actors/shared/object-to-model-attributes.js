@@ -30,21 +30,21 @@ function getImageInfoFromObject(actorObject, type) {
     const icon = type === 1
         ? actorObject.icon
         : actorObject.image;
-    if (!icon || icon.type !== 'Image' || !(0, misc_1.isActivityPubUrlValid)(icon.url))
+    if (!icon || icon.type !== 'Image' || !misc_1.isActivityPubUrlValid(icon.url))
         return undefined;
     let extension;
     if (icon.mediaType) {
         extension = mimetypes.MIMETYPE_EXT[icon.mediaType];
     }
     else {
-        const tmp = (0, core_utils_1.getLowercaseExtension)(icon.url);
+        const tmp = core_utils_1.getLowercaseExtension(icon.url);
         if (mimetypes.EXT_MIMETYPE[tmp] !== undefined)
             extension = tmp;
     }
     if (!extension)
         return undefined;
     return {
-        name: (0, uuid_1.buildUUID)() + extension,
+        name: uuid_1.buildUUID() + extension,
         fileUrl: icon.url,
         height: icon.height,
         width: icon.width,

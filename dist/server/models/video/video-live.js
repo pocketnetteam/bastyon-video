@@ -73,45 +73,45 @@ let VideoLiveModel = VideoLiveModel_1 = class VideoLiveModel extends sequelize_t
         };
     }
 };
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(true),
-    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING),
-    (0, tslib_1.__metadata)("design:type", String)
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(true),
+    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.STRING),
+    tslib_1.__metadata("design:type", String)
 ], VideoLiveModel.prototype, "streamKey", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(false),
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(false),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", Boolean)
+    tslib_1.__metadata("design:type", Boolean)
 ], VideoLiveModel.prototype, "saveReplay", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(false),
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(false),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", Boolean)
+    tslib_1.__metadata("design:type", Boolean)
 ], VideoLiveModel.prototype, "permanentLive", void 0);
-(0, tslib_1.__decorate)([
+tslib_1.__decorate([
     sequelize_typescript_1.CreatedAt,
-    (0, tslib_1.__metadata)("design:type", Date)
+    tslib_1.__metadata("design:type", Date)
 ], VideoLiveModel.prototype, "createdAt", void 0);
-(0, tslib_1.__decorate)([
+tslib_1.__decorate([
     sequelize_typescript_1.UpdatedAt,
-    (0, tslib_1.__metadata)("design:type", Date)
+    tslib_1.__metadata("design:type", Date)
 ], VideoLiveModel.prototype, "updatedAt", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.ForeignKey)(() => video_1.VideoModel),
+tslib_1.__decorate([
+    sequelize_typescript_1.ForeignKey(() => video_1.VideoModel),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", Number)
+    tslib_1.__metadata("design:type", Number)
 ], VideoLiveModel.prototype, "videoId", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.BelongsTo)(() => video_1.VideoModel, {
+tslib_1.__decorate([
+    sequelize_typescript_1.BelongsTo(() => video_1.VideoModel, {
         foreignKey: {
             allowNull: false
         },
         onDelete: 'cascade'
     }),
-    (0, tslib_1.__metadata)("design:type", video_1.VideoModel)
+    tslib_1.__metadata("design:type", video_1.VideoModel)
 ], VideoLiveModel.prototype, "Video", void 0);
-VideoLiveModel = VideoLiveModel_1 = (0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.DefaultScope)(() => ({
+VideoLiveModel = VideoLiveModel_1 = tslib_1.__decorate([
+    sequelize_typescript_1.DefaultScope(() => ({
         include: [
             {
                 model: video_1.VideoModel,
@@ -125,7 +125,7 @@ VideoLiveModel = VideoLiveModel_1 = (0, tslib_1.__decorate)([
             }
         ]
     })),
-    (0, sequelize_typescript_1.Table)({
+    sequelize_typescript_1.Table({
         tableName: 'videoLive',
         indexes: [
             {

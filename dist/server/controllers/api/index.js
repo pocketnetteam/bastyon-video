@@ -2,9 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiRouter = void 0;
 const tslib_1 = require("tslib");
-const cors_1 = (0, tslib_1.__importDefault)(require("cors"));
-const express_1 = (0, tslib_1.__importDefault)(require("express"));
-const express_rate_limit_1 = (0, tslib_1.__importDefault)(require("express-rate-limit"));
+const cors_1 = tslib_1.__importDefault(require("cors"));
+const express_1 = tslib_1.__importDefault(require("express"));
+const express_rate_limit_1 = tslib_1.__importDefault(require("express-rate-limit"));
 const models_1 = require("../../../shared/models");
 const express_utils_1 = require("../../helpers/express-utils");
 const config_1 = require("../../initializers/config");
@@ -26,12 +26,12 @@ const videos_1 = require("./videos");
 const images_1 = require("./images");
 const apiRouter = express_1.default.Router();
 exports.apiRouter = apiRouter;
-apiRouter.use((0, cors_1.default)({
+apiRouter.use(cors_1.default({
     origin: '*',
     exposedHeaders: 'Retry-After',
     credentials: true
 }));
-const apiRateLimiter = (0, express_rate_limit_1.default)({
+const apiRateLimiter = express_rate_limit_1.default({
     windowMs: config_1.CONFIG.RATES_LIMIT.API.WINDOW_MS,
     max: config_1.CONFIG.RATES_LIMIT.API.MAX
 });

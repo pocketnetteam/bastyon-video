@@ -20,7 +20,7 @@ const LOGGER_ENDPOINT = 'https://rixtrema.net/api/uptime/Peertube/TranscodingErr
 exports.LOGGER_ENDPOINT = LOGGER_ENDPOINT;
 const API_VERSION = 'v1';
 exports.API_VERSION = API_VERSION;
-const PEERTUBE_VERSION = require((0, path_1.join)((0, core_utils_1.root)(), 'package.json')).version;
+const PEERTUBE_VERSION = require(path_1.join(core_utils_1.root(), 'package.json')).version;
 exports.PEERTUBE_VERSION = PEERTUBE_VERSION;
 const PAGINATION = {
     GLOBAL: {
@@ -162,10 +162,10 @@ const JOB_TTL = {
 exports.JOB_TTL = JOB_TTL;
 const REPEAT_JOBS = {
     'videos-views': {
-        cron: (0, miscs_1.randomInt)(1, 20) + ' * * * *'
+        cron: miscs_1.randomInt(1, 20) + ' * * * *'
     },
     'activitypub-cleaner': {
-        cron: '30 5 * * ' + (0, miscs_1.randomInt)(0, 7)
+        cron: '30 5 * * ' + miscs_1.randomInt(0, 7)
     }
 };
 exports.REPEAT_JOBS = REPEAT_JOBS;
@@ -179,7 +179,7 @@ const AP_CLEANER_CONCURRENCY = 10;
 exports.AP_CLEANER_CONCURRENCY = AP_CLEANER_CONCURRENCY;
 const CRAWL_REQUEST_CONCURRENCY = 1;
 exports.CRAWL_REQUEST_CONCURRENCY = CRAWL_REQUEST_CONCURRENCY;
-const REQUEST_TIMEOUT = 7000;
+const REQUEST_TIMEOUT = 60000;
 exports.REQUEST_TIMEOUT = REQUEST_TIMEOUT;
 const JOB_COMPLETED_LIFETIME = 60000 * 60 * 24 * 2;
 exports.JOB_COMPLETED_LIFETIME = JOB_COMPLETED_LIFETIME;
@@ -470,8 +470,8 @@ const MIMETYPES = {
     }
 };
 exports.MIMETYPES = MIMETYPES;
-MIMETYPES.AUDIO.EXT_MIMETYPE = (0, lodash_1.invert)(MIMETYPES.AUDIO.MIMETYPE_EXT);
-MIMETYPES.IMAGE.EXT_MIMETYPE = (0, lodash_1.invert)(MIMETYPES.IMAGE.MIMETYPE_EXT);
+MIMETYPES.AUDIO.EXT_MIMETYPE = lodash_1.invert(MIMETYPES.AUDIO.MIMETYPE_EXT);
+MIMETYPES.IMAGE.EXT_MIMETYPE = lodash_1.invert(MIMETYPES.IMAGE.MIMETYPE_EXT);
 const OVERVIEWS = {
     VIDEOS: {
         SAMPLE_THRESHOLD: 6,
@@ -603,15 +603,15 @@ const EMBED_SIZE = {
 exports.EMBED_SIZE = EMBED_SIZE;
 const FILES_CACHE = {
     PREVIEWS: {
-        DIRECTORY: (0, path_1.join)(config_1.CONFIG.STORAGE.CACHE_DIR, 'previews'),
+        DIRECTORY: path_1.join(config_1.CONFIG.STORAGE.CACHE_DIR, 'previews'),
         MAX_AGE: 1000 * 3600 * 3
     },
     VIDEO_CAPTIONS: {
-        DIRECTORY: (0, path_1.join)(config_1.CONFIG.STORAGE.CACHE_DIR, 'video-captions'),
+        DIRECTORY: path_1.join(config_1.CONFIG.STORAGE.CACHE_DIR, 'video-captions'),
         MAX_AGE: 1000 * 3600 * 3
     },
     TORRENTS: {
-        DIRECTORY: (0, path_1.join)(config_1.CONFIG.STORAGE.CACHE_DIR, 'torrents'),
+        DIRECTORY: path_1.join(config_1.CONFIG.STORAGE.CACHE_DIR, 'torrents'),
         MAX_AGE: 1000 * 3600 * 3
     }
 };
@@ -625,11 +625,11 @@ const LRU_CACHE = {
     }
 };
 exports.LRU_CACHE = LRU_CACHE;
-const RESUMABLE_UPLOAD_DIRECTORY = (0, path_1.join)(config_1.CONFIG.STORAGE.TMP_DIR, 'resumable-uploads');
+const RESUMABLE_UPLOAD_DIRECTORY = path_1.join(config_1.CONFIG.STORAGE.TMP_DIR, 'resumable-uploads');
 exports.RESUMABLE_UPLOAD_DIRECTORY = RESUMABLE_UPLOAD_DIRECTORY;
-const HLS_STREAMING_PLAYLIST_DIRECTORY = (0, path_1.join)(config_1.CONFIG.STORAGE.STREAMING_PLAYLISTS_DIR, 'hls');
+const HLS_STREAMING_PLAYLIST_DIRECTORY = path_1.join(config_1.CONFIG.STORAGE.STREAMING_PLAYLISTS_DIR, 'hls');
 exports.HLS_STREAMING_PLAYLIST_DIRECTORY = HLS_STREAMING_PLAYLIST_DIRECTORY;
-const HLS_REDUNDANCY_DIRECTORY = (0, path_1.join)(config_1.CONFIG.STORAGE.REDUNDANCY_DIR, 'hls');
+const HLS_REDUNDANCY_DIRECTORY = path_1.join(config_1.CONFIG.STORAGE.REDUNDANCY_DIR, 'hls');
 exports.HLS_REDUNDANCY_DIRECTORY = HLS_REDUNDANCY_DIRECTORY;
 const VIDEO_LIVE = {
     EXTENSION: '.ts',
@@ -672,8 +672,8 @@ exports.REDUNDANCY = REDUNDANCY;
 const ACCEPT_HEADERS = ['html', 'application/json'].concat(ACTIVITY_PUB.POTENTIAL_ACCEPT_HEADERS);
 exports.ACCEPT_HEADERS = ACCEPT_HEADERS;
 const ASSETS_PATH = {
-    DEFAULT_AUDIO_BACKGROUND: (0, path_1.join)((0, core_utils_1.root)(), 'dist', 'server', 'assets', 'default-audio-background.jpg'),
-    DEFAULT_LIVE_BACKGROUND: (0, path_1.join)((0, core_utils_1.root)(), 'dist', 'server', 'assets', 'default-live-background.jpg')
+    DEFAULT_AUDIO_BACKGROUND: path_1.join(core_utils_1.root(), 'dist', 'server', 'assets', 'default-audio-background.jpg'),
+    DEFAULT_LIVE_BACKGROUND: path_1.join(core_utils_1.root(), 'dist', 'server', 'assets', 'default-live-background.jpg')
 };
 exports.ASSETS_PATH = ASSETS_PATH;
 const CUSTOM_HTML_TAG_COMMENTS = {
@@ -705,7 +705,7 @@ const P2P_MEDIA_LOADER_PEER_VERSION = 2;
 exports.P2P_MEDIA_LOADER_PEER_VERSION = P2P_MEDIA_LOADER_PEER_VERSION;
 const PLUGIN_GLOBAL_CSS_FILE_NAME = 'plugins-global.css';
 exports.PLUGIN_GLOBAL_CSS_FILE_NAME = PLUGIN_GLOBAL_CSS_FILE_NAME;
-const PLUGIN_GLOBAL_CSS_PATH = (0, path_1.join)(config_1.CONFIG.STORAGE.TMP_DIR, PLUGIN_GLOBAL_CSS_FILE_NAME);
+const PLUGIN_GLOBAL_CSS_PATH = path_1.join(config_1.CONFIG.STORAGE.TMP_DIR, PLUGIN_GLOBAL_CSS_FILE_NAME);
 exports.PLUGIN_GLOBAL_CSS_PATH = PLUGIN_GLOBAL_CSS_PATH;
 let PLUGIN_EXTERNAL_AUTH_TOKEN_LIFETIME = 1000 * 60 * 5;
 exports.PLUGIN_EXTERNAL_AUTH_TOKEN_LIFETIME = PLUGIN_EXTERNAL_AUTH_TOKEN_LIFETIME;
@@ -720,7 +720,7 @@ const SEARCH_INDEX = {
     }
 };
 exports.SEARCH_INDEX = SEARCH_INDEX;
-if ((0, core_utils_1.isTestInstance)() === true) {
+if (core_utils_1.isTestInstance() === true) {
     exports.PRIVATE_RSA_KEY_SIZE = PRIVATE_RSA_KEY_SIZE = 1024;
     ACTOR_FOLLOW_SCORE.BASE = 20;
     REMOTE_SCHEME.HTTP = 'http';
@@ -758,7 +758,7 @@ if ((0, core_utils_1.isTestInstance)() === true) {
 }
 updateWebserverUrls();
 updateWebserverConfig();
-(0, config_1.registerConfigChangedHandler)(() => {
+config_1.registerConfigChangedHandler(() => {
     updateWebserverUrls();
     updateWebserverConfig();
 });
@@ -807,8 +807,8 @@ function buildVideoMimetypeExt() {
     return data;
 }
 function updateWebserverUrls() {
-    WEBSERVER.URL = (0, core_utils_1.sanitizeUrl)(config_1.CONFIG.WEBSERVER.SCHEME + '://' + config_1.CONFIG.WEBSERVER.HOSTNAME + ':' + config_1.CONFIG.WEBSERVER.PORT);
-    WEBSERVER.HOST = (0, core_utils_1.sanitizeHost)(config_1.CONFIG.WEBSERVER.HOSTNAME + ':' + config_1.CONFIG.WEBSERVER.PORT, REMOTE_SCHEME.HTTP);
+    WEBSERVER.URL = core_utils_1.sanitizeUrl(config_1.CONFIG.WEBSERVER.SCHEME + '://' + config_1.CONFIG.WEBSERVER.HOSTNAME + ':' + config_1.CONFIG.WEBSERVER.PORT);
+    WEBSERVER.HOST = core_utils_1.sanitizeHost(config_1.CONFIG.WEBSERVER.HOSTNAME + ':' + config_1.CONFIG.WEBSERVER.PORT, REMOTE_SCHEME.HTTP);
     WEBSERVER.WS = config_1.CONFIG.WEBSERVER.WS;
     WEBSERVER.SCHEME = config_1.CONFIG.WEBSERVER.SCHEME;
     WEBSERVER.HOSTNAME = config_1.CONFIG.WEBSERVER.HOSTNAME;
@@ -882,6 +882,6 @@ function buildLanguages() {
 }
 exports.buildLanguages = buildLanguages;
 function generateContentHash() {
-    return (0, crypto_1.randomBytes)(20).toString('hex');
+    return crypto_1.randomBytes(20).toString('hex');
 }
 exports.generateContentHash = generateContentHash;

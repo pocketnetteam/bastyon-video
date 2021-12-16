@@ -11,10 +11,10 @@ function sendReject(followUrl, follower, following) {
         return;
     }
     logger_1.logger.info('Creating job to reject follower %s.', follower.url);
-    const followData = (0, send_follow_1.buildFollowActivity)(followUrl, follower, following);
-    const url = (0, url_1.getLocalActorFollowRejectActivityPubUrl)(follower, following);
+    const followData = send_follow_1.buildFollowActivity(followUrl, follower, following);
+    const url = url_1.getLocalActorFollowRejectActivityPubUrl(follower, following);
     const data = buildRejectActivity(url, following, followData);
-    return (0, utils_1.unicastTo)(data, following, follower.inboxUrl);
+    return utils_1.unicastTo(data, following, follower.inboxUrl);
 }
 exports.sendReject = sendReject;
 function buildRejectActivity(url, byActor, followActivityData) {

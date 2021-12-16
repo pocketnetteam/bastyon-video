@@ -78,13 +78,13 @@ const sequelizeTypescript = new sequelize_typescript_1.Sequelize({
     pool: {
         max: poolMax
     },
-    benchmark: (0, core_utils_1.isTestInstance)(),
+    benchmark: core_utils_1.isTestInstance(),
     isolationLevel: sequelize_1.Transaction.ISOLATION_LEVELS.SERIALIZABLE,
     logging: (message, benchmark) => {
         if (process.env.NODE_DB_LOG === 'false')
             return;
         let newMessage = 'Executed SQL request';
-        if ((0, core_utils_1.isTestInstance)() === true && benchmark !== undefined) {
+        if (core_utils_1.isTestInstance() === true && benchmark !== undefined) {
             newMessage += ' in ' + benchmark + 'ms';
         }
         logger_1.logger.debug(newMessage, { sql: message, tags: ['sql'] });
@@ -101,7 +101,7 @@ function checkDatabaseConnectionOrDie() {
 }
 exports.checkDatabaseConnectionOrDie = checkDatabaseConnectionOrDie;
 function initDatabaseModels(silent) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         sequelizeTypescript.addModels([
             application_1.ApplicationModel,
             actor_1.ActorModel,
@@ -157,7 +157,7 @@ function initDatabaseModels(silent) {
 }
 exports.initDatabaseModels = initDatabaseModels;
 function checkPostgresExtensions() {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const promises = [
             checkPostgresExtension('pg_trgm'),
             checkPostgresExtension('unaccent')
@@ -166,7 +166,7 @@ function checkPostgresExtensions() {
     });
 }
 function checkPostgresExtension(extension) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const query = `SELECT 1 FROM pg_available_extensions WHERE name = '${extension}' AND installed_version IS NOT NULL;`;
         const options = {
             type: sequelize_1.QueryTypes.SELECT,

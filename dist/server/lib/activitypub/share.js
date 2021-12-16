@@ -12,9 +12,9 @@ const video_share_1 = require("../../models/video/video-share");
 const actors_1 = require("./actors");
 const send_1 = require("./send");
 const url_1 = require("./url");
-const lTags = (0, logger_1.loggerTagsFactory)('share');
+const lTags = logger_1.loggerTagsFactory('share');
 function shareVideoByServerAndChannel(video, t) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         if (!video.hasPrivacyForFederation())
             return undefined;
         return Promise.all([
@@ -25,7 +25,7 @@ function shareVideoByServerAndChannel(video, t) {
 }
 exports.shareVideoByServerAndChannel = shareVideoByServerAndChannel;
 function changeVideoChannelShare(video, oldVideoChannel, t) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         logger_1.logger.info('Updating video channel of video %s: %s -> %s.', video.uuid, oldVideoChannel.name, video.VideoChannel.name, lTags(video.uuid));
         yield undoShareByVideoChannel(video, oldVideoChannel, t);
         yield shareByVideoChannel(video, t);
@@ -33,8 +33,8 @@ function changeVideoChannelShare(video, oldVideoChannel, t) {
 }
 exports.changeVideoChannelShare = changeVideoChannelShare;
 function addVideoShares(shareUrls, video) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        yield (0, bluebird_1.map)(shareUrls, (shareUrl) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        yield bluebird_1.map(shareUrls, (shareUrl) => tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 yield addVideoShare(shareUrl, video);
             }
@@ -46,15 +46,15 @@ function addVideoShares(shareUrls, video) {
 }
 exports.addVideoShares = addVideoShares;
 function addVideoShare(shareUrl, video) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        const { body } = yield (0, requests_1.doJSONRequest)(shareUrl, { activityPub: true });
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const { body } = yield requests_1.doJSONRequest(shareUrl, { activityPub: true });
         if (!body || !body.actor)
             throw new Error('Body or body actor is invalid');
-        const actorUrl = (0, activitypub_1.getAPId)(body.actor);
-        if ((0, activitypub_1.checkUrlsSameHost)(shareUrl, actorUrl) !== true) {
+        const actorUrl = activitypub_1.getAPId(body.actor);
+        if (activitypub_1.checkUrlsSameHost(shareUrl, actorUrl) !== true) {
             throw new Error(`Actor url ${actorUrl} has not the same host than the share url ${shareUrl}`);
         }
-        const actor = yield (0, actors_1.getOrCreateAPActor)(actorUrl);
+        const actor = yield actors_1.getOrCreateAPActor(actorUrl);
         const entry = {
             actorId: actor.id,
             videoId: video.id,
@@ -64,9 +64,9 @@ function addVideoShare(shareUrl, video) {
     });
 }
 function shareByServer(video, t) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        const serverActor = yield (0, application_1.getServerActor)();
-        const serverShareUrl = (0, url_1.getLocalVideoAnnounceActivityPubUrl)(serverActor, video);
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const serverActor = yield application_1.getServerActor();
+        const serverShareUrl = url_1.getLocalVideoAnnounceActivityPubUrl(serverActor, video);
         const [serverShare] = yield video_share_1.VideoShareModel.findOrCreate({
             defaults: {
                 actorId: serverActor.id,
@@ -78,12 +78,12 @@ function shareByServer(video, t) {
             },
             transaction: t
         });
-        return (0, send_1.sendVideoAnnounce)(serverActor, serverShare, video, t);
+        return send_1.sendVideoAnnounce(serverActor, serverShare, video, t);
     });
 }
 function shareByVideoChannel(video, t) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        const videoChannelShareUrl = (0, url_1.getLocalVideoAnnounceActivityPubUrl)(video.VideoChannel.Actor, video);
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const videoChannelShareUrl = url_1.getLocalVideoAnnounceActivityPubUrl(video.VideoChannel.Actor, video);
         const [videoChannelShare] = yield video_share_1.VideoShareModel.findOrCreate({
             defaults: {
                 actorId: video.VideoChannel.actorId,
@@ -95,15 +95,15 @@ function shareByVideoChannel(video, t) {
             },
             transaction: t
         });
-        return (0, send_1.sendVideoAnnounce)(video.VideoChannel.Actor, videoChannelShare, video, t);
+        return send_1.sendVideoAnnounce(video.VideoChannel.Actor, videoChannelShare, video, t);
     });
 }
 function undoShareByVideoChannel(video, oldVideoChannel, t) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const oldShare = yield video_share_1.VideoShareModel.load(oldVideoChannel.actorId, video.id, t);
         if (!oldShare)
             return new Error('Cannot find old video channel share ' + oldVideoChannel.actorId + ' for video ' + video.id);
-        yield (0, send_1.sendUndoAnnounce)(oldVideoChannel.Actor, oldShare, video, t);
+        yield send_1.sendUndoAnnounce(oldVideoChannel.Actor, oldShare, video, t);
         yield oldShare.destroy({ transaction: t });
     });
 }

@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.videoCommentRouter = void 0;
 const tslib_1 = require("tslib");
-const express_1 = (0, tslib_1.__importDefault)(require("express"));
+const express_1 = tslib_1.__importDefault(require("express"));
 const http_error_codes_1 = require("../../../../shared/models/http/http-error-codes");
 const audit_logger_1 = require("../../../helpers/audit-logger");
 const utils_1 = require("../../../helpers/utils");
@@ -14,17 +14,17 @@ const middlewares_1 = require("../../../middlewares");
 const validators_1 = require("../../../middlewares/validators");
 const account_1 = require("../../../models/account/account");
 const video_comment_2 = require("../../../models/video/video-comment");
-const auditLogger = (0, audit_logger_1.auditLoggerFactory)('comments');
+const auditLogger = audit_logger_1.auditLoggerFactory('comments');
 const videoCommentRouter = express_1.default.Router();
 exports.videoCommentRouter = videoCommentRouter;
-videoCommentRouter.get('/:videoId/comment-threads', middlewares_1.paginationValidator, validators_1.videoCommentThreadsSortValidator, middlewares_1.setDefaultSort, middlewares_1.setDefaultPagination, (0, middlewares_1.asyncMiddleware)(validators_1.listVideoCommentThreadsValidator), middlewares_1.optionalAuthenticate, (0, middlewares_1.asyncMiddleware)(listVideoThreads));
-videoCommentRouter.get('/:videoId/comment-threads/:threadId', (0, middlewares_1.asyncMiddleware)(validators_1.listVideoThreadCommentsValidator), middlewares_1.optionalAuthenticate, (0, middlewares_1.asyncMiddleware)(listVideoThreadComments));
-videoCommentRouter.post('/:videoId/comment-threads', middlewares_1.authenticate, (0, middlewares_1.asyncMiddleware)(validators_1.addVideoCommentThreadValidator), (0, middlewares_1.asyncRetryTransactionMiddleware)(addVideoCommentThread));
-videoCommentRouter.post('/:videoId/comments/:commentId', middlewares_1.authenticate, (0, middlewares_1.asyncMiddleware)(validators_1.addVideoCommentReplyValidator), (0, middlewares_1.asyncRetryTransactionMiddleware)(addVideoCommentReply));
-videoCommentRouter.delete('/:videoId/comments/:commentId', middlewares_1.authenticate, (0, middlewares_1.asyncMiddleware)(validators_1.removeVideoCommentValidator), (0, middlewares_1.asyncRetryTransactionMiddleware)(removeVideoComment));
-videoCommentRouter.get('/comments', middlewares_1.authenticate, (0, middlewares_1.ensureUserHasRight)(21), middlewares_1.paginationValidator, validators_1.videoCommentsValidator, middlewares_1.setDefaultSort, middlewares_1.setDefaultPagination, validators_1.listVideoCommentsValidator, (0, middlewares_1.asyncMiddleware)(listComments));
+videoCommentRouter.get('/:videoId/comment-threads', middlewares_1.paginationValidator, validators_1.videoCommentThreadsSortValidator, middlewares_1.setDefaultSort, middlewares_1.setDefaultPagination, middlewares_1.asyncMiddleware(validators_1.listVideoCommentThreadsValidator), middlewares_1.optionalAuthenticate, middlewares_1.asyncMiddleware(listVideoThreads));
+videoCommentRouter.get('/:videoId/comment-threads/:threadId', middlewares_1.asyncMiddleware(validators_1.listVideoThreadCommentsValidator), middlewares_1.optionalAuthenticate, middlewares_1.asyncMiddleware(listVideoThreadComments));
+videoCommentRouter.post('/:videoId/comment-threads', middlewares_1.authenticate, middlewares_1.asyncMiddleware(validators_1.addVideoCommentThreadValidator), middlewares_1.asyncRetryTransactionMiddleware(addVideoCommentThread));
+videoCommentRouter.post('/:videoId/comments/:commentId', middlewares_1.authenticate, middlewares_1.asyncMiddleware(validators_1.addVideoCommentReplyValidator), middlewares_1.asyncRetryTransactionMiddleware(addVideoCommentReply));
+videoCommentRouter.delete('/:videoId/comments/:commentId', middlewares_1.authenticate, middlewares_1.asyncMiddleware(validators_1.removeVideoCommentValidator), middlewares_1.asyncRetryTransactionMiddleware(removeVideoComment));
+videoCommentRouter.get('/comments', middlewares_1.authenticate, middlewares_1.ensureUserHasRight(21), middlewares_1.paginationValidator, validators_1.videoCommentsValidator, middlewares_1.setDefaultSort, middlewares_1.setDefaultPagination, validators_1.listVideoCommentsValidator, middlewares_1.asyncMiddleware(listComments));
 function listComments(req, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const options = {
             start: req.query.start,
             count: req.query.count,
@@ -42,7 +42,7 @@ function listComments(req, res) {
     });
 }
 function listVideoThreads(req, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const video = res.locals.onlyVideo;
         const user = res.locals.oauth ? res.locals.oauth.token.User : undefined;
         let resultList;
@@ -64,11 +64,11 @@ function listVideoThreads(req, res) {
                 data: []
             };
         }
-        return res.json(Object.assign(Object.assign({}, (0, utils_1.getFormattedObjects)(resultList.data, resultList.total)), { totalNotDeletedComments: resultList.totalNotDeletedComments }));
+        return res.json(Object.assign(Object.assign({}, utils_1.getFormattedObjects(resultList.data, resultList.total)), { totalNotDeletedComments: resultList.totalNotDeletedComments }));
     });
 }
 function listVideoThreadComments(req, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const video = res.locals.onlyVideo;
         const user = res.locals.oauth ? res.locals.oauth.token.User : undefined;
         let resultList;
@@ -93,15 +93,15 @@ function listVideoThreadComments(req, res) {
                 message: 'No comments were found'
             });
         }
-        return res.json((0, video_comment_1.buildFormattedCommentTree)(resultList));
+        return res.json(video_comment_1.buildFormattedCommentTree(resultList));
     });
 }
 function addVideoCommentThread(req, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const videoCommentInfo = req.body;
-        const comment = yield database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        const comment = yield database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
             const account = yield account_1.AccountModel.load(res.locals.oauth.token.User.Account.id, t);
-            return (0, video_comment_1.createVideoComment)({
+            return video_comment_1.createVideoComment({
                 text: videoCommentInfo.text,
                 inReplyToComment: null,
                 video: res.locals.videoAll,
@@ -109,17 +109,17 @@ function addVideoCommentThread(req, res) {
             }, t);
         }));
         notifier_1.Notifier.Instance.notifyOnNewComment(comment);
-        auditLogger.create((0, audit_logger_1.getAuditIdFromRes)(res), new audit_logger_1.CommentAuditView(comment.toFormattedJSON()));
+        auditLogger.create(audit_logger_1.getAuditIdFromRes(res), new audit_logger_1.CommentAuditView(comment.toFormattedJSON()));
         hooks_1.Hooks.runAction('action:api.video-thread.created', { comment });
         return res.json({ comment: comment.toFormattedJSON() });
     });
 }
 function addVideoCommentReply(req, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const videoCommentInfo = req.body;
-        const comment = yield database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        const comment = yield database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
             const account = yield account_1.AccountModel.load(res.locals.oauth.token.User.Account.id, t);
-            return (0, video_comment_1.createVideoComment)({
+            return video_comment_1.createVideoComment({
                 text: videoCommentInfo.text,
                 inReplyToComment: res.locals.videoCommentFull,
                 video: res.locals.videoAll,
@@ -127,16 +127,16 @@ function addVideoCommentReply(req, res) {
             }, t);
         }));
         notifier_1.Notifier.Instance.notifyOnNewComment(comment);
-        auditLogger.create((0, audit_logger_1.getAuditIdFromRes)(res), new audit_logger_1.CommentAuditView(comment.toFormattedJSON()));
+        auditLogger.create(audit_logger_1.getAuditIdFromRes(res), new audit_logger_1.CommentAuditView(comment.toFormattedJSON()));
         hooks_1.Hooks.runAction('action:api.video-comment-reply.created', { comment });
         return res.json({ comment: comment.toFormattedJSON() });
     });
 }
 function removeVideoComment(req, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const videoCommentInstance = res.locals.videoCommentFull;
-        yield (0, video_comment_1.removeComment)(videoCommentInstance);
-        auditLogger.delete((0, audit_logger_1.getAuditIdFromRes)(res), new audit_logger_1.CommentAuditView(videoCommentInstance.toFormattedJSON()));
+        yield video_comment_1.removeComment(videoCommentInstance);
+        auditLogger.delete(audit_logger_1.getAuditIdFromRes(res), new audit_logger_1.CommentAuditView(videoCommentInstance.toFormattedJSON()));
         return res.type('json')
             .status(http_error_codes_1.HttpStatusCode.NO_CONTENT_204)
             .end();

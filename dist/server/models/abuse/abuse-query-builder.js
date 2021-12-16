@@ -17,7 +17,7 @@ function buildAbuseListQuery(options, type) {
         'LEFT JOIN "videoComment" ON "commentAbuse"."videoCommentId" = "videoComment"."id"'
     ];
     if (options.serverAccountId || options.userAccountId) {
-        whereAnd.push('"abuse"."reporterAccountId" NOT IN (' + (0, utils_1.buildBlockedAccountSQL)([options.serverAccountId, options.userAccountId]) + ')');
+        whereAnd.push('"abuse"."reporterAccountId" NOT IN (' + utils_1.buildBlockedAccountSQL([options.serverAccountId, options.userAccountId]) + ')');
     }
     if (options.reporterAccountId) {
         whereAnd.push('"abuse"."reporterAccountId" = :reporterAccountId');
@@ -87,11 +87,11 @@ function buildAbuseListQuery(options, type) {
             const order = buildAbuseOrder(options.sort);
             suffix += `${order} `;
         }
-        if ((0, misc_1.exists)(options.count)) {
+        if (misc_1.exists(options.count)) {
             const count = parseInt(options.count + '', 10);
             suffix += `LIMIT ${count} `;
         }
-        if ((0, misc_1.exists)(options.start)) {
+        if (misc_1.exists(options.start)) {
             const start = parseInt(options.start + '', 10);
             suffix += `OFFSET ${start} `;
         }
@@ -106,6 +106,6 @@ function buildAbuseListQuery(options, type) {
 }
 exports.buildAbuseListQuery = buildAbuseListQuery;
 function buildAbuseOrder(value) {
-    const { direction, field } = (0, utils_1.buildDirectionAndField)(value);
+    const { direction, field } = utils_1.buildDirectionAndField(value);
     return `ORDER BY "abuse"."${field}" ${direction}`;
 }

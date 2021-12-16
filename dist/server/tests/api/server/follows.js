@@ -2,21 +2,21 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = (0, tslib_1.__importStar)(require("chai"));
+const chai = tslib_1.__importStar(require("chai"));
 const extra_utils_1 = require("@shared/extra-utils");
 const expect = chai.expect;
 describe('Test follows', function () {
     let servers = [];
     before(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(30000);
-            servers = yield (0, extra_utils_1.createMultipleServers)(3);
-            yield (0, extra_utils_1.setAccessTokensToServers)(servers);
+            servers = yield extra_utils_1.createMultipleServers(3);
+            yield extra_utils_1.setAccessTokensToServers(servers);
         });
     });
     describe('Data propagation after follow', function () {
         it('Should not have followers/followings', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 for (const server of servers) {
                     const bodies = yield Promise.all([
                         server.follows.getFollowers({ start: 0, count: 5, sort: 'createdAt' }),
@@ -32,17 +32,17 @@ describe('Test follows', function () {
             });
         });
         it('Should have server 1 following root account of server 2 and server 3', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(30000);
                 yield servers[0].follows.follow({
                     hosts: [servers[2].url],
                     handles: ['root@' + servers[1].host]
                 });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
             });
         });
         it('Should have 2 followings on server 1', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const body = yield servers[0].follows.getFollowings({ start: 0, count: 1, sort: 'createdAt' });
                 expect(body.total).to.equal(2);
                 let follows = body.data;
@@ -61,7 +61,7 @@ describe('Test follows', function () {
             });
         });
         it('Should have 0 followings on server 2 and 3', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 for (const server of [servers[1], servers[2]]) {
                     const body = yield server.follows.getFollowings({ start: 0, count: 5, sort: 'createdAt' });
                     expect(body.total).to.equal(0);
@@ -72,7 +72,7 @@ describe('Test follows', function () {
             });
         });
         it('Should have 1 followers on server 3', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const body = yield servers[2].follows.getFollowers({ start: 0, count: 1, sort: 'createdAt' });
                 expect(body.total).to.equal(1);
                 const follows = body.data;
@@ -82,7 +82,7 @@ describe('Test follows', function () {
             });
         });
         it('Should have 0 followers on server 1 and 2', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 for (const server of [servers[0], servers[1]]) {
                     const body = yield server.follows.getFollowers({ start: 0, count: 5, sort: 'createdAt' });
                     expect(body.total).to.equal(0);
@@ -93,7 +93,7 @@ describe('Test follows', function () {
             });
         });
         it('Should search/filter followings on server 1', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const sort = 'createdAt';
                 const start = 0;
                 const count = 1;
@@ -147,7 +147,7 @@ describe('Test follows', function () {
             });
         });
         it('Should search/filter followers on server 2', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const start = 0;
                 const count = 5;
                 const sort = 'createdAt';
@@ -197,26 +197,26 @@ describe('Test follows', function () {
             });
         });
         it('Should have the correct follows counts', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.expectAccountFollows)({ server: servers[0], handle: 'peertube@' + servers[0].host, followers: 0, following: 2 });
-                yield (0, extra_utils_1.expectAccountFollows)({ server: servers[0], handle: 'root@' + servers[1].host, followers: 1, following: 0 });
-                yield (0, extra_utils_1.expectAccountFollows)({ server: servers[0], handle: 'peertube@' + servers[2].host, followers: 1, following: 0 });
-                yield (0, extra_utils_1.expectAccountFollows)({ server: servers[1], handle: 'peertube@' + servers[0].host, followers: 0, following: 1 });
-                yield (0, extra_utils_1.expectAccountFollows)({ server: servers[1], handle: 'root@' + servers[1].host, followers: 1, following: 0 });
-                yield (0, extra_utils_1.expectAccountFollows)({ server: servers[1], handle: 'peertube@' + servers[1].host, followers: 0, following: 0 });
-                yield (0, extra_utils_1.expectAccountFollows)({ server: servers[2], handle: 'peertube@' + servers[0].host, followers: 0, following: 1 });
-                yield (0, extra_utils_1.expectAccountFollows)({ server: servers[2], handle: 'peertube@' + servers[2].host, followers: 1, following: 0 });
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.expectAccountFollows({ server: servers[0], handle: 'peertube@' + servers[0].host, followers: 0, following: 2 });
+                yield extra_utils_1.expectAccountFollows({ server: servers[0], handle: 'root@' + servers[1].host, followers: 1, following: 0 });
+                yield extra_utils_1.expectAccountFollows({ server: servers[0], handle: 'peertube@' + servers[2].host, followers: 1, following: 0 });
+                yield extra_utils_1.expectAccountFollows({ server: servers[1], handle: 'peertube@' + servers[0].host, followers: 0, following: 1 });
+                yield extra_utils_1.expectAccountFollows({ server: servers[1], handle: 'root@' + servers[1].host, followers: 1, following: 0 });
+                yield extra_utils_1.expectAccountFollows({ server: servers[1], handle: 'peertube@' + servers[1].host, followers: 0, following: 0 });
+                yield extra_utils_1.expectAccountFollows({ server: servers[2], handle: 'peertube@' + servers[0].host, followers: 0, following: 1 });
+                yield extra_utils_1.expectAccountFollows({ server: servers[2], handle: 'peertube@' + servers[2].host, followers: 1, following: 0 });
             });
         });
         it('Should unfollow server 3 on server 1', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(15000);
                 yield servers[0].follows.unfollow({ target: servers[2] });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
             });
         });
         it('Should not follow server 3 on server 1 anymore', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const body = yield servers[0].follows.getFollowings({ start: 0, count: 2, sort: 'createdAt' });
                 expect(body.total).to.equal(1);
                 const follows = body.data;
@@ -226,7 +226,7 @@ describe('Test follows', function () {
             });
         });
         it('Should not have server 1 as follower on server 3 anymore', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const body = yield servers[2].follows.getFollowers({ start: 0, count: 1, sort: 'createdAt' });
                 expect(body.total).to.equal(0);
                 const follows = body.data;
@@ -235,23 +235,23 @@ describe('Test follows', function () {
             });
         });
         it('Should have the correct follows counts after the unfollow', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.expectAccountFollows)({ server: servers[0], handle: 'peertube@' + servers[0].host, followers: 0, following: 1 });
-                yield (0, extra_utils_1.expectAccountFollows)({ server: servers[0], handle: 'root@' + servers[1].host, followers: 1, following: 0 });
-                yield (0, extra_utils_1.expectAccountFollows)({ server: servers[0], handle: 'peertube@' + servers[2].host, followers: 0, following: 0 });
-                yield (0, extra_utils_1.expectAccountFollows)({ server: servers[1], handle: 'peertube@' + servers[0].host, followers: 0, following: 1 });
-                yield (0, extra_utils_1.expectAccountFollows)({ server: servers[1], handle: 'root@' + servers[1].host, followers: 1, following: 0 });
-                yield (0, extra_utils_1.expectAccountFollows)({ server: servers[1], handle: 'peertube@' + servers[1].host, followers: 0, following: 0 });
-                yield (0, extra_utils_1.expectAccountFollows)({ server: servers[2], handle: 'peertube@' + servers[0].host, followers: 0, following: 0 });
-                yield (0, extra_utils_1.expectAccountFollows)({ server: servers[2], handle: 'peertube@' + servers[2].host, followers: 0, following: 0 });
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.expectAccountFollows({ server: servers[0], handle: 'peertube@' + servers[0].host, followers: 0, following: 1 });
+                yield extra_utils_1.expectAccountFollows({ server: servers[0], handle: 'root@' + servers[1].host, followers: 1, following: 0 });
+                yield extra_utils_1.expectAccountFollows({ server: servers[0], handle: 'peertube@' + servers[2].host, followers: 0, following: 0 });
+                yield extra_utils_1.expectAccountFollows({ server: servers[1], handle: 'peertube@' + servers[0].host, followers: 0, following: 1 });
+                yield extra_utils_1.expectAccountFollows({ server: servers[1], handle: 'root@' + servers[1].host, followers: 1, following: 0 });
+                yield extra_utils_1.expectAccountFollows({ server: servers[1], handle: 'peertube@' + servers[1].host, followers: 0, following: 0 });
+                yield extra_utils_1.expectAccountFollows({ server: servers[2], handle: 'peertube@' + servers[0].host, followers: 0, following: 0 });
+                yield extra_utils_1.expectAccountFollows({ server: servers[2], handle: 'peertube@' + servers[2].host, followers: 0, following: 0 });
             });
         });
         it('Should upload a video on server 2 and 3 and propagate only the video of server 2', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(60000);
                 yield servers[1].videos.upload({ attributes: { name: 'server2' } });
                 yield servers[2].videos.upload({ attributes: { name: 'server3' } });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 {
                     const { total, data } = yield servers[0].videos.list();
                     expect(total).to.equal(1);
@@ -270,16 +270,16 @@ describe('Test follows', function () {
             });
         });
         it('Should remove account follow', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(15000);
                 yield servers[0].follows.unfollow({ target: 'root@' + servers[1].host });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
             });
         });
         it('Should have removed the account follow', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.expectAccountFollows)({ server: servers[0], handle: 'root@' + servers[1].host, followers: 0, following: 0 });
-                yield (0, extra_utils_1.expectAccountFollows)({ server: servers[1], handle: 'root@' + servers[1].host, followers: 0, following: 0 });
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.expectAccountFollows({ server: servers[0], handle: 'root@' + servers[1].host, followers: 0, following: 0 });
+                yield extra_utils_1.expectAccountFollows({ server: servers[1], handle: 'root@' + servers[1].host, followers: 0, following: 0 });
                 {
                     const { total, data } = yield servers[0].follows.getFollowings();
                     expect(total).to.equal(0);
@@ -293,14 +293,14 @@ describe('Test follows', function () {
             });
         });
         it('Should follow a channel', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(15000);
                 yield servers[0].follows.follow({
                     handles: ['root_channel@' + servers[1].host]
                 });
-                yield (0, extra_utils_1.waitJobs)(servers);
-                yield (0, extra_utils_1.expectChannelsFollows)({ server: servers[0], handle: 'root_channel@' + servers[1].host, followers: 1, following: 0 });
-                yield (0, extra_utils_1.expectChannelsFollows)({ server: servers[1], handle: 'root_channel@' + servers[1].host, followers: 1, following: 0 });
+                yield extra_utils_1.waitJobs(servers);
+                yield extra_utils_1.expectChannelsFollows({ server: servers[0], handle: 'root_channel@' + servers[1].host, followers: 1, following: 0 });
+                yield extra_utils_1.expectChannelsFollows({ server: servers[1], handle: 'root_channel@' + servers[1].host, followers: 1, following: 0 });
                 {
                     const { total, data } = yield servers[0].follows.getFollowings();
                     expect(total).to.equal(1);
@@ -317,7 +317,7 @@ describe('Test follows', function () {
     describe('Should propagate data on a new server follow', function () {
         let video4;
         before(function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(50000);
                 const video4Attributes = {
                     name: 'server3-4',
@@ -355,27 +355,27 @@ describe('Test follows', function () {
                     videoId: video4.id,
                     fixture: 'subtitle-good2.vtt'
                 });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 yield servers[0].follows.follow({ hosts: [servers[2].url] });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
             });
         });
         it('Should have the correct follows counts', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.expectAccountFollows)({ server: servers[0], handle: 'peertube@' + servers[0].host, followers: 0, following: 2 });
-                yield (0, extra_utils_1.expectAccountFollows)({ server: servers[0], handle: 'root@' + servers[1].host, followers: 0, following: 0 });
-                yield (0, extra_utils_1.expectChannelsFollows)({ server: servers[0], handle: 'root_channel@' + servers[1].host, followers: 1, following: 0 });
-                yield (0, extra_utils_1.expectAccountFollows)({ server: servers[0], handle: 'peertube@' + servers[2].host, followers: 1, following: 0 });
-                yield (0, extra_utils_1.expectAccountFollows)({ server: servers[1], handle: 'peertube@' + servers[0].host, followers: 0, following: 1 });
-                yield (0, extra_utils_1.expectAccountFollows)({ server: servers[1], handle: 'peertube@' + servers[1].host, followers: 0, following: 0 });
-                yield (0, extra_utils_1.expectAccountFollows)({ server: servers[1], handle: 'root@' + servers[1].host, followers: 0, following: 0 });
-                yield (0, extra_utils_1.expectChannelsFollows)({ server: servers[1], handle: 'root_channel@' + servers[1].host, followers: 1, following: 0 });
-                yield (0, extra_utils_1.expectAccountFollows)({ server: servers[2], handle: 'peertube@' + servers[0].host, followers: 0, following: 1 });
-                yield (0, extra_utils_1.expectAccountFollows)({ server: servers[2], handle: 'peertube@' + servers[2].host, followers: 1, following: 0 });
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.expectAccountFollows({ server: servers[0], handle: 'peertube@' + servers[0].host, followers: 0, following: 2 });
+                yield extra_utils_1.expectAccountFollows({ server: servers[0], handle: 'root@' + servers[1].host, followers: 0, following: 0 });
+                yield extra_utils_1.expectChannelsFollows({ server: servers[0], handle: 'root_channel@' + servers[1].host, followers: 1, following: 0 });
+                yield extra_utils_1.expectAccountFollows({ server: servers[0], handle: 'peertube@' + servers[2].host, followers: 1, following: 0 });
+                yield extra_utils_1.expectAccountFollows({ server: servers[1], handle: 'peertube@' + servers[0].host, followers: 0, following: 1 });
+                yield extra_utils_1.expectAccountFollows({ server: servers[1], handle: 'peertube@' + servers[1].host, followers: 0, following: 0 });
+                yield extra_utils_1.expectAccountFollows({ server: servers[1], handle: 'root@' + servers[1].host, followers: 0, following: 0 });
+                yield extra_utils_1.expectChannelsFollows({ server: servers[1], handle: 'root_channel@' + servers[1].host, followers: 1, following: 0 });
+                yield extra_utils_1.expectAccountFollows({ server: servers[2], handle: 'peertube@' + servers[0].host, followers: 0, following: 1 });
+                yield extra_utils_1.expectAccountFollows({ server: servers[2], handle: 'peertube@' + servers[2].host, followers: 1, following: 0 });
             });
         });
         it('Should have propagated videos', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const { total, data } = yield servers[0].videos.list();
                 expect(total).to.equal(7);
                 const video2 = data.find(v => v.name === 'server3-2');
@@ -419,11 +419,11 @@ describe('Test follows', function () {
                         }
                     ]
                 };
-                yield (0, extra_utils_1.completeVideoCheck)(servers[0], video4, checkAttributes);
+                yield extra_utils_1.completeVideoCheck(servers[0], video4, checkAttributes);
             });
         });
         it('Should have propagated comments', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const { total, data } = yield servers[0].comments.listThreads({ videoId: video4.id, sort: 'createdAt' });
                 expect(total).to.equal(2);
                 expect(data).to.be.an('array');
@@ -437,8 +437,8 @@ describe('Test follows', function () {
                     expect(comment.account.name).to.equal('root');
                     expect(comment.account.host).to.equal(servers[2].host);
                     expect(comment.totalReplies).to.equal(3);
-                    expect((0, extra_utils_1.dateIsValid)(comment.createdAt)).to.be.true;
-                    expect((0, extra_utils_1.dateIsValid)(comment.updatedAt)).to.be.true;
+                    expect(extra_utils_1.dateIsValid(comment.createdAt)).to.be.true;
+                    expect(extra_utils_1.dateIsValid(comment.updatedAt)).to.be.true;
                     const threadId = comment.threadId;
                     const tree = yield servers[0].comments.getThread({ videoId: video4.id, threadId });
                     expect(tree.comment.text).equal('my super first comment');
@@ -462,7 +462,7 @@ describe('Test follows', function () {
                     expect(deletedComment.inReplyToCommentId).to.be.null;
                     expect(deletedComment.account).to.be.null;
                     expect(deletedComment.totalReplies).to.equal(2);
-                    expect((0, extra_utils_1.dateIsValid)(deletedComment.deletedAt)).to.be.true;
+                    expect(extra_utils_1.dateIsValid(deletedComment.deletedAt)).to.be.true;
                     const tree = yield servers[0].comments.getThread({ videoId: video4.id, threadId: deletedComment.threadId });
                     const [commentRoot, deletedChildRoot] = tree.children;
                     expect(deletedChildRoot).to.not.be.undefined;
@@ -485,7 +485,7 @@ describe('Test follows', function () {
             });
         });
         it('Should have propagated captions', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const body = yield servers[0].captions.list({ videoId: video4.id });
                 expect(body.total).to.equal(1);
                 expect(body.data).to.have.lengthOf(1);
@@ -493,14 +493,14 @@ describe('Test follows', function () {
                 expect(caption1.language.id).to.equal('ar');
                 expect(caption1.language.label).to.equal('Arabic');
                 expect(caption1.captionPath).to.match(new RegExp('^/lazy-static/video-captions/.+-ar.vtt$'));
-                yield (0, extra_utils_1.testCaptionFile)(servers[0].url, caption1.captionPath, 'Subtitle good 2.');
+                yield extra_utils_1.testCaptionFile(servers[0].url, caption1.captionPath, 'Subtitle good 2.');
             });
         });
         it('Should unfollow server 3 on server 1 and does not list server 3 videos', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(5000);
                 yield servers[0].follows.unfollow({ target: servers[2] });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 const { total } = yield servers[0].videos.list();
                 expect(total).to.equal(1);
             });
@@ -508,27 +508,27 @@ describe('Test follows', function () {
     });
     describe('Should propagate data on a new channel follow', function () {
         before(function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(60000);
                 yield servers[2].videos.upload({ attributes: { name: 'server3-7' } });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 const video = yield servers[0].videos.find({ name: 'server3-7' });
                 expect(video).to.not.exist;
             });
         });
         it('Should have propagated channel video', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(60000);
                 yield servers[0].follows.follow({ handles: ['root_channel@' + servers[2].host] });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 const video = yield servers[0].videos.find({ name: 'server3-7' });
                 expect(video).to.exist;
             });
         });
     });
     after(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            yield (0, extra_utils_1.cleanupTests)(servers);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield extra_utils_1.cleanupTests(servers);
         });
     });
 });

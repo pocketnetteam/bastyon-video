@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.abuseRouter = void 0;
 const tslib_1 = require("tslib");
-const express_1 = (0, tslib_1.__importDefault)(require("express"));
+const express_1 = tslib_1.__importDefault(require("express"));
 const logger_1 = require("@server/helpers/logger");
 const moderation_1 = require("@server/lib/moderation");
 const notifier_1 = require("@server/lib/notifier");
@@ -17,17 +17,17 @@ const middlewares_1 = require("../../middlewares");
 const account_1 = require("../../models/account/account");
 const abuseRouter = express_1.default.Router();
 exports.abuseRouter = abuseRouter;
-abuseRouter.get('/', (0, middlewares_1.openapiOperationDoc)({ operationId: 'getAbuses' }), middlewares_1.authenticate, (0, middlewares_1.ensureUserHasRight)(6), middlewares_1.paginationValidator, middlewares_1.abusesSortValidator, middlewares_1.setDefaultSort, middlewares_1.setDefaultPagination, middlewares_1.abuseListForAdminsValidator, (0, middlewares_1.asyncMiddleware)(listAbusesForAdmins));
-abuseRouter.put('/:id', middlewares_1.authenticate, (0, middlewares_1.ensureUserHasRight)(6), (0, middlewares_1.asyncMiddleware)(middlewares_1.abuseUpdateValidator), (0, middlewares_1.asyncRetryTransactionMiddleware)(updateAbuse));
-abuseRouter.post('/', middlewares_1.authenticate, (0, middlewares_1.asyncMiddleware)(middlewares_1.abuseReportValidator), (0, middlewares_1.asyncRetryTransactionMiddleware)(reportAbuse));
-abuseRouter.delete('/:id', middlewares_1.authenticate, (0, middlewares_1.ensureUserHasRight)(6), (0, middlewares_1.asyncMiddleware)(middlewares_1.abuseGetValidator), (0, middlewares_1.asyncRetryTransactionMiddleware)(deleteAbuse));
-abuseRouter.get('/:id/messages', middlewares_1.authenticate, (0, middlewares_1.asyncMiddleware)(middlewares_1.getAbuseValidator), middlewares_1.checkAbuseValidForMessagesValidator, (0, middlewares_1.asyncRetryTransactionMiddleware)(listAbuseMessages));
-abuseRouter.post('/:id/messages', middlewares_1.authenticate, (0, middlewares_1.asyncMiddleware)(middlewares_1.getAbuseValidator), middlewares_1.checkAbuseValidForMessagesValidator, middlewares_1.addAbuseMessageValidator, (0, middlewares_1.asyncRetryTransactionMiddleware)(addAbuseMessage));
-abuseRouter.delete('/:id/messages/:messageId', middlewares_1.authenticate, (0, middlewares_1.asyncMiddleware)(middlewares_1.getAbuseValidator), middlewares_1.checkAbuseValidForMessagesValidator, (0, middlewares_1.asyncMiddleware)(middlewares_1.deleteAbuseMessageValidator), (0, middlewares_1.asyncRetryTransactionMiddleware)(deleteAbuseMessage));
+abuseRouter.get('/', middlewares_1.openapiOperationDoc({ operationId: 'getAbuses' }), middlewares_1.authenticate, middlewares_1.ensureUserHasRight(6), middlewares_1.paginationValidator, middlewares_1.abusesSortValidator, middlewares_1.setDefaultSort, middlewares_1.setDefaultPagination, middlewares_1.abuseListForAdminsValidator, middlewares_1.asyncMiddleware(listAbusesForAdmins));
+abuseRouter.put('/:id', middlewares_1.authenticate, middlewares_1.ensureUserHasRight(6), middlewares_1.asyncMiddleware(middlewares_1.abuseUpdateValidator), middlewares_1.asyncRetryTransactionMiddleware(updateAbuse));
+abuseRouter.post('/', middlewares_1.authenticate, middlewares_1.asyncMiddleware(middlewares_1.abuseReportValidator), middlewares_1.asyncRetryTransactionMiddleware(reportAbuse));
+abuseRouter.delete('/:id', middlewares_1.authenticate, middlewares_1.ensureUserHasRight(6), middlewares_1.asyncMiddleware(middlewares_1.abuseGetValidator), middlewares_1.asyncRetryTransactionMiddleware(deleteAbuse));
+abuseRouter.get('/:id/messages', middlewares_1.authenticate, middlewares_1.asyncMiddleware(middlewares_1.getAbuseValidator), middlewares_1.checkAbuseValidForMessagesValidator, middlewares_1.asyncRetryTransactionMiddleware(listAbuseMessages));
+abuseRouter.post('/:id/messages', middlewares_1.authenticate, middlewares_1.asyncMiddleware(middlewares_1.getAbuseValidator), middlewares_1.checkAbuseValidForMessagesValidator, middlewares_1.addAbuseMessageValidator, middlewares_1.asyncRetryTransactionMiddleware(addAbuseMessage));
+abuseRouter.delete('/:id/messages/:messageId', middlewares_1.authenticate, middlewares_1.asyncMiddleware(middlewares_1.getAbuseValidator), middlewares_1.checkAbuseValidForMessagesValidator, middlewares_1.asyncMiddleware(middlewares_1.deleteAbuseMessageValidator), middlewares_1.asyncRetryTransactionMiddleware(deleteAbuseMessage));
 function listAbusesForAdmins(req, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const user = res.locals.oauth.token.user;
-        const serverActor = yield (0, application_1.getServerActor)();
+        const serverActor = yield application_1.getServerActor();
         const resultList = yield abuse_1.AbuseModel.listForAdminApi({
             start: req.query.start,
             count: req.query.count,
@@ -52,7 +52,7 @@ function listAbusesForAdmins(req, res) {
     });
 }
 function updateAbuse(req, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const abuse = res.locals.abuse;
         let stateUpdated = false;
         if (req.body.moderationComment !== undefined)
@@ -73,7 +73,7 @@ function updateAbuse(req, res) {
     });
 }
 function deleteAbuse(req, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const abuse = res.locals.abuse;
         yield database_1.sequelizeTypescript.transaction(t => {
             return abuse.destroy({ transaction: t });
@@ -82,12 +82,12 @@ function deleteAbuse(req, res) {
     });
 }
 function reportAbuse(req, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const videoInstance = res.locals.videoAll;
         const commentInstance = res.locals.videoCommentFull;
         const accountInstance = res.locals.account;
         const body = req.body;
-        const { id } = yield database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        const { id } = yield database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
             var _a;
             const reporterAccount = yield account_1.AccountModel.load(res.locals.oauth.token.User.Account.id, t);
             const predefinedReasons = (_a = body.predefinedReasons) === null || _a === void 0 ? void 0 : _a.map(r => abuse_2.abusePredefinedReasonsMap[r]);
@@ -98,7 +98,7 @@ function reportAbuse(req, res) {
                 predefinedReasons
             };
             if (body.video) {
-                return (0, moderation_1.createVideoAbuse)({
+                return moderation_1.createVideoAbuse({
                     baseAbuse,
                     videoInstance,
                     reporterAccount,
@@ -108,14 +108,14 @@ function reportAbuse(req, res) {
                 });
             }
             if (body.comment) {
-                return (0, moderation_1.createVideoCommentAbuse)({
+                return moderation_1.createVideoCommentAbuse({
                     baseAbuse,
                     commentInstance,
                     reporterAccount,
                     transaction: t
                 });
             }
-            return (0, moderation_1.createAccountAbuse)({
+            return moderation_1.createAccountAbuse({
                 baseAbuse,
                 accountInstance,
                 reporterAccount,
@@ -126,14 +126,14 @@ function reportAbuse(req, res) {
     });
 }
 function listAbuseMessages(req, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const abuse = res.locals.abuse;
         const resultList = yield abuse_message_1.AbuseMessageModel.listForApi(abuse.id);
-        return res.json((0, utils_1.getFormattedObjects)(resultList.data, resultList.total));
+        return res.json(utils_1.getFormattedObjects(resultList.data, resultList.total));
     });
 }
 function addAbuseMessage(req, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const abuse = res.locals.abuse;
         const user = res.locals.oauth.token.user;
         const abuseMessage = yield abuse_message_1.AbuseMessageModel.create({
@@ -153,7 +153,7 @@ function addAbuseMessage(req, res) {
     });
 }
 function deleteAbuseMessage(req, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const abuseMessage = res.locals.abuseMessage;
         yield database_1.sequelizeTypescript.transaction(t => {
             return abuseMessage.destroy({ transaction: t });

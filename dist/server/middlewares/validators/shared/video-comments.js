@@ -5,7 +5,7 @@ const tslib_1 = require("tslib");
 const video_comment_1 = require("@server/models/video/video-comment");
 const models_1 = require("@shared/models");
 function doesVideoCommentThreadExist(idArg, video, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const id = parseInt(idArg + '', 10);
         const videoComment = yield video_comment_1.VideoCommentModel.loadById(id);
         if (!videoComment) {
@@ -29,7 +29,7 @@ function doesVideoCommentThreadExist(idArg, video, res) {
 }
 exports.doesVideoCommentThreadExist = doesVideoCommentThreadExist;
 function doesVideoCommentExist(idArg, video, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const id = parseInt(idArg + '', 10);
         const videoComment = yield video_comment_1.VideoCommentModel.loadByIdAndPopulateVideoAndAccountAndReply(id);
         if (!videoComment) {
@@ -49,7 +49,7 @@ function doesVideoCommentExist(idArg, video, res) {
 }
 exports.doesVideoCommentExist = doesVideoCommentExist;
 function doesCommentIdExist(idArg, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const id = parseInt(idArg + '', 10);
         const videoComment = yield video_comment_1.VideoCommentModel.loadByIdAndPopulateVideoAndAccountAndReply(id);
         if (!videoComment) {

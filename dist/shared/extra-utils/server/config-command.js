@@ -94,9 +94,9 @@ class ConfigCommand extends shared_1.AbstractCommand {
         return this.deleteRequest(Object.assign(Object.assign({}, options), { path, implicitToken: true, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 }));
     }
     updateExistingSubConfig(options) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const existing = yield this.getCustomConfig(options);
-            return this.updateCustomConfig(Object.assign(Object.assign({}, options), { newCustomConfig: (0, lodash_1.merge)({}, existing, options.newConfig) }));
+            return this.updateCustomConfig(Object.assign(Object.assign({}, options), { newCustomConfig: lodash_1.merge({}, existing, options.newConfig) }));
         });
     }
     updateCustomSubConfig(options) {
@@ -266,7 +266,7 @@ class ConfigCommand extends shared_1.AbstractCommand {
                 }
             }
         };
-        (0, lodash_1.merge)(newCustomConfig, options.newConfig);
+        lodash_1.merge(newCustomConfig, options.newConfig);
         return this.updateCustomConfig(Object.assign(Object.assign({}, options), { newCustomConfig }));
     }
 }

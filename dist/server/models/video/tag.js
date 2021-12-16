@@ -46,30 +46,30 @@ let TagModel = TagModel_1 = class TagModel extends sequelize_typescript_1.Model 
             .then(data => data.map(d => d.name));
     }
 };
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(false),
-    (0, sequelize_typescript_1.Is)('VideoTag', value => (0, utils_1.throwIfNotValid)(value, videos_1.isVideoTagValid, 'tag')),
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(false),
+    sequelize_typescript_1.Is('VideoTag', value => utils_1.throwIfNotValid(value, videos_1.isVideoTagValid, 'tag')),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", String)
+    tslib_1.__metadata("design:type", String)
 ], TagModel.prototype, "name", void 0);
-(0, tslib_1.__decorate)([
+tslib_1.__decorate([
     sequelize_typescript_1.CreatedAt,
-    (0, tslib_1.__metadata)("design:type", Date)
+    tslib_1.__metadata("design:type", Date)
 ], TagModel.prototype, "createdAt", void 0);
-(0, tslib_1.__decorate)([
+tslib_1.__decorate([
     sequelize_typescript_1.UpdatedAt,
-    (0, tslib_1.__metadata)("design:type", Date)
+    tslib_1.__metadata("design:type", Date)
 ], TagModel.prototype, "updatedAt", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.BelongsToMany)(() => video_1.VideoModel, {
+tslib_1.__decorate([
+    sequelize_typescript_1.BelongsToMany(() => video_1.VideoModel, {
         foreignKey: 'tagId',
         through: () => video_tag_1.VideoTagModel,
         onDelete: 'CASCADE'
     }),
-    (0, tslib_1.__metadata)("design:type", Array)
+    tslib_1.__metadata("design:type", Array)
 ], TagModel.prototype, "Videos", void 0);
-TagModel = TagModel_1 = (0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.Table)({
+TagModel = TagModel_1 = tslib_1.__decorate([
+    sequelize_typescript_1.Table({
         tableName: 'tag',
         timestamps: false,
         indexes: [
@@ -79,7 +79,7 @@ TagModel = TagModel_1 = (0, tslib_1.__decorate)([
             },
             {
                 name: 'tag_lower_name',
-                fields: [(0, sequelize_1.fn)('lower', (0, sequelize_1.col)('name'))]
+                fields: [sequelize_1.fn('lower', sequelize_1.col('name'))]
             }
         ]
     })

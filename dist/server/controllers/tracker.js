@@ -3,9 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.createWebsocketTrackerServer = exports.trackerRouter = void 0;
 const tslib_1 = require("tslib");
 const bittorrent_tracker_1 = require("bittorrent-tracker");
-const express_1 = (0, tslib_1.__importDefault)(require("express"));
+const express_1 = tslib_1.__importDefault(require("express"));
 const http_1 = require("http");
-const proxy_addr_1 = (0, tslib_1.__importDefault)(require("proxy-addr"));
+const proxy_addr_1 = tslib_1.__importDefault(require("proxy-addr"));
 const ws_1 = require("ws");
 const redis_1 = require("@server/lib/redis");
 const logger_1 = require("../helpers/logger");
@@ -24,7 +24,7 @@ const trackerServer = new bittorrent_tracker_1.Server({
     udp: false,
     ws: false,
     filter: function (infoHash, params, cb) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (config_1.CONFIG.TRACKER.ENABLED === false) {
                 return cb(new Error('Tracker is disabled on this instance.'));
             }
@@ -79,15 +79,15 @@ const onHttpRequest = trackerServer.onHttpRequest.bind(trackerServer);
 trackerRouter.get('/tracker/announce', (req, res) => onHttpRequest(req, res, { action: 'announce' }));
 trackerRouter.get('/tracker/scrape', (req, res) => onHttpRequest(req, res, { action: 'scrape' }));
 function createWebsocketTrackerServer(app) {
-    const server = (0, http_1.createServer)(app);
+    const server = http_1.createServer(app);
     const wss = new ws_1.WebSocketServer({ noServer: true });
     wss.on('connection', function (ws, req) {
-        ws['ip'] = (0, proxy_addr_1.default)(req, config_1.CONFIG.TRUST_PROXY);
+        ws['ip'] = proxy_addr_1.default(req, config_1.CONFIG.TRUST_PROXY);
         trackerServer.onWebSocketConnection(ws);
     });
     server.on('upgrade', (request, socket, head) => {
         if (request.url === '/tracker/socket') {
-            const ip = (0, proxy_addr_1.default)(request, config_1.CONFIG.TRUST_PROXY);
+            const ip = proxy_addr_1.default(request, config_1.CONFIG.TRUST_PROXY);
             redis_1.Redis.Instance.doesTrackerBlockIPExist(ip)
                 .then(result => {
                 if (result === true) {

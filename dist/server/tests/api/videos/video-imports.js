@@ -2,17 +2,17 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = (0, tslib_1.__importStar)(require("chai"));
+const chai = tslib_1.__importStar(require("chai"));
 const extra_utils_1 = require("@shared/extra-utils");
 const expect = chai.expect;
 describe('Test video imports', function () {
     let servers = [];
     let channelIdServer1;
     let channelIdServer2;
-    if ((0, extra_utils_1.areHttpImportTestsDisabled)())
+    if (extra_utils_1.areHttpImportTestsDisabled())
         return;
     function checkVideosServer1(server, idHttp, idMagnet, idTorrent) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const videoHttp = yield server.videos.get({ id: idHttp });
             expect(videoHttp.name).to.equal('small video - youtube');
             expect(videoHttp.language.label).to.equal('Unknown');
@@ -42,7 +42,7 @@ describe('Test video imports', function () {
         });
     }
     function checkVideoServer2(server, id) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const video = yield server.videos.get({ id });
             expect(video.name).to.equal('my super name');
             expect(video.category.label).to.equal('Entertainment');
@@ -57,10 +57,10 @@ describe('Test video imports', function () {
         });
     }
     before(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(30000);
-            servers = yield (0, extra_utils_1.createMultipleServers)(2);
-            yield (0, extra_utils_1.setAccessTokensToServers)(servers);
+            servers = yield extra_utils_1.createMultipleServers(2);
+            yield extra_utils_1.setAccessTokensToServers(servers);
             {
                 const { videoChannels } = yield servers[0].users.getMyInfo();
                 channelIdServer1 = videoChannels[0].id;
@@ -69,11 +69,11 @@ describe('Test video imports', function () {
                 const { videoChannels } = yield servers[1].users.getMyInfo();
                 channelIdServer2 = videoChannels[0].id;
             }
-            yield (0, extra_utils_1.doubleFollow)(servers[0], servers[1]);
+            yield extra_utils_1.doubleFollow(servers[0], servers[1]);
         });
     });
     it('Should import videos on server 1', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(60000);
             const baseAttributes = {
                 channelId: channelIdServer1,
@@ -85,8 +85,8 @@ describe('Test video imports', function () {
                 expect(video.name).to.equal('small video - youtube');
                 expect(video.thumbnailPath).to.match(new RegExp(`^/static/thumbnails/.+.jpg$`));
                 expect(video.previewPath).to.match(new RegExp(`^/lazy-static/previews/.+.jpg$`));
-                yield (0, extra_utils_1.testImage)(servers[0].url, 'video_import_thumbnail', video.thumbnailPath);
-                yield (0, extra_utils_1.testImage)(servers[0].url, 'video_import_preview', video.previewPath);
+                yield extra_utils_1.testImage(servers[0].url, 'video_import_thumbnail', video.thumbnailPath);
+                yield extra_utils_1.testImage(servers[0].url, 'video_import_preview', video.previewPath);
                 const bodyCaptions = yield servers[0].captions.list({ videoId: video.id });
                 const videoCaptions = bodyCaptions.data;
                 expect(videoCaptions).to.have.lengthOf(2);
@@ -94,7 +94,7 @@ describe('Test video imports', function () {
                 expect(enCaption).to.exist;
                 expect(enCaption.language.label).to.equal('English');
                 expect(enCaption.captionPath).to.match(new RegExp(`^/lazy-static/video-captions/.+-en.vtt$`));
-                yield (0, extra_utils_1.testCaptionFile)(servers[0].url, enCaption.captionPath, `WEBVTT
+                yield extra_utils_1.testCaptionFile(servers[0].url, enCaption.captionPath, `WEBVTT
 Kind: captions
 Language: en
 
@@ -110,7 +110,7 @@ Adding subtitles is very easy to do`);
                 expect(frCaption).to.exist;
                 expect(frCaption.language.label).to.equal('French');
                 expect(frCaption.captionPath).to.match(new RegExp(`^/lazy-static/video-captions/.+-fr.vtt`));
-                yield (0, extra_utils_1.testCaptionFile)(servers[0].url, frCaption.captionPath, `WEBVTT
+                yield extra_utils_1.testCaptionFile(servers[0].url, frCaption.captionPath, `WEBVTT
 Kind: captions
 Language: fr
 
@@ -136,7 +136,7 @@ Ajouter un sous-titre est vraiment facile`);
         });
     });
     it('Should list the videos to import in my videos on server 1', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const { total, data } = yield servers[0].videos.listMyVideos({ sort: 'createdAt' });
             expect(total).to.equal(3);
             expect(data).to.have.lengthOf(3);
@@ -146,7 +146,7 @@ Ajouter un sous-titre est vraiment facile`);
         });
     });
     it('Should list the videos to import in my imports on server 1', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const { total, data: videoImports } = yield servers[0].imports.getMyVideoImports({ sort: '-createdAt' });
             expect(total).to.equal(3);
             expect(videoImports).to.have.lengthOf(3);
@@ -165,9 +165,9 @@ Ajouter un sous-titre est vraiment facile`);
         });
     });
     it('Should have the video listed on the two instances', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(120000);
-            yield (0, extra_utils_1.waitJobs)(servers);
+            yield extra_utils_1.waitJobs(servers);
             for (const server of servers) {
                 const { total, data } = yield server.videos.list();
                 expect(total).to.equal(3);
@@ -178,7 +178,7 @@ Ajouter un sous-titre est vraiment facile`);
         });
     });
     it('Should import a video on server 2 with some fields', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(60000);
             const attributes = {
                 targetUrl: extra_utils_1.FIXTURE_URLS.youtube,
@@ -196,9 +196,9 @@ Ajouter un sous-titre est vraiment facile`);
         });
     });
     it('Should have the videos listed on the two instances', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(120000);
-            yield (0, extra_utils_1.waitJobs)(servers);
+            yield extra_utils_1.waitJobs(servers);
             for (const server of servers) {
                 const { total, data } = yield server.videos.list();
                 expect(total).to.equal(4);
@@ -210,7 +210,7 @@ Ajouter un sous-titre est vraiment facile`);
         });
     });
     it('Should import a video that will be transcoded', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(120000);
             const attributes = {
                 name: 'transcoded video',
@@ -220,7 +220,7 @@ Ajouter un sous-titre est vraiment facile`);
             };
             const { video } = yield servers[1].imports.importVideo({ attributes });
             const videoUUID = video.uuid;
-            yield (0, extra_utils_1.waitJobs)(servers);
+            yield extra_utils_1.waitJobs(servers);
             for (const server of servers) {
                 const video = yield server.videos.get({ id: videoUUID });
                 expect(video.name).to.equal('transcoded video');
@@ -229,7 +229,7 @@ Ajouter un sous-titre est vraiment facile`);
         });
     });
     it('Should import no HDR version on a HDR video', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(120000);
             const config = {
                 transcoding: {
@@ -266,7 +266,7 @@ Ajouter un sous-titre est vraiment facile`);
             };
             const { video: videoImported } = yield servers[0].imports.importVideo({ attributes });
             const videoUUID = videoImported.uuid;
-            yield (0, extra_utils_1.waitJobs)(servers);
+            yield extra_utils_1.waitJobs(servers);
             const video = yield servers[0].videos.get({ id: videoUUID });
             expect(video.name).to.equal('hdr video');
             const maxResolution = Math.max.apply(Math, video.files.map(function (o) { return o.resolution.id; }));
@@ -274,7 +274,7 @@ Ajouter un sous-titre est vraiment facile`);
         });
     });
     it('Should import a peertube video', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(120000);
             for (const targetUrl of [extra_utils_1.FIXTURE_URLS.peertube_long]) {
                 yield servers[0].config.disableTranscoding();
@@ -285,7 +285,7 @@ Ajouter un sous-titre est vraiment facile`);
                 };
                 const { video } = yield servers[0].imports.importVideo({ attributes });
                 const videoUUID = video.uuid;
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 for (const server of servers) {
                     const video = yield server.videos.get({ id: videoUUID });
                     expect(video.name).to.equal('E2E tests');
@@ -294,8 +294,8 @@ Ajouter un sous-titre est vraiment facile`);
         });
     });
     after(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            yield (0, extra_utils_1.cleanupTests)(servers);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield extra_utils_1.cleanupTests(servers);
         });
     });
 });

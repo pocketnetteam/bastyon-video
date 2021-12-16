@@ -5,7 +5,7 @@ const tslib_1 = require("tslib");
 const abuse_1 = require("@server/models/abuse/abuse");
 const models_1 = require("@shared/models");
 function doesAbuseExist(abuseId, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const abuse = yield abuse_1.AbuseModel.loadByIdWithReporter(parseInt(abuseId + '', 10));
         if (!abuse) {
             res.fail({

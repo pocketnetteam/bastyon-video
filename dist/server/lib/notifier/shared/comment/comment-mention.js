@@ -13,7 +13,7 @@ const user_notification_1 = require("@server/models/user/user-notification");
 const common_1 = require("../common");
 class CommentMention extends common_1.AbstractNotification {
     prepare() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const extractedUsernames = this.payload.extractMentions();
             logger_1.logger.debug('Extracted %d username from comment %s.', extractedUsernames.length, this.payload.url, { usernames: extractedUsernames, text: this.payload.text });
             this.users = yield user_1.UserModel.listByUsernames(extractedUsernames);
@@ -24,7 +24,7 @@ class CommentMention extends common_1.AbstractNotification {
             this.users = this.users.filter(u => u.Account.id !== this.payload.accountId);
             if (this.users.length === 0)
                 return;
-            this.serverAccountId = (yield (0, application_1.getServerActor)()).Account.id;
+            this.serverAccountId = (yield application_1.getServerActor()).Account.id;
             const sourceAccounts = this.users.map(u => u.Account.id).concat([this.serverAccountId]);
             this.accountMutedHash = yield account_blocklist_1.AccountBlocklistModel.isAccountMutedByMulti(sourceAccounts, this.payload.accountId);
             this.instanceMutedHash = yield server_blocklist_1.ServerBlocklistModel.isServerMutedByMulti(sourceAccounts, this.payload.Account.Actor.serverId);
@@ -45,7 +45,7 @@ class CommentMention extends common_1.AbstractNotification {
         return this.users;
     }
     createNotification(user) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const notification = yield user_notification_1.UserNotificationModel.create({
                 type: 11,
                 userId: user.id,
@@ -61,7 +61,7 @@ class CommentMention extends common_1.AbstractNotification {
         const video = comment.Video;
         const videoUrl = constants_1.WEBSERVER.URL + comment.Video.getWatchStaticPath();
         const commentUrl = constants_1.WEBSERVER.URL + comment.getCommentStaticPath();
-        const commentHtml = (0, markdown_1.toSafeHtml)(comment.text);
+        const commentHtml = markdown_1.toSafeHtml(comment.text);
         return {
             template: 'video-comment-mention',
             to,

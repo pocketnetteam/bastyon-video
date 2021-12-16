@@ -10,7 +10,7 @@ function sendFollow(actorFollow, t) {
         return;
     logger_1.logger.info('Creating job to send follow request to %s.', following.url);
     const data = buildFollowActivity(actorFollow.url, me, following);
-    t.afterCommit(() => (0, utils_1.unicastTo)(data, me, following.inboxUrl));
+    t.afterCommit(() => utils_1.unicastTo(data, me, following.inboxUrl));
 }
 exports.sendFollow = sendFollow;
 function buildFollowActivity(url, byActor, targetActor) {

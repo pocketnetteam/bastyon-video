@@ -10,20 +10,20 @@ const videos_1 = require("../videos");
 const notifier_1 = require("../../notifier");
 const logger_1 = require("../../../helpers/logger");
 function processAnnounceActivity(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { activity, byActor: actorAnnouncer } = options;
         const notify = options.fromFetch !== true;
-        return (0, database_utils_1.retryTransactionWrapper)(processVideoShare, actorAnnouncer, activity, notify);
+        return database_utils_1.retryTransactionWrapper(processVideoShare, actorAnnouncer, activity, notify);
     });
 }
 exports.processAnnounceActivity = processAnnounceActivity;
 function processVideoShare(actorAnnouncer, activity, notify) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const objectUri = typeof activity.object === 'string' ? activity.object : activity.object.id;
         let video;
         let videoCreated;
         try {
-            const result = yield (0, videos_1.getOrCreateAPVideo)({ videoObject: objectUri });
+            const result = yield videos_1.getOrCreateAPVideo({ videoObject: objectUri });
             video = result.video;
             videoCreated = result.created;
         }
@@ -31,7 +31,7 @@ function processVideoShare(actorAnnouncer, activity, notify) {
             logger_1.logger.debug('Cannot process share of %s. Maybe this is not a video object, so just skipping.', objectUri, { err });
             return;
         }
-        yield database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        yield database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
             const share = {
                 actorId: actorAnnouncer.id,
                 videoId: video.id,
@@ -46,7 +46,7 @@ function processVideoShare(actorAnnouncer, activity, notify) {
             });
             if (video.isOwned() && created === true) {
                 const exceptions = [actorAnnouncer];
-                yield (0, utils_1.forwardVideoRelatedActivity)(activity, t, exceptions, video);
+                yield utils_1.forwardVideoRelatedActivity(activity, t, exceptions, video);
             }
             return undefined;
         }));

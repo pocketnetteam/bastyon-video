@@ -4,7 +4,7 @@ exports.isVideoCaptionLanguageValid = exports.isVideoCaptionFile = void 0;
 const constants_1 = require("../../initializers/constants");
 const misc_1 = require("./misc");
 function isVideoCaptionLanguageValid(value) {
-    return (0, misc_1.exists)(value) && constants_1.VIDEO_LANGUAGES[value] !== undefined;
+    return misc_1.exists(value) && constants_1.VIDEO_LANGUAGES[value] !== undefined;
 }
 exports.isVideoCaptionLanguageValid = isVideoCaptionLanguageValid;
 const videoCaptionTypesRegex = Object.keys(constants_1.MIMETYPES.VIDEO_CAPTIONS.MIMETYPE_EXT)
@@ -12,6 +12,6 @@ const videoCaptionTypesRegex = Object.keys(constants_1.MIMETYPES.VIDEO_CAPTIONS.
     .map(m => `(${m})`)
     .join('|');
 function isVideoCaptionFile(files, field) {
-    return (0, misc_1.isFileValid)(files, videoCaptionTypesRegex, field, constants_1.CONSTRAINTS_FIELDS.VIDEO_CAPTIONS.CAPTION_FILE.FILE_SIZE.max);
+    return misc_1.isFileValid(files, videoCaptionTypesRegex, field, constants_1.CONSTRAINTS_FIELDS.VIDEO_CAPTIONS.CAPTION_FILE.FILE_SIZE.max);
 }
 exports.isVideoCaptionFile = isVideoCaptionFile;

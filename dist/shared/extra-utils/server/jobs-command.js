@@ -7,7 +7,7 @@ const models_1 = require("@shared/models");
 const shared_1 = require("../shared");
 class JobsCommand extends shared_1.AbstractCommand {
     getLatest(options) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const { data } = yield this.list(Object.assign(Object.assign({}, options), { start: 0, count: 1, sort: '-createdAt' }));
             if (data.length === 0)
                 return undefined;
@@ -16,7 +16,7 @@ class JobsCommand extends shared_1.AbstractCommand {
     }
     list(options = {}) {
         const path = this.buildJobsUrl(options.state);
-        const query = (0, core_utils_1.pick)(options, ['start', 'count', 'sort', 'jobType']);
+        const query = core_utils_1.pick(options, ['start', 'count', 'sort', 'jobType']);
         return this.getRequestBody(Object.assign(Object.assign({}, options), { path,
             query, implicitToken: true, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 }));
     }

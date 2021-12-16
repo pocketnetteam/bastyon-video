@@ -9,20 +9,20 @@ const account_video_rate_1 = require("../../../models/account/account-video-rate
 const utils_1 = require("../send/utils");
 const videos_1 = require("../videos");
 function processLikeActivity(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { activity, byActor } = options;
-        return (0, database_utils_1.retryTransactionWrapper)(processLikeVideo, byActor, activity);
+        return database_utils_1.retryTransactionWrapper(processLikeVideo, byActor, activity);
     });
 }
 exports.processLikeActivity = processLikeActivity;
 function processLikeVideo(byActor, activity) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        const videoUrl = (0, activitypub_1.getAPId)(activity.object);
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const videoUrl = activitypub_1.getAPId(activity.object);
         const byAccount = byActor.Account;
         if (!byAccount)
             throw new Error('Cannot create like with the non account actor ' + byActor.url);
-        const { video } = yield (0, videos_1.getOrCreateAPVideo)({ videoObject: videoUrl });
-        return database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        const { video } = yield videos_1.getOrCreateAPVideo({ videoObject: videoUrl });
+        return database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
             const existingRate = yield account_video_rate_1.AccountVideoRateModel.loadByAccountAndVideoOrUrl(byAccount.id, video.id, activity.id, t);
             if (existingRate && existingRate.type === 'like')
                 return;
@@ -38,7 +38,7 @@ function processLikeVideo(byActor, activity) {
             yield rate.save({ transaction: t });
             if (video.isOwned()) {
                 const exceptions = [byActor];
-                yield (0, utils_1.forwardVideoRelatedActivity)(activity, t, exceptions, video);
+                yield utils_1.forwardVideoRelatedActivity(activity, t, exceptions, video);
             }
         }));
     });

@@ -18,16 +18,16 @@ function refreshActorIfNeeded(options) {
 }
 exports.refreshActorIfNeeded = refreshActorIfNeeded;
 function doRefresh(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { actor: actorArg, fetchedType } = options;
         const actor = fetchedType === 'all'
             ? actorArg
             : yield actor_1.ActorModel.loadByUrlAndPopulateAccountAndChannel(actorArg.url);
-        const lTags = (0, logger_1.loggerTagsFactory)('ap', 'actor', 'refresh', actor.url);
+        const lTags = logger_1.loggerTagsFactory('ap', 'actor', 'refresh', actor.url);
         logger_1.logger.info('Refreshing actor %s.', actor.url, lTags());
         try {
             const actorUrl = yield getActorUrl(actor);
-            const { actorObject } = yield (0, shared_1.fetchRemoteActor)(actorUrl);
+            const { actorObject } = yield shared_1.fetchRemoteActor(actorUrl);
             if (actorObject === undefined) {
                 logger_1.logger.warn('Cannot fetch remote actor in refresh actor.');
                 return { actor, refreshed: false };
@@ -50,7 +50,7 @@ function doRefresh(options) {
     });
 }
 function getActorUrl(actor) {
-    return (0, webfinger_1.getUrlFromWebfinger)(actor.preferredUsername + '@' + actor.getHost())
+    return webfinger_1.getUrlFromWebfinger(actor.preferredUsername + '@' + actor.getHost())
         .catch(err => {
         logger_1.logger.warn('Cannot get actor URL from webfinger, keeping the old one.', err);
         return actor.url;

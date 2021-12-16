@@ -8,7 +8,7 @@ const user_1 = require("@server/models/user/user");
 const abstract_new_abuse_message_1 = require("./abstract-new-abuse-message");
 class NewAbuseMessageForModerators extends abstract_new_abuse_message_1.AbstractNewAbuseMessage {
     prepare() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.moderators = yield user_1.UserModel.listWithRight(6);
             this.moderators = this.moderators.filter(m => m.Account.id !== this.message.accountId);
             if (this.moderators.length === 0)
@@ -17,7 +17,7 @@ class NewAbuseMessageForModerators extends abstract_new_abuse_message_1.Abstract
         });
     }
     log() {
-        logger_1.logger.info('Notifying moderators of new abuse message on %s.', (0, url_1.getAbuseTargetUrl)(this.abuse));
+        logger_1.logger.info('Notifying moderators of new abuse message on %s.', url_1.getAbuseTargetUrl(this.abuse));
     }
     getTargetUsers() {
         return this.moderators;

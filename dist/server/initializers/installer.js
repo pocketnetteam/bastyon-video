@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.installApplication = void 0;
 const tslib_1 = require("tslib");
 const fs_extra_1 = require("fs-extra");
-const password_generator_1 = (0, tslib_1.__importDefault)(require("password-generator"));
+const password_generator_1 = tslib_1.__importDefault(require("password-generator"));
 const shared_1 = require("../../shared");
 const logger_1 = require("../helpers/logger");
 const user_1 = require("../lib/user");
@@ -15,7 +15,7 @@ const config_1 = require("./config");
 const constants_1 = require("./constants");
 const database_1 = require("./database");
 function installApplication() {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         try {
             yield Promise.all([
                 database_1.sequelizeTypescript.sync()
@@ -43,9 +43,9 @@ function removeCacheAndTmpDirectories() {
     const tasks = [];
     for (const key of Object.keys(cacheDirectories)) {
         const dir = cacheDirectories[key];
-        tasks.push((0, fs_extra_1.remove)(dir));
+        tasks.push(fs_extra_1.remove(dir));
     }
-    tasks.push((0, fs_extra_1.remove)(config_1.CONFIG.STORAGE.TMP_DIR));
+    tasks.push(fs_extra_1.remove(config_1.CONFIG.STORAGE.TMP_DIR));
     return Promise.all(tasks);
 }
 function createDirectoriesIfNotExist() {
@@ -55,24 +55,24 @@ function createDirectoriesIfNotExist() {
     const tasks = [];
     for (const key of Object.keys(storage)) {
         const dir = storage[key];
-        tasks.push((0, fs_extra_1.ensureDir)(dir));
+        tasks.push(fs_extra_1.ensureDir(dir));
     }
     for (const key of Object.keys(cacheDirectories)) {
         const dir = cacheDirectories[key];
-        tasks.push((0, fs_extra_1.ensureDir)(dir));
+        tasks.push(fs_extra_1.ensureDir(dir));
     }
-    tasks.push((0, fs_extra_1.ensureDir)(constants_1.HLS_STREAMING_PLAYLIST_DIRECTORY));
-    tasks.push((0, fs_extra_1.ensureDir)(constants_1.RESUMABLE_UPLOAD_DIRECTORY));
+    tasks.push(fs_extra_1.ensureDir(constants_1.HLS_STREAMING_PLAYLIST_DIRECTORY));
+    tasks.push(fs_extra_1.ensureDir(constants_1.RESUMABLE_UPLOAD_DIRECTORY));
     return Promise.all(tasks);
 }
 function createOAuthClientIfNotExist() {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        const exist = yield (0, checker_after_init_1.clientsExist)();
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const exist = yield checker_after_init_1.clientsExist();
         if (exist === true)
             return undefined;
         logger_1.logger.info('Creating a default OAuth Client.');
-        const id = (0, password_generator_1.default)(32, false, /[a-z0-9]/);
-        const secret = (0, password_generator_1.default)(32, false, /[a-zA-Z0-9]/);
+        const id = password_generator_1.default(32, false, /[a-z0-9]/);
+        const secret = password_generator_1.default(32, false, /[a-zA-Z0-9]/);
         const client = new oauth_client_1.OAuthClientModel({
             clientId: id,
             clientSecret: secret,
@@ -86,8 +86,8 @@ function createOAuthClientIfNotExist() {
     });
 }
 function createOAuthAdminIfNotExist() {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        const exist = yield (0, checker_after_init_1.usersExist)();
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const exist = yield checker_after_init_1.usersExist();
         if (exist === true)
             return undefined;
         logger_1.logger.info('Creating the administrator.');
@@ -107,7 +107,7 @@ function createOAuthAdminIfNotExist() {
             password = process.env.PT_INITIAL_ROOT_PASSWORD;
         }
         else {
-            password = (0, password_generator_1.default)(16, true);
+            password = password_generator_1.default(16, true);
         }
         const userData = {
             username,
@@ -120,20 +120,20 @@ function createOAuthAdminIfNotExist() {
             videoQuotaDaily: -1
         };
         const user = new user_2.UserModel(userData);
-        yield (0, user_1.createUserAccountAndChannelAndPlaylist)({ userToCreate: user, channelNames: undefined, validateUser: validatePassword });
+        yield user_1.createUserAccountAndChannelAndPlaylist({ userToCreate: user, channelNames: undefined, validateUser: validatePassword });
         logger_1.logger.info('Username: ' + username);
         logger_1.logger.info('User password: ' + password);
     });
 }
 function createApplicationIfNotExist() {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        const exist = yield (0, checker_after_init_1.applicationExist)();
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const exist = yield checker_after_init_1.applicationExist();
         if (exist === true)
             return undefined;
         logger_1.logger.info('Creating application account.');
         const application = yield application_1.ApplicationModel.create({
             migrationVersion: constants_1.LAST_MIGRATION_VERSION
         });
-        return (0, user_1.createApplicationActor)(application.id);
+        return user_1.createApplicationActor(application.id);
     });
 }

@@ -11,20 +11,20 @@ const job_queue_1 = require("../../job-queue");
 const audience_1 = require("../audience");
 function sendVideoRelatedActivity(activityBuilder, options) {
     var _a, _b;
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { byActor, video, transaction, contextType } = options;
-        const actorsInvolvedInVideo = yield (0, audience_1.getActorsInvolvedInVideo)(video, transaction);
+        const actorsInvolvedInVideo = yield audience_1.getActorsInvolvedInVideo(video, transaction);
         if (video.isOwned() === false) {
             let accountActor = (_b = (_a = video.VideoChannel) === null || _a === void 0 ? void 0 : _a.Account) === null || _b === void 0 ? void 0 : _b.Actor;
             if (!accountActor)
                 accountActor = yield actor_1.ActorModel.loadAccountActorByVideoId(video.id, transaction);
-            const audience = (0, audience_1.getRemoteVideoAudience)(accountActor, actorsInvolvedInVideo);
+            const audience = audience_1.getRemoteVideoAudience(accountActor, actorsInvolvedInVideo);
             const activity = activityBuilder(audience);
-            return (0, database_utils_1.afterCommitIfTransaction)(transaction, () => {
+            return database_utils_1.afterCommitIfTransaction(transaction, () => {
                 return unicastTo(activity, byActor, accountActor.getSharedInbox(), contextType);
             });
         }
-        const audience = (0, audience_1.getAudienceFromFollowersOf)(actorsInvolvedInVideo);
+        const audience = audience_1.getAudienceFromFollowersOf(actorsInvolvedInVideo);
         const activity = activityBuilder(audience);
         const actorsException = [byActor];
         return broadcastToFollowers(activity, byActor, actorsInvolvedInVideo, transaction, actorsException, contextType);
@@ -32,15 +32,15 @@ function sendVideoRelatedActivity(activityBuilder, options) {
 }
 exports.sendVideoRelatedActivity = sendVideoRelatedActivity;
 function forwardVideoRelatedActivity(activity, t, followersException, video) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        const additionalActors = yield (0, audience_1.getActorsInvolvedInVideo)(video, t);
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const additionalActors = yield audience_1.getActorsInvolvedInVideo(video, t);
         const additionalFollowerUrls = additionalActors.map(a => a.followersUrl);
         return forwardActivity(activity, t, followersException, additionalFollowerUrls);
     });
 }
 exports.forwardVideoRelatedActivity = forwardVideoRelatedActivity;
 function forwardActivity(activity, t, followersException = [], additionalFollowerUrls = []) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         logger_1.logger.info('Forwarding activity %s.', activity.id);
         const to = activity.to || [];
         const cc = activity.cc || [];
@@ -61,21 +61,21 @@ function forwardActivity(activity, t, followersException = [], additionalFollowe
             uris,
             body: activity
         };
-        return (0, database_utils_1.afterCommitIfTransaction)(t, () => job_queue_1.JobQueue.Instance.createJob({ type: 'activitypub-http-broadcast', payload }));
+        return database_utils_1.afterCommitIfTransaction(t, () => job_queue_1.JobQueue.Instance.createJob({ type: 'activitypub-http-broadcast', payload }));
     });
 }
 exports.forwardActivity = forwardActivity;
 function broadcastToFollowers(data, byActor, toFollowersOf, t, actorsException = [], contextType) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const uris = yield computeFollowerUris(toFollowersOf, actorsException, t);
-        return (0, database_utils_1.afterCommitIfTransaction)(t, () => broadcastTo(uris, data, byActor, contextType));
+        return database_utils_1.afterCommitIfTransaction(t, () => broadcastTo(uris, data, byActor, contextType));
     });
 }
 exports.broadcastToFollowers = broadcastToFollowers;
 function broadcastToActors(data, byActor, toActors, t, actorsException = [], contextType) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const uris = yield computeUris(toActors, actorsException);
-        return (0, database_utils_1.afterCommitIfTransaction)(t, () => broadcastTo(uris, data, byActor, contextType));
+        return database_utils_1.afterCommitIfTransaction(t, () => broadcastTo(uris, data, byActor, contextType));
     });
 }
 exports.broadcastToActors = broadcastToActors;
@@ -103,7 +103,7 @@ function unicastTo(data, byActor, toActorUrl, contextType) {
 }
 exports.unicastTo = unicastTo;
 function computeFollowerUris(toFollowersOf, actorsException, t) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const toActorFollowerIds = toFollowersOf.map(a => a.id);
         const result = yield actor_follow_1.ActorFollowModel.listAcceptedFollowerSharedInboxUrls(toActorFollowerIds, t);
         const sharedInboxesException = yield buildSharedInboxesException(actorsException);
@@ -111,8 +111,8 @@ function computeFollowerUris(toFollowersOf, actorsException, t) {
     });
 }
 function computeUris(toActors, actorsException = []) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        const serverActor = yield (0, application_1.getServerActor)();
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const serverActor = yield application_1.getServerActor();
         const targetUrls = toActors
             .filter(a => a.id !== serverActor.id)
             .map(a => a.getSharedInbox());
@@ -123,8 +123,8 @@ function computeUris(toActors, actorsException = []) {
     });
 }
 function buildSharedInboxesException(actorsException) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        const serverActor = yield (0, application_1.getServerActor)();
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const serverActor = yield application_1.getServerActor();
         return actorsException
             .map(f => f.getSharedInbox())
             .concat([serverActor.sharedInboxUrl]);

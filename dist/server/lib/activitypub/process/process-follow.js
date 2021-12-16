@@ -14,27 +14,27 @@ const notifier_1 = require("../../notifier");
 const follow_1 = require("../follow");
 const send_1 = require("../send");
 function processFollowActivity(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { activity, byActor } = options;
         const activityId = activity.id;
-        const objectId = (0, activitypub_1.getAPId)(activity.object);
-        return (0, database_utils_1.retryTransactionWrapper)(processFollow, byActor, activityId, objectId);
+        const objectId = activitypub_1.getAPId(activity.object);
+        return database_utils_1.retryTransactionWrapper(processFollow, byActor, activityId, objectId);
     });
 }
 exports.processFollowActivity = processFollowActivity;
 function processFollow(byActor, activityId, targetActorURL) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        const { actorFollow, created, isFollowingInstance, targetActor } = yield database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const { actorFollow, created, isFollowingInstance, targetActor } = yield database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
             const targetActor = yield actor_1.ActorModel.loadByUrlAndPopulateAccountAndChannel(targetActorURL, t);
             if (!targetActor)
                 throw new Error('Unknown actor');
             if (targetActor.isOwned() === false)
                 throw new Error('This is not a local actor.');
-            const serverActor = yield (0, application_1.getServerActor)();
+            const serverActor = yield application_1.getServerActor();
             const isFollowingInstance = targetActor.id === serverActor.id;
             if (isFollowingInstance && config_1.CONFIG.FOLLOWERS.INSTANCE.ENABLED === false) {
                 logger_1.logger.info('Rejecting %s because instance followers are disabled.', targetActor.url);
-                (0, send_1.sendReject)(activityId, byActor, targetActor);
+                send_1.sendReject(activityId, byActor, targetActor);
                 return { actorFollow: undefined };
             }
             const [actorFollow, created] = yield actor_follow_1.ActorFollowModel.findOrCreate({
@@ -63,8 +63,8 @@ function processFollow(byActor, activityId, targetActorURL) {
             actorFollow.ActorFollower = byActor;
             actorFollow.ActorFollowing = targetActor;
             if (actorFollow.state === 'accepted') {
-                (0, send_1.sendAccept)(actorFollow);
-                yield (0, follow_1.autoFollowBackIfNeeded)(actorFollow, t);
+                send_1.sendAccept(actorFollow);
+                yield follow_1.autoFollowBackIfNeeded(actorFollow, t);
             }
             return { actorFollow, created, isFollowingInstance, targetActor };
         }));

@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.botsRouter = void 0;
 const tslib_1 = require("tslib");
-const express_1 = (0, tslib_1.__importDefault)(require("express"));
+const express_1 = tslib_1.__importDefault(require("express"));
 const lodash_1 = require("lodash");
 const sitemap_1 = require("sitemap");
 const express_utils_1 = require("../helpers/express-utils");
@@ -14,9 +14,9 @@ const video_1 = require("../models/video/video");
 const video_channel_1 = require("../models/video/video-channel");
 const botsRouter = express_1.default.Router();
 exports.botsRouter = botsRouter;
-botsRouter.use('/sitemap.xml', (0, cache_1.cacheRoute)(constants_1.ROUTE_CACHE_LIFETIME.SITEMAP), (0, middlewares_1.asyncMiddleware)(getSitemap));
+botsRouter.use('/sitemap.xml', cache_1.cacheRoute(constants_1.ROUTE_CACHE_LIFETIME.SITEMAP), middlewares_1.asyncMiddleware(getSitemap));
 function getSitemap(req, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         let urls = getSitemapBasicUrls();
         urls = urls.concat(yield getSitemapLocalVideoUrls());
         urls = urls.concat(yield getSitemapVideoChannelUrls());
@@ -26,13 +26,13 @@ function getSitemap(req, res) {
             sitemapStream.write(urlObj);
         }
         sitemapStream.end();
-        const xml = yield (0, sitemap_1.streamToPromise)(sitemapStream);
+        const xml = yield sitemap_1.streamToPromise(sitemapStream);
         res.header('Content-Type', 'application/xml');
         res.send(xml);
     });
 }
 function getSitemapVideoChannelUrls() {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const rows = yield video_channel_1.VideoChannelModel.listLocalsForSitemap('createdAt');
         return rows.map(channel => ({
             url: constants_1.WEBSERVER.URL + '/video-channels/' + channel.Actor.preferredUsername
@@ -40,7 +40,7 @@ function getSitemapVideoChannelUrls() {
     });
 }
 function getSitemapAccountUrls() {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const rows = yield account_1.AccountModel.listLocalsForSitemap('createdAt');
         return rows.map(channel => ({
             url: constants_1.WEBSERVER.URL + '/accounts/' + channel.Actor.preferredUsername
@@ -48,13 +48,13 @@ function getSitemapAccountUrls() {
     });
 }
 function getSitemapLocalVideoUrls() {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { data } = yield video_1.VideoModel.listForApi({
             start: 0,
             count: undefined,
             sort: 'createdAt',
             includeLocalVideos: true,
-            nsfw: (0, express_utils_1.buildNSFWFilter)(),
+            nsfw: express_utils_1.buildNSFWFilter(),
             filter: 'local',
             withFiles: false,
             countVideos: false
@@ -64,7 +64,7 @@ function getSitemapLocalVideoUrls() {
             video: [
                 {
                     title: v.name,
-                    description: (0, lodash_1.truncate)(v.description || v.name, { length: 2000, omission: '...' }),
+                    description: lodash_1.truncate(v.description || v.name, { length: 2000, omission: '...' }),
                     player_loc: constants_1.WEBSERVER.URL + v.getEmbedStaticPath(),
                     thumbnail_loc: constants_1.WEBSERVER.URL + v.getMiniatureStaticPath()
                 }

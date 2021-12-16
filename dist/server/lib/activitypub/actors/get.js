@@ -10,13 +10,13 @@ const model_loaders_1 = require("@server/lib/model-loaders");
 const refresh_1 = require("./refresh");
 const shared_1 = require("./shared");
 function getOrCreateAPActor(activityActor, fetchType = 'association-ids', recurseIfNeeded = true, updateCollections = false) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        const actorUrl = (0, activitypub_1.getAPId)(activityActor);
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const actorUrl = activitypub_1.getAPId(activityActor);
         let actor = yield loadActorFromDB(actorUrl, fetchType);
         let created = false;
         let accountPlaylistsUrl;
         if (!actor) {
-            const { actorObject } = yield (0, shared_1.fetchRemoteActor)(actorUrl);
+            const { actorObject } = yield shared_1.fetchRemoteActor(actorUrl);
             if (actorObject === undefined)
                 throw new Error('Cannot fetch remote actor ' + actorUrl);
             if (actorObject.id !== actorUrl)
@@ -26,7 +26,7 @@ function getOrCreateAPActor(activityActor, fetchType = 'association-ids', recurs
                 ownerActor = yield getOrCreateAPOwner(actorObject, actorUrl);
             }
             const creator = new shared_1.APActorCreator(actorObject, ownerActor);
-            actor = yield (0, database_utils_1.retryTransactionWrapper)(creator.create.bind(creator));
+            actor = yield database_utils_1.retryTransactionWrapper(creator.create.bind(creator));
             created = true;
             accountPlaylistsUrl = actorObject.playlists;
         }
@@ -34,7 +34,7 @@ function getOrCreateAPActor(activityActor, fetchType = 'association-ids', recurs
             actor.Account.Actor = actor;
         if (actor.VideoChannel)
             actor.VideoChannel.Actor = actor;
-        const { actor: actorRefreshed, refreshed } = yield (0, refresh_1.refreshActorIfNeeded)({ actor, fetchedType: fetchType });
+        const { actor: actorRefreshed, refreshed } = yield refresh_1.refreshActorIfNeeded({ actor, fetchedType: fetchType });
         if (!actorRefreshed)
             throw new Error('Actor ' + actor.url + ' does not exist anymore.');
         yield scheduleOutboxFetchIfNeeded(actor, created, refreshed, updateCollections);
@@ -44,8 +44,8 @@ function getOrCreateAPActor(activityActor, fetchType = 'association-ids', recurs
 }
 exports.getOrCreateAPActor = getOrCreateAPActor;
 function loadActorFromDB(actorUrl, fetchType) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        let actor = yield (0, model_loaders_1.loadActorByUrl)(actorUrl, fetchType);
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        let actor = yield model_loaders_1.loadActorByUrl(actorUrl, fetchType);
         if (actor && (!actor.Account && !actor.VideoChannel)) {
             yield actor.destroy();
             actor = null;
@@ -57,7 +57,7 @@ function getOrCreateAPOwner(actorObject, actorUrl) {
     const accountAttributedTo = actorObject.attributedTo.find(a => a.type === 'Person');
     if (!accountAttributedTo)
         throw new Error('Cannot find account attributed to video channel ' + actorUrl);
-    if ((0, activitypub_1.checkUrlsSameHost)(accountAttributedTo.id, actorUrl) !== true) {
+    if (activitypub_1.checkUrlsSameHost(accountAttributedTo.id, actorUrl) !== true) {
         throw new Error(`Account attributed to ${accountAttributedTo.id} does not have the same host than actor url ${actorUrl}`);
     }
     try {
@@ -70,7 +70,7 @@ function getOrCreateAPOwner(actorObject, actorUrl) {
     }
 }
 function scheduleOutboxFetchIfNeeded(actor, created, refreshed, updateCollections) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         if ((created === true || refreshed === true) && updateCollections === true) {
             const payload = { uri: actor.outboxUrl, type: 'activity' };
             yield job_queue_1.JobQueue.Instance.createJobWithPromise({ type: 'activitypub-http-fetcher', payload });
@@ -78,7 +78,7 @@ function scheduleOutboxFetchIfNeeded(actor, created, refreshed, updateCollection
     });
 }
 function schedulePlaylistFetchIfNeeded(actor, created, accountPlaylistsUrl) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         if (created === true && actor.Account && accountPlaylistsUrl) {
             const payload = { uri: accountPlaylistsUrl, type: 'account-playlists' };
             yield job_queue_1.JobQueue.Instance.createJobWithPromise({ type: 'activitypub-http-fetcher', payload });

@@ -2,9 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const register_ts_paths_1 = require("../server/helpers/register-ts-paths");
-(0, register_ts_paths_1.registerTSPaths)();
+register_ts_paths_1.registerTSPaths();
 const commander_1 = require("commander");
-const fluent_ffmpeg_1 = (0, tslib_1.__importDefault)(require("fluent-ffmpeg"));
+const fluent_ffmpeg_1 = tslib_1.__importDefault(require("fluent-ffmpeg"));
 const ffmpeg_utils_1 = require("@server/helpers/ffmpeg-utils");
 const process_1 = require("process");
 const video_transcoding_profiles_1 = require("@server/lib/transcoding/video-transcoding-profiles");
@@ -25,7 +25,7 @@ commander_1.program
 })
     .parse(process.argv);
 function run(path, cmd) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const options = {
             type: 'video',
             inputPath: path,
@@ -35,13 +35,13 @@ function run(path, cmd) {
             resolution: +cmd.resolution,
             isPortraitMode: false
         };
-        let command = (0, fluent_ffmpeg_1.default)(options.inputPath)
+        let command = fluent_ffmpeg_1.default(options.inputPath)
             .output(options.outputPath);
-        command = yield (0, ffmpeg_utils_1.buildx264VODCommand)(command, options);
+        command = yield ffmpeg_utils_1.buildx264VODCommand(command, options);
         command.on('start', (cmdline) => {
             console.log(cmdline);
-            (0, process_1.exit)();
+            process_1.exit();
         });
-        yield (0, ffmpeg_utils_1.runCommand)({ command });
+        yield ffmpeg_utils_1.runCommand({ command });
     });
 }

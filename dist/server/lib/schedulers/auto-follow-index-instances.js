@@ -17,29 +17,29 @@ class AutoFollowIndexInstances extends abstract_scheduler_1.AbstractScheduler {
         this.schedulerIntervalMs = constants_1.SCHEDULER_INTERVALS_MS.autoFollowIndexInstances;
     }
     internalExecute() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             return this.autoFollow();
         });
     }
     autoFollow() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (config_1.CONFIG.FOLLOWINGS.INSTANCE.AUTO_FOLLOW_INDEX.ENABLED === false)
                 return;
             const indexUrl = config_1.CONFIG.FOLLOWINGS.INSTANCE.AUTO_FOLLOW_INDEX.INDEX_URL;
             logger_1.logger.info('Auto follow instances of index %s.', indexUrl);
             try {
-                const serverActor = yield (0, application_1.getServerActor)();
+                const serverActor = yield application_1.getServerActor();
                 const searchParams = { count: 1000 };
                 if (this.lastCheck)
                     Object.assign(searchParams, { since: this.lastCheck.toISOString() });
                 this.lastCheck = new Date();
-                const { body } = yield (0, requests_1.doJSONRequest)(indexUrl, { searchParams });
+                const { body } = yield requests_1.doJSONRequest(indexUrl, { searchParams });
                 if (!body.data || Array.isArray(body.data) === false) {
                     logger_1.logger.error('Cannot auto follow instances of index %s. Please check the auto follow URL.', indexUrl, { body });
                     return;
                 }
                 const hosts = body.data.map(o => o.host);
-                const chunks = (0, lodash_1.chunk)(hosts, 20);
+                const chunks = lodash_1.chunk(hosts, 20);
                 for (const chunk of chunks) {
                     const unfollowedHosts = yield actor_follow_1.ActorFollowModel.keepUnfollowedInstance(chunk);
                     for (const unfollowedHost of unfollowedHosts) {

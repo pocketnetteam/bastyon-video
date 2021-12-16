@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getCountVideos = exports.cleanUpReqFiles = exports.createReqFiles = exports.badRequest = exports.isUserAbleToSearchRemoteURI = exports.getHostWithPort = exports.buildNSFWFilter = void 0;
 const tslib_1 = require("tslib");
-const multer_1 = (0, tslib_1.__importStar)(require("multer"));
+const multer_1 = tslib_1.__importStar(require("multer"));
 const http_error_codes_1 = require("../../shared/models/http/http-error-codes");
 const config_1 = require("../initializers/config");
 const constants_1 = require("../initializers/constants");
@@ -33,13 +33,13 @@ function cleanUpReqFiles(req) {
     const filesObject = req.files;
     if (!filesObject)
         return;
-    if ((0, misc_1.isArray)(filesObject)) {
-        filesObject.forEach(f => (0, utils_1.deleteFileAndCatch)(f.path));
+    if (misc_1.isArray(filesObject)) {
+        filesObject.forEach(f => utils_1.deleteFileAndCatch(f.path));
         return;
     }
     for (const key of Object.keys(filesObject)) {
         const files = filesObject[key];
-        files.forEach(f => (0, utils_1.deleteFileAndCatch)(f.path));
+        files.forEach(f => utils_1.deleteFileAndCatch(f.path));
     }
 }
 exports.cleanUpReqFiles = cleanUpReqFiles;
@@ -60,14 +60,14 @@ function badRequest(req, res) {
 }
 exports.badRequest = badRequest;
 function createReqFiles(fieldNames, mimeTypes, destinations) {
-    const storage = (0, multer_1.diskStorage)({
+    const storage = multer_1.diskStorage({
         destination: (req, file, cb) => {
             cb(null, destinations[file.fieldname]);
         },
-        filename: (req, file, cb) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        filename: (req, file, cb) => tslib_1.__awaiter(this, void 0, void 0, function* () {
             let extension;
-            const fileExtension = (0, core_utils_1.getLowercaseExtension)(file.originalname);
-            const extensionFromMimetype = (0, video_1.getExtFromMimetype)(mimeTypes, file.mimetype);
+            const fileExtension = core_utils_1.getLowercaseExtension(file.originalname);
+            const extensionFromMimetype = video_1.getExtFromMimetype(mimeTypes, file.mimetype);
             if (!extensionFromMimetype) {
                 extension = fileExtension;
             }
@@ -76,7 +76,7 @@ function createReqFiles(fieldNames, mimeTypes, destinations) {
             }
             let randomString = '';
             try {
-                randomString = yield (0, utils_1.generateRandomString)(16);
+                randomString = yield utils_1.generateRandomString(16);
             }
             catch (err) {
                 logger_1.logger.error('Cannot generate random string for file name.', { err });
@@ -92,7 +92,7 @@ function createReqFiles(fieldNames, mimeTypes, destinations) {
             maxCount: 1
         });
     }
-    return (0, multer_1.default)({ storage }).fields(fields);
+    return multer_1.default({ storage }).fields(fields);
 }
 exports.createReqFiles = createReqFiles;
 function isUserAbleToSearchRemoteURI(res) {

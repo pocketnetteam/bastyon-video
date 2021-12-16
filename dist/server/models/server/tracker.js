@@ -42,29 +42,29 @@ let TrackerModel = TrackerModel_1 = class TrackerModel extends sequelize_typescr
         return Promise.all(tasks);
     }
 };
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(false),
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(false),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", String)
+    tslib_1.__metadata("design:type", String)
 ], TrackerModel.prototype, "url", void 0);
-(0, tslib_1.__decorate)([
+tslib_1.__decorate([
     sequelize_typescript_1.CreatedAt,
-    (0, tslib_1.__metadata)("design:type", Date)
+    tslib_1.__metadata("design:type", Date)
 ], TrackerModel.prototype, "createdAt", void 0);
-(0, tslib_1.__decorate)([
+tslib_1.__decorate([
     sequelize_typescript_1.UpdatedAt,
-    (0, tslib_1.__metadata)("design:type", Date)
+    tslib_1.__metadata("design:type", Date)
 ], TrackerModel.prototype, "updatedAt", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.BelongsToMany)(() => video_1.VideoModel, {
+tslib_1.__decorate([
+    sequelize_typescript_1.BelongsToMany(() => video_1.VideoModel, {
         foreignKey: 'trackerId',
         through: () => video_tracker_1.VideoTrackerModel,
         onDelete: 'CASCADE'
     }),
-    (0, tslib_1.__metadata)("design:type", Array)
+    tslib_1.__metadata("design:type", Array)
 ], TrackerModel.prototype, "Videos", void 0);
-TrackerModel = TrackerModel_1 = (0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.Table)({
+TrackerModel = TrackerModel_1 = tslib_1.__decorate([
+    sequelize_typescript_1.Table({
         tableName: 'tracker',
         indexes: [
             {

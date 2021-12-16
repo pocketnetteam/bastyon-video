@@ -16,18 +16,18 @@ class UpdateVideosScheduler extends abstract_scheduler_1.AbstractScheduler {
         this.schedulerIntervalMs = constants_1.SCHEDULER_INTERVALS_MS.updateVideos;
     }
     internalExecute() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             return this.updateVideos();
         });
     }
     updateVideos() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (!(yield schedule_video_update_1.ScheduleVideoUpdateModel.areVideosToUpdate()))
                 return undefined;
             const schedules = yield schedule_video_update_1.ScheduleVideoUpdateModel.listVideosToUpdate();
             const publishedVideos = [];
             for (const schedule of schedules) {
-                yield database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
                     const video = yield video_1.VideoModel.loadAndPopulateAccountAndServerAndTags(schedule.videoId, t);
                     logger_1.logger.info('Executing scheduled video update on %s.', video.uuid);
                     if (schedule.privacy) {
@@ -35,7 +35,7 @@ class UpdateVideosScheduler extends abstract_scheduler_1.AbstractScheduler {
                         const isNewVideo = video.isNewVideo(schedule.privacy);
                         video.setPrivacy(schedule.privacy);
                         yield video.save({ transaction: t });
-                        yield (0, videos_1.federateVideoIfNeeded)(video, isNewVideo, t);
+                        yield videos_1.federateVideoIfNeeded(video, isNewVideo, t);
                         if (wasConfidentialVideo) {
                             publishedVideos.push(video);
                         }

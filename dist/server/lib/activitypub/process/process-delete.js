@@ -11,7 +11,7 @@ const video_comment_1 = require("../../../models/video/video-comment");
 const video_playlist_1 = require("../../../models/video/video-playlist");
 const utils_1 = require("../send/utils");
 function processDeleteActivity(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { activity, byActor } = options;
         const objectUrl = typeof activity.object === 'string' ? activity.object : activity.object.id;
         if (activity.actor === objectUrl) {
@@ -21,20 +21,20 @@ function processDeleteActivity(options) {
                     throw new Error('Actor ' + byActorFull.url + ' is a person but we cannot find it in database.');
                 const accountToDelete = byActorFull.Account;
                 accountToDelete.Actor = byActorFull;
-                return (0, database_utils_1.retryTransactionWrapper)(processDeleteAccount, accountToDelete);
+                return database_utils_1.retryTransactionWrapper(processDeleteAccount, accountToDelete);
             }
             else if (byActorFull.type === 'Group') {
                 if (!byActorFull.VideoChannel)
                     throw new Error('Actor ' + byActorFull.url + ' is a group but we cannot find it in database.');
                 const channelToDelete = byActorFull.VideoChannel;
                 channelToDelete.Actor = byActorFull;
-                return (0, database_utils_1.retryTransactionWrapper)(processDeleteVideoChannel, channelToDelete);
+                return database_utils_1.retryTransactionWrapper(processDeleteVideoChannel, channelToDelete);
             }
         }
         {
             const videoCommentInstance = yield video_comment_1.VideoCommentModel.loadByUrlAndPopulateAccountAndVideo(objectUrl);
             if (videoCommentInstance) {
-                return (0, database_utils_1.retryTransactionWrapper)(processDeleteVideoComment, byActor, videoCommentInstance, activity);
+                return database_utils_1.retryTransactionWrapper(processDeleteVideoComment, byActor, videoCommentInstance, activity);
             }
         }
         {
@@ -42,7 +42,7 @@ function processDeleteActivity(options) {
             if (videoInstance) {
                 if (videoInstance.isOwned())
                     throw new Error(`Remote instance cannot delete owned video ${videoInstance.url}.`);
-                return (0, database_utils_1.retryTransactionWrapper)(processDeleteVideo, byActor, videoInstance);
+                return database_utils_1.retryTransactionWrapper(processDeleteVideo, byActor, videoInstance);
             }
         }
         {
@@ -50,7 +50,7 @@ function processDeleteActivity(options) {
             if (videoPlaylist) {
                 if (videoPlaylist.isOwned())
                     throw new Error(`Remote instance cannot delete owned playlist ${videoPlaylist.url}.`);
-                return (0, database_utils_1.retryTransactionWrapper)(processDeleteVideoPlaylist, byActor, videoPlaylist);
+                return database_utils_1.retryTransactionWrapper(processDeleteVideoPlaylist, byActor, videoPlaylist);
             }
         }
         return undefined;
@@ -58,9 +58,9 @@ function processDeleteActivity(options) {
 }
 exports.processDeleteActivity = processDeleteActivity;
 function processDeleteVideo(actor, videoToDelete) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         logger_1.logger.debug('Removing remote video "%s".', videoToDelete.uuid);
-        yield database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        yield database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (videoToDelete.VideoChannel.Account.Actor.id !== actor.id) {
                 throw new Error('Account ' + actor.url + ' does not own video channel ' + videoToDelete.VideoChannel.Actor.url);
             }
@@ -70,9 +70,9 @@ function processDeleteVideo(actor, videoToDelete) {
     });
 }
 function processDeleteVideoPlaylist(actor, playlistToDelete) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         logger_1.logger.debug('Removing remote video playlist "%s".', playlistToDelete.uuid);
-        yield database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        yield database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (playlistToDelete.OwnerAccount.Actor.id !== actor.id) {
                 throw new Error('Account ' + actor.url + ' does not own video playlist ' + playlistToDelete.url);
             }
@@ -82,18 +82,18 @@ function processDeleteVideoPlaylist(actor, playlistToDelete) {
     });
 }
 function processDeleteAccount(accountToRemove) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         logger_1.logger.debug('Removing remote account "%s".', accountToRemove.Actor.url);
-        yield database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        yield database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
             yield accountToRemove.destroy({ transaction: t });
         }));
         logger_1.logger.info('Remote account %s removed.', accountToRemove.Actor.url);
     });
 }
 function processDeleteVideoChannel(videoChannelToRemove) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         logger_1.logger.debug('Removing remote video channel "%s".', videoChannelToRemove.Actor.url);
-        yield database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        yield database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
             yield videoChannelToRemove.destroy({ transaction: t });
         }));
         logger_1.logger.info('Remote video channel %s removed.', videoChannelToRemove.Actor.url);
@@ -103,7 +103,7 @@ function processDeleteVideoComment(byActor, videoComment, activity) {
     if (videoComment.isDeleted())
         return Promise.resolve();
     logger_1.logger.debug('Removing remote video comment "%s".', videoComment.url);
-    return database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
         if (byActor.Account.id !== videoComment.Account.id && byActor.Account.id !== videoComment.Video.VideoChannel.accountId) {
             throw new Error(`Account ${byActor.url} does not own video comment ${videoComment.url} or video ${videoComment.Video.url}`);
         }
@@ -111,7 +111,7 @@ function processDeleteVideoComment(byActor, videoComment, activity) {
         yield videoComment.save({ transaction: t });
         if (videoComment.Video.isOwned()) {
             const exceptions = [byActor];
-            yield (0, utils_1.forwardVideoRelatedActivity)(activity, t, exceptions, videoComment.Video);
+            yield utils_1.forwardVideoRelatedActivity(activity, t, exceptions, videoComment.Video);
         }
         logger_1.logger.info('Remote video comment %s removed.', videoComment.url);
     }));

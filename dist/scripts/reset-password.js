@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const register_ts_paths_1 = require("../server/helpers/register-ts-paths");
-(0, register_ts_paths_1.registerTSPaths)();
+register_ts_paths_1.registerTSPaths();
 const commander_1 = require("commander");
 const database_1 = require("../server/initializers/database");
 const user_1 = require("../server/models/user/user");
@@ -14,7 +14,7 @@ if (options.user === undefined) {
     console.error('All parameters are mandatory.');
     process.exit(-1);
 }
-(0, database_1.initDatabaseModels)(true)
+database_1.initDatabaseModels(true)
     .then(() => {
     return user_1.UserModel.loadByUsername(options.user);
 })
@@ -37,7 +37,7 @@ if (options.user === undefined) {
     });
     console.log('New password?');
     rl.on('line', function (password) {
-        if (!(0, users_1.isUserPasswordValid)(password)) {
+        if (!users_1.isUserPasswordValid(password)) {
             console.error('New password is invalid.');
             process.exit(-1);
         }

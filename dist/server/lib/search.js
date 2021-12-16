@@ -20,8 +20,8 @@ function isSearchIndexSearch(query) {
 }
 exports.isSearchIndexSearch = isSearchIndexSearch;
 function buildMutedForSearchIndex(res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        const serverActor = yield (0, application_1.getServerActor)();
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const serverActor = yield application_1.getServerActor();
         const accountIds = [serverActor.Account.id];
         if (res.locals.oauth) {
             accountIds.push(res.locals.oauth.token.User.Account.id);

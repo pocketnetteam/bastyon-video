@@ -7,7 +7,7 @@ function setBodyHostsPort(req, res, next) {
     if (!req.body.hosts)
         return next();
     for (let i = 0; i < req.body.hosts.length; i++) {
-        const hostWithPort = (0, express_utils_1.getHostWithPort)(req.body.hosts[i]);
+        const hostWithPort = express_utils_1.getHostWithPort(req.body.hosts[i]);
         if (hostWithPort === null) {
             return res.fail({
                 status: http_error_codes_1.HttpStatusCode.INTERNAL_SERVER_ERROR_500,

@@ -8,12 +8,12 @@ const logger_1 = require("../../helpers/logger");
 const constants_1 = require("../../initializers/constants");
 const shared_1 = require("./shared");
 const updateActorImageValidatorFactory = (fieldname) => ([
-    (0, express_validator_1.body)(fieldname).custom((value, { req }) => (0, actor_images_1.isActorImageFile)(req.files, fieldname)).withMessage('This file is not supported or too large. Please, make sure it is of the following type : ' +
+    express_validator_1.body(fieldname).custom((value, { req }) => actor_images_1.isActorImageFile(req.files, fieldname)).withMessage('This file is not supported or too large. Please, make sure it is of the following type : ' +
         constants_1.CONSTRAINTS_FIELDS.ACTORS.IMAGE.EXTNAME.join(', ')),
     (req, res, next) => {
         logger_1.logger.debug('Checking updateActorImageValidator parameters', { files: req.files });
-        if ((0, shared_1.areValidationErrors)(req, res))
-            return (0, express_utils_1.cleanUpReqFiles)(req);
+        if (shared_1.areValidationErrors(req, res))
+            return express_utils_1.cleanUpReqFiles(req);
         return next();
     }
 ]);

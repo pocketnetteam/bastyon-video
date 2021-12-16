@@ -8,10 +8,10 @@ describe('Test bulk API validators', function () {
     let server;
     let userAccessToken;
     before(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(120000);
-            server = yield (0, extra_utils_1.createSingleServer)(1);
-            yield (0, extra_utils_1.setAccessTokensToServers)([server]);
+            server = yield extra_utils_1.createSingleServer(1);
+            yield extra_utils_1.setAccessTokensToServers([server]);
             const user = { username: 'user1', password: 'password' };
             yield server.users.create({ username: user.username, password: user.password });
             userAccessToken = yield server.login.getAccessToken(user);
@@ -20,8 +20,8 @@ describe('Test bulk API validators', function () {
     describe('When removing comments of', function () {
         const path = '/api/v1/bulk/remove-comments-of';
         it('Should fail with an unauthenticated user', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makePostBodyRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makePostBodyRequest({
                     url: server.url,
                     path,
                     fields: { accountName: 'user1', scope: 'my-videos' },
@@ -30,8 +30,8 @@ describe('Test bulk API validators', function () {
             });
         });
         it('Should fail with an unknown account', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makePostBodyRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makePostBodyRequest({
                     url: server.url,
                     token: server.accessToken,
                     path,
@@ -41,8 +41,8 @@ describe('Test bulk API validators', function () {
             });
         });
         it('Should fail with an invalid scope', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makePostBodyRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makePostBodyRequest({
                     url: server.url,
                     token: server.accessToken,
                     path,
@@ -52,8 +52,8 @@ describe('Test bulk API validators', function () {
             });
         });
         it('Should fail to delete comments of the instance without the appropriate rights', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makePostBodyRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makePostBodyRequest({
                     url: server.url,
                     token: userAccessToken,
                     path,
@@ -63,8 +63,8 @@ describe('Test bulk API validators', function () {
             });
         });
         it('Should succeed with the correct params', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makePostBodyRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makePostBodyRequest({
                     url: server.url,
                     token: server.accessToken,
                     path,
@@ -75,8 +75,8 @@ describe('Test bulk API validators', function () {
         });
     });
     after(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            yield (0, extra_utils_1.cleanupTests)([server]);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield extra_utils_1.cleanupTests([server]);
         });
     });
 });

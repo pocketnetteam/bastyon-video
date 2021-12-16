@@ -2,11 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.down = exports.up = void 0;
 const tslib_1 = require("tslib");
-const Sequelize = (0, tslib_1.__importStar)(require("sequelize"));
+const Sequelize = tslib_1.__importStar(require("sequelize"));
 const uuid_1 = require("@server/helpers/uuid");
 const constants_1 = require("../constants");
 function up(utils) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const transaction = utils.transaction;
         {
             const query = `
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS "videoPlaylistElement"
             const userResult = yield utils.sequelize.query(userQuery, options);
             const usernames = userResult.map(r => r.username);
             for (const username of usernames) {
-                const uuid = (0, uuid_1.buildUUID)();
+                const uuid = uuid_1.buildUUID();
                 const baseUrl = constants_1.WEBSERVER.URL + '/video-playlists/' + uuid;
                 const query = `
  INSERT INTO "videoPlaylist" ("url", "uuid", "name", "privacy", "type", "ownerAccountId", "createdAt", "updatedAt")

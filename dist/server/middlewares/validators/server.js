@@ -12,10 +12,10 @@ const redis_1 = require("../../lib/redis");
 const server_1 = require("../../models/server/server");
 const shared_1 = require("./shared");
 const serverGetValidator = [
-    (0, express_validator_1.body)('host').custom(servers_1.isHostValid).withMessage('Should have a valid host'),
-    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
+    express_validator_1.body('host').custom(servers_1.isHostValid).withMessage('Should have a valid host'),
+    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking serverGetValidator parameters', { parameters: req.body });
-        if ((0, shared_1.areValidationErrors)(req, res))
+        if (shared_1.areValidationErrors(req, res))
             return;
         const server = yield server_1.ServerModel.loadByHost(req.body.host);
         if (!server) {
@@ -30,15 +30,15 @@ const serverGetValidator = [
 ];
 exports.serverGetValidator = serverGetValidator;
 const contactAdministratorValidator = [
-    (0, express_validator_1.body)('fromName')
+    express_validator_1.body('fromName')
         .custom(users_1.isUserDisplayNameValid).withMessage('Should have a valid name'),
-    (0, express_validator_1.body)('fromEmail')
+    express_validator_1.body('fromEmail')
         .isEmail().withMessage('Should have a valid email'),
-    (0, express_validator_1.body)('body')
+    express_validator_1.body('body')
         .custom(servers_1.isValidContactBody).withMessage('Should have a valid body'),
-    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
+    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking contactAdministratorValidator parameters', { parameters: req.body });
-        if ((0, shared_1.areValidationErrors)(req, res))
+        if (shared_1.areValidationErrors(req, res))
             return;
         if (config_1.CONFIG.CONTACT_FORM.ENABLED === false) {
             return res.fail({
@@ -46,7 +46,7 @@ const contactAdministratorValidator = [
                 message: 'Contact form is not enabled on this instance.'
             });
         }
-        if ((0, config_1.isEmailEnabled)() === false) {
+        if (config_1.isEmailEnabled() === false) {
             return res.fail({
                 status: http_error_codes_1.HttpStatusCode.CONFLICT_409,
                 message: 'Emailer is not enabled on this instance.'

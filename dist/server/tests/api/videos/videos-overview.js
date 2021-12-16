@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = (0, tslib_1.__importStar)(require("chai"));
+const chai = tslib_1.__importStar(require("chai"));
 const extra_utils_1 = require("@shared/extra-utils");
 const expect = chai.expect;
 describe('Test a videos overview', function () {
@@ -13,22 +13,22 @@ describe('Test a videos overview', function () {
         expect(overview.channels).to.have.lengthOf(expected);
     }
     before(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(30000);
-            server = yield (0, extra_utils_1.createSingleServer)(1);
-            yield (0, extra_utils_1.setAccessTokensToServers)([server]);
+            server = yield extra_utils_1.createSingleServer(1);
+            yield extra_utils_1.setAccessTokensToServers([server]);
         });
     });
     it('Should send empty overview', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const body = yield server.overviews.getVideos({ page: 1 });
             testOverviewCount(body, 0);
         });
     });
     it('Should upload 5 videos in a specific category, tag and channel but not include them in overview', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(30000);
-            yield (0, extra_utils_1.wait)(3000);
+            yield extra_utils_1.wait(3000);
             yield server.videos.upload({
                 attributes: {
                     name: 'video 0',
@@ -41,7 +41,7 @@ describe('Test a videos overview', function () {
         });
     });
     it('Should upload another video and include all videos in the overview', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(30000);
             {
                 for (let i = 1; i < 6; i++) {
@@ -53,7 +53,7 @@ describe('Test a videos overview', function () {
                         }
                     });
                 }
-                yield (0, extra_utils_1.wait)(3000);
+                yield extra_utils_1.wait(3000);
             }
             {
                 const body = yield server.overviews.getVideos({ page: 1 });
@@ -68,7 +68,7 @@ describe('Test a videos overview', function () {
         });
     });
     it('Should have the correct overview', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const overview1 = yield server.overviews.getVideos({ page: 1 });
             const overview2 = yield server.overviews.getVideos({ page: 2 });
             for (const arr of [overview1.tags, overview1.categories, overview1.channels, overview2.tags]) {
@@ -90,7 +90,7 @@ describe('Test a videos overview', function () {
         });
     });
     it('Should hide muted accounts', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const token = yield server.users.generateUserAndToken('choco');
             yield server.blocklist.addToMyBlocklist({ token, account: 'root@' + server.host });
             {
@@ -104,8 +104,8 @@ describe('Test a videos overview', function () {
         });
     });
     after(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            yield (0, extra_utils_1.cleanupTests)([server]);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield extra_utils_1.cleanupTests([server]);
         });
     });
 });

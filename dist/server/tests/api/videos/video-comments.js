@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = (0, tslib_1.__importStar)(require("chai"));
+const chai = tslib_1.__importStar(require("chai"));
 const extra_utils_1 = require("@shared/extra-utils");
 const expect = chai.expect;
 describe('Test video comments', function () {
@@ -14,10 +14,10 @@ describe('Test video comments', function () {
     let userAccessTokenServer1;
     let command;
     before(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(30000);
-            server = yield (0, extra_utils_1.createSingleServer)(1);
-            yield (0, extra_utils_1.setAccessTokensToServers)([server]);
+            server = yield extra_utils_1.createSingleServer(1);
+            yield extra_utils_1.setAccessTokensToServers([server]);
             const { id, uuid } = yield server.videos.upload();
             videoUUID = uuid;
             videoId = id;
@@ -28,7 +28,7 @@ describe('Test video comments', function () {
     });
     describe('User comments', function () {
         it('Should not have threads on this video', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const body = yield command.listThreads({ videoId: videoUUID });
                 expect(body.total).to.equal(0);
                 expect(body.totalNotDeletedComments).to.equal(0);
@@ -37,7 +37,7 @@ describe('Test video comments', function () {
             });
         });
         it('Should create a thread in this video', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const text = 'my super first comment';
                 const comment = yield command.createThread({ videoId: videoUUID, text });
                 expect(comment.inReplyToCommentId).to.be.null;
@@ -49,12 +49,12 @@ describe('Test video comments', function () {
                 expect(comment.account.url).to.equal('http://localhost:' + server.port + '/accounts/root');
                 expect(comment.totalReplies).to.equal(0);
                 expect(comment.totalRepliesFromVideoAuthor).to.equal(0);
-                expect((0, extra_utils_1.dateIsValid)(comment.createdAt)).to.be.true;
-                expect((0, extra_utils_1.dateIsValid)(comment.updatedAt)).to.be.true;
+                expect(extra_utils_1.dateIsValid(comment.createdAt)).to.be.true;
+                expect(extra_utils_1.dateIsValid(comment.updatedAt)).to.be.true;
             });
         });
         it('Should list threads of this video', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const body = yield command.listThreads({ videoId: videoUUID });
                 expect(body.total).to.equal(1);
                 expect(body.totalNotDeletedComments).to.equal(1);
@@ -67,27 +67,27 @@ describe('Test video comments', function () {
                 expect(comment.id).to.equal(comment.threadId);
                 expect(comment.account.name).to.equal('root');
                 expect(comment.account.host).to.equal('localhost:' + server.port);
-                yield (0, extra_utils_1.testImage)(server.url, 'avatar-resized', comment.account.avatar.path, '.png');
+                yield extra_utils_1.testImage(server.url, 'avatar-resized', comment.account.avatar.path, '.png');
                 expect(comment.totalReplies).to.equal(0);
                 expect(comment.totalRepliesFromVideoAuthor).to.equal(0);
-                expect((0, extra_utils_1.dateIsValid)(comment.createdAt)).to.be.true;
-                expect((0, extra_utils_1.dateIsValid)(comment.updatedAt)).to.be.true;
+                expect(extra_utils_1.dateIsValid(comment.createdAt)).to.be.true;
+                expect(extra_utils_1.dateIsValid(comment.updatedAt)).to.be.true;
                 threadId = comment.threadId;
             });
         });
         it('Should get all the thread created', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const body = yield command.getThread({ videoId: videoUUID, threadId });
                 const rootComment = body.comment;
                 expect(rootComment.inReplyToCommentId).to.be.null;
                 expect(rootComment.text).equal('my super first comment');
                 expect(rootComment.videoId).to.equal(videoId);
-                expect((0, extra_utils_1.dateIsValid)(rootComment.createdAt)).to.be.true;
-                expect((0, extra_utils_1.dateIsValid)(rootComment.updatedAt)).to.be.true;
+                expect(extra_utils_1.dateIsValid(rootComment.createdAt)).to.be.true;
+                expect(extra_utils_1.dateIsValid(rootComment.updatedAt)).to.be.true;
             });
         });
         it('Should create multiple replies in this thread', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const text1 = 'my super answer to thread 1';
                 const created = yield command.addReply({ videoId, toCommentId: threadId, text: text1 });
                 const childCommentId = created.id;
@@ -98,7 +98,7 @@ describe('Test video comments', function () {
             });
         });
         it('Should get correctly the replies', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const tree = yield command.getThread({ videoId: videoUUID, threadId });
                 expect(tree.comment.text).equal('my super first comment');
                 expect(tree.children).to.have.lengthOf(2);
@@ -115,7 +115,7 @@ describe('Test video comments', function () {
             });
         });
         it('Should create other threads', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const text1 = 'super thread 2';
                 yield command.createThread({ videoId: videoUUID, text: text1 });
                 const text2 = 'super thread 3';
@@ -123,7 +123,7 @@ describe('Test video comments', function () {
             });
         });
         it('Should list the threads', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const body = yield command.listThreads({ videoId: videoUUID, sort: 'createdAt' });
                 expect(body.total).to.equal(3);
                 expect(body.totalNotDeletedComments).to.equal(6);
@@ -138,7 +138,7 @@ describe('Test video comments', function () {
             });
         });
         it('Should delete a reply', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 yield command.delete({ videoId, commentId: replyToDeleteId });
                 {
                     const body = yield command.listThreads({ videoId: videoUUID, sort: 'createdAt' });
@@ -165,7 +165,7 @@ describe('Test video comments', function () {
             });
         });
         it('Should delete a complete thread', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 yield command.delete({ videoId, commentId: threadId });
                 const body = yield command.listThreads({ videoId: videoUUID, sort: 'createdAt' });
                 expect(body.total).to.equal(3);
@@ -183,7 +183,7 @@ describe('Test video comments', function () {
             });
         });
         it('Should count replies from the video author correctly', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 yield command.createThread({ videoId: videoUUID, text: 'my super first comment' });
                 const { data } = yield command.listThreads({ videoId: videoUUID });
                 const threadId2 = data[0].threadId;
@@ -198,20 +198,20 @@ describe('Test video comments', function () {
     });
     describe('All instance comments', function () {
         it('Should list instance comments as admin', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const { data } = yield command.listForAdmin({ start: 0, count: 1 });
                 expect(data[0].text).to.equal('my second answer to thread 4');
             });
         });
         it('Should filter instance comments by isLocal', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const { total, data } = yield command.listForAdmin({ isLocal: false });
                 expect(data).to.have.lengthOf(0);
                 expect(total).to.equal(0);
             });
         });
         it('Should search instance comments by account', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const { total, data } = yield command.listForAdmin({ searchAccount: 'user' });
                 expect(data).to.have.lengthOf(1);
                 expect(total).to.equal(1);
@@ -219,7 +219,7 @@ describe('Test video comments', function () {
             });
         });
         it('Should search instance comments by video', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 {
                     const { total, data } = yield command.listForAdmin({ searchVideo: 'video' });
                     expect(data).to.have.lengthOf(7);
@@ -233,7 +233,7 @@ describe('Test video comments', function () {
             });
         });
         it('Should search instance comments', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const { total, data } = yield command.listForAdmin({ search: 'super thread 3' });
                 expect(total).to.equal(1);
                 expect(data).to.have.lengthOf(1);
@@ -242,8 +242,8 @@ describe('Test video comments', function () {
         });
     });
     after(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            yield (0, extra_utils_1.cleanupTests)([server]);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield extra_utils_1.cleanupTests([server]);
         });
     });
 });

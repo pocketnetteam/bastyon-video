@@ -13,7 +13,7 @@ const oauth_token_1 = require("../../models/oauth/oauth-token");
 const user_2 = require("../user");
 const tokens_cache_1 = require("./tokens-cache");
 function getAccessToken(bearerToken) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         logger_1.logger.debug('Getting access token (bearerToken: ' + bearerToken + ').');
         if (!bearerToken)
             return undefined;
@@ -43,7 +43,7 @@ function getClient(clientId, clientSecret) {
 }
 exports.getClient = getClient;
 function getRefreshToken(refreshToken) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         logger_1.logger.debug('Getting RefreshToken (refreshToken: ' + refreshToken + ').');
         const tokenInfo = yield oauth_token_1.OAuthTokenModel.getByRefreshTokenAndPopulateClient(refreshToken);
         if (!tokenInfo)
@@ -59,7 +59,7 @@ function getRefreshToken(refreshToken) {
 }
 exports.getRefreshToken = getRefreshToken;
 function getUser(usernameOrEmail, password, bypassLogin) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         if (bypassLogin && bypassLogin.bypass === true) {
             logger_1.logger.info('Bypassing oauth login by plugin %s.', bypassLogin.pluginName);
             let user = yield user_1.UserModel.loadByEmail(bypassLogin.user.email);
@@ -94,7 +94,7 @@ function getUser(usernameOrEmail, password, bypassLogin) {
 }
 exports.getUser = getUser;
 function revokeToken(tokenInfo, options = {}) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { req, explicitLogout } = options;
         const token = yield oauth_token_1.OAuthTokenModel.getByRefreshTokenAndPopulateUser(tokenInfo.refreshToken);
         if (token) {
@@ -112,7 +112,7 @@ function revokeToken(tokenInfo, options = {}) {
 }
 exports.revokeToken = revokeToken;
 function saveToken(token, client, user, options = {}) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { refreshTokenAuthName, bypassLogin } = options;
         let authName = null;
         if ((bypassLogin === null || bypassLogin === void 0 ? void 0 : bypassLogin.bypass) === true) {
@@ -148,7 +148,7 @@ function saveToken(token, client, user, options = {}) {
 }
 exports.saveToken = saveToken;
 function createUserFromExternal(pluginAuth, options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const actor = yield actor_1.ActorModel.loadLocalByName(options.username);
         if (actor)
             return null;
@@ -164,7 +164,7 @@ function createUserFromExternal(pluginAuth, options) {
             adminFlags: 0,
             pluginAuth
         });
-        const { user } = yield (0, user_2.createUserAccountAndChannelAndPlaylist)({
+        const { user } = yield user_2.createUserAccountAndChannelAndPlaylist({
             userToCreate,
             userDisplayName: options.displayName
         });

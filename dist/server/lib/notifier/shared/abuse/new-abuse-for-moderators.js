@@ -10,12 +10,12 @@ const user_notification_1 = require("@server/models/user/user-notification");
 const abstract_notification_1 = require("../common/abstract-notification");
 class NewAbuseForModerators extends abstract_notification_1.AbstractNotification {
     prepare() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.moderators = yield user_1.UserModel.listWithRight(6);
         });
     }
     log() {
-        logger_1.logger.info('Notifying %s user/moderators of new abuse %s.', this.moderators.length, (0, url_1.getAbuseTargetUrl)(this.payload.abuseInstance));
+        logger_1.logger.info('Notifying %s user/moderators of new abuse %s.', this.moderators.length, url_1.getAbuseTargetUrl(this.payload.abuseInstance));
     }
     getSetting(user) {
         return user.NotificationSetting.abuseAsModerator;
@@ -24,7 +24,7 @@ class NewAbuseForModerators extends abstract_notification_1.AbstractNotification
         return this.moderators;
     }
     createNotification(user) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const notification = yield user_notification_1.UserNotificationModel.create({
                 type: 3,
                 userId: user.id,

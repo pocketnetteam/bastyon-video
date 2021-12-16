@@ -24,7 +24,7 @@ class MuxingSession extends stream_1.EventEmitter {
         super();
         this.segmentsToProcessPerPlaylist = {};
         this.isAbleToUploadVideoWithCache = memoizee((userId) => {
-            return (0, user_1.isAbleToUploadVideo)(userId, 1000);
+            return user_1.isAbleToUploadVideo(userId, 1000);
         }, { maxAge: constants_1.MEMOIZE_TTL.LIVE_ABLE_TO_UPLOAD });
         this.hasClientSocketInBadHealthWithCache = memoizee((sessionId) => {
             return this.hasClientSocketInBadHealth(sessionId);
@@ -42,14 +42,14 @@ class MuxingSession extends stream_1.EventEmitter {
         this.videoId = this.videoLive.Video.id;
         this.videoUUID = this.videoLive.Video.uuid;
         this.saveReplay = this.videoLive.saveReplay;
-        this.lTags = (0, logger_1.loggerTagsFactory)('live', this.sessionId, this.videoUUID);
+        this.lTags = logger_1.loggerTagsFactory('live', this.sessionId, this.videoUUID);
     }
     runMuxing() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             yield this.createFiles();
             const outPath = yield this.prepareDirectories();
             this.ffmpegCommand = config_1.CONFIG.LIVE.TRANSCODING.ENABLED
-                ? yield (0, ffmpeg_utils_1.getLiveTranscodingCommand)({
+                ? yield ffmpeg_utils_1.getLiveTranscodingCommand({
                     rtmpUrl: this.rtmpUrl,
                     outPath,
                     masterPlaylistName: this.streamingPlaylist.playlistFilename,
@@ -60,7 +60,7 @@ class MuxingSession extends stream_1.EventEmitter {
                     availableEncoders: video_transcoding_profiles_1.VideoTranscodingProfilesManager.Instance.getAvailableEncoders(),
                     profile: config_1.CONFIG.LIVE.TRANSCODING.PROFILE
                 })
-                : (0, ffmpeg_utils_1.getLiveMuxingCommand)(this.rtmpUrl, outPath, this.streamingPlaylist.playlistFilename);
+                : ffmpeg_utils_1.getLiveMuxingCommand(this.rtmpUrl, outPath, this.streamingPlaylist.playlistFilename);
             logger_1.logger.info('Running live muxing/transcoding for %s.', this.videoUUID, this.lTags);
             yield this.watchTSFiles(outPath);
             this.watchMasterFile(outPath);
@@ -105,7 +105,7 @@ class MuxingSession extends stream_1.EventEmitter {
         }, 1000);
     }
     watchMasterFile(outPath) {
-        this.masterWatcher = (0, chokidar_1.watch)(outPath + '/' + this.streamingPlaylist.playlistFilename);
+        this.masterWatcher = chokidar_1.watch(outPath + '/' + this.streamingPlaylist.playlistFilename);
         this.masterWatcher.on('add', () => {
             this.emit('master-playlist-created', { videoId: this.videoId });
             this.masterWatcher.close()
@@ -113,15 +113,15 @@ class MuxingSession extends stream_1.EventEmitter {
         });
     }
     watchTSFiles(outPath) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const startStreamDateTime = new Date().getTime();
-            this.tsWatcher = (0, chokidar_1.watch)(outPath + '/*.ts');
+            this.tsWatcher = chokidar_1.watch(outPath + '/*.ts');
             const playlistIdMatcher = /^([\d+])-/;
-            const existingFiles = yield (0, fs_extra_1.readdir)(outPath);
-            yield Promise.all(existingFiles.map(fileName => fileName.includes('.ts') ? (0, fs_extra_1.unlink)((0, path_1.join)(outPath, fileName)) : Promise.resolve()));
-            const addHandler = (segmentPath) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            const existingFiles = yield fs_extra_1.readdir(outPath);
+            yield Promise.all(existingFiles.map(fileName => fileName.includes('.ts') ? fs_extra_1.unlink(path_1.join(outPath, fileName)) : Promise.resolve()));
+            const addHandler = (segmentPath) => tslib_1.__awaiter(this, void 0, void 0, function* () {
                 logger_1.logger.debug('Live add handler of %s.', segmentPath, this.lTags);
-                const playlistId = (0, path_1.basename)(segmentPath).match(playlistIdMatcher)[0];
+                const playlistId = path_1.basename(segmentPath).match(playlistIdMatcher)[0];
                 const segmentsToProcess = this.segmentsToProcessPerPlaylist[playlistId] || [];
                 this.processSegments(outPath, segmentsToProcess);
                 this.segmentsToProcessPerPlaylist[playlistId] = [segmentPath];
@@ -143,11 +143,11 @@ class MuxingSession extends stream_1.EventEmitter {
         });
     }
     isQuotaExceeded(segmentPath) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (this.saveReplay !== true)
                 return false;
             try {
-                const segmentStat = yield (0, fs_extra_1.stat)(segmentPath);
+                const segmentStat = yield fs_extra_1.stat(segmentPath);
                 live_quota_store_1.LiveQuotaStore.Instance.addQuotaTo(this.user.id, this.videoLive.id, segmentStat.size);
                 const canUpload = yield this.isAbleToUploadVideoWithCache(this.user.id);
                 return canUpload !== true;
@@ -158,7 +158,7 @@ class MuxingSession extends stream_1.EventEmitter {
         });
     }
     createFiles() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             for (let i = 0; i < this.allResolutions.length; i++) {
                 const resolution = this.allResolutions[i];
                 const existingFile = yield video_file_1.VideoFileModel.loadByPlaylistId(this.streamingPlaylist.id, resolution);
@@ -178,12 +178,12 @@ class MuxingSession extends stream_1.EventEmitter {
         });
     }
     prepareDirectories() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            const outPath = (0, paths_1.getLiveDirectory)(this.videoLive.Video);
-            yield (0, fs_extra_1.ensureDir)(outPath);
-            const replayDirectory = (0, path_1.join)(outPath, constants_1.VIDEO_LIVE.REPLAY_DIRECTORY);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const outPath = paths_1.getLiveDirectory(this.videoLive.Video);
+            yield fs_extra_1.ensureDir(outPath);
+            const replayDirectory = path_1.join(outPath, constants_1.VIDEO_LIVE.REPLAY_DIRECTORY);
             if (this.videoLive.saveReplay === true) {
-                yield (0, fs_extra_1.ensureDir)(replayDirectory);
+                yield fs_extra_1.ensureDir(replayDirectory);
             }
             return outPath;
         });
@@ -197,7 +197,7 @@ class MuxingSession extends stream_1.EventEmitter {
         return now <= max;
     }
     processSegments(hlsVideoPath, segmentPaths) {
-        (0, bluebird_1.mapSeries)(segmentPaths, (previousSegment) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        bluebird_1.mapSeries(segmentPaths, (previousSegment) => tslib_1.__awaiter(this, void 0, void 0, function* () {
             yield live_segment_sha_store_1.LiveSegmentShaStore.Instance.addSegmentSha(this.videoUUID, previousSegment);
             if (this.saveReplay) {
                 yield this.addSegmentToReplay(hlsVideoPath, previousSegment);
@@ -223,12 +223,12 @@ class MuxingSession extends stream_1.EventEmitter {
         return false;
     }
     addSegmentToReplay(hlsVideoPath, segmentPath) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            const segmentName = (0, path_1.basename)(segmentPath);
-            const dest = (0, path_1.join)(hlsVideoPath, constants_1.VIDEO_LIVE.REPLAY_DIRECTORY, (0, live_utils_1.buildConcatenatedName)(segmentName));
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const segmentName = path_1.basename(segmentPath);
+            const dest = path_1.join(hlsVideoPath, constants_1.VIDEO_LIVE.REPLAY_DIRECTORY, live_utils_1.buildConcatenatedName(segmentName));
             try {
-                const data = yield (0, fs_extra_1.readFile)(segmentPath);
-                yield (0, fs_extra_1.appendFile)(dest, data);
+                const data = yield fs_extra_1.readFile(segmentPath);
+                yield fs_extra_1.appendFile(dest, data);
             }
             catch (err) {
                 logger_1.logger.error('Cannot copy segment %s to replay directory.', segmentPath, Object.assign({ err }, this.lTags));

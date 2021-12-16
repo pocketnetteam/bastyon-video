@@ -6,7 +6,7 @@ const logger_1 = require("@server/helpers/logger");
 const actor_image_1 = require("@server/models/actor/actor-image");
 function updateActorImageInstance(actor, type, imageInfo, t) {
     var _a;
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const oldImageModel = type === 1
             ? actor.Avatar
             : actor.Banner;
@@ -37,7 +37,7 @@ function updateActorImageInstance(actor, type, imageInfo, t) {
 }
 exports.updateActorImageInstance = updateActorImageInstance;
 function deleteActorImageInstance(actor, type, t) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         try {
             if (type === 1) {
                 yield actor.Avatar.destroy({ transaction: t });

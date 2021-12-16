@@ -83,7 +83,7 @@ let AbuseModel = AbuseModel_1 = class AbuseModel extends sequelize_typescript_1.
         return AbuseModel_1.findOne(query);
     }
     static listForAdminApi(parameters) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const { start, count, sort, search, user, serverAccountId, state, videoIs, predefinedReason, searchReportee, searchVideo, filter, searchVideoChannel, searchReporter, id } = parameters;
             const userAccountId = user ? user.Account.id : undefined;
             const predefinedReasonId = predefinedReason ? core_utils_1.abusePredefinedReasonsMap[predefinedReason] : undefined;
@@ -112,7 +112,7 @@ let AbuseModel = AbuseModel_1 = class AbuseModel extends sequelize_typescript_1.
         });
     }
     static listForUserApi(parameters) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const { start, count, sort, search, user, state, id } = parameters;
             const queryOptions = {
                 start,
@@ -239,8 +239,8 @@ let AbuseModel = AbuseModel_1 = class AbuseModel extends sequelize_typescript_1.
         };
     }
     static internalCountForApi(parameters) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            const { query, replacements } = (0, abuse_query_builder_1.buildAbuseListQuery)(parameters, 'count');
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const { query, replacements } = abuse_query_builder_1.buildAbuseListQuery(parameters, 'count');
             const options = {
                 type: sequelize_1.QueryTypes.SELECT,
                 replacements
@@ -252,8 +252,8 @@ let AbuseModel = AbuseModel_1 = class AbuseModel extends sequelize_typescript_1.
         });
     }
     static internalListForApi(parameters) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            const { query, replacements } = (0, abuse_query_builder_1.buildAbuseListQuery)(parameters, 'id');
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const { query, replacements } = abuse_query_builder_1.buildAbuseListQuery(parameters, 'id');
             const options = {
                 type: sequelize_1.QueryTypes.SELECT,
                 replacements
@@ -264,7 +264,7 @@ let AbuseModel = AbuseModel_1 = class AbuseModel extends sequelize_typescript_1.
                 return [];
             return AbuseModel_1.scope(ScopeNames.FOR_API)
                 .findAll({
-                order: (0, utils_1.getSort)(parameters.sort),
+                order: utils_1.getSort(parameters.sort),
                 where: {
                     id: {
                         [sequelize_1.Op.in]: ids
@@ -277,54 +277,54 @@ let AbuseModel = AbuseModel_1 = class AbuseModel extends sequelize_typescript_1.
         return constants_1.ABUSE_STATES[id] || 'Unknown';
     }
     static getPredefinedReasonsStrings(predefinedReasons) {
-        const invertedPredefinedReasons = (0, lodash_1.invert)(core_utils_1.abusePredefinedReasonsMap);
+        const invertedPredefinedReasons = lodash_1.invert(core_utils_1.abusePredefinedReasonsMap);
         return (predefinedReasons || [])
             .map(r => invertedPredefinedReasons[r])
             .filter(v => !!v);
     }
 };
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(false),
-    (0, sequelize_typescript_1.Default)(null),
-    (0, sequelize_typescript_1.Is)('AbuseReason', value => (0, utils_1.throwIfNotValid)(value, abuses_1.isAbuseReasonValid, 'reason')),
-    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.ABUSES.REASON.max)),
-    (0, tslib_1.__metadata)("design:type", String)
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(false),
+    sequelize_typescript_1.Default(null),
+    sequelize_typescript_1.Is('AbuseReason', value => utils_1.throwIfNotValid(value, abuses_1.isAbuseReasonValid, 'reason')),
+    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.ABUSES.REASON.max)),
+    tslib_1.__metadata("design:type", String)
 ], AbuseModel.prototype, "reason", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(false),
-    (0, sequelize_typescript_1.Default)(null),
-    (0, sequelize_typescript_1.Is)('AbuseState', value => (0, utils_1.throwIfNotValid)(value, abuses_1.isAbuseStateValid, 'state')),
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(false),
+    sequelize_typescript_1.Default(null),
+    sequelize_typescript_1.Is('AbuseState', value => utils_1.throwIfNotValid(value, abuses_1.isAbuseStateValid, 'state')),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", Number)
+    tslib_1.__metadata("design:type", Number)
 ], AbuseModel.prototype, "state", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(true),
-    (0, sequelize_typescript_1.Default)(null),
-    (0, sequelize_typescript_1.Is)('AbuseModerationComment', value => (0, utils_1.throwIfNotValid)(value, abuses_1.isAbuseModerationCommentValid, 'moderationComment', true)),
-    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.ABUSES.MODERATION_COMMENT.max)),
-    (0, tslib_1.__metadata)("design:type", String)
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(true),
+    sequelize_typescript_1.Default(null),
+    sequelize_typescript_1.Is('AbuseModerationComment', value => utils_1.throwIfNotValid(value, abuses_1.isAbuseModerationCommentValid, 'moderationComment', true)),
+    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.ABUSES.MODERATION_COMMENT.max)),
+    tslib_1.__metadata("design:type", String)
 ], AbuseModel.prototype, "moderationComment", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(true),
-    (0, sequelize_typescript_1.Default)(null),
-    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.ARRAY(sequelize_typescript_1.DataType.INTEGER)),
-    (0, tslib_1.__metadata)("design:type", Array)
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(true),
+    sequelize_typescript_1.Default(null),
+    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.ARRAY(sequelize_typescript_1.DataType.INTEGER)),
+    tslib_1.__metadata("design:type", Array)
 ], AbuseModel.prototype, "predefinedReasons", void 0);
-(0, tslib_1.__decorate)([
+tslib_1.__decorate([
     sequelize_typescript_1.CreatedAt,
-    (0, tslib_1.__metadata)("design:type", Date)
+    tslib_1.__metadata("design:type", Date)
 ], AbuseModel.prototype, "createdAt", void 0);
-(0, tslib_1.__decorate)([
+tslib_1.__decorate([
     sequelize_typescript_1.UpdatedAt,
-    (0, tslib_1.__metadata)("design:type", Date)
+    tslib_1.__metadata("design:type", Date)
 ], AbuseModel.prototype, "updatedAt", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.ForeignKey)(() => account_1.AccountModel),
+tslib_1.__decorate([
+    sequelize_typescript_1.ForeignKey(() => account_1.AccountModel),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", Number)
+    tslib_1.__metadata("design:type", Number)
 ], AbuseModel.prototype, "reporterAccountId", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.BelongsTo)(() => account_1.AccountModel, {
+tslib_1.__decorate([
+    sequelize_typescript_1.BelongsTo(() => account_1.AccountModel, {
         foreignKey: {
             name: 'reporterAccountId',
             allowNull: true
@@ -332,15 +332,15 @@ let AbuseModel = AbuseModel_1 = class AbuseModel extends sequelize_typescript_1.
         as: 'ReporterAccount',
         onDelete: 'set null'
     }),
-    (0, tslib_1.__metadata)("design:type", account_1.AccountModel)
+    tslib_1.__metadata("design:type", account_1.AccountModel)
 ], AbuseModel.prototype, "ReporterAccount", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.ForeignKey)(() => account_1.AccountModel),
+tslib_1.__decorate([
+    sequelize_typescript_1.ForeignKey(() => account_1.AccountModel),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", Number)
+    tslib_1.__metadata("design:type", Number)
 ], AbuseModel.prototype, "flaggedAccountId", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.BelongsTo)(() => account_1.AccountModel, {
+tslib_1.__decorate([
+    sequelize_typescript_1.BelongsTo(() => account_1.AccountModel, {
         foreignKey: {
             name: 'flaggedAccountId',
             allowNull: true
@@ -348,36 +348,36 @@ let AbuseModel = AbuseModel_1 = class AbuseModel extends sequelize_typescript_1.
         as: 'FlaggedAccount',
         onDelete: 'set null'
     }),
-    (0, tslib_1.__metadata)("design:type", account_1.AccountModel)
+    tslib_1.__metadata("design:type", account_1.AccountModel)
 ], AbuseModel.prototype, "FlaggedAccount", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.HasOne)(() => video_comment_abuse_1.VideoCommentAbuseModel, {
+tslib_1.__decorate([
+    sequelize_typescript_1.HasOne(() => video_comment_abuse_1.VideoCommentAbuseModel, {
         foreignKey: {
             name: 'abuseId',
             allowNull: false
         },
         onDelete: 'cascade'
     }),
-    (0, tslib_1.__metadata)("design:type", video_comment_abuse_1.VideoCommentAbuseModel)
+    tslib_1.__metadata("design:type", video_comment_abuse_1.VideoCommentAbuseModel)
 ], AbuseModel.prototype, "VideoCommentAbuse", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.HasOne)(() => video_abuse_1.VideoAbuseModel, {
+tslib_1.__decorate([
+    sequelize_typescript_1.HasOne(() => video_abuse_1.VideoAbuseModel, {
         foreignKey: {
             name: 'abuseId',
             allowNull: false
         },
         onDelete: 'cascade'
     }),
-    (0, tslib_1.__metadata)("design:type", video_abuse_1.VideoAbuseModel)
+    tslib_1.__metadata("design:type", video_abuse_1.VideoAbuseModel)
 ], AbuseModel.prototype, "VideoAbuse", void 0);
-AbuseModel = AbuseModel_1 = (0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.Scopes)(() => ({
+AbuseModel = AbuseModel_1 = tslib_1.__decorate([
+    sequelize_typescript_1.Scopes(() => ({
         [ScopeNames.FOR_API]: () => {
             return {
                 attributes: {
                     include: [
                         [
-                            (0, sequelize_1.literal)('(' +
+                            sequelize_1.literal('(' +
                                 'SELECT count(*) ' +
                                 'FROM "abuseMessage" ' +
                                 'WHERE "abuseId" = "AbuseModel"."id"' +
@@ -385,7 +385,7 @@ AbuseModel = AbuseModel_1 = (0, tslib_1.__decorate)([
                             'countMessages'
                         ],
                         [
-                            (0, sequelize_1.literal)('(' +
+                            sequelize_1.literal('(' +
                                 'SELECT count(*) ' +
                                 'FROM "videoAbuse" ' +
                                 'WHERE "videoId" = "VideoAbuse"."videoId" AND "videoId" IS NOT NULL' +
@@ -393,7 +393,7 @@ AbuseModel = AbuseModel_1 = (0, tslib_1.__decorate)([
                             'countReportsForVideo'
                         ],
                         [
-                            (0, sequelize_1.literal)('(' +
+                            sequelize_1.literal('(' +
                                 'SELECT t.nth ' +
                                 'FROM ( ' +
                                 'SELECT id, ' +
@@ -405,7 +405,7 @@ AbuseModel = AbuseModel_1 = (0, tslib_1.__decorate)([
                             'nthReportForVideo'
                         ],
                         [
-                            (0, sequelize_1.literal)('(' +
+                            sequelize_1.literal('(' +
                                 'SELECT count("abuse"."id") ' +
                                 'FROM "abuse" ' +
                                 'WHERE "abuse"."reporterAccountId" = "AbuseModel"."reporterAccountId"' +
@@ -413,7 +413,7 @@ AbuseModel = AbuseModel_1 = (0, tslib_1.__decorate)([
                             'countReportsForReporter'
                         ],
                         [
-                            (0, sequelize_1.literal)('(' +
+                            sequelize_1.literal('(' +
                                 'SELECT count("abuse"."id") ' +
                                 'FROM "abuse" ' +
                                 'WHERE "abuse"."flaggedAccountId" = "AbuseModel"."flaggedAccountId"' +
@@ -488,7 +488,7 @@ AbuseModel = AbuseModel_1 = (0, tslib_1.__decorate)([
             };
         }
     })),
-    (0, sequelize_typescript_1.Table)({
+    sequelize_typescript_1.Table({
         tableName: 'abuse',
         indexes: [
             {

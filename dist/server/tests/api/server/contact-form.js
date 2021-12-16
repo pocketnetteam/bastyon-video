@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = (0, tslib_1.__importStar)(require("chai"));
+const chai = tslib_1.__importStar(require("chai"));
 const extra_utils_1 = require("@shared/extra-utils");
 const models_1 = require("@shared/models");
 const expect = chai.expect;
@@ -11,7 +11,7 @@ describe('Test contact form', function () {
     const emails = [];
     let command;
     before(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(30000);
             const port = yield extra_utils_1.MockSmtpServer.Instance.collectEmails(emails);
             const overrideConfig = {
@@ -20,13 +20,13 @@ describe('Test contact form', function () {
                     port
                 }
             };
-            server = yield (0, extra_utils_1.createSingleServer)(1, overrideConfig);
-            yield (0, extra_utils_1.setAccessTokensToServers)([server]);
+            server = yield extra_utils_1.createSingleServer(1, overrideConfig);
+            yield extra_utils_1.setAccessTokensToServers([server]);
             command = server.contactForm;
         });
     });
     it('Should send a contact form', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(10000);
             yield command.send({
                 fromEmail: 'toto@example.com',
@@ -34,7 +34,7 @@ describe('Test contact form', function () {
                 subject: 'my subject',
                 fromName: 'Super toto'
             });
-            yield (0, extra_utils_1.waitJobs)(server);
+            yield extra_utils_1.waitJobs(server);
             expect(emails).to.have.lengthOf(1);
             const email = emails[0];
             expect(email['from'][0]['address']).equal('test-admin@localhost');
@@ -45,9 +45,9 @@ describe('Test contact form', function () {
         });
     });
     it('Should not be able to send another contact form because of the anti spam checker', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(10000);
-            yield (0, extra_utils_1.wait)(1000);
+            yield extra_utils_1.wait(1000);
             yield command.send({
                 fromEmail: 'toto@example.com',
                 body: 'my super message',
@@ -64,8 +64,8 @@ describe('Test contact form', function () {
         });
     });
     it('Should be able to send another contact form after a while', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            yield (0, extra_utils_1.wait)(1000);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield extra_utils_1.wait(1000);
             yield command.send({
                 fromEmail: 'toto@example.com',
                 fromName: 'Super toto',
@@ -75,15 +75,15 @@ describe('Test contact form', function () {
         });
     });
     it('Should not have the manage preferences link in the email', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const email = emails[0];
             expect(email['text']).to.not.contain('Manage your notification preferences');
         });
     });
     after(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             extra_utils_1.MockSmtpServer.Instance.kill();
-            yield (0, extra_utils_1.cleanupTests)([server]);
+            yield extra_utils_1.cleanupTests([server]);
         });
     });
 });

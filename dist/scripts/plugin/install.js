@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const register_ts_paths_1 = require("../../server/helpers/register-ts-paths");
-(0, register_ts_paths_1.registerTSPaths)();
+register_ts_paths_1.registerTSPaths();
 const database_1 = require("../../server/initializers/database");
 const commander_1 = require("commander");
 const plugin_manager_1 = require("../../server/lib/plugins/plugin-manager");
@@ -17,7 +17,7 @@ if (!options.npmName && !options.pluginPath) {
     console.error('You need to specify a plugin name with the desired version, or a plugin path.');
     process.exit(-1);
 }
-if (options.pluginPath && !(0, path_1.isAbsolute)(options.pluginPath)) {
+if (options.pluginPath && !path_1.isAbsolute(options.pluginPath)) {
     console.error('Plugin path should be absolute.');
     process.exit(-1);
 }
@@ -28,8 +28,8 @@ run()
     process.exit(-1);
 });
 function run() {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        yield (0, database_1.initDatabaseModels)(true);
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        yield database_1.initDatabaseModels(true);
         const toInstall = options.npmName || options.pluginPath;
         yield plugin_manager_1.PluginManager.Instance.install(toInstall, options.pluginVersion, !!options.pluginPath);
     });

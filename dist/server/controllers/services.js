@@ -2,15 +2,15 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.servicesRouter = void 0;
 const tslib_1 = require("tslib");
-const express_1 = (0, tslib_1.__importDefault)(require("express"));
+const express_1 = tslib_1.__importDefault(require("express"));
 const constants_1 = require("../initializers/constants");
 const middlewares_1 = require("../middlewares");
 const validators_1 = require("../middlewares/validators");
 const renderer_1 = require("@shared/core-utils/renderer");
 const servicesRouter = express_1.default.Router();
 exports.servicesRouter = servicesRouter;
-servicesRouter.use('/oembed', (0, middlewares_1.asyncMiddleware)(middlewares_1.oembedValidator), generateOEmbed);
-servicesRouter.use('/redirect/accounts/:accountName', (0, middlewares_1.asyncMiddleware)(validators_1.accountNameWithHostGetValidator), redirectToAccountUrl);
+servicesRouter.use('/oembed', middlewares_1.asyncMiddleware(middlewares_1.oembedValidator), generateOEmbed);
+servicesRouter.use('/redirect/accounts/:accountName', middlewares_1.asyncMiddleware(validators_1.accountNameWithHostGetValidator), redirectToAccountUrl);
 function generateOEmbed(req, res) {
     if (res.locals.videoAll)
         return generateVideoOEmbed(req, res);
@@ -46,7 +46,7 @@ function buildOEmbed(options) {
     const maxHeight = parseInt(req.query.maxheight, 10);
     const maxWidth = parseInt(req.query.maxwidth, 10);
     const embedUrl = webserverUrl + embedPath;
-    const embedTitle = (0, renderer_1.escapeHTML)(title);
+    const embedTitle = renderer_1.escapeHTML(title);
     let thumbnailUrl = previewPath
         ? webserverUrl + previewPath
         : undefined;

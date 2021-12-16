@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = (0, tslib_1.__importStar)(require("chai"));
+const chai = tslib_1.__importStar(require("chai"));
 const extra_utils_1 = require("@shared/extra-utils");
 const models_1 = require("@shared/models");
 const expect = chai.expect;
@@ -110,7 +110,7 @@ function checkUpdatedConfig(data) {
     expect(data.signup.limit).to.equal(5);
     expect(data.signup.requiresEmailVerification).to.be.false;
     expect(data.signup.minimumAge).to.equal(10);
-    if ((0, extra_utils_1.parallelTests)() === false) {
+    if (extra_utils_1.parallelTests() === false) {
         expect(data.admin.email).to.equal('superadmin1@example.com');
     }
     expect(data.contactForm.enabled).to.be.false;
@@ -161,20 +161,20 @@ function checkUpdatedConfig(data) {
 describe('Test config', function () {
     let server = null;
     before(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(30000);
-            server = yield (0, extra_utils_1.createSingleServer)(1);
-            yield (0, extra_utils_1.setAccessTokensToServers)([server]);
+            server = yield extra_utils_1.createSingleServer(1);
+            yield extra_utils_1.setAccessTokensToServers([server]);
         });
     });
     it('Should have a correct config on a server with registration enabled', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const data = yield server.config.getConfig();
             expect(data.signup.allowed).to.be.true;
         });
     });
     it('Should have a correct config on a server with registration enabled and a users limit', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(5000);
             yield Promise.all([
                 server.users.register({ username: 'user1' }),
@@ -186,7 +186,7 @@ describe('Test config', function () {
         });
     });
     it('Should have the correct video allowed extensions', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const data = yield server.config.getConfig();
             expect(data.video.file.extensions).to.have.lengthOf(3);
             expect(data.video.file.extensions).to.contain('.mp4');
@@ -198,13 +198,13 @@ describe('Test config', function () {
         });
     });
     it('Should get the customized configuration', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const data = yield server.config.getCustomConfig();
             checkInitialConfig(server, data);
         });
     });
     it('Should update the customized configuration', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const newCustomConfig = {
                 instance: {
                     name: 'PeerTube updated',
@@ -377,7 +377,7 @@ describe('Test config', function () {
         });
     });
     it('Should have the correct updated video allowed extensions', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(10000);
             const data = yield server.config.getConfig();
             expect(data.video.file.extensions).to.have.length.above(4);
@@ -395,16 +395,16 @@ describe('Test config', function () {
         });
     });
     it('Should have the configuration updated after a restart', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(30000);
-            yield (0, extra_utils_1.killallServers)([server]);
+            yield extra_utils_1.killallServers([server]);
             yield server.run();
             const data = yield server.config.getCustomConfig();
             checkUpdatedConfig(data);
         });
     });
     it('Should fetch the about information', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const data = yield server.config.getAbout();
             expect(data.instance.name).to.equal('PeerTube updated');
             expect(data.instance.shortDescription).to.equal('my short description');
@@ -422,7 +422,7 @@ describe('Test config', function () {
         });
     });
     it('Should remove the custom configuration', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(10000);
             yield server.config.deleteCustomConfig();
             const data = yield server.config.getCustomConfig();
@@ -430,17 +430,17 @@ describe('Test config', function () {
         });
     });
     it('Should enable frameguard', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(25000);
             {
-                const res = yield (0, extra_utils_1.makeGetRequest)({
+                const res = yield extra_utils_1.makeGetRequest({
                     url: server.url,
                     path: '/api/v1/config',
                     expectedStatus: 200
                 });
                 expect(res.headers['x-frame-options']).to.exist;
             }
-            yield (0, extra_utils_1.killallServers)([server]);
+            yield extra_utils_1.killallServers([server]);
             const config = {
                 security: {
                     frameguard: { enabled: false }
@@ -448,7 +448,7 @@ describe('Test config', function () {
             };
             yield server.run(config);
             {
-                const res = yield (0, extra_utils_1.makeGetRequest)({
+                const res = yield extra_utils_1.makeGetRequest({
                     url: server.url,
                     path: '/api/v1/config',
                     expectedStatus: 200
@@ -458,8 +458,8 @@ describe('Test config', function () {
         });
     });
     after(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            yield (0, extra_utils_1.cleanupTests)([server]);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield extra_utils_1.cleanupTests([server]);
         });
     });
 });

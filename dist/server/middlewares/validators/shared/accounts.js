@@ -21,7 +21,7 @@ function doesAccountNameWithHostExist(nameWithDomain, res, sendNotFound = true) 
 }
 exports.doesAccountNameWithHostExist = doesAccountNameWithHostExist;
 function doesAccountExist(p, res, sendNotFound) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const account = yield p;
         if (!account) {
             if (sendNotFound === true) {
@@ -38,7 +38,7 @@ function doesAccountExist(p, res, sendNotFound) {
 }
 exports.doesAccountExist = doesAccountExist;
 function doesUserFeedTokenCorrespond(id, token, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const user = yield user_1.UserModel.loadByIdWithChannels(parseInt(id + '', 10));
         if (token !== user.feedToken) {
             res.fail({

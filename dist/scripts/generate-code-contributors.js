@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const register_ts_paths_1 = require("../server/helpers/register-ts-paths");
-(0, register_ts_paths_1.registerTSPaths)();
+register_ts_paths_1.registerTSPaths();
 const extra_utils_1 = require("@shared/extra-utils");
 run()
     .then(() => process.exit(0))
@@ -11,7 +11,7 @@ run()
     process.exit(-1);
 });
 function run() {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const blacklist = getContributorsBlacklist();
         {
             let contributors = yield getGitContributors();
@@ -50,7 +50,7 @@ function run() {
     });
 }
 function getGitContributors() {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const output = yield extra_utils_1.CLICommand.exec(`git --no-pager shortlog -sn < /dev/tty | sed 's/^\\s\\+[0-9]\\+\\s\\+//g'`);
         return output.split('\n')
             .filter(l => !!l)

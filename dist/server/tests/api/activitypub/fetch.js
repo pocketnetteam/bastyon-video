@@ -2,16 +2,16 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = (0, tslib_1.__importStar)(require("chai"));
+const chai = tslib_1.__importStar(require("chai"));
 const extra_utils_1 = require("@shared/extra-utils");
 const expect = chai.expect;
 describe('Test ActivityPub fetcher', function () {
     let servers;
     before(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(60000);
-            servers = yield (0, extra_utils_1.createMultipleServers)(3);
-            yield (0, extra_utils_1.setAccessTokensToServers)(servers);
+            servers = yield extra_utils_1.createMultipleServers(3);
+            yield extra_utils_1.setAccessTokensToServers(servers);
             const user = { username: 'user1', password: 'password' };
             for (const server of servers) {
                 yield server.users.create({ username: user.username, password: user.password });
@@ -32,10 +32,10 @@ describe('Test ActivityPub fetcher', function () {
         });
     });
     it('Should add only the video with a valid actor URL', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(60000);
-            yield (0, extra_utils_1.doubleFollow)(servers[0], servers[1]);
-            yield (0, extra_utils_1.waitJobs)(servers);
+            yield extra_utils_1.doubleFollow(servers[0], servers[1]);
+            yield extra_utils_1.waitJobs(servers);
             {
                 const { total, data } = yield servers[0].videos.list({ sort: 'createdAt' });
                 expect(total).to.equal(3);
@@ -51,9 +51,9 @@ describe('Test ActivityPub fetcher', function () {
         });
     });
     after(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(20000);
-            yield (0, extra_utils_1.cleanupTests)(servers);
+            yield extra_utils_1.cleanupTests(servers);
         });
     });
 });

@@ -2,18 +2,18 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const magnet_uri_1 = (0, tslib_1.__importDefault)(require("magnet-uri"));
-const webtorrent_1 = (0, tslib_1.__importDefault)(require("webtorrent"));
+const magnet_uri_1 = tslib_1.__importDefault(require("magnet-uri"));
+const webtorrent_1 = tslib_1.__importDefault(require("webtorrent"));
 const extra_utils_1 = require("@shared/extra-utils");
 describe('Test tracker', function () {
     let server;
     let badMagnet;
     let goodMagnet;
     before(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(60000);
-            server = yield (0, extra_utils_1.createSingleServer)(1);
-            yield (0, extra_utils_1.setAccessTokensToServers)([server]);
+            server = yield extra_utils_1.createSingleServer(1);
+            yield extra_utils_1.setAccessTokensToServers([server]);
             {
                 const { uuid } = yield server.videos.upload();
                 const video = yield server.videos.get({ id: uuid });
@@ -39,7 +39,7 @@ describe('Test tracker', function () {
     it('Should disable the tracker', function (done) {
         this.timeout(20000);
         const errCb = () => done(new Error('Tracker is enabled'));
-        (0, extra_utils_1.killallServers)([server])
+        extra_utils_1.killallServers([server])
             .then(() => server.run({ tracker: { enabled: false } }))
             .then(() => {
             const webtorrent = new webtorrent_1.default();
@@ -57,7 +57,7 @@ describe('Test tracker', function () {
     });
     it('Should return an error when adding an incorrect infohash', function (done) {
         this.timeout(20000);
-        (0, extra_utils_1.killallServers)([server])
+        extra_utils_1.killallServers([server])
             .then(() => server.run())
             .then(() => {
             const webtorrent = new webtorrent_1.default();
@@ -82,8 +82,8 @@ describe('Test tracker', function () {
         });
     });
     after(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            yield (0, extra_utils_1.cleanupTests)([server]);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield extra_utils_1.cleanupTests([server]);
         });
     });
 });

@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const register_ts_paths_1 = require("../server/helpers/register-ts-paths");
-(0, register_ts_paths_1.registerTSPaths)();
-const autocannon_1 = (0, tslib_1.__importStar)(require("autocannon"));
+register_ts_paths_1.registerTSPaths();
+const autocannon_1 = tslib_1.__importStar(require("autocannon"));
 const fs_extra_1 = require("fs-extra");
 const extra_utils_1 = require("@shared/extra-utils");
 let server;
@@ -14,7 +14,7 @@ run()
     .catch(err => console.error(err))
     .finally(() => {
     if (server)
-        return (0, extra_utils_1.killallServers)([server]);
+        return extra_utils_1.killallServers([server]);
 });
 function buildAuthorizationHeader() {
     return {
@@ -27,7 +27,7 @@ function buildAPHeader() {
     };
 }
 function run() {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         console.log('Preparing server...');
         yield prepare();
         const tests = [
@@ -140,16 +140,16 @@ function run() {
             const testResult = yield runBenchmark(test);
             Object.assign(testResult, { title: test.title, path: test.path });
             finalResult.push(testResult);
-            console.log((0, autocannon_1.printResult)(testResult));
+            console.log(autocannon_1.printResult(testResult));
         }
         if (outfile)
-            yield (0, fs_extra_1.writeJson)(outfile, finalResult);
+            yield fs_extra_1.writeJson(outfile, finalResult);
     });
 }
 function runBenchmark(options) {
     const { path, expecter, headers } = options;
     return new Promise((res, rej) => {
-        (0, autocannon_1.default)({
+        autocannon_1.default({
             url: server.url + path,
             connections: 20,
             headers,
@@ -173,15 +173,15 @@ function runBenchmark(options) {
     });
 }
 function prepare() {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        server = yield (0, extra_utils_1.createSingleServer)(1, {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        server = yield extra_utils_1.createSingleServer(1, {
             rates_limit: {
                 api: {
                     max: 5000000
                 }
             }
         });
-        yield (0, extra_utils_1.setAccessTokensToServers)([server]);
+        yield extra_utils_1.setAccessTokensToServers([server]);
         const attributes = {
             name: 'my super video',
             category: 2,

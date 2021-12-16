@@ -8,7 +8,7 @@ const models_1 = require("@shared/models");
 const shared_1 = require("../shared");
 class PluginsCommand extends shared_1.AbstractCommand {
     static getPluginTestPath(suffix = '') {
-        return (0, path_1.join)((0, core_utils_1.root)(), 'server', 'tests', 'fixtures', 'peertube-plugin-test' + suffix);
+        return path_1.join(core_utils_1.root(), 'server', 'tests', 'fixtures', 'peertube-plugin-test' + suffix);
     }
     list(options) {
         const { start, count, sort, pluginType, uninstalled } = options;
@@ -85,14 +85,14 @@ class PluginsCommand extends shared_1.AbstractCommand {
     }
     updatePackageJSON(npmName, json) {
         const path = this.getPackageJSONPath(npmName);
-        return (0, fs_extra_1.writeJSON)(path, json);
+        return fs_extra_1.writeJSON(path, json);
     }
     getPackageJSON(npmName) {
         const path = this.getPackageJSONPath(npmName);
-        return (0, fs_extra_1.readJSON)(path);
+        return fs_extra_1.readJSON(path);
     }
     getPackageJSONPath(npmName) {
-        return this.server.servers.buildDirectory((0, path_1.join)('plugins', 'node_modules', npmName, 'package.json'));
+        return this.server.servers.buildDirectory(path_1.join('plugins', 'node_modules', npmName, 'package.json'));
     }
 }
 exports.PluginsCommand = PluginsCommand;

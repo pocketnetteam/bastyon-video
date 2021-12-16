@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sanitizeAndCheckVideoCommentObject = void 0;
 const tslib_1 = require("tslib");
-const validator_1 = (0, tslib_1.__importDefault)(require("validator"));
+const validator_1 = tslib_1.__importDefault(require("validator"));
 const constants_1 = require("../../../initializers/constants");
 const misc_1 = require("../misc");
 const misc_2 = require("./misc");
@@ -13,23 +13,23 @@ function sanitizeAndCheckVideoCommentObject(comment) {
         return false;
     normalizeComment(comment);
     if (comment.type === 'Tombstone') {
-        return (0, misc_2.isActivityPubUrlValid)(comment.id) &&
-            (0, misc_1.isDateValid)(comment.published) &&
-            (0, misc_1.isDateValid)(comment.deleted) &&
-            (0, misc_2.isActivityPubUrlValid)(comment.url);
+        return misc_2.isActivityPubUrlValid(comment.id) &&
+            misc_1.isDateValid(comment.published) &&
+            misc_1.isDateValid(comment.deleted) &&
+            misc_2.isActivityPubUrlValid(comment.url);
     }
-    return (0, misc_2.isActivityPubUrlValid)(comment.id) &&
+    return misc_2.isActivityPubUrlValid(comment.id) &&
         isCommentContentValid(comment.content) &&
-        (0, misc_2.isActivityPubUrlValid)(comment.inReplyTo) &&
-        (0, misc_1.isDateValid)(comment.published) &&
-        (0, misc_2.isActivityPubUrlValid)(comment.url) &&
-        (0, misc_1.isArray)(comment.to) &&
+        misc_2.isActivityPubUrlValid(comment.inReplyTo) &&
+        misc_1.isDateValid(comment.published) &&
+        misc_2.isActivityPubUrlValid(comment.url) &&
+        misc_1.isArray(comment.to) &&
         (comment.to.indexOf(constants_1.ACTIVITY_PUB.PUBLIC) !== -1 ||
             comment.cc.indexOf(constants_1.ACTIVITY_PUB.PUBLIC) !== -1);
 }
 exports.sanitizeAndCheckVideoCommentObject = sanitizeAndCheckVideoCommentObject;
 function isCommentContentValid(content) {
-    return (0, misc_1.exists)(content) && validator_1.default.isLength('' + content, { min: 1 });
+    return misc_1.exists(content) && validator_1.default.isLength('' + content, { min: 1 });
 }
 function normalizeComment(comment) {
     if (!comment)

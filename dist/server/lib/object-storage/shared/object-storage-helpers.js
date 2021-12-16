@@ -14,40 +14,40 @@ const urls_1 = require("../urls");
 const client_1 = require("./client");
 const logger_2 = require("./logger");
 function storeObject(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { inputPath, objectStorageKey, bucketInfo } = options;
-        logger_1.logger.debug('Uploading file %s to %s%s in bucket %s', inputPath, bucketInfo.PREFIX, objectStorageKey, bucketInfo.BUCKET_NAME, (0, logger_2.lTags)());
-        const stats = yield (0, fs_extra_1.stat)(inputPath);
+        logger_1.logger.debug('Uploading file %s to %s%s in bucket %s', inputPath, bucketInfo.PREFIX, objectStorageKey, bucketInfo.BUCKET_NAME, logger_2.lTags());
+        const stats = yield fs_extra_1.stat(inputPath);
         if (stats.size > config_1.CONFIG.OBJECT_STORAGE.MAX_UPLOAD_PART) {
             return multiPartUpload({ inputPath, objectStorageKey, bucketInfo });
         }
-        const fileStream = (0, fs_extra_1.createReadStream)(inputPath);
+        const fileStream = fs_extra_1.createReadStream(inputPath);
         return objectStoragePut({ objectStorageKey, content: fileStream, bucketInfo });
     });
 }
 exports.storeObject = storeObject;
 function removeObject(filename, bucketInfo) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const command = new client_s3_1.DeleteObjectCommand({
             Bucket: bucketInfo.BUCKET_NAME,
             Key: buildKey(filename, bucketInfo)
         });
-        return (0, client_1.getClient)().send(command);
+        return client_1.getClient().send(command);
     });
 }
 exports.removeObject = removeObject;
 function removePrefix(prefix, bucketInfo) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        const s3Client = (0, client_1.getClient)();
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const s3Client = client_1.getClient();
         const commandPrefix = bucketInfo.PREFIX + prefix;
         const listCommand = new client_s3_1.ListObjectsV2Command({
             Bucket: bucketInfo.BUCKET_NAME,
             Prefix: commandPrefix
         });
         const listedObjects = yield s3Client.send(listCommand);
-        if ((0, misc_1.isArray)(listedObjects.Contents) !== true) {
+        if (misc_1.isArray(listedObjects.Contents) !== true) {
             const message = `Cannot remove ${commandPrefix} prefix in bucket ${bucketInfo.BUCKET_NAME}: no files listed.`;
-            logger_1.logger.error(message, Object.assign({ response: listedObjects }, (0, logger_2.lTags)()));
+            logger_1.logger.error(message, Object.assign({ response: listedObjects }, logger_2.lTags()));
             throw new Error(message);
         }
         for (const object of listedObjects.Contents) {
@@ -63,16 +63,16 @@ function removePrefix(prefix, bucketInfo) {
 }
 exports.removePrefix = removePrefix;
 function makeAvailable(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { key, destination, bucketInfo } = options;
-        yield (0, fs_extra_1.ensureDir)((0, path_1.dirname)(options.destination));
+        yield fs_extra_1.ensureDir(path_1.dirname(options.destination));
         const command = new client_s3_1.GetObjectCommand({
             Bucket: bucketInfo.BUCKET_NAME,
             Key: buildKey(key, bucketInfo)
         });
-        const response = yield (0, client_1.getClient)().send(command);
-        const file = (0, fs_extra_1.createWriteStream)(destination);
-        yield (0, core_utils_1.pipelinePromise)(response.Body, file);
+        const response = yield client_1.getClient().send(command);
+        const file = fs_extra_1.createWriteStream(destination);
+        yield core_utils_1.pipelinePromise(response.Body, file);
         file.close();
     });
 }
@@ -82,7 +82,7 @@ function buildKey(key, bucketInfo) {
 }
 exports.buildKey = buildKey;
 function objectStoragePut(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { objectStorageKey, content, bucketInfo } = options;
         const command = new client_s3_1.PutObjectCommand({
             Bucket: bucketInfo.BUCKET_NAME,
@@ -90,30 +90,30 @@ function objectStoragePut(options) {
             Body: content,
             ACL: 'public-read'
         });
-        yield (0, client_1.getClient)().send(command);
-        return (0, urls_1.getPrivateUrl)(bucketInfo, objectStorageKey);
+        yield client_1.getClient().send(command);
+        return urls_1.getPrivateUrl(bucketInfo, objectStorageKey);
     });
 }
 function multiPartUpload(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { objectStorageKey, inputPath, bucketInfo } = options;
         const key = buildKey(objectStorageKey, bucketInfo);
-        const s3Client = (0, client_1.getClient)();
-        const statResult = yield (0, fs_extra_1.stat)(inputPath);
+        const s3Client = client_1.getClient();
+        const statResult = yield fs_extra_1.stat(inputPath);
         const createMultipartCommand = new client_s3_1.CreateMultipartUploadCommand({
             Bucket: bucketInfo.BUCKET_NAME,
             Key: key,
             ACL: 'public-read'
         });
         const createResponse = yield s3Client.send(createMultipartCommand);
-        const fd = yield (0, fs_extra_1.open)(inputPath, 'r');
+        const fd = yield fs_extra_1.open(inputPath, 'r');
         let partNumber = 1;
         const parts = [];
         const partSize = config_1.CONFIG.OBJECT_STORAGE.MAX_UPLOAD_PART;
         for (let start = 0; start < statResult.size; start += partSize) {
-            logger_1.logger.debug('Uploading part %d of file to %s%s in bucket %s', partNumber, bucketInfo.PREFIX, objectStorageKey, bucketInfo.BUCKET_NAME, (0, logger_2.lTags)());
-            const stream = (0, fs_extra_1.createReadStream)(inputPath, { fd, autoClose: false, start, end: (start + partSize) - 1 });
-            stream.byteLength = (0, lodash_1.min)([statResult.size - start, partSize]);
+            logger_1.logger.debug('Uploading part %d of file to %s%s in bucket %s', partNumber, bucketInfo.PREFIX, objectStorageKey, bucketInfo.BUCKET_NAME, logger_2.lTags());
+            const stream = fs_extra_1.createReadStream(inputPath, { fd, autoClose: false, start, end: (start + partSize) - 1 });
+            stream.byteLength = lodash_1.min([statResult.size - start, partSize]);
             const uploadPartCommand = new client_s3_1.UploadPartCommand({
                 Bucket: bucketInfo.BUCKET_NAME,
                 Key: key,
@@ -125,7 +125,7 @@ function multiPartUpload(options) {
             parts.push({ ETag: uploadResponse.ETag, PartNumber: partNumber });
             partNumber += 1;
         }
-        yield (0, fs_extra_1.close)(fd);
+        yield fs_extra_1.close(fd);
         const completeUploadCommand = new client_s3_1.CompleteMultipartUploadCommand({
             Bucket: bucketInfo.BUCKET_NAME,
             Key: key,
@@ -133,7 +133,7 @@ function multiPartUpload(options) {
             MultipartUpload: { Parts: parts }
         });
         yield s3Client.send(completeUploadCommand);
-        logger_1.logger.debug('Completed %s%s in bucket %s in %d parts', bucketInfo.PREFIX, objectStorageKey, bucketInfo.BUCKET_NAME, partNumber - 1, (0, logger_2.lTags)());
-        return (0, urls_1.getPrivateUrl)(bucketInfo, objectStorageKey);
+        logger_1.logger.debug('Completed %s%s in bucket %s in %d parts', bucketInfo.PREFIX, objectStorageKey, bucketInfo.BUCKET_NAME, partNumber - 1, logger_2.lTags());
+        return urls_1.getPrivateUrl(bucketInfo, objectStorageKey);
     });
 }

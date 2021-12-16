@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = (0, tslib_1.__importStar)(require("chai"));
+const chai = tslib_1.__importStar(require("chai"));
 const extra_utils_1 = require("@shared/extra-utils");
 const expect = chai.expect;
 describe('Test bulk actions', function () {
@@ -13,10 +13,10 @@ describe('Test bulk actions', function () {
     let user3Token;
     let bulkCommand;
     before(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(30000);
-            servers = yield (0, extra_utils_1.createMultipleServers)(2);
-            yield (0, extra_utils_1.setAccessTokensToServers)(servers);
+            servers = yield extra_utils_1.createMultipleServers(2);
+            yield extra_utils_1.setAccessTokensToServers(servers);
             {
                 const user = { username: 'user1', password: 'password' };
                 yield servers[0].users.create({ username: user.username, password: user.password });
@@ -32,13 +32,13 @@ describe('Test bulk actions', function () {
                 yield servers[1].users.create({ username: user.username, password: user.password });
                 user3Token = yield servers[1].login.getAccessToken(user);
             }
-            yield (0, extra_utils_1.doubleFollow)(servers[0], servers[1]);
+            yield extra_utils_1.doubleFollow(servers[0], servers[1]);
             bulkCommand = new extra_utils_1.BulkCommand(servers[0]);
         });
     });
     describe('Bulk remove comments', function () {
         function checkInstanceCommentsRemoved() {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 {
                     const { data } = yield servers[0].videos.list();
                     for (const video of data) {
@@ -63,13 +63,13 @@ describe('Test bulk actions', function () {
             });
         }
         before(function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(120000);
                 yield servers[0].videos.upload({ attributes: { name: 'video 1 server 1' } });
                 yield servers[0].videos.upload({ attributes: { name: 'video 2 server 1' } });
                 yield servers[0].videos.upload({ token: user1Token, attributes: { name: 'video 3 server 1' } });
                 yield servers[1].videos.upload({ attributes: { name: 'video 1 server 2' } });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 {
                     const { data } = yield servers[0].videos.list();
                     for (const video of data) {
@@ -86,11 +86,11 @@ describe('Test bulk actions', function () {
                         commentsUser3.push({ videoId: video.id, commentId: comment.id });
                     }
                 }
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
             });
         });
         it('Should delete comments of an account on my videos', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(60000);
                 yield bulkCommand.removeCommentsOf({
                     token: user1Token,
@@ -99,7 +99,7 @@ describe('Test bulk actions', function () {
                         scope: 'my-videos'
                     }
                 });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 for (const server of servers) {
                     const { data } = yield server.videos.list();
                     for (const video of data) {
@@ -114,7 +114,7 @@ describe('Test bulk actions', function () {
             });
         });
         it('Should delete comments of an account on the instance', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(60000);
                 yield bulkCommand.removeCommentsOf({
                     attributes: {
@@ -122,12 +122,12 @@ describe('Test bulk actions', function () {
                         scope: 'instance'
                     }
                 });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 yield checkInstanceCommentsRemoved();
             });
         });
         it('Should not re create the comment on video update', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(60000);
                 for (const obj of commentsUser3) {
                     yield servers[1].comments.addReply({
@@ -137,14 +137,14 @@ describe('Test bulk actions', function () {
                         text: 'comment by user 3 bis'
                     });
                 }
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 yield checkInstanceCommentsRemoved();
             });
         });
     });
     after(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            yield (0, extra_utils_1.cleanupTests)(servers);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield extra_utils_1.cleanupTests(servers);
         });
     });
 });

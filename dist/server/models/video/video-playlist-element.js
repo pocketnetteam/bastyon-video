@@ -5,7 +5,7 @@ exports.VideoPlaylistElementModel = void 0;
 const tslib_1 = require("tslib");
 const sequelize_1 = require("sequelize");
 const sequelize_typescript_1 = require("sequelize-typescript");
-const validator_1 = (0, tslib_1.__importDefault)(require("validator"));
+const validator_1 = tslib_1.__importDefault(require("validator"));
 const misc_1 = require("../../helpers/custom-validators/activitypub/misc");
 const constants_1 = require("../../initializers/constants");
 const utils_1 = require("../utils");
@@ -39,7 +39,7 @@ let VideoPlaylistElementModel = VideoPlaylistElementModel_1 = class VideoPlaylis
         const findQuery = {
             offset: options.start,
             limit: options.count,
-            order: (0, utils_1.getSort)('position'),
+            order: utils_1.getSort('position'),
             where: {
                 videoPlaylistId: options.videoPlaylistId
             },
@@ -97,7 +97,7 @@ let VideoPlaylistElementModel = VideoPlaylistElementModel_1 = class VideoPlaylis
             attributes: ['url'],
             offset: start,
             limit: count,
-            order: (0, utils_1.getSort)('position'),
+            order: utils_1.getSort('position'),
             where: {
                 videoPlaylistId
             },
@@ -111,7 +111,7 @@ let VideoPlaylistElementModel = VideoPlaylistElementModel_1 = class VideoPlaylis
     }
     static loadFirstElementWithVideoThumbnail(videoPlaylistId) {
         const query = {
-            order: (0, utils_1.getSort)('position'),
+            order: utils_1.getSort('position'),
             where: {
                 videoPlaylistId
             },
@@ -209,72 +209,72 @@ let VideoPlaylistElementModel = VideoPlaylistElementModel_1 = class VideoPlaylis
         return base;
     }
 };
-(0, tslib_1.__decorate)([
+tslib_1.__decorate([
     sequelize_typescript_1.CreatedAt,
-    (0, tslib_1.__metadata)("design:type", Date)
+    tslib_1.__metadata("design:type", Date)
 ], VideoPlaylistElementModel.prototype, "createdAt", void 0);
-(0, tslib_1.__decorate)([
+tslib_1.__decorate([
     sequelize_typescript_1.UpdatedAt,
-    (0, tslib_1.__metadata)("design:type", Date)
+    tslib_1.__metadata("design:type", Date)
 ], VideoPlaylistElementModel.prototype, "updatedAt", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(true),
-    (0, sequelize_typescript_1.Is)('VideoPlaylistUrl', value => (0, utils_1.throwIfNotValid)(value, misc_1.isActivityPubUrlValid, 'url', true)),
-    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.VIDEO_PLAYLISTS.URL.max)),
-    (0, tslib_1.__metadata)("design:type", String)
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(true),
+    sequelize_typescript_1.Is('VideoPlaylistUrl', value => utils_1.throwIfNotValid(value, misc_1.isActivityPubUrlValid, 'url', true)),
+    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.VIDEO_PLAYLISTS.URL.max)),
+    tslib_1.__metadata("design:type", String)
 ], VideoPlaylistElementModel.prototype, "url", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(false),
-    (0, sequelize_typescript_1.Default)(1),
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(false),
+    sequelize_typescript_1.Default(1),
     sequelize_typescript_1.IsInt,
-    (0, sequelize_typescript_1.Min)(1),
+    sequelize_typescript_1.Min(1),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", Number)
+    tslib_1.__metadata("design:type", Number)
 ], VideoPlaylistElementModel.prototype, "position", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(true),
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(true),
     sequelize_typescript_1.IsInt,
-    (0, sequelize_typescript_1.Min)(0),
+    sequelize_typescript_1.Min(0),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", Number)
+    tslib_1.__metadata("design:type", Number)
 ], VideoPlaylistElementModel.prototype, "startTimestamp", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(true),
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(true),
     sequelize_typescript_1.IsInt,
-    (0, sequelize_typescript_1.Min)(0),
+    sequelize_typescript_1.Min(0),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", Number)
+    tslib_1.__metadata("design:type", Number)
 ], VideoPlaylistElementModel.prototype, "stopTimestamp", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.ForeignKey)(() => video_playlist_1.VideoPlaylistModel),
+tslib_1.__decorate([
+    sequelize_typescript_1.ForeignKey(() => video_playlist_1.VideoPlaylistModel),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", Number)
+    tslib_1.__metadata("design:type", Number)
 ], VideoPlaylistElementModel.prototype, "videoPlaylistId", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.BelongsTo)(() => video_playlist_1.VideoPlaylistModel, {
+tslib_1.__decorate([
+    sequelize_typescript_1.BelongsTo(() => video_playlist_1.VideoPlaylistModel, {
         foreignKey: {
             allowNull: false
         },
         onDelete: 'CASCADE'
     }),
-    (0, tslib_1.__metadata)("design:type", video_playlist_1.VideoPlaylistModel)
+    tslib_1.__metadata("design:type", video_playlist_1.VideoPlaylistModel)
 ], VideoPlaylistElementModel.prototype, "VideoPlaylist", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.ForeignKey)(() => video_1.VideoModel),
+tslib_1.__decorate([
+    sequelize_typescript_1.ForeignKey(() => video_1.VideoModel),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", Number)
+    tslib_1.__metadata("design:type", Number)
 ], VideoPlaylistElementModel.prototype, "videoId", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.BelongsTo)(() => video_1.VideoModel, {
+tslib_1.__decorate([
+    sequelize_typescript_1.BelongsTo(() => video_1.VideoModel, {
         foreignKey: {
             allowNull: true
         },
         onDelete: 'set null'
     }),
-    (0, tslib_1.__metadata)("design:type", video_1.VideoModel)
+    tslib_1.__metadata("design:type", video_1.VideoModel)
 ], VideoPlaylistElementModel.prototype, "Video", void 0);
-VideoPlaylistElementModel = VideoPlaylistElementModel_1 = (0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.Table)({
+VideoPlaylistElementModel = VideoPlaylistElementModel_1 = tslib_1.__decorate([
+    sequelize_typescript_1.Table({
         tableName: 'videoPlaylistElement',
         indexes: [
             {

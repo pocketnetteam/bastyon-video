@@ -8,9 +8,9 @@ const url_1 = require("./activitypub/url");
 const videos_1 = require("./activitypub/videos");
 const local_actor_1 = require("./local-actor");
 function createLocalVideoChannel(videoChannelInfo, account, t) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        const url = (0, url_1.getLocalVideoChannelActivityPubUrl)(videoChannelInfo.name);
-        const actorInstance = (0, local_actor_1.buildActorInstance)('Group', url, videoChannelInfo.name);
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const url = url_1.getLocalVideoChannelActivityPubUrl(videoChannelInfo.name);
+        const actorInstance = local_actor_1.buildActorInstance('Group', url, videoChannelInfo.name);
         const actorInstanceCreated = yield actorInstance.save({ transaction: t });
         const videoChannelData = {
             name: videoChannelInfo.displayName,
@@ -28,11 +28,11 @@ function createLocalVideoChannel(videoChannelInfo, account, t) {
 }
 exports.createLocalVideoChannel = createLocalVideoChannel;
 function federateAllVideosOfChannel(videoChannel) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const videoIds = yield video_1.VideoModel.getAllIdsFromChannel(videoChannel);
         for (const videoId of videoIds) {
             const video = yield video_1.VideoModel.loadAndPopulateAccountAndServerAndTags(videoId);
-            yield (0, videos_1.federateVideoIfNeeded)(video, false);
+            yield videos_1.federateVideoIfNeeded(video, false);
         }
     });
 }

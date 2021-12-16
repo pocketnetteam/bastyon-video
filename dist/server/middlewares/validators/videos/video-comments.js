@@ -11,65 +11,65 @@ const moderation_1 = require("../../../lib/moderation");
 const hooks_1 = require("../../../lib/plugins/hooks");
 const shared_1 = require("../shared");
 const listVideoCommentsValidator = [
-    (0, express_validator_1.query)('isLocal')
+    express_validator_1.query('isLocal')
         .optional()
         .customSanitizer(misc_1.toBooleanOrNull)
         .custom(misc_1.isBooleanValid)
         .withMessage('Should have a valid is local boolean'),
-    (0, express_validator_1.query)('search')
+    express_validator_1.query('search')
         .optional()
         .custom(misc_1.exists).withMessage('Should have a valid search'),
-    (0, express_validator_1.query)('searchAccount')
+    express_validator_1.query('searchAccount')
         .optional()
         .custom(misc_1.exists).withMessage('Should have a valid account search'),
-    (0, express_validator_1.query)('searchVideo')
+    express_validator_1.query('searchVideo')
         .optional()
         .custom(misc_1.exists).withMessage('Should have a valid video search'),
     (req, res, next) => {
         logger_1.logger.debug('Checking listVideoCommentsValidator parameters.', { parameters: req.query });
-        if ((0, shared_1.areValidationErrors)(req, res))
+        if (shared_1.areValidationErrors(req, res))
             return;
         return next();
     }
 ];
 exports.listVideoCommentsValidator = listVideoCommentsValidator;
 const listVideoCommentThreadsValidator = [
-    (0, shared_1.isValidVideoIdParam)('videoId'),
-    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
+    shared_1.isValidVideoIdParam('videoId'),
+    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking listVideoCommentThreads parameters.', { parameters: req.params });
-        if ((0, shared_1.areValidationErrors)(req, res))
+        if (shared_1.areValidationErrors(req, res))
             return;
-        if (!(yield (0, shared_1.doesVideoExist)(req.params.videoId, res, 'only-video')))
+        if (!(yield shared_1.doesVideoExist(req.params.videoId, res, 'only-video')))
             return;
         return next();
     })
 ];
 exports.listVideoCommentThreadsValidator = listVideoCommentThreadsValidator;
 const listVideoThreadCommentsValidator = [
-    (0, shared_1.isValidVideoIdParam)('videoId'),
-    (0, express_validator_1.param)('threadId')
+    shared_1.isValidVideoIdParam('videoId'),
+    express_validator_1.param('threadId')
         .custom(misc_1.isIdValid).not().isEmpty().withMessage('Should have a valid threadId'),
-    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
+    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking listVideoThreadComments parameters.', { parameters: req.params });
-        if ((0, shared_1.areValidationErrors)(req, res))
+        if (shared_1.areValidationErrors(req, res))
             return;
-        if (!(yield (0, shared_1.doesVideoExist)(req.params.videoId, res, 'only-video')))
+        if (!(yield shared_1.doesVideoExist(req.params.videoId, res, 'only-video')))
             return;
-        if (!(yield (0, shared_1.doesVideoCommentThreadExist)(req.params.threadId, res.locals.onlyVideo, res)))
+        if (!(yield shared_1.doesVideoCommentThreadExist(req.params.threadId, res.locals.onlyVideo, res)))
             return;
         return next();
     })
 ];
 exports.listVideoThreadCommentsValidator = listVideoThreadCommentsValidator;
 const addVideoCommentThreadValidator = [
-    (0, shared_1.isValidVideoIdParam)('videoId'),
-    (0, express_validator_1.body)('text')
+    shared_1.isValidVideoIdParam('videoId'),
+    express_validator_1.body('text')
         .custom(video_comments_1.isValidVideoCommentText).not().isEmpty().withMessage('Should have a valid comment text'),
-    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
+    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking addVideoCommentThread parameters.', { parameters: req.params, body: req.body });
-        if ((0, shared_1.areValidationErrors)(req, res))
+        if (shared_1.areValidationErrors(req, res))
             return;
-        if (!(yield (0, shared_1.doesVideoExist)(req.params.videoId, res)))
+        if (!(yield shared_1.doesVideoExist(req.params.videoId, res)))
             return;
         if (!isVideoCommentsEnabled(res.locals.videoAll, res))
             return;
@@ -80,18 +80,18 @@ const addVideoCommentThreadValidator = [
 ];
 exports.addVideoCommentThreadValidator = addVideoCommentThreadValidator;
 const addVideoCommentReplyValidator = [
-    (0, shared_1.isValidVideoIdParam)('videoId'),
-    (0, express_validator_1.param)('commentId').custom(misc_1.isIdValid).not().isEmpty().withMessage('Should have a valid commentId'),
-    (0, express_validator_1.body)('text').custom(video_comments_1.isValidVideoCommentText).not().isEmpty().withMessage('Should have a valid comment text'),
-    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
+    shared_1.isValidVideoIdParam('videoId'),
+    express_validator_1.param('commentId').custom(misc_1.isIdValid).not().isEmpty().withMessage('Should have a valid commentId'),
+    express_validator_1.body('text').custom(video_comments_1.isValidVideoCommentText).not().isEmpty().withMessage('Should have a valid comment text'),
+    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking addVideoCommentReply parameters.', { parameters: req.params, body: req.body });
-        if ((0, shared_1.areValidationErrors)(req, res))
+        if (shared_1.areValidationErrors(req, res))
             return;
-        if (!(yield (0, shared_1.doesVideoExist)(req.params.videoId, res)))
+        if (!(yield shared_1.doesVideoExist(req.params.videoId, res)))
             return;
         if (!isVideoCommentsEnabled(res.locals.videoAll, res))
             return;
-        if (!(yield (0, shared_1.doesVideoCommentExist)(req.params.commentId, res.locals.videoAll, res)))
+        if (!(yield shared_1.doesVideoCommentExist(req.params.commentId, res.locals.videoAll, res)))
             return;
         if (!(yield isVideoCommentAccepted(req, res, res.locals.videoAll, true)))
             return;
@@ -100,31 +100,31 @@ const addVideoCommentReplyValidator = [
 ];
 exports.addVideoCommentReplyValidator = addVideoCommentReplyValidator;
 const videoCommentGetValidator = [
-    (0, shared_1.isValidVideoIdParam)('videoId'),
-    (0, express_validator_1.param)('commentId')
+    shared_1.isValidVideoIdParam('videoId'),
+    express_validator_1.param('commentId')
         .custom(misc_1.isIdValid).not().isEmpty().withMessage('Should have a valid commentId'),
-    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
+    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking videoCommentGetValidator parameters.', { parameters: req.params });
-        if ((0, shared_1.areValidationErrors)(req, res))
+        if (shared_1.areValidationErrors(req, res))
             return;
-        if (!(yield (0, shared_1.doesVideoExist)(req.params.videoId, res, 'id')))
+        if (!(yield shared_1.doesVideoExist(req.params.videoId, res, 'id')))
             return;
-        if (!(yield (0, shared_1.doesVideoCommentExist)(req.params.commentId, res.locals.videoId, res)))
+        if (!(yield shared_1.doesVideoCommentExist(req.params.commentId, res.locals.videoId, res)))
             return;
         return next();
     })
 ];
 exports.videoCommentGetValidator = videoCommentGetValidator;
 const removeVideoCommentValidator = [
-    (0, shared_1.isValidVideoIdParam)('videoId'),
-    (0, express_validator_1.param)('commentId').custom(misc_1.isIdValid).not().isEmpty().withMessage('Should have a valid commentId'),
-    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
+    shared_1.isValidVideoIdParam('videoId'),
+    express_validator_1.param('commentId').custom(misc_1.isIdValid).not().isEmpty().withMessage('Should have a valid commentId'),
+    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking removeVideoCommentValidator parameters.', { parameters: req.params });
-        if ((0, shared_1.areValidationErrors)(req, res))
+        if (shared_1.areValidationErrors(req, res))
             return;
-        if (!(yield (0, shared_1.doesVideoExist)(req.params.videoId, res)))
+        if (!(yield shared_1.doesVideoExist(req.params.videoId, res)))
             return;
-        if (!(yield (0, shared_1.doesVideoCommentExist)(req.params.commentId, res.locals.videoAll, res)))
+        if (!(yield shared_1.doesVideoCommentExist(req.params.commentId, res.locals.videoAll, res)))
             return;
         if (!checkUserCanDeleteVideoComment(res.locals.oauth.token.User, res.locals.videoCommentFull, res))
             return;
@@ -163,7 +163,7 @@ function checkUserCanDeleteVideoComment(user, videoComment, res) {
     return true;
 }
 function isVideoCommentAccepted(req, res, video, isReply) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const acceptParameters = {
             video,
             commentBody: req.body,

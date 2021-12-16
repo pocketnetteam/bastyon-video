@@ -17,17 +17,17 @@ class PluginsCheckScheduler extends abstract_scheduler_1.AbstractScheduler {
         this.schedulerIntervalMs = constants_1.SCHEDULER_INTERVALS_MS.checkPlugins;
     }
     internalExecute() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             return this.checkLatestPluginsVersion();
         });
     }
     checkLatestPluginsVersion() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (config_1.CONFIG.PLUGINS.INDEX.ENABLED === false)
                 return;
             logger_1.logger.info('Checking latest plugins version.');
             const plugins = yield plugin_1.PluginModel.listInstalled();
-            const chunks = (0, lodash_1.chunk)(plugins, 10);
+            const chunks = lodash_1.chunk(plugins, 10);
             for (const chunk of chunks) {
                 const pluginIndex = {};
                 for (const plugin of chunk) {
@@ -35,16 +35,16 @@ class PluginsCheckScheduler extends abstract_scheduler_1.AbstractScheduler {
                 }
                 const npmNames = Object.keys(pluginIndex);
                 try {
-                    const results = yield (0, plugin_index_1.getLatestPluginsVersion)(npmNames);
+                    const results = yield plugin_index_1.getLatestPluginsVersion(npmNames);
                     for (const result of results) {
                         const plugin = pluginIndex[result.npmName];
                         if (!result.latestVersion)
                             continue;
                         if (!plugin.latestVersion ||
-                            (plugin.latestVersion !== result.latestVersion && (0, core_utils_1.compareSemVer)(plugin.latestVersion, result.latestVersion) < 0)) {
+                            (plugin.latestVersion !== result.latestVersion && core_utils_1.compareSemVer(plugin.latestVersion, result.latestVersion) < 0)) {
                             plugin.latestVersion = result.latestVersion;
                             yield plugin.save();
-                            if ((0, core_utils_1.compareSemVer)(plugin.version, result.latestVersion) < 0) {
+                            if (core_utils_1.compareSemVer(plugin.version, result.latestVersion) < 0) {
                                 notifier_1.Notifier.Instance.notifyOfNewPluginVersion(plugin);
                             }
                             logger_1.logger.info('Plugin %s has a new latest version %s.', result.npmName, plugin.latestVersion);

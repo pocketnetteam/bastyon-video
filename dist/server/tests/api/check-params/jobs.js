@@ -9,10 +9,10 @@ describe('Test jobs API validators', function () {
     let server;
     let userAccessToken = '';
     before(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(120000);
-            server = yield (0, extra_utils_1.createSingleServer)(1);
-            yield (0, extra_utils_1.setAccessTokensToServers)([server]);
+            server = yield extra_utils_1.createSingleServer(1);
+            yield extra_utils_1.setAccessTokensToServers([server]);
             const user = {
                 username: 'user1',
                 password: 'my super password'
@@ -23,8 +23,8 @@ describe('Test jobs API validators', function () {
     });
     describe('When listing jobs', function () {
         it('Should fail with a bad state', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makeGetRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makeGetRequest({
                     url: server.url,
                     token: server.accessToken,
                     path: path + 'ade'
@@ -32,8 +32,8 @@ describe('Test jobs API validators', function () {
             });
         });
         it('Should fail with an incorrect job type', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makeGetRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makeGetRequest({
                     url: server.url,
                     token: server.accessToken,
                     path,
@@ -44,23 +44,23 @@ describe('Test jobs API validators', function () {
             });
         });
         it('Should fail with a bad start pagination', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.checkBadStartPagination)(server.url, path, server.accessToken);
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.checkBadStartPagination(server.url, path, server.accessToken);
             });
         });
         it('Should fail with a bad count pagination', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.checkBadCountPagination)(server.url, path, server.accessToken);
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.checkBadCountPagination(server.url, path, server.accessToken);
             });
         });
         it('Should fail with an incorrect sort', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.checkBadSortPagination)(server.url, path, server.accessToken);
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.checkBadSortPagination(server.url, path, server.accessToken);
             });
         });
         it('Should fail with a non authenticated user', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makeGetRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makeGetRequest({
                     url: server.url,
                     path,
                     expectedStatus: models_1.HttpStatusCode.UNAUTHORIZED_401
@@ -68,8 +68,8 @@ describe('Test jobs API validators', function () {
             });
         });
         it('Should fail with a non admin user', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makeGetRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makeGetRequest({
                     url: server.url,
                     path,
                     token: userAccessToken,
@@ -79,8 +79,8 @@ describe('Test jobs API validators', function () {
         });
     });
     after(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            yield (0, extra_utils_1.cleanupTests)([server]);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield extra_utils_1.cleanupTests([server]);
         });
     });
 });

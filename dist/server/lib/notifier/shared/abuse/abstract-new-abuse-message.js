@@ -8,7 +8,7 @@ const user_notification_1 = require("@server/models/user/user-notification");
 const abstract_notification_1 = require("../common/abstract-notification");
 class AbstractNewAbuseMessage extends abstract_notification_1.AbstractNotification {
     loadMessageAccount() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.messageAccount = yield account_1.AccountModel.load(this.message.accountId);
         });
     }
@@ -16,7 +16,7 @@ class AbstractNewAbuseMessage extends abstract_notification_1.AbstractNotificati
         return user.NotificationSetting.abuseNewMessage;
     }
     createNotification(user) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const notification = yield user_notification_1.UserNotificationModel.create({
                 type: 16,
                 userId: user.id,

@@ -26,7 +26,7 @@ var ScopeNames;
 })(ScopeNames = exports.ScopeNames || (exports.ScopeNames = {}));
 let VideoRedundancyModel = VideoRedundancyModel_1 = class VideoRedundancyModel extends sequelize_typescript_1.Model {
     static removeFile(instance) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (!instance.isOwned())
                 return;
             if (instance.videoFileId) {
@@ -47,8 +47,8 @@ let VideoRedundancyModel = VideoRedundancyModel_1 = class VideoRedundancyModel e
         });
     }
     static loadLocalByFileId(videoFileId) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            const actor = yield (0, application_1.getServerActor)();
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const actor = yield application_1.getServerActor();
             const query = {
                 where: {
                     actorId: actor.id,
@@ -59,8 +59,8 @@ let VideoRedundancyModel = VideoRedundancyModel_1 = class VideoRedundancyModel e
         });
     }
     static listLocalByVideoId(videoId) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            const actor = yield (0, application_1.getServerActor)();
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const actor = yield application_1.getServerActor();
             const queryStreamingPlaylist = {
                 where: {
                     actorId: actor.id
@@ -108,8 +108,8 @@ let VideoRedundancyModel = VideoRedundancyModel_1 = class VideoRedundancyModel e
         });
     }
     static loadLocalByStreamingPlaylistId(videoStreamingPlaylistId) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            const actor = yield (0, application_1.getServerActor)();
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const actor = yield application_1.getServerActor();
             const query = {
                 where: {
                     actorId: actor.id,
@@ -136,8 +136,8 @@ let VideoRedundancyModel = VideoRedundancyModel_1 = class VideoRedundancyModel e
         return VideoRedundancyModel_1.findOne(query);
     }
     static isLocalByVideoUUIDExists(uuid) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            const actor = yield (0, application_1.getServerActor)();
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const actor = yield application_1.getServerActor();
             const query = {
                 raw: true,
                 attributes: ['id'],
@@ -167,22 +167,22 @@ let VideoRedundancyModel = VideoRedundancyModel_1 = class VideoRedundancyModel e
         });
     }
     static getVideoSample(p) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const rows = yield p;
             if (rows.length === 0)
                 return undefined;
             const ids = rows.map(r => r.id);
-            const id = (0, lodash_1.sample)(ids);
-            return video_1.VideoModel.loadWithFiles(id, undefined, !(0, core_utils_1.isTestInstance)());
+            const id = lodash_1.sample(ids);
+            return video_1.VideoModel.loadWithFiles(id, undefined, !core_utils_1.isTestInstance());
         });
     }
     static findMostViewToDuplicate(randomizedFactor) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            const peertubeActor = yield (0, application_1.getServerActor)();
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const peertubeActor = yield application_1.getServerActor();
             const query = {
                 attributes: ['id', 'views'],
                 limit: randomizedFactor,
-                order: (0, utils_1.getVideoSort)('-views'),
+                order: utils_1.getVideoSort('-views'),
                 where: Object.assign({ privacy: 1, isLive: false }, this.buildVideoIdsForDuplication(peertubeActor)),
                 include: [
                     VideoRedundancyModel_1.buildServerRedundancyInclude()
@@ -192,14 +192,14 @@ let VideoRedundancyModel = VideoRedundancyModel_1 = class VideoRedundancyModel e
         });
     }
     static findTrendingToDuplicate(randomizedFactor) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            const peertubeActor = yield (0, application_1.getServerActor)();
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const peertubeActor = yield application_1.getServerActor();
             const query = {
                 attributes: ['id', 'views'],
                 subQuery: false,
                 group: 'VideoModel.id',
                 limit: randomizedFactor,
-                order: (0, utils_1.getVideoSort)('-trending'),
+                order: utils_1.getVideoSort('-trending'),
                 where: Object.assign({ privacy: 1, isLive: false }, this.buildVideoIdsForDuplication(peertubeActor)),
                 include: [
                     VideoRedundancyModel_1.buildServerRedundancyInclude(),
@@ -210,12 +210,12 @@ let VideoRedundancyModel = VideoRedundancyModel_1 = class VideoRedundancyModel e
         });
     }
     static findRecentlyAddedToDuplicate(randomizedFactor, minViews) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            const peertubeActor = yield (0, application_1.getServerActor)();
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const peertubeActor = yield application_1.getServerActor();
             const query = {
                 attributes: ['id', 'publishedAt'],
                 limit: randomizedFactor,
-                order: (0, utils_1.getVideoSort)('-publishedAt'),
+                order: utils_1.getVideoSort('publishedAt'),
                 where: Object.assign({ privacy: 1, isLive: false, views: {
                         [sequelize_1.Op.gte]: minViews
                     } }, this.buildVideoIdsForDuplication(peertubeActor)),
@@ -231,10 +231,10 @@ let VideoRedundancyModel = VideoRedundancyModel_1 = class VideoRedundancyModel e
         });
     }
     static loadOldestLocalExpired(strategy, expiresAfterMs) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const expiredDate = new Date();
             expiredDate.setMilliseconds(expiredDate.getMilliseconds() - expiresAfterMs);
-            const actor = yield (0, application_1.getServerActor)();
+            const actor = yield application_1.getServerActor();
             const query = {
                 where: {
                     actorId: actor.id,
@@ -248,8 +248,8 @@ let VideoRedundancyModel = VideoRedundancyModel_1 = class VideoRedundancyModel e
         });
     }
     static listLocalExpired() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            const actor = yield (0, application_1.getServerActor)();
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const actor = yield application_1.getServerActor();
             const query = {
                 where: {
                     actorId: actor.id,
@@ -262,8 +262,8 @@ let VideoRedundancyModel = VideoRedundancyModel_1 = class VideoRedundancyModel e
         });
     }
     static listRemoteExpired() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            const actor = yield (0, application_1.getServerActor)();
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const actor = yield application_1.getServerActor();
             const query = {
                 where: {
                     actorId: {
@@ -279,8 +279,8 @@ let VideoRedundancyModel = VideoRedundancyModel_1 = class VideoRedundancyModel e
         });
     }
     static listLocalOfServer(serverId) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            const actor = yield (0, application_1.getServerActor)();
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const actor = yield application_1.getServerActor();
             const buildVideoInclude = () => ({
                 model: video_1.VideoModel,
                 required: true,
@@ -362,7 +362,7 @@ let VideoRedundancyModel = VideoRedundancyModel_1 = class VideoRedundancyModel e
                     [sequelize_1.Op.or]: [
                         {
                             id: {
-                                [sequelize_1.Op.in]: (0, sequelize_1.literal)('(' +
+                                [sequelize_1.Op.in]: sequelize_1.literal('(' +
                                     'SELECT "videoId" FROM "videoFile" ' +
                                     'INNER JOIN "videoRedundancy" ON "videoRedundancy"."videoFileId" = "videoFile".id' +
                                     redundancySqlSuffix +
@@ -371,7 +371,7 @@ let VideoRedundancyModel = VideoRedundancyModel_1 = class VideoRedundancyModel e
                         },
                         {
                             id: {
-                                [sequelize_1.Op.in]: (0, sequelize_1.literal)('(' +
+                                [sequelize_1.Op.in]: sequelize_1.literal('(' +
                                     'select "videoId" FROM "videoStreamingPlaylist" ' +
                                     'INNER JOIN "videoRedundancy" ON "videoRedundancy"."videoStreamingPlaylistId" = "videoStreamingPlaylist".id' +
                                     redundancySqlSuffix +
@@ -386,7 +386,7 @@ let VideoRedundancyModel = VideoRedundancyModel_1 = class VideoRedundancyModel e
         const findOptions = {
             offset: start,
             limit: count,
-            order: (0, utils_1.getSort)(sort),
+            order: utils_1.getSort(sort),
             include: [
                 {
                     required: false,
@@ -426,8 +426,8 @@ let VideoRedundancyModel = VideoRedundancyModel_1 = class VideoRedundancyModel e
         ]).then(([data, total]) => ({ total, data }));
     }
     static getStats(strategy) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            const actor = yield (0, application_1.getServerActor)();
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const actor = yield application_1.getServerActor();
             const sql = `WITH "tmp" AS ` +
                 `(` +
                 `SELECT "videoFile"."size" AS "videoFileSize", "videoStreamingFile"."size" AS "videoStreamingFileSize", ` +
@@ -452,7 +452,7 @@ let VideoRedundancyModel = VideoRedundancyModel_1 = class VideoRedundancyModel e
                 replacements: { strategy, actorId: actor.id },
                 type: sequelize_1.QueryTypes.SELECT
             }).then(([row]) => ({
-                totalUsed: (0, utils_1.parseAggregateResult)(row.totalUsed),
+                totalUsed: utils_1.parseAggregateResult(row.totalUsed),
                 totalVideos: row.totalVideos,
                 totalVideoFiles: row.totalVideoFiles
             }));
@@ -546,7 +546,7 @@ let VideoRedundancyModel = VideoRedundancyModel_1 = class VideoRedundancyModel e
         };
     }
     static buildVideoIdsForDuplication(peertubeActor) {
-        const notIn = (0, sequelize_1.literal)('(' +
+        const notIn = sequelize_1.literal('(' +
             `SELECT "videoFile"."videoId" AS "videoId" FROM "videoRedundancy" ` +
             `INNER JOIN "videoFile" ON "videoFile"."id" = "videoRedundancy"."videoFileId" ` +
             `WHERE "videoRedundancy"."actorId" = ${peertubeActor.id} ` +
@@ -586,86 +586,86 @@ let VideoRedundancyModel = VideoRedundancyModel_1 = class VideoRedundancyModel e
         };
     }
 };
-(0, tslib_1.__decorate)([
+tslib_1.__decorate([
     sequelize_typescript_1.CreatedAt,
-    (0, tslib_1.__metadata)("design:type", Date)
+    tslib_1.__metadata("design:type", Date)
 ], VideoRedundancyModel.prototype, "createdAt", void 0);
-(0, tslib_1.__decorate)([
+tslib_1.__decorate([
     sequelize_typescript_1.UpdatedAt,
-    (0, tslib_1.__metadata)("design:type", Date)
+    tslib_1.__metadata("design:type", Date)
 ], VideoRedundancyModel.prototype, "updatedAt", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(true),
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(true),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", Date)
+    tslib_1.__metadata("design:type", Date)
 ], VideoRedundancyModel.prototype, "expiresOn", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(false),
-    (0, sequelize_typescript_1.Is)('VideoRedundancyFileUrl', value => (0, utils_1.throwIfNotValid)(value, misc_1.isUrlValid, 'fileUrl')),
-    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.VIDEOS_REDUNDANCY.URL.max)),
-    (0, tslib_1.__metadata)("design:type", String)
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(false),
+    sequelize_typescript_1.Is('VideoRedundancyFileUrl', value => utils_1.throwIfNotValid(value, misc_1.isUrlValid, 'fileUrl')),
+    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.VIDEOS_REDUNDANCY.URL.max)),
+    tslib_1.__metadata("design:type", String)
 ], VideoRedundancyModel.prototype, "fileUrl", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(false),
-    (0, sequelize_typescript_1.Is)('VideoRedundancyUrl', value => (0, utils_1.throwIfNotValid)(value, misc_1.isActivityPubUrlValid, 'url')),
-    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.VIDEOS_REDUNDANCY.URL.max)),
-    (0, tslib_1.__metadata)("design:type", String)
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(false),
+    sequelize_typescript_1.Is('VideoRedundancyUrl', value => utils_1.throwIfNotValid(value, misc_1.isActivityPubUrlValid, 'url')),
+    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.VIDEOS_REDUNDANCY.URL.max)),
+    tslib_1.__metadata("design:type", String)
 ], VideoRedundancyModel.prototype, "url", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(true),
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(true),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", String)
+    tslib_1.__metadata("design:type", String)
 ], VideoRedundancyModel.prototype, "strategy", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.ForeignKey)(() => video_file_1.VideoFileModel),
+tslib_1.__decorate([
+    sequelize_typescript_1.ForeignKey(() => video_file_1.VideoFileModel),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", Number)
+    tslib_1.__metadata("design:type", Number)
 ], VideoRedundancyModel.prototype, "videoFileId", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.BelongsTo)(() => video_file_1.VideoFileModel, {
+tslib_1.__decorate([
+    sequelize_typescript_1.BelongsTo(() => video_file_1.VideoFileModel, {
         foreignKey: {
             allowNull: true
         },
         onDelete: 'cascade'
     }),
-    (0, tslib_1.__metadata)("design:type", video_file_1.VideoFileModel)
+    tslib_1.__metadata("design:type", video_file_1.VideoFileModel)
 ], VideoRedundancyModel.prototype, "VideoFile", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.ForeignKey)(() => video_streaming_playlist_1.VideoStreamingPlaylistModel),
+tslib_1.__decorate([
+    sequelize_typescript_1.ForeignKey(() => video_streaming_playlist_1.VideoStreamingPlaylistModel),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", Number)
+    tslib_1.__metadata("design:type", Number)
 ], VideoRedundancyModel.prototype, "videoStreamingPlaylistId", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.BelongsTo)(() => video_streaming_playlist_1.VideoStreamingPlaylistModel, {
+tslib_1.__decorate([
+    sequelize_typescript_1.BelongsTo(() => video_streaming_playlist_1.VideoStreamingPlaylistModel, {
         foreignKey: {
             allowNull: true
         },
         onDelete: 'cascade'
     }),
-    (0, tslib_1.__metadata)("design:type", video_streaming_playlist_1.VideoStreamingPlaylistModel)
+    tslib_1.__metadata("design:type", video_streaming_playlist_1.VideoStreamingPlaylistModel)
 ], VideoRedundancyModel.prototype, "VideoStreamingPlaylist", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.ForeignKey)(() => actor_1.ActorModel),
+tslib_1.__decorate([
+    sequelize_typescript_1.ForeignKey(() => actor_1.ActorModel),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", Number)
+    tslib_1.__metadata("design:type", Number)
 ], VideoRedundancyModel.prototype, "actorId", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.BelongsTo)(() => actor_1.ActorModel, {
+tslib_1.__decorate([
+    sequelize_typescript_1.BelongsTo(() => actor_1.ActorModel, {
         foreignKey: {
             allowNull: false
         },
         onDelete: 'cascade'
     }),
-    (0, tslib_1.__metadata)("design:type", actor_1.ActorModel)
+    tslib_1.__metadata("design:type", actor_1.ActorModel)
 ], VideoRedundancyModel.prototype, "Actor", void 0);
-(0, tslib_1.__decorate)([
+tslib_1.__decorate([
     sequelize_typescript_1.BeforeDestroy,
-    (0, tslib_1.__metadata)("design:type", Function),
-    (0, tslib_1.__metadata)("design:paramtypes", [VideoRedundancyModel]),
-    (0, tslib_1.__metadata)("design:returntype", Promise)
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [VideoRedundancyModel]),
+    tslib_1.__metadata("design:returntype", Promise)
 ], VideoRedundancyModel, "removeFile", null);
-VideoRedundancyModel = VideoRedundancyModel_1 = (0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.Scopes)(() => ({
+VideoRedundancyModel = VideoRedundancyModel_1 = tslib_1.__decorate([
+    sequelize_typescript_1.Scopes(() => ({
         [ScopeNames.WITH_VIDEO]: {
             include: [
                 {
@@ -691,7 +691,7 @@ VideoRedundancyModel = VideoRedundancyModel_1 = (0, tslib_1.__decorate)([
             ]
         }
     })),
-    (0, sequelize_typescript_1.Table)({
+    sequelize_typescript_1.Table({
         tableName: 'videoRedundancy',
         indexes: [
             {

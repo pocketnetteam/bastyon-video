@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VideosIdListQueryBuilder = void 0;
 const tslib_1 = require("tslib");
-const validator_1 = (0, tslib_1.__importDefault)(require("validator"));
+const validator_1 = tslib_1.__importDefault(require("validator"));
 const misc_1 = require("@server/helpers/custom-validators/misc");
 const constants_1 = require("@server/initializers/constants");
 const utils_1 = require("@server/models/utils");
@@ -136,13 +136,13 @@ class VideosIdListQueryBuilder extends abstract_videos_query_builder_1.AbstractV
             this.setCountAttribute();
         }
         else {
-            if ((0, misc_1.exists)(options.sort)) {
+            if (misc_1.exists(options.sort)) {
                 this.setSort(options.sort);
             }
-            if ((0, misc_1.exists)(options.count)) {
+            if (misc_1.exists(options.count)) {
                 this.setLimit(options.count);
             }
-            if ((0, misc_1.exists)(options.start)) {
+            if (misc_1.exists(options.start)) {
                 this.setOffset(options.start);
             }
         }
@@ -238,7 +238,7 @@ class VideosIdListQueryBuilder extends abstract_videos_query_builder_1.AbstractV
         this.and.push('EXISTS (' +
             '  SELECT 1 FROM "videoTag" ' +
             '  INNER JOIN "tag" ON "tag"."id" = "videoTag"."tagId" ' +
-            '  WHERE lower("tag"."name") IN (' + (0, utils_1.createSafeIn)(this.sequelize, tagsOneOfLower) + ') ' +
+            '  WHERE lower("tag"."name") IN (' + utils_1.createSafeIn(this.sequelize, tagsOneOfLower) + ') ' +
             '  AND "video"."id" = "videoTag"."videoId"' +
             ')');
     }
@@ -247,13 +247,13 @@ class VideosIdListQueryBuilder extends abstract_videos_query_builder_1.AbstractV
         this.and.push('EXISTS (' +
             '  SELECT 1 FROM "videoTag" ' +
             '  INNER JOIN "tag" ON "tag"."id" = "videoTag"."tagId" ' +
-            '  WHERE lower("tag"."name") IN (' + (0, utils_1.createSafeIn)(this.sequelize, tagsAllOfLower) + ') ' +
+            '  WHERE lower("tag"."name") IN (' + utils_1.createSafeIn(this.sequelize, tagsAllOfLower) + ') ' +
             '  AND "video"."id" = "videoTag"."videoId" ' +
             '  GROUP BY "videoTag"."videoId" HAVING COUNT(*) = ' + tagsAllOfLower.length +
             ')');
     }
     whereUUIDs(uuids) {
-        this.and.push('"video"."uuid" IN (' + (0, utils_1.createSafeIn)(this.sequelize, uuids) + ')');
+        this.and.push('"video"."uuid" IN (' + utils_1.createSafeIn(this.sequelize, uuids) + ')');
     }
     whereCategoryOneOf(categoryOneOf) {
         this.and.push('"video"."category" IN (:categoryOneOf)');
@@ -271,7 +271,7 @@ class VideosIdListQueryBuilder extends abstract_videos_query_builder_1.AbstractV
             this.replacements.languageOneOf = languages;
             languagesQueryParts.push('EXISTS (' +
                 '  SELECT 1 FROM "videoCaption" WHERE "videoCaption"."language" ' +
-                '  IN (' + (0, utils_1.createSafeIn)(this.sequelize, languages) + ') AND ' +
+                '  IN (' + utils_1.createSafeIn(this.sequelize, languages) + ') AND ' +
                 '  "videoCaption"."videoId" = "video"."id"' +
                 ')');
         }
@@ -298,7 +298,7 @@ class VideosIdListQueryBuilder extends abstract_videos_query_builder_1.AbstractV
         const blockerIds = [serverAccountId];
         if (user)
             blockerIds.push(user.Account.id);
-        const inClause = (0, utils_1.createSafeIn)(this.sequelize, blockerIds);
+        const inClause = utils_1.createSafeIn(this.sequelize, blockerIds);
         this.and.push('NOT EXISTS (' +
             '  SELECT 1 FROM "accountBlocklist" ' +
             '  WHERE "accountBlocklist"."accountId" IN (' + inClause + ') ' +
@@ -403,7 +403,7 @@ class VideosIdListQueryBuilder extends abstract_videos_query_builder_1.AbstractV
         this.sort = this.buildOrder(sort);
     }
     buildOrder(value) {
-        const { direction, field } = (0, utils_1.buildDirectionAndField)(value);
+        const { direction, field } = utils_1.buildDirectionAndField(value);
         if (field.match(/^[a-zA-Z."]+$/) === null)
             throw new Error('Invalid sort column ' + field);
         if (field.toLowerCase() === 'random')

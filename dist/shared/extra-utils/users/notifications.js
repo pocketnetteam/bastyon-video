@@ -30,18 +30,18 @@ function getAllNotificationsSettings() {
 }
 exports.getAllNotificationsSettings = getAllNotificationsSettings;
 function checkNewVideoFromSubscription(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { videoName, shortUUID } = options;
         const notificationType = 1;
         function notificationChecker(notification, checkType) {
             if (checkType === 'presence') {
-                (0, chai_1.expect)(notification).to.not.be.undefined;
-                (0, chai_1.expect)(notification.type).to.equal(notificationType);
+                chai_1.expect(notification).to.not.be.undefined;
+                chai_1.expect(notification.type).to.equal(notificationType);
                 checkVideo(notification.video, videoName, shortUUID);
                 checkActor(notification.video.channel);
             }
             else {
-                (0, chai_1.expect)(notification).to.satisfy((n) => {
+                chai_1.expect(notification).to.satisfy((n) => {
                     return n === undefined || n.type !== 1 || n.video.name !== videoName;
                 });
             }
@@ -55,18 +55,18 @@ function checkNewVideoFromSubscription(options) {
 }
 exports.checkNewVideoFromSubscription = checkNewVideoFromSubscription;
 function checkVideoIsPublished(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { videoName, shortUUID } = options;
         const notificationType = 6;
         function notificationChecker(notification, checkType) {
             if (checkType === 'presence') {
-                (0, chai_1.expect)(notification).to.not.be.undefined;
-                (0, chai_1.expect)(notification.type).to.equal(notificationType);
+                chai_1.expect(notification).to.not.be.undefined;
+                chai_1.expect(notification.type).to.equal(notificationType);
                 checkVideo(notification.video, videoName, shortUUID);
                 checkActor(notification.video.channel);
             }
             else {
-                (0, chai_1.expect)(notification.video).to.satisfy(v => v === undefined || v.name !== videoName);
+                chai_1.expect(notification.video).to.satisfy(v => v === undefined || v.name !== videoName);
             }
         }
         function emailNotificationFinder(email) {
@@ -78,19 +78,19 @@ function checkVideoIsPublished(options) {
 }
 exports.checkVideoIsPublished = checkVideoIsPublished;
 function checkMyVideoImportIsFinished(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { videoName, shortUUID, url, success } = options;
         const notificationType = success ? 7 : 8;
         function notificationChecker(notification, checkType) {
             if (checkType === 'presence') {
-                (0, chai_1.expect)(notification).to.not.be.undefined;
-                (0, chai_1.expect)(notification.type).to.equal(notificationType);
-                (0, chai_1.expect)(notification.videoImport.targetUrl).to.equal(url);
+                chai_1.expect(notification).to.not.be.undefined;
+                chai_1.expect(notification.type).to.equal(notificationType);
+                chai_1.expect(notification.videoImport.targetUrl).to.equal(url);
                 if (success)
                     checkVideo(notification.videoImport.video, videoName, shortUUID);
             }
             else {
-                (0, chai_1.expect)(notification.videoImport).to.satisfy(i => i === undefined || i.targetUrl !== url);
+                chai_1.expect(notification.videoImport).to.satisfy(i => i === undefined || i.targetUrl !== url);
             }
         }
         function emailNotificationFinder(email) {
@@ -103,18 +103,18 @@ function checkMyVideoImportIsFinished(options) {
 }
 exports.checkMyVideoImportIsFinished = checkMyVideoImportIsFinished;
 function checkUserRegistered(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { username } = options;
         const notificationType = 9;
         function notificationChecker(notification, checkType) {
             if (checkType === 'presence') {
-                (0, chai_1.expect)(notification).to.not.be.undefined;
-                (0, chai_1.expect)(notification.type).to.equal(notificationType);
+                chai_1.expect(notification).to.not.be.undefined;
+                chai_1.expect(notification.type).to.equal(notificationType);
                 checkActor(notification.account);
-                (0, chai_1.expect)(notification.account.name).to.equal(username);
+                chai_1.expect(notification.account.name).to.equal(username);
             }
             else {
-                (0, chai_1.expect)(notification).to.satisfy(n => n.type !== notificationType || n.account.name !== username);
+                chai_1.expect(notification).to.satisfy(n => n.type !== notificationType || n.account.name !== username);
             }
         }
         function emailNotificationFinder(email) {
@@ -126,23 +126,23 @@ function checkUserRegistered(options) {
 }
 exports.checkUserRegistered = checkUserRegistered;
 function checkNewActorFollow(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { followType, followerName, followerDisplayName, followingDisplayName } = options;
         const notificationType = 10;
         function notificationChecker(notification, checkType) {
             if (checkType === 'presence') {
-                (0, chai_1.expect)(notification).to.not.be.undefined;
-                (0, chai_1.expect)(notification.type).to.equal(notificationType);
+                chai_1.expect(notification).to.not.be.undefined;
+                chai_1.expect(notification.type).to.equal(notificationType);
                 checkActor(notification.actorFollow.follower);
-                (0, chai_1.expect)(notification.actorFollow.follower.displayName).to.equal(followerDisplayName);
-                (0, chai_1.expect)(notification.actorFollow.follower.name).to.equal(followerName);
-                (0, chai_1.expect)(notification.actorFollow.follower.host).to.not.be.undefined;
+                chai_1.expect(notification.actorFollow.follower.displayName).to.equal(followerDisplayName);
+                chai_1.expect(notification.actorFollow.follower.name).to.equal(followerName);
+                chai_1.expect(notification.actorFollow.follower.host).to.not.be.undefined;
                 const following = notification.actorFollow.following;
-                (0, chai_1.expect)(following.displayName).to.equal(followingDisplayName);
-                (0, chai_1.expect)(following.type).to.equal(followType);
+                chai_1.expect(following.displayName).to.equal(followingDisplayName);
+                chai_1.expect(following.type).to.equal(followType);
             }
             else {
-                (0, chai_1.expect)(notification).to.satisfy(n => {
+                chai_1.expect(notification).to.satisfy(n => {
                     return n.type !== notificationType ||
                         (n.actorFollow.follower.name !== followerName && n.actorFollow.following !== followingDisplayName);
                 });
@@ -157,20 +157,20 @@ function checkNewActorFollow(options) {
 }
 exports.checkNewActorFollow = checkNewActorFollow;
 function checkNewInstanceFollower(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { followerHost } = options;
         const notificationType = 13;
         function notificationChecker(notification, checkType) {
             if (checkType === 'presence') {
-                (0, chai_1.expect)(notification).to.not.be.undefined;
-                (0, chai_1.expect)(notification.type).to.equal(notificationType);
+                chai_1.expect(notification).to.not.be.undefined;
+                chai_1.expect(notification.type).to.equal(notificationType);
                 checkActor(notification.actorFollow.follower);
-                (0, chai_1.expect)(notification.actorFollow.follower.name).to.equal('peertube');
-                (0, chai_1.expect)(notification.actorFollow.follower.host).to.equal(followerHost);
-                (0, chai_1.expect)(notification.actorFollow.following.name).to.equal('peertube');
+                chai_1.expect(notification.actorFollow.follower.name).to.equal('peertube');
+                chai_1.expect(notification.actorFollow.follower.host).to.equal(followerHost);
+                chai_1.expect(notification.actorFollow.following.name).to.equal('peertube');
             }
             else {
-                (0, chai_1.expect)(notification).to.satisfy(n => {
+                chai_1.expect(notification).to.satisfy(n => {
                     return n.type !== notificationType || n.actorFollow.follower.host !== followerHost;
                 });
             }
@@ -184,22 +184,22 @@ function checkNewInstanceFollower(options) {
 }
 exports.checkNewInstanceFollower = checkNewInstanceFollower;
 function checkAutoInstanceFollowing(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { followerHost, followingHost } = options;
         const notificationType = 14;
         function notificationChecker(notification, checkType) {
             if (checkType === 'presence') {
-                (0, chai_1.expect)(notification).to.not.be.undefined;
-                (0, chai_1.expect)(notification.type).to.equal(notificationType);
+                chai_1.expect(notification).to.not.be.undefined;
+                chai_1.expect(notification.type).to.equal(notificationType);
                 const following = notification.actorFollow.following;
                 checkActor(following);
-                (0, chai_1.expect)(following.name).to.equal('peertube');
-                (0, chai_1.expect)(following.host).to.equal(followingHost);
-                (0, chai_1.expect)(notification.actorFollow.follower.name).to.equal('peertube');
-                (0, chai_1.expect)(notification.actorFollow.follower.host).to.equal(followerHost);
+                chai_1.expect(following.name).to.equal('peertube');
+                chai_1.expect(following.host).to.equal(followingHost);
+                chai_1.expect(notification.actorFollow.follower.name).to.equal('peertube');
+                chai_1.expect(notification.actorFollow.follower.host).to.equal(followerHost);
             }
             else {
-                (0, chai_1.expect)(notification).to.satisfy(n => {
+                chai_1.expect(notification).to.satisfy(n => {
                     return n.type !== notificationType || n.actorFollow.following.host !== followingHost;
                 });
             }
@@ -213,20 +213,20 @@ function checkAutoInstanceFollowing(options) {
 }
 exports.checkAutoInstanceFollowing = checkAutoInstanceFollowing;
 function checkCommentMention(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { shortUUID, commentId, threadId, byAccountDisplayName } = options;
         const notificationType = 11;
         function notificationChecker(notification, checkType) {
             if (checkType === 'presence') {
-                (0, chai_1.expect)(notification).to.not.be.undefined;
-                (0, chai_1.expect)(notification.type).to.equal(notificationType);
+                chai_1.expect(notification).to.not.be.undefined;
+                chai_1.expect(notification.type).to.equal(notificationType);
                 checkComment(notification.comment, commentId, threadId);
                 checkActor(notification.comment.account);
-                (0, chai_1.expect)(notification.comment.account.displayName).to.equal(byAccountDisplayName);
+                chai_1.expect(notification.comment.account.displayName).to.equal(byAccountDisplayName);
                 checkVideo(notification.comment.video, undefined, shortUUID);
             }
             else {
-                (0, chai_1.expect)(notification).to.satisfy(n => n.type !== notificationType || n.comment.id !== commentId);
+                chai_1.expect(notification).to.satisfy(n => n.type !== notificationType || n.comment.id !== commentId);
             }
         }
         function emailNotificationFinder(email) {
@@ -239,19 +239,19 @@ function checkCommentMention(options) {
 exports.checkCommentMention = checkCommentMention;
 let lastEmailCount = 0;
 function checkNewCommentOnMyVideo(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { server, shortUUID, commentId, threadId, checkType, emails } = options;
         const notificationType = 2;
         function notificationChecker(notification, checkType) {
             if (checkType === 'presence') {
-                (0, chai_1.expect)(notification).to.not.be.undefined;
-                (0, chai_1.expect)(notification.type).to.equal(notificationType);
+                chai_1.expect(notification).to.not.be.undefined;
+                chai_1.expect(notification.type).to.equal(notificationType);
                 checkComment(notification.comment, commentId, threadId);
                 checkActor(notification.comment.account);
                 checkVideo(notification.comment.video, undefined, shortUUID);
             }
             else {
-                (0, chai_1.expect)(notification).to.satisfy((n) => {
+                chai_1.expect(notification).to.satisfy((n) => {
                     return n === undefined || n.comment === undefined || n.comment.id !== commentId;
                 });
             }
@@ -262,25 +262,25 @@ function checkNewCommentOnMyVideo(options) {
         }
         yield checkNotification(Object.assign(Object.assign({}, options), { notificationChecker, emailNotificationFinder }));
         if (checkType === 'presence') {
-            (0, chai_1.expect)(emails).to.have.length.above(lastEmailCount);
+            chai_1.expect(emails).to.have.length.above(lastEmailCount);
             lastEmailCount = emails.length;
         }
     });
 }
 exports.checkNewCommentOnMyVideo = checkNewCommentOnMyVideo;
 function checkNewVideoAbuseForModerators(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { shortUUID, videoName } = options;
         const notificationType = 3;
         function notificationChecker(notification, checkType) {
             if (checkType === 'presence') {
-                (0, chai_1.expect)(notification).to.not.be.undefined;
-                (0, chai_1.expect)(notification.type).to.equal(notificationType);
-                (0, chai_1.expect)(notification.abuse.id).to.be.a('number');
+                chai_1.expect(notification).to.not.be.undefined;
+                chai_1.expect(notification.type).to.equal(notificationType);
+                chai_1.expect(notification.abuse.id).to.be.a('number');
                 checkVideo(notification.abuse.video, videoName, shortUUID);
             }
             else {
-                (0, chai_1.expect)(notification).to.satisfy((n) => {
+                chai_1.expect(notification).to.satisfy((n) => {
                     return n === undefined || n.abuse === undefined || n.abuse.video.shortUUID !== shortUUID;
                 });
             }
@@ -294,17 +294,17 @@ function checkNewVideoAbuseForModerators(options) {
 }
 exports.checkNewVideoAbuseForModerators = checkNewVideoAbuseForModerators;
 function checkNewAbuseMessage(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { abuseId, message, toEmail } = options;
         const notificationType = 16;
         function notificationChecker(notification, checkType) {
             if (checkType === 'presence') {
-                (0, chai_1.expect)(notification).to.not.be.undefined;
-                (0, chai_1.expect)(notification.type).to.equal(notificationType);
-                (0, chai_1.expect)(notification.abuse.id).to.equal(abuseId);
+                chai_1.expect(notification).to.not.be.undefined;
+                chai_1.expect(notification.type).to.equal(notificationType);
+                chai_1.expect(notification.abuse.id).to.equal(abuseId);
             }
             else {
-                (0, chai_1.expect)(notification).to.satisfy((n) => {
+                chai_1.expect(notification).to.satisfy((n) => {
                     return n === undefined || n.type !== notificationType || n.abuse === undefined || n.abuse.id !== abuseId;
                 });
             }
@@ -319,18 +319,18 @@ function checkNewAbuseMessage(options) {
 }
 exports.checkNewAbuseMessage = checkNewAbuseMessage;
 function checkAbuseStateChange(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { abuseId, state } = options;
         const notificationType = 15;
         function notificationChecker(notification, checkType) {
             if (checkType === 'presence') {
-                (0, chai_1.expect)(notification).to.not.be.undefined;
-                (0, chai_1.expect)(notification.type).to.equal(notificationType);
-                (0, chai_1.expect)(notification.abuse.id).to.equal(abuseId);
-                (0, chai_1.expect)(notification.abuse.state).to.equal(state);
+                chai_1.expect(notification).to.not.be.undefined;
+                chai_1.expect(notification.type).to.equal(notificationType);
+                chai_1.expect(notification.abuse.id).to.equal(abuseId);
+                chai_1.expect(notification.abuse.state).to.equal(state);
             }
             else {
-                (0, chai_1.expect)(notification).to.satisfy((n) => {
+                chai_1.expect(notification).to.satisfy((n) => {
                     return n === undefined || n.abuse === undefined || n.abuse.id !== abuseId;
                 });
             }
@@ -347,18 +347,18 @@ function checkAbuseStateChange(options) {
 }
 exports.checkAbuseStateChange = checkAbuseStateChange;
 function checkNewCommentAbuseForModerators(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { shortUUID, videoName } = options;
         const notificationType = 3;
         function notificationChecker(notification, checkType) {
             if (checkType === 'presence') {
-                (0, chai_1.expect)(notification).to.not.be.undefined;
-                (0, chai_1.expect)(notification.type).to.equal(notificationType);
-                (0, chai_1.expect)(notification.abuse.id).to.be.a('number');
+                chai_1.expect(notification).to.not.be.undefined;
+                chai_1.expect(notification.type).to.equal(notificationType);
+                chai_1.expect(notification.abuse.id).to.be.a('number');
                 checkVideo(notification.abuse.comment.video, videoName, shortUUID);
             }
             else {
-                (0, chai_1.expect)(notification).to.satisfy((n) => {
+                chai_1.expect(notification).to.satisfy((n) => {
                     return n === undefined || n.abuse === undefined || n.abuse.comment.video.shortUUID !== shortUUID;
                 });
             }
@@ -372,18 +372,18 @@ function checkNewCommentAbuseForModerators(options) {
 }
 exports.checkNewCommentAbuseForModerators = checkNewCommentAbuseForModerators;
 function checkNewAccountAbuseForModerators(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { displayName } = options;
         const notificationType = 3;
         function notificationChecker(notification, checkType) {
             if (checkType === 'presence') {
-                (0, chai_1.expect)(notification).to.not.be.undefined;
-                (0, chai_1.expect)(notification.type).to.equal(notificationType);
-                (0, chai_1.expect)(notification.abuse.id).to.be.a('number');
-                (0, chai_1.expect)(notification.abuse.account.displayName).to.equal(displayName);
+                chai_1.expect(notification).to.not.be.undefined;
+                chai_1.expect(notification.type).to.equal(notificationType);
+                chai_1.expect(notification.abuse.id).to.be.a('number');
+                chai_1.expect(notification.abuse.account.displayName).to.equal(displayName);
             }
             else {
-                (0, chai_1.expect)(notification).to.satisfy((n) => {
+                chai_1.expect(notification).to.satisfy((n) => {
                     return n === undefined || n.abuse === undefined || n.abuse.account.displayName !== displayName;
                 });
             }
@@ -397,18 +397,18 @@ function checkNewAccountAbuseForModerators(options) {
 }
 exports.checkNewAccountAbuseForModerators = checkNewAccountAbuseForModerators;
 function checkVideoAutoBlacklistForModerators(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { shortUUID, videoName } = options;
         const notificationType = 12;
         function notificationChecker(notification, checkType) {
             if (checkType === 'presence') {
-                (0, chai_1.expect)(notification).to.not.be.undefined;
-                (0, chai_1.expect)(notification.type).to.equal(notificationType);
-                (0, chai_1.expect)(notification.videoBlacklist.video.id).to.be.a('number');
+                chai_1.expect(notification).to.not.be.undefined;
+                chai_1.expect(notification.type).to.equal(notificationType);
+                chai_1.expect(notification.videoBlacklist.video.id).to.be.a('number');
                 checkVideo(notification.videoBlacklist.video, videoName, shortUUID);
             }
             else {
-                (0, chai_1.expect)(notification).to.satisfy((n) => {
+                chai_1.expect(notification).to.satisfy((n) => {
                     return n === undefined || n.video === undefined || n.video.shortUUID !== shortUUID;
                 });
             }
@@ -422,14 +422,14 @@ function checkVideoAutoBlacklistForModerators(options) {
 }
 exports.checkVideoAutoBlacklistForModerators = checkVideoAutoBlacklistForModerators;
 function checkNewBlacklistOnMyVideo(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { videoName, shortUUID, blacklistType } = options;
         const notificationType = blacklistType === 'blacklist'
             ? 4
             : 5;
         function notificationChecker(notification) {
-            (0, chai_1.expect)(notification).to.not.be.undefined;
-            (0, chai_1.expect)(notification.type).to.equal(notificationType);
+            chai_1.expect(notification).to.not.be.undefined;
+            chai_1.expect(notification.type).to.equal(notificationType);
             const video = blacklistType === 'blacklist' ? notification.videoBlacklist.video : notification.video;
             checkVideo(video, videoName, shortUUID);
         }
@@ -445,18 +445,18 @@ function checkNewBlacklistOnMyVideo(options) {
 }
 exports.checkNewBlacklistOnMyVideo = checkNewBlacklistOnMyVideo;
 function checkNewPeerTubeVersion(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { latestVersion } = options;
         const notificationType = 18;
         function notificationChecker(notification, checkType) {
             if (checkType === 'presence') {
-                (0, chai_1.expect)(notification).to.not.be.undefined;
-                (0, chai_1.expect)(notification.type).to.equal(notificationType);
-                (0, chai_1.expect)(notification.peertube).to.exist;
-                (0, chai_1.expect)(notification.peertube.latestVersion).to.equal(latestVersion);
+                chai_1.expect(notification).to.not.be.undefined;
+                chai_1.expect(notification.type).to.equal(notificationType);
+                chai_1.expect(notification.peertube).to.exist;
+                chai_1.expect(notification.peertube.latestVersion).to.equal(latestVersion);
             }
             else {
-                (0, chai_1.expect)(notification).to.satisfy((n) => {
+                chai_1.expect(notification).to.satisfy((n) => {
                     return n === undefined || n.peertube === undefined || n.peertube.latestVersion !== latestVersion;
                 });
             }
@@ -470,18 +470,18 @@ function checkNewPeerTubeVersion(options) {
 }
 exports.checkNewPeerTubeVersion = checkNewPeerTubeVersion;
 function checkNewPluginVersion(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { pluginName, pluginType } = options;
         const notificationType = 17;
         function notificationChecker(notification, checkType) {
             if (checkType === 'presence') {
-                (0, chai_1.expect)(notification).to.not.be.undefined;
-                (0, chai_1.expect)(notification.type).to.equal(notificationType);
-                (0, chai_1.expect)(notification.plugin.name).to.equal(pluginName);
-                (0, chai_1.expect)(notification.plugin.type).to.equal(pluginType);
+                chai_1.expect(notification).to.not.be.undefined;
+                chai_1.expect(notification.type).to.equal(notificationType);
+                chai_1.expect(notification.plugin.name).to.equal(pluginName);
+                chai_1.expect(notification.plugin.type).to.equal(pluginType);
             }
             else {
-                (0, chai_1.expect)(notification).to.satisfy((n) => {
+                chai_1.expect(notification).to.satisfy((n) => {
                     return n === undefined || n.plugin === undefined || n.plugin.name !== pluginName;
                 });
             }
@@ -495,7 +495,7 @@ function checkNewPluginVersion(options) {
 }
 exports.checkNewPluginVersion = checkNewPluginVersion;
 function prepareNotificationsTest(serversCount = 3, overrideConfigArg = {}) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const userNotifications = [];
         const adminNotifications = [];
         const adminNotificationsServer2 = [];
@@ -510,10 +510,10 @@ function prepareNotificationsTest(serversCount = 3, overrideConfigArg = {}) {
                 limit: 20
             }
         };
-        const servers = yield (0, servers_1.createMultipleServers)(serversCount, Object.assign(overrideConfig, overrideConfigArg));
-        yield (0, login_1.setAccessTokensToServers)(servers);
+        const servers = yield servers_1.createMultipleServers(serversCount, Object.assign(overrideConfig, overrideConfigArg));
+        yield login_1.setAccessTokensToServers(servers);
         if (serversCount > 1) {
-            yield (0, follows_1.doubleFollow)(servers[0], servers[1]);
+            yield follows_1.doubleFollow(servers[0], servers[1]);
         }
         const user = { username: 'user_1', password: 'super password' };
         yield servers[0].users.create(Object.assign(Object.assign({}, user), { videoQuota: 10 * 1000 * 1000 }));
@@ -550,7 +550,7 @@ function prepareNotificationsTest(serversCount = 3, overrideConfigArg = {}) {
 }
 exports.prepareNotificationsTest = prepareNotificationsTest;
 function checkNotification(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { server, token, checkType, notificationChecker, emailNotificationFinder, socketNotifications, emails } = options;
         const check = options.check || { web: true, mail: true };
         if (check.web) {
@@ -568,12 +568,12 @@ function checkNotification(options) {
                 }
             });
             if (checkType === 'presence') {
-                const obj = (0, util_1.inspect)(socketNotifications, { depth: 5 });
-                (0, chai_1.expect)(socketNotification, 'The socket notification is absent when it should be present. ' + obj).to.not.be.undefined;
+                const obj = util_1.inspect(socketNotifications, { depth: 5 });
+                chai_1.expect(socketNotification, 'The socket notification is absent when it should be present. ' + obj).to.not.be.undefined;
             }
             else {
-                const obj = (0, util_1.inspect)(socketNotification, { depth: 5 });
-                (0, chai_1.expect)(socketNotification, 'The socket notification is present when it should not be present. ' + obj).to.be.undefined;
+                const obj = util_1.inspect(socketNotification, { depth: 5 });
+                chai_1.expect(socketNotification, 'The socket notification is present when it should not be present. ' + obj).to.be.undefined;
             }
         }
         if (check.mail) {
@@ -583,33 +583,33 @@ function checkNotification(options) {
                 .find(e => emailNotificationFinder(e));
             if (checkType === 'presence') {
                 const texts = emails.map(e => e.text);
-                (0, chai_1.expect)(email, 'The email is absent when is should be present. ' + (0, util_1.inspect)(texts)).to.not.be.undefined;
+                chai_1.expect(email, 'The email is absent when is should be present. ' + util_1.inspect(texts)).to.not.be.undefined;
             }
             else {
-                (0, chai_1.expect)(email, 'The email is present when is should not be present. ' + (0, util_1.inspect)(email)).to.be.undefined;
+                chai_1.expect(email, 'The email is present when is should not be present. ' + util_1.inspect(email)).to.be.undefined;
             }
         }
     });
 }
 function checkVideo(video, videoName, shortUUID) {
     if (videoName) {
-        (0, chai_1.expect)(video.name).to.be.a('string');
-        (0, chai_1.expect)(video.name).to.not.be.empty;
-        (0, chai_1.expect)(video.name).to.equal(videoName);
+        chai_1.expect(video.name).to.be.a('string');
+        chai_1.expect(video.name).to.not.be.empty;
+        chai_1.expect(video.name).to.equal(videoName);
     }
     if (shortUUID) {
-        (0, chai_1.expect)(video.shortUUID).to.be.a('string');
-        (0, chai_1.expect)(video.shortUUID).to.not.be.empty;
-        (0, chai_1.expect)(video.shortUUID).to.equal(shortUUID);
+        chai_1.expect(video.shortUUID).to.be.a('string');
+        chai_1.expect(video.shortUUID).to.not.be.empty;
+        chai_1.expect(video.shortUUID).to.equal(shortUUID);
     }
-    (0, chai_1.expect)(video.id).to.be.a('number');
+    chai_1.expect(video.id).to.be.a('number');
 }
 function checkActor(actor) {
-    (0, chai_1.expect)(actor.displayName).to.be.a('string');
-    (0, chai_1.expect)(actor.displayName).to.not.be.empty;
-    (0, chai_1.expect)(actor.host).to.not.be.undefined;
+    chai_1.expect(actor.displayName).to.be.a('string');
+    chai_1.expect(actor.displayName).to.not.be.empty;
+    chai_1.expect(actor.host).to.not.be.undefined;
 }
 function checkComment(comment, commentId, threadId) {
-    (0, chai_1.expect)(comment.id).to.equal(commentId);
-    (0, chai_1.expect)(comment.threadId).to.equal(threadId);
+    chai_1.expect(comment.id).to.equal(commentId);
+    chai_1.expect(comment.threadId).to.equal(threadId);
 }

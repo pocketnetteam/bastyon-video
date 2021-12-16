@@ -12,57 +12,57 @@ const paths_1 = require("./paths");
 class VideoPathManager {
     constructor() { }
     getFSHLSOutputPath(video, filename) {
-        const base = (0, paths_1.getHLSDirectory)(video);
+        const base = paths_1.getHLSDirectory(video);
         if (!filename)
             return base;
-        return (0, path_1.join)(base, filename);
+        return path_1.join(base, filename);
     }
     getFSRedundancyVideoFilePath(videoOrPlaylist, videoFile) {
         if (videoFile.isHLS()) {
-            const video = (0, video_1.extractVideo)(videoOrPlaylist);
-            return (0, path_1.join)((0, paths_1.getHLSRedundancyDirectory)(video), videoFile.filename);
+            const video = video_1.extractVideo(videoOrPlaylist);
+            return path_1.join(paths_1.getHLSRedundancyDirectory(video), videoFile.filename);
         }
-        return (0, path_1.join)(config_1.CONFIG.STORAGE.REDUNDANCY_DIR, videoFile.filename);
+        return path_1.join(config_1.CONFIG.STORAGE.REDUNDANCY_DIR, videoFile.filename);
     }
     getFSVideoFileOutputPath(videoOrPlaylist, videoFile) {
         if (videoFile.isHLS()) {
-            const video = (0, video_1.extractVideo)(videoOrPlaylist);
-            return (0, path_1.join)((0, paths_1.getHLSDirectory)(video), videoFile.filename);
+            const video = video_1.extractVideo(videoOrPlaylist);
+            return path_1.join(paths_1.getHLSDirectory(video), videoFile.filename);
         }
-        return (0, path_1.join)(config_1.CONFIG.STORAGE.VIDEOS_DIR, videoFile.filename);
+        return path_1.join(config_1.CONFIG.STORAGE.VIDEOS_DIR, videoFile.filename);
     }
     makeAvailableVideoFile(videoOrPlaylist, videoFile, cb) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (videoFile.storage === 0) {
                 return this.makeAvailableFactory(() => this.getFSVideoFileOutputPath(videoOrPlaylist, videoFile), false, cb);
             }
             const destination = this.buildTMPDestination(videoFile.filename);
             if (videoFile.isHLS()) {
-                const video = (0, video_1.extractVideo)(videoOrPlaylist);
-                return this.makeAvailableFactory(() => (0, object_storage_1.makeHLSFileAvailable)(videoOrPlaylist, video, videoFile.filename, destination), true, cb);
+                const video = video_1.extractVideo(videoOrPlaylist);
+                return this.makeAvailableFactory(() => object_storage_1.makeHLSFileAvailable(videoOrPlaylist, video, videoFile.filename, destination), true, cb);
             }
-            return this.makeAvailableFactory(() => (0, object_storage_1.makeWebTorrentFileAvailable)(videoFile.filename, destination), true, cb);
+            return this.makeAvailableFactory(() => object_storage_1.makeWebTorrentFileAvailable(videoFile.filename, destination), true, cb);
         });
     }
     makeAvailableResolutionPlaylistFile(playlist, videoFile, cb) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            const filename = (0, paths_1.getHlsResolutionPlaylistFilename)(videoFile.filename);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const filename = paths_1.getHlsResolutionPlaylistFilename(videoFile.filename);
             if (videoFile.storage === 0) {
-                return this.makeAvailableFactory(() => (0, path_1.join)((0, paths_1.getHLSDirectory)(playlist.Video), filename), false, cb);
+                return this.makeAvailableFactory(() => path_1.join(paths_1.getHLSDirectory(playlist.Video), filename), false, cb);
             }
-            return this.makeAvailableFactory(() => (0, object_storage_1.makeHLSFileAvailable)(playlist, playlist.Video, filename, this.buildTMPDestination(filename)), true, cb);
+            return this.makeAvailableFactory(() => object_storage_1.makeHLSFileAvailable(playlist, playlist.Video, filename, this.buildTMPDestination(filename)), true, cb);
         });
     }
     makeAvailablePlaylistFile(playlist, filename, cb) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (playlist.storage === 0) {
-                return this.makeAvailableFactory(() => (0, path_1.join)((0, paths_1.getHLSDirectory)(playlist.Video), filename), false, cb);
+                return this.makeAvailableFactory(() => path_1.join(paths_1.getHLSDirectory(playlist.Video), filename), false, cb);
             }
-            return this.makeAvailableFactory(() => (0, object_storage_1.makeHLSFileAvailable)(playlist, playlist.Video, filename, this.buildTMPDestination(filename)), true, cb);
+            return this.makeAvailableFactory(() => object_storage_1.makeHLSFileAvailable(playlist, playlist.Video, filename, this.buildTMPDestination(filename)), true, cb);
         });
     }
     makeAvailableFactory(method, clean, cb) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             let result;
             const destination = yield method();
             try {
@@ -70,16 +70,16 @@ class VideoPathManager {
             }
             catch (err) {
                 if (destination && clean)
-                    yield (0, fs_extra_1.remove)(destination);
+                    yield fs_extra_1.remove(destination);
                 throw err;
             }
             if (clean)
-                yield (0, fs_extra_1.remove)(destination);
+                yield fs_extra_1.remove(destination);
             return result;
         });
     }
     buildTMPDestination(filename) {
-        return (0, path_1.join)(config_1.CONFIG.STORAGE.TMP_DIR, (0, uuid_1.buildUUID)() + (0, path_1.extname)(filename));
+        return path_1.join(config_1.CONFIG.STORAGE.TMP_DIR, uuid_1.buildUUID() + path_1.extname(filename));
     }
     static get Instance() {
         return this.instance || (this.instance = new this());

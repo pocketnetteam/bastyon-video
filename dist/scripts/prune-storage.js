@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const register_ts_paths_1 = require("../server/helpers/register-ts-paths");
-(0, register_ts_paths_1.registerTSPaths)();
+register_ts_paths_1.registerTSPaths();
 const prompt_1 = require("prompt");
 const path_1 = require("path");
 const config_1 = require("../server/initializers/config");
@@ -24,18 +24,18 @@ run()
     process.exit(-1);
 });
 function run() {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        const dirs = (0, lodash_1.values)(config_1.CONFIG.STORAGE);
-        if ((0, lodash_1.uniq)(dirs).length !== dirs.length) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const dirs = lodash_1.values(config_1.CONFIG.STORAGE);
+        if (lodash_1.uniq(dirs).length !== dirs.length) {
             console.error('Cannot prune storage because you put multiple storage keys in the same directory.');
             process.exit(0);
         }
-        yield (0, database_1.initDatabaseModels)(true);
+        yield database_1.initDatabaseModels(true);
         let toDelete = [];
         console.log('Detecting files to remove, it could take a while...');
         toDelete = toDelete.concat(yield pruneDirectory(config_1.CONFIG.STORAGE.VIDEOS_DIR, doesWebTorrentFileExist()), yield pruneDirectory(config_1.CONFIG.STORAGE.TORRENTS_DIR, doesTorrentFileExist()), yield pruneDirectory(config_1.CONFIG.STORAGE.REDUNDANCY_DIR, doesRedundancyExist), yield pruneDirectory(config_1.CONFIG.STORAGE.PREVIEWS_DIR, doesThumbnailExist(true, 2)), yield pruneDirectory(config_1.CONFIG.STORAGE.THUMBNAILS_DIR, doesThumbnailExist(false, 1)), yield pruneDirectory(config_1.CONFIG.STORAGE.ACTOR_IMAGES, doesActorImageExist));
-        const tmpFiles = yield (0, fs_extra_1.readdir)(config_1.CONFIG.STORAGE.TMP_DIR);
-        toDelete = toDelete.concat(tmpFiles.map(t => (0, path_1.join)(config_1.CONFIG.STORAGE.TMP_DIR, t)));
+        const tmpFiles = yield fs_extra_1.readdir(config_1.CONFIG.STORAGE.TMP_DIR);
+        toDelete = toDelete.concat(tmpFiles.map(t => path_1.join(config_1.CONFIG.STORAGE.TMP_DIR, t)));
         if (toDelete.length === 0) {
             console.log('No files to delete.');
             return;
@@ -45,7 +45,7 @@ function run() {
         if (res === true) {
             console.log('Processing delete...\n');
             for (const path of toDelete) {
-                yield (0, fs_extra_1.remove)(path);
+                yield fs_extra_1.remove(path);
             }
             console.log('Done!');
         }
@@ -55,11 +55,11 @@ function run() {
     });
 }
 function pruneDirectory(directory, existFun) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        const files = yield (0, fs_extra_1.readdir)(directory);
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const files = yield fs_extra_1.readdir(directory);
         const toDelete = [];
-        yield (0, bluebird_1.map)(files, (file) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            const filePath = (0, path_1.join)(directory, file);
+        yield bluebird_1.map(files, (file) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const filePath = path_1.join(directory, file);
             if ((yield existFun(filePath)) !== true) {
                 toDelete.push(filePath);
             }
@@ -68,14 +68,14 @@ function pruneDirectory(directory, existFun) {
     });
 }
 function doesWebTorrentFileExist() {
-    return (filePath) => video_file_1.VideoFileModel.doesOwnedWebTorrentVideoFileExist((0, path_1.basename)(filePath));
+    return (filePath) => video_file_1.VideoFileModel.doesOwnedWebTorrentVideoFileExist(path_1.basename(filePath));
 }
 function doesTorrentFileExist() {
-    return (filePath) => video_file_1.VideoFileModel.doesOwnedTorrentFileExist((0, path_1.basename)(filePath));
+    return (filePath) => video_file_1.VideoFileModel.doesOwnedTorrentFileExist(path_1.basename(filePath));
 }
 function doesThumbnailExist(keepOnlyOwned, type) {
-    return (filePath) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        const thumbnail = yield thumbnail_1.ThumbnailModel.loadByFilename((0, path_1.basename)(filePath), type);
+    return (filePath) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const thumbnail = yield thumbnail_1.ThumbnailModel.loadByFilename(path_1.basename(filePath), type);
         if (!thumbnail)
             return false;
         if (keepOnlyOwned) {
@@ -87,18 +87,18 @@ function doesThumbnailExist(keepOnlyOwned, type) {
     });
 }
 function doesActorImageExist(filePath) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        const image = yield actor_image_1.ActorImageModel.loadByName((0, path_1.basename)(filePath));
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const image = yield actor_image_1.ActorImageModel.loadByName(path_1.basename(filePath));
         return !!image;
     });
 }
 function doesRedundancyExist(filePath) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        const isPlaylist = (yield (0, fs_extra_1.stat)(filePath)).isDirectory();
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const isPlaylist = (yield fs_extra_1.stat(filePath)).isDirectory();
         if (isPlaylist) {
             if (filePath === constants_1.HLS_REDUNDANCY_DIRECTORY)
                 return true;
-            const uuid = (0, utils_1.getUUIDFromFilename)(filePath);
+            const uuid = utils_1.getUUIDFromFilename(filePath);
             const video = yield video_1.VideoModel.loadWithFiles(uuid);
             if (!video)
                 return false;
@@ -108,7 +108,7 @@ function doesRedundancyExist(filePath) {
             const redundancy = yield video_redundancy_1.VideoRedundancyModel.loadLocalByStreamingPlaylistId(p.id);
             return !!redundancy;
         }
-        const file = yield video_file_1.VideoFileModel.loadByFilename((0, path_1.basename)(filePath));
+        const file = yield video_file_1.VideoFileModel.loadByFilename(path_1.basename(filePath));
         if (!file)
             return false;
         const redundancy = yield video_redundancy_1.VideoRedundancyModel.loadLocalByFileId(file.id);
@@ -116,9 +116,9 @@ function doesRedundancyExist(filePath) {
     });
 }
 function askConfirmation() {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         return new Promise((res, rej) => {
-            (0, prompt_1.start)();
+            prompt_1.start();
             const schema = {
                 properties: {
                     confirm: {
@@ -131,7 +131,7 @@ function askConfirmation() {
                     }
                 }
             };
-            (0, prompt_1.get)(schema, function (err, result) {
+            prompt_1.get(schema, function (err, result) {
                 var _a;
                 if (err)
                     return rej(err);

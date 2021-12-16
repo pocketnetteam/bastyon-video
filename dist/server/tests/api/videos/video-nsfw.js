@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = (0, tslib_1.__importStar)(require("chai"));
+const chai = tslib_1.__importStar(require("chai"));
 const extra_utils_1 = require("@shared/extra-utils");
 const expect = chai.expect;
 function createOverviewRes(overview) {
@@ -14,7 +14,7 @@ describe('Test video NSFW policy', function () {
     let userAccessToken;
     let customConfig;
     function getVideosFunctions(token, query = {}) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const user = yield server.users.getMyInfo();
             const channelName = user.videoChannels[0].name;
             const accountName = user.account.name + '@' + user.account.host;
@@ -49,10 +49,10 @@ describe('Test video NSFW policy', function () {
         });
     }
     before(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(50000);
-            server = yield (0, extra_utils_1.createSingleServer)(1);
-            yield (0, extra_utils_1.setAccessTokensToServers)([server]);
+            server = yield extra_utils_1.createSingleServer(1);
+            yield extra_utils_1.setAccessTokensToServers([server]);
             {
                 const attributes = { name: 'nsfw', nsfw: true, category: 1 };
                 yield server.videos.upload({ attributes });
@@ -66,7 +66,7 @@ describe('Test video NSFW policy', function () {
     });
     describe('Instance default NSFW policy', function () {
         it('Should display NSFW videos with display default NSFW policy', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const serverConfig = yield server.config.getConfig();
                 expect(serverConfig.instance.defaultNSFWPolicy).to.equal('display');
                 for (const body of yield getVideosFunctions()) {
@@ -79,7 +79,7 @@ describe('Test video NSFW policy', function () {
             });
         });
         it('Should not display NSFW videos with do_not_list default NSFW policy', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 customConfig.instance.defaultNSFWPolicy = 'do_not_list';
                 yield server.config.updateCustomConfig({ newCustomConfig: customConfig });
                 const serverConfig = yield server.config.getConfig();
@@ -93,7 +93,7 @@ describe('Test video NSFW policy', function () {
             });
         });
         it('Should display NSFW videos with blur default NSFW policy', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 customConfig.instance.defaultNSFWPolicy = 'blur';
                 yield server.config.updateCustomConfig({ newCustomConfig: customConfig });
                 const serverConfig = yield server.config.getConfig();
@@ -110,7 +110,7 @@ describe('Test video NSFW policy', function () {
     });
     describe('User NSFW policy', function () {
         it('Should create a user having the default nsfw policy', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const username = 'user1';
                 const password = 'my super password';
                 yield server.users.create({ username: username, password: password });
@@ -120,7 +120,7 @@ describe('Test video NSFW policy', function () {
             });
         });
         it('Should display NSFW videos with blur user NSFW policy', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 customConfig.instance.defaultNSFWPolicy = 'do_not_list';
                 yield server.config.updateCustomConfig({ newCustomConfig: customConfig });
                 for (const body of yield getVideosFunctions(userAccessToken)) {
@@ -133,7 +133,7 @@ describe('Test video NSFW policy', function () {
             });
         });
         it('Should display NSFW videos with display user NSFW policy', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 yield server.users.updateMe({ nsfwPolicy: 'display' });
                 for (const body of yield getVideosFunctions(server.accessToken)) {
                     expect(body.total).to.equal(2);
@@ -145,7 +145,7 @@ describe('Test video NSFW policy', function () {
             });
         });
         it('Should not display NSFW videos with do_not_list user NSFW policy', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 yield server.users.updateMe({ nsfwPolicy: 'do_not_list' });
                 for (const body of yield getVideosFunctions(server.accessToken)) {
                     expect(body.total).to.equal(1);
@@ -156,7 +156,7 @@ describe('Test video NSFW policy', function () {
             });
         });
         it('Should be able to see my NSFW videos even with do_not_list user NSFW policy', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const { total, data } = yield server.videos.listMyVideos();
                 expect(total).to.equal(2);
                 expect(data).to.have.lengthOf(2);
@@ -165,7 +165,7 @@ describe('Test video NSFW policy', function () {
             });
         });
         it('Should display NSFW videos when the nsfw param === true', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 for (const body of yield getVideosFunctions(server.accessToken, { nsfw: 'true' })) {
                     expect(body.total).to.equal(1);
                     const videos = body.data;
@@ -175,7 +175,7 @@ describe('Test video NSFW policy', function () {
             });
         });
         it('Should hide NSFW videos when the nsfw param === true', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 for (const body of yield getVideosFunctions(server.accessToken, { nsfw: 'false' })) {
                     expect(body.total).to.equal(1);
                     const videos = body.data;
@@ -185,7 +185,7 @@ describe('Test video NSFW policy', function () {
             });
         });
         it('Should display both videos when the nsfw param === both', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 for (const body of yield getVideosFunctions(server.accessToken, { nsfw: 'both' })) {
                     expect(body.total).to.equal(2);
                     const videos = body.data;
@@ -197,8 +197,8 @@ describe('Test video NSFW policy', function () {
         });
     });
     after(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            yield (0, extra_utils_1.cleanupTests)([server]);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield extra_utils_1.cleanupTests([server]);
         });
     });
 });

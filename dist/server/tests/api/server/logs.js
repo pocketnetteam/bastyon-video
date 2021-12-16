@@ -2,29 +2,29 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = (0, tslib_1.__importStar)(require("chai"));
+const chai = tslib_1.__importStar(require("chai"));
 const extra_utils_1 = require("@shared/extra-utils");
 const expect = chai.expect;
 describe('Test logs', function () {
     let server;
     let logsCommand;
     before(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(30000);
-            server = yield (0, extra_utils_1.createSingleServer)(1);
-            yield (0, extra_utils_1.setAccessTokensToServers)([server]);
+            server = yield extra_utils_1.createSingleServer(1);
+            yield extra_utils_1.setAccessTokensToServers([server]);
             logsCommand = server.logs;
         });
     });
     describe('With the standard log file', function () {
         it('Should get logs with a start date', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(20000);
                 yield server.videos.upload({ attributes: { name: 'video 1' } });
-                yield (0, extra_utils_1.waitJobs)([server]);
+                yield extra_utils_1.waitJobs([server]);
                 const now = new Date();
                 yield server.videos.upload({ attributes: { name: 'video 2' } });
-                yield (0, extra_utils_1.waitJobs)([server]);
+                yield extra_utils_1.waitJobs([server]);
                 const body = yield logsCommand.getLogs({ startDate: now });
                 const logsString = JSON.stringify(body);
                 expect(logsString.includes('video 1')).to.be.false;
@@ -32,16 +32,16 @@ describe('Test logs', function () {
             });
         });
         it('Should get logs with an end date', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(30000);
                 yield server.videos.upload({ attributes: { name: 'video 3' } });
-                yield (0, extra_utils_1.waitJobs)([server]);
+                yield extra_utils_1.waitJobs([server]);
                 const now1 = new Date();
                 yield server.videos.upload({ attributes: { name: 'video 4' } });
-                yield (0, extra_utils_1.waitJobs)([server]);
+                yield extra_utils_1.waitJobs([server]);
                 const now2 = new Date();
                 yield server.videos.upload({ attributes: { name: 'video 5' } });
-                yield (0, extra_utils_1.waitJobs)([server]);
+                yield extra_utils_1.waitJobs([server]);
                 const body = yield logsCommand.getLogs({ startDate: now1, endDate: now2 });
                 const logsString = JSON.stringify(body);
                 expect(logsString.includes('video 3')).to.be.false;
@@ -50,11 +50,11 @@ describe('Test logs', function () {
             });
         });
         it('Should get filter by level', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(20000);
                 const now = new Date();
                 yield server.videos.upload({ attributes: { name: 'video 6' } });
-                yield (0, extra_utils_1.waitJobs)([server]);
+                yield extra_utils_1.waitJobs([server]);
                 {
                     const body = yield logsCommand.getLogs({ startDate: now, level: 'info' });
                     const logsString = JSON.stringify(body);
@@ -68,7 +68,7 @@ describe('Test logs', function () {
             });
         });
         it('Should log ping requests', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(10000);
                 const now = new Date();
                 yield server.servers.ping();
@@ -78,9 +78,9 @@ describe('Test logs', function () {
             });
         });
         it('Should not log ping requests', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(30000);
-                yield (0, extra_utils_1.killallServers)([server]);
+                yield extra_utils_1.killallServers([server]);
                 yield server.run({ log: { log_ping_requests: false } });
                 const now = new Date();
                 yield server.servers.ping();
@@ -92,13 +92,13 @@ describe('Test logs', function () {
     });
     describe('With the audit log', function () {
         it('Should get logs with a start date', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(20000);
                 yield server.videos.upload({ attributes: { name: 'video 7' } });
-                yield (0, extra_utils_1.waitJobs)([server]);
+                yield extra_utils_1.waitJobs([server]);
                 const now = new Date();
                 yield server.videos.upload({ attributes: { name: 'video 8' } });
-                yield (0, extra_utils_1.waitJobs)([server]);
+                yield extra_utils_1.waitJobs([server]);
                 const body = yield logsCommand.getAuditLogs({ startDate: now });
                 const logsString = JSON.stringify(body);
                 expect(logsString.includes('video 7')).to.be.false;
@@ -111,16 +111,16 @@ describe('Test logs', function () {
             });
         });
         it('Should get logs with an end date', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(30000);
                 yield server.videos.upload({ attributes: { name: 'video 9' } });
-                yield (0, extra_utils_1.waitJobs)([server]);
+                yield extra_utils_1.waitJobs([server]);
                 const now1 = new Date();
                 yield server.videos.upload({ attributes: { name: 'video 10' } });
-                yield (0, extra_utils_1.waitJobs)([server]);
+                yield extra_utils_1.waitJobs([server]);
                 const now2 = new Date();
                 yield server.videos.upload({ attributes: { name: 'video 11' } });
-                yield (0, extra_utils_1.waitJobs)([server]);
+                yield extra_utils_1.waitJobs([server]);
                 const body = yield logsCommand.getAuditLogs({ startDate: now1, endDate: now2 });
                 const logsString = JSON.stringify(body);
                 expect(logsString.includes('video 9')).to.be.false;
@@ -130,8 +130,8 @@ describe('Test logs', function () {
         });
     });
     after(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            yield (0, extra_utils_1.cleanupTests)([server]);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield extra_utils_1.cleanupTests([server]);
         });
     });
 });

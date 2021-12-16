@@ -17,7 +17,7 @@ let VideoBlacklistModel = VideoBlacklistModel_1 = class VideoBlacklistModel exte
             return {
                 offset: start,
                 limit: count,
-                order: (0, utils_1.getBlacklistSort)(sort.sortModel, sort.sortValue)
+                order: utils_1.getBlacklistSort(sort.sortModel, sort.sortValue)
             };
         }
         const countQuery = buildBaseQuery();
@@ -26,7 +26,7 @@ let VideoBlacklistModel = VideoBlacklistModel_1 = class VideoBlacklistModel exte
             {
                 model: video_1.VideoModel,
                 required: true,
-                where: (0, utils_1.searchAttribute)(search, 'name'),
+                where: utils_1.searchAttribute(search, 'name'),
                 include: [
                     {
                         model: video_channel_1.VideoChannelModel.scope({ method: [video_channel_1.ScopeNames.SUMMARY, { withAccount: true }] }),
@@ -74,48 +74,48 @@ let VideoBlacklistModel = VideoBlacklistModel_1 = class VideoBlacklistModel exte
         };
     }
 };
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(true),
-    (0, sequelize_typescript_1.Is)('VideoBlacklistReason', value => (0, utils_1.throwIfNotValid)(value, video_blacklist_1.isVideoBlacklistReasonValid, 'reason', true)),
-    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.VIDEO_BLACKLIST.REASON.max)),
-    (0, tslib_1.__metadata)("design:type", String)
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(true),
+    sequelize_typescript_1.Is('VideoBlacklistReason', value => utils_1.throwIfNotValid(value, video_blacklist_1.isVideoBlacklistReasonValid, 'reason', true)),
+    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.VIDEO_BLACKLIST.REASON.max)),
+    tslib_1.__metadata("design:type", String)
 ], VideoBlacklistModel.prototype, "reason", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(false),
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(false),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", Boolean)
+    tslib_1.__metadata("design:type", Boolean)
 ], VideoBlacklistModel.prototype, "unfederated", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(false),
-    (0, sequelize_typescript_1.Default)(null),
-    (0, sequelize_typescript_1.Is)('VideoBlacklistType', value => (0, utils_1.throwIfNotValid)(value, video_blacklist_1.isVideoBlacklistTypeValid, 'type')),
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(false),
+    sequelize_typescript_1.Default(null),
+    sequelize_typescript_1.Is('VideoBlacklistType', value => utils_1.throwIfNotValid(value, video_blacklist_1.isVideoBlacklistTypeValid, 'type')),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", Number)
+    tslib_1.__metadata("design:type", Number)
 ], VideoBlacklistModel.prototype, "type", void 0);
-(0, tslib_1.__decorate)([
+tslib_1.__decorate([
     sequelize_typescript_1.CreatedAt,
-    (0, tslib_1.__metadata)("design:type", Date)
+    tslib_1.__metadata("design:type", Date)
 ], VideoBlacklistModel.prototype, "createdAt", void 0);
-(0, tslib_1.__decorate)([
+tslib_1.__decorate([
     sequelize_typescript_1.UpdatedAt,
-    (0, tslib_1.__metadata)("design:type", Date)
+    tslib_1.__metadata("design:type", Date)
 ], VideoBlacklistModel.prototype, "updatedAt", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.ForeignKey)(() => video_1.VideoModel),
+tslib_1.__decorate([
+    sequelize_typescript_1.ForeignKey(() => video_1.VideoModel),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", Number)
+    tslib_1.__metadata("design:type", Number)
 ], VideoBlacklistModel.prototype, "videoId", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.BelongsTo)(() => video_1.VideoModel, {
+tslib_1.__decorate([
+    sequelize_typescript_1.BelongsTo(() => video_1.VideoModel, {
         foreignKey: {
             allowNull: false
         },
         onDelete: 'cascade'
     }),
-    (0, tslib_1.__metadata)("design:type", video_1.VideoModel)
+    tslib_1.__metadata("design:type", video_1.VideoModel)
 ], VideoBlacklistModel.prototype, "Video", void 0);
-VideoBlacklistModel = VideoBlacklistModel_1 = (0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.Table)({
+VideoBlacklistModel = VideoBlacklistModel_1 = tslib_1.__decorate([
+    sequelize_typescript_1.Table({
         tableName: 'videoBlacklist',
         indexes: [
             {

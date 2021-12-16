@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = (0, tslib_1.__importStar)(require("chai"));
+const chai = tslib_1.__importStar(require("chai"));
 const extra_utils_1 = require("@shared/extra-utils");
 const expect = chai.expect;
 describe('Test services', function () {
@@ -11,11 +11,11 @@ describe('Test services', function () {
     let playlistDisplayName;
     let video;
     before(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(30000);
-            server = yield (0, extra_utils_1.createSingleServer)(1);
-            yield (0, extra_utils_1.setAccessTokensToServers)([server]);
-            yield (0, extra_utils_1.setDefaultVideoChannel)([server]);
+            server = yield extra_utils_1.createSingleServer(1);
+            yield extra_utils_1.setAccessTokensToServers([server]);
+            yield extra_utils_1.setDefaultVideoChannel([server]);
             {
                 const attributes = { name: 'my super name' };
                 yield server.videos.upload({ attributes });
@@ -42,7 +42,7 @@ describe('Test services', function () {
         });
     });
     it('Should have a valid oEmbed video response', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             for (const basePath of ['/videos/watch/', '/w/']) {
                 for (const suffix of ['', '?param=1']) {
                     const oembedUrl = server.url + basePath + video.uuid + suffix;
@@ -64,7 +64,7 @@ describe('Test services', function () {
         });
     });
     it('Should have a valid playlist oEmbed response', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             for (const basePath of ['/videos/watch/playlist/', '/w/p/']) {
                 for (const suffix of ['', '?param=1']) {
                     const oembedUrl = server.url + basePath + playlistUUID + suffix;
@@ -85,7 +85,7 @@ describe('Test services', function () {
         });
     });
     it('Should have a valid oEmbed response with small max height query', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             for (const basePath of ['/videos/watch/', '/w/']) {
                 const oembedUrl = 'http://localhost:' + server.port + basePath + video.uuid;
                 const format = 'json';
@@ -107,8 +107,8 @@ describe('Test services', function () {
         });
     });
     after(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            yield (0, extra_utils_1.cleanupTests)([server]);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield extra_utils_1.cleanupTests([server]);
         });
     });
 });

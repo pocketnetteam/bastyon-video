@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = (0, tslib_1.__importStar)(require("chai"));
+const chai = tslib_1.__importStar(require("chai"));
 const fast_xml_parser_1 = require("fast-xml-parser");
 const extra_utils_1 = require("@shared/extra-utils");
 const models_1 = require("@shared/models");
@@ -20,18 +20,18 @@ describe('Test syndication feeds', () => {
     let userChannelId;
     let userFeedToken;
     before(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(120000);
-            servers = yield (0, extra_utils_1.createMultipleServers)(2);
-            serverHLSOnly = yield (0, extra_utils_1.createSingleServer)(3, {
+            servers = yield extra_utils_1.createMultipleServers(2);
+            serverHLSOnly = yield extra_utils_1.createSingleServer(3, {
                 transcoding: {
                     enabled: true,
                     webtorrent: { enabled: false },
                     hls: { enabled: true }
                 }
             });
-            yield (0, extra_utils_1.setAccessTokensToServers)([...servers, serverHLSOnly]);
-            yield (0, extra_utils_1.doubleFollow)(servers[0], servers[1]);
+            yield extra_utils_1.setAccessTokensToServers([...servers, serverHLSOnly]);
+            yield extra_utils_1.doubleFollow(servers[0], servers[1]);
             {
                 const user = yield servers[0].users.getMyInfo();
                 rootAccountId = user.account.id;
@@ -63,12 +63,12 @@ describe('Test syndication feeds', () => {
                 const { id } = yield servers[0].videos.upload({ attributes });
                 yield servers[0].comments.createThread({ videoId: id, text: 'comment on unlisted video' });
             }
-            yield (0, extra_utils_1.waitJobs)(servers);
+            yield extra_utils_1.waitJobs(servers);
         });
     });
     describe('All feed', function () {
         it('Should be well formed XML (covers RSS 2.0 and ATOM 1.0 endpoints)', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 for (const feed of ['video-comments', 'videos']) {
                     const rss = yield servers[0].feed.getXML({ feed });
                     expect(rss).xml.to.be.valid();
@@ -78,7 +78,7 @@ describe('Test syndication feeds', () => {
             });
         });
         it('Should be well formed JSON (covers JSON feed 1.0 endpoint)', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 for (const feed of ['video-comments', 'videos']) {
                     const jsonText = yield servers[0].feed.getJSON({ feed });
                     expect(JSON.parse(jsonText)).to.be.jsonSchema({ type: 'object' });
@@ -86,8 +86,8 @@ describe('Test syndication feeds', () => {
             });
         });
         it('Should serve the endpoint with a classic request', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makeGetRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makeGetRequest({
                     url: servers[0].url,
                     path: '/feeds/videos.xml',
                     accept: 'application/xml',
@@ -96,8 +96,8 @@ describe('Test syndication feeds', () => {
             });
         });
         it('Should serve the endpoint as a cached request', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                const res = yield (0, extra_utils_1.makeGetRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                const res = yield extra_utils_1.makeGetRequest({
                     url: servers[0].url,
                     path: '/feeds/videos.xml',
                     accept: 'application/xml',
@@ -107,8 +107,8 @@ describe('Test syndication feeds', () => {
             });
         });
         it('Should not serve the endpoint as a cached request', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                const res = yield (0, extra_utils_1.makeGetRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                const res = yield extra_utils_1.makeGetRequest({
                     url: servers[0].url,
                     path: '/feeds/videos.xml?v=186',
                     accept: 'application/xml',
@@ -118,18 +118,18 @@ describe('Test syndication feeds', () => {
             });
         });
         it('Should refuse to serve the endpoint without accept header', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makeGetRequest)({ url: servers[0].url, path: '/feeds/videos.xml', expectedStatus: models_1.HttpStatusCode.NOT_ACCEPTABLE_406 });
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makeGetRequest({ url: servers[0].url, path: '/feeds/videos.xml', expectedStatus: models_1.HttpStatusCode.NOT_ACCEPTABLE_406 });
             });
         });
     });
     describe('Videos feed', function () {
         it('Should contain a valid enclosure (covers RSS 2.0 endpoint)', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 for (const server of servers) {
                     const rss = yield server.feed.getXML({ feed: 'videos' });
-                    expect((0, fast_xml_parser_1.validate)(rss)).to.be.true;
-                    const xmlDoc = (0, fast_xml_parser_1.parse)(rss, { parseAttributeValue: true, ignoreAttributes: false });
+                    expect(fast_xml_parser_1.validate(rss)).to.be.true;
+                    const xmlDoc = fast_xml_parser_1.parse(rss, { parseAttributeValue: true, ignoreAttributes: false });
                     const enclosure = xmlDoc.rss.channel.item[0].enclosure;
                     expect(enclosure).to.exist;
                     expect(enclosure['@_type']).to.equal('application/x-bittorrent');
@@ -139,7 +139,7 @@ describe('Test syndication feeds', () => {
             });
         });
         it('Should contain a valid \'attachments\' object (covers JSON feed 1.0 endpoint)', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 for (const server of servers) {
                     const json = yield server.feed.getJSON({ feed: 'videos' });
                     const jsonObj = JSON.parse(json);
@@ -153,7 +153,7 @@ describe('Test syndication feeds', () => {
             });
         });
         it('Should filter by account', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 {
                     const json = yield servers[0].feed.getJSON({ feed: 'videos', query: { accountId: rootAccountId } });
                     const jsonObj = JSON.parse(json);
@@ -185,7 +185,7 @@ describe('Test syndication feeds', () => {
             });
         });
         it('Should filter by video channel', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 {
                     const json = yield servers[0].feed.getJSON({ feed: 'videos', query: { videoChannelId: rootChannelId } });
                     const jsonObj = JSON.parse(json);
@@ -219,10 +219,10 @@ describe('Test syndication feeds', () => {
             });
         });
         it('Should correctly have videos feed with HLS only', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(120000);
                 yield serverHLSOnly.videos.upload({ attributes: { name: 'hls only video' } });
-                yield (0, extra_utils_1.waitJobs)([serverHLSOnly]);
+                yield extra_utils_1.waitJobs([serverHLSOnly]);
                 const json = yield serverHLSOnly.feed.getJSON({ feed: 'videos' });
                 const jsonObj = JSON.parse(json);
                 expect(jsonObj.items.length).to.be.equal(1);
@@ -238,7 +238,7 @@ describe('Test syndication feeds', () => {
     });
     describe('Video comments feed', function () {
         it('Should contain valid comments (covers JSON feed 1.0 endpoint) and not from unlisted videos', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 for (const server of servers) {
                     const json = yield server.feed.getJSON({ feed: 'video-comments' });
                     const jsonObj = JSON.parse(json);
@@ -249,7 +249,7 @@ describe('Test syndication feeds', () => {
             });
         });
         it('Should not list comments from muted accounts or instances', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(30000);
                 const remoteHandle = 'root@localhost:' + servers[0].port;
                 yield servers[1].blocklist.addToServerBlocklist({ account: remoteHandle });
@@ -261,9 +261,9 @@ describe('Test syndication feeds', () => {
                 yield servers[1].blocklist.removeFromServerBlocklist({ account: remoteHandle });
                 {
                     const videoUUID = (yield servers[1].videos.quickUpload({ name: 'server 2' })).uuid;
-                    yield (0, extra_utils_1.waitJobs)(servers);
+                    yield extra_utils_1.waitJobs(servers);
                     yield servers[0].comments.createThread({ videoId: videoUUID, text: 'super comment' });
-                    yield (0, extra_utils_1.waitJobs)(servers);
+                    yield extra_utils_1.waitJobs(servers);
                     const json = yield servers[1].feed.getJSON({ feed: 'video-comments', query: { version: 3 } });
                     const jsonObj = JSON.parse(json);
                     expect(jsonObj.items.length).to.be.equal(3);
@@ -281,7 +281,7 @@ describe('Test syndication feeds', () => {
         let feeduserAccountId;
         let feeduserFeedToken;
         it('Should list no videos for a user with no videos and no subscriptions', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const attr = { username: 'feeduser', password: 'password' };
                 yield servers[0].users.create({ username: attr.username, password: attr.password });
                 const feeduserAccessToken = yield servers[0].login.getAccessToken(attr);
@@ -304,19 +304,19 @@ describe('Test syndication feeds', () => {
             });
         });
         it('Should fail with an invalid token', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const query = { accountId: feeduserAccountId, token: 'toto' };
                 yield servers[0].feed.getJSON({ feed: 'subscriptions', query, expectedStatus: models_1.HttpStatusCode.FORBIDDEN_403 });
             });
         });
         it('Should fail with a token of another user', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const query = { accountId: feeduserAccountId, token: userFeedToken };
                 yield servers[0].feed.getJSON({ feed: 'subscriptions', query, expectedStatus: models_1.HttpStatusCode.FORBIDDEN_403 });
             });
         });
         it('Should list no videos for a user with videos but no subscriptions', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const body = yield servers[0].subscriptions.listVideos({ token: userAccessToken });
                 expect(body.total).to.equal(0);
                 const query = { accountId: userAccountId, token: userFeedToken };
@@ -326,10 +326,10 @@ describe('Test syndication feeds', () => {
             });
         });
         it('Should list self videos for a user with a subscription to themselves', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(30000);
                 yield servers[0].subscriptions.add({ token: userAccessToken, targetUri: 'john_channel@localhost:' + servers[0].port });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 {
                     const body = yield servers[0].subscriptions.listVideos({ token: userAccessToken });
                     expect(body.total).to.equal(1);
@@ -342,10 +342,10 @@ describe('Test syndication feeds', () => {
             });
         });
         it('Should list videos of a user\'s subscription', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(30000);
                 yield servers[0].subscriptions.add({ token: userAccessToken, targetUri: 'root_channel@localhost:' + servers[0].port });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 {
                     const body = yield servers[0].subscriptions.listVideos({ token: userAccessToken });
                     expect(body.total).to.equal(2, "there should be 2 videos part of the subscription");
@@ -357,14 +357,14 @@ describe('Test syndication feeds', () => {
             });
         });
         it('Should renew the token, and so have an invalid old token', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 yield servers[0].users.renewMyScopedTokens({ token: userAccessToken });
                 const query = { accountId: userAccountId, token: userFeedToken, version: 3 };
                 yield servers[0].feed.getJSON({ feed: 'subscriptions', query, expectedStatus: models_1.HttpStatusCode.FORBIDDEN_403 });
             });
         });
         it('Should succeed with the new token', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const token = yield servers[0].users.getMyScopedTokens({ token: userAccessToken });
                 userFeedToken = token.feedToken;
                 const query = { accountId: userAccountId, token: userFeedToken, version: 4 };
@@ -373,8 +373,8 @@ describe('Test syndication feeds', () => {
         });
     });
     after(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            yield (0, extra_utils_1.cleanupTests)([...servers, serverHLSOnly]);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield extra_utils_1.cleanupTests([...servers, serverHLSOnly]);
         });
     });
 });

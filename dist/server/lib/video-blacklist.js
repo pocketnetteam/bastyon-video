@@ -12,9 +12,9 @@ const videos_1 = require("./activitypub/videos");
 const live_manager_1 = require("./live/live-manager");
 const notifier_1 = require("./notifier");
 const hooks_1 = require("./plugins/hooks");
-const lTags = (0, logger_1.loggerTagsFactory)('blacklist');
+const lTags = logger_1.loggerTagsFactory('blacklist');
 function autoBlacklistVideoIfNeeded(parameters) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { video, user, isRemote, isNew, notify = true, transaction } = parameters;
         const doAutoBlacklist = yield hooks_1.Hooks.wrapFun(autoBlacklistNeeded, { video, user, isRemote, isNew }, 'filter:video.auto-blacklist.result');
         if (!doAutoBlacklist)
@@ -35,7 +35,7 @@ function autoBlacklistVideoIfNeeded(parameters) {
         video.VideoBlacklist = videoBlacklist;
         videoBlacklist.Video = video;
         if (notify) {
-            (0, database_utils_1.afterCommitIfTransaction)(transaction, () => {
+            database_utils_1.afterCommitIfTransaction(transaction, () => {
                 notifier_1.Notifier.Instance.notifyOnVideoAutoBlacklist(videoBlacklist);
             });
         }
@@ -45,7 +45,7 @@ function autoBlacklistVideoIfNeeded(parameters) {
 }
 exports.autoBlacklistVideoIfNeeded = autoBlacklistVideoIfNeeded;
 function blacklistVideo(videoInstance, options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const blacklist = yield video_blacklist_1.VideoBlacklistModel.create({
             videoId: videoInstance.id,
             unfederated: options.unfederate === true,
@@ -54,7 +54,7 @@ function blacklistVideo(videoInstance, options) {
         });
         blacklist.Video = videoInstance;
         if (options.unfederate === true) {
-            yield (0, send_1.sendDeleteVideo)(videoInstance, undefined);
+            yield send_1.sendDeleteVideo(videoInstance, undefined);
         }
         if (videoInstance.isLive) {
             live_manager_1.LiveManager.Instance.stopSessionOf(videoInstance.id);
@@ -64,14 +64,14 @@ function blacklistVideo(videoInstance, options) {
 }
 exports.blacklistVideo = blacklistVideo;
 function unblacklistVideo(videoBlacklist, video) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        const videoBlacklistType = yield database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const videoBlacklistType = yield database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
             const unfederated = videoBlacklist.unfederated;
             const videoBlacklistType = videoBlacklist.type;
             yield videoBlacklist.destroy({ transaction: t });
             video.VideoBlacklist = undefined;
             if (unfederated === true) {
-                yield (0, videos_1.federateVideoIfNeeded)(video, true, t);
+                yield videos_1.federateVideoIfNeeded(video, true, t);
             }
             return videoBlacklistType;
         }));

@@ -2,10 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.down = exports.up = void 0;
 const tslib_1 = require("tslib");
-const Sequelize = (0, tslib_1.__importStar)(require("sequelize"));
+const Sequelize = tslib_1.__importStar(require("sequelize"));
 const uuid_1 = require("@server/helpers/uuid");
 function up(utils) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const q = utils.queryInterface;
         {
             const userFeedTokenUUID = {
@@ -20,7 +20,7 @@ function up(utils) {
             const options = { type: Sequelize.QueryTypes.SELECT };
             const users = yield utils.sequelize.query(query, options);
             for (const user of users) {
-                const queryUpdate = `UPDATE "user" SET "feedToken" = '${(0, uuid_1.buildUUID)()}' WHERE id = ${user.id}`;
+                const queryUpdate = `UPDATE "user" SET "feedToken" = '${uuid_1.buildUUID()}' WHERE id = ${user.id}`;
                 yield utils.sequelize.query(queryUpdate);
             }
         }

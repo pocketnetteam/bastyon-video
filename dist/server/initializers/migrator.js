@@ -10,7 +10,7 @@ const constants_1 = require("./constants");
 const database_1 = require("./database");
 function migrate() {
     var _a;
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const tables = yield database_1.sequelizeTypescript.getQueryInterface().showAllTables();
         if (tables.length === 0)
             return;
@@ -45,8 +45,8 @@ function migrate() {
 }
 exports.migrate = migrate;
 function getMigrationScripts() {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        const files = yield (0, fs_extra_1.readdir)((0, path_1.join)(__dirname, 'migrations'));
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const files = yield fs_extra_1.readdir(path_1.join(__dirname, 'migrations'));
         const filesToMigrate = [];
         files
             .filter(file => file.endsWith('.js.map') === false)
@@ -61,14 +61,14 @@ function getMigrationScripts() {
     });
 }
 function executeMigration(actualVersion, entity) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const versionScript = parseInt(entity.version, 10);
         if (versionScript <= actualVersion)
             return undefined;
         const migrationScriptName = entity.script;
         logger_1.logger.info('Executing %s migration script.', migrationScriptName);
-        const migrationScript = require((0, path_1.join)(__dirname, 'migrations', migrationScriptName));
-        return database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        const migrationScript = require(path_1.join(__dirname, 'migrations', migrationScriptName));
+        return database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
             const options = {
                 transaction: t,
                 queryInterface: database_1.sequelizeTypescript.getQueryInterface(),

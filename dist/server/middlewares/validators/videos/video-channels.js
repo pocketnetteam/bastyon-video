@@ -12,13 +12,13 @@ const actor_1 = require("../../../models/actor/actor");
 const video_channel_1 = require("../../../models/video/video-channel");
 const shared_1 = require("../shared");
 const videoChannelsAddValidator = [
-    (0, express_validator_1.body)('name').custom(video_channels_1.isVideoChannelUsernameValid).withMessage('Should have a valid channel name'),
-    (0, express_validator_1.body)('displayName').custom(video_channels_1.isVideoChannelDisplayNameValid).withMessage('Should have a valid display name'),
-    (0, express_validator_1.body)('description').optional().custom(video_channels_1.isVideoChannelDescriptionValid).withMessage('Should have a valid description'),
-    (0, express_validator_1.body)('support').optional().custom(video_channels_1.isVideoChannelSupportValid).withMessage('Should have a valid support text'),
-    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
+    express_validator_1.body('name').custom(video_channels_1.isVideoChannelUsernameValid).withMessage('Should have a valid channel name'),
+    express_validator_1.body('displayName').custom(video_channels_1.isVideoChannelDisplayNameValid).withMessage('Should have a valid display name'),
+    express_validator_1.body('description').optional().custom(video_channels_1.isVideoChannelDescriptionValid).withMessage('Should have a valid description'),
+    express_validator_1.body('support').optional().custom(video_channels_1.isVideoChannelSupportValid).withMessage('Should have a valid support text'),
+    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking videoChannelsAdd parameters', { parameters: req.body });
-        if ((0, shared_1.areValidationErrors)(req, res))
+        if (shared_1.areValidationErrors(req, res))
             return;
         const actor = yield actor_1.ActorModel.loadLocalByName(req.body.name);
         if (actor) {
@@ -38,24 +38,24 @@ const videoChannelsAddValidator = [
 ];
 exports.videoChannelsAddValidator = videoChannelsAddValidator;
 const videoChannelsUpdateValidator = [
-    (0, express_validator_1.param)('nameWithHost').exists().withMessage('Should have an video channel name with host'),
-    (0, express_validator_1.body)('displayName')
+    express_validator_1.param('nameWithHost').exists().withMessage('Should have an video channel name with host'),
+    express_validator_1.body('displayName')
         .optional()
         .custom(video_channels_1.isVideoChannelDisplayNameValid).withMessage('Should have a valid display name'),
-    (0, express_validator_1.body)('description')
+    express_validator_1.body('description')
         .optional()
         .custom(video_channels_1.isVideoChannelDescriptionValid).withMessage('Should have a valid description'),
-    (0, express_validator_1.body)('support')
+    express_validator_1.body('support')
         .optional()
         .custom(video_channels_1.isVideoChannelSupportValid).withMessage('Should have a valid support text'),
-    (0, express_validator_1.body)('bulkVideosSupportUpdate')
+    express_validator_1.body('bulkVideosSupportUpdate')
         .optional()
         .custom(misc_1.isBooleanValid).withMessage('Should have a valid bulkVideosSupportUpdate boolean field'),
-    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
+    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking videoChannelsUpdate parameters', { parameters: req.body });
-        if ((0, shared_1.areValidationErrors)(req, res))
+        if (shared_1.areValidationErrors(req, res))
             return;
-        if (!(yield (0, shared_1.doesVideoChannelNameWithHostExist)(req.params.nameWithHost, res)))
+        if (!(yield shared_1.doesVideoChannelNameWithHostExist(req.params.nameWithHost, res)))
             return;
         if (res.locals.videoChannel.Actor.isOwned() === false) {
             return res.fail({
@@ -74,12 +74,12 @@ const videoChannelsUpdateValidator = [
 ];
 exports.videoChannelsUpdateValidator = videoChannelsUpdateValidator;
 const videoChannelsRemoveValidator = [
-    (0, express_validator_1.param)('nameWithHost').exists().withMessage('Should have an video channel name with host'),
-    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
+    express_validator_1.param('nameWithHost').exists().withMessage('Should have an video channel name with host'),
+    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking videoChannelsRemove parameters', { parameters: req.params });
-        if ((0, shared_1.areValidationErrors)(req, res))
+        if (shared_1.areValidationErrors(req, res))
             return;
-        if (!(yield (0, shared_1.doesVideoChannelNameWithHostExist)(req.params.nameWithHost, res)))
+        if (!(yield shared_1.doesVideoChannelNameWithHostExist(req.params.nameWithHost, res)))
             return;
         if (!checkUserCanDeleteVideoChannel(res.locals.oauth.token.User, res.locals.videoChannel, res))
             return;
@@ -90,46 +90,46 @@ const videoChannelsRemoveValidator = [
 ];
 exports.videoChannelsRemoveValidator = videoChannelsRemoveValidator;
 const videoChannelsNameWithHostValidator = [
-    (0, express_validator_1.param)('nameWithHost').exists().withMessage('Should have an video channel name with host'),
-    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
+    express_validator_1.param('nameWithHost').exists().withMessage('Should have an video channel name with host'),
+    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking videoChannelsNameWithHostValidator parameters', { parameters: req.params });
-        if ((0, shared_1.areValidationErrors)(req, res))
+        if (shared_1.areValidationErrors(req, res))
             return;
-        if (!(yield (0, shared_1.doesVideoChannelNameWithHostExist)(req.params.nameWithHost, res)))
+        if (!(yield shared_1.doesVideoChannelNameWithHostExist(req.params.nameWithHost, res)))
             return;
         return next();
     })
 ];
 exports.videoChannelsNameWithHostValidator = videoChannelsNameWithHostValidator;
 const localVideoChannelValidator = [
-    (0, express_validator_1.param)('name').custom(video_channels_1.isVideoChannelDisplayNameValid).withMessage('Should have a valid video channel name'),
-    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
+    express_validator_1.param('name').custom(video_channels_1.isVideoChannelDisplayNameValid).withMessage('Should have a valid video channel name'),
+    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking localVideoChannelValidator parameters', { parameters: req.params });
-        if ((0, shared_1.areValidationErrors)(req, res))
+        if (shared_1.areValidationErrors(req, res))
             return;
-        if (!(yield (0, shared_1.doesLocalVideoChannelNameExist)(req.params.name, res)))
+        if (!(yield shared_1.doesLocalVideoChannelNameExist(req.params.name, res)))
             return;
         return next();
     })
 ];
 exports.localVideoChannelValidator = localVideoChannelValidator;
 const videoChannelStatsValidator = [
-    (0, express_validator_1.query)('withStats')
+    express_validator_1.query('withStats')
         .optional()
         .customSanitizer(misc_1.toBooleanOrNull)
         .custom(misc_1.isBooleanValid).withMessage('Should have a valid stats flag'),
     (req, res, next) => {
-        if ((0, shared_1.areValidationErrors)(req, res))
+        if (shared_1.areValidationErrors(req, res))
             return;
         return next();
     }
 ];
 exports.videoChannelStatsValidator = videoChannelStatsValidator;
 const videoChannelsListValidator = [
-    (0, express_validator_1.query)('search').optional().not().isEmpty().withMessage('Should have a valid search'),
+    express_validator_1.query('search').optional().not().isEmpty().withMessage('Should have a valid search'),
     (req, res, next) => {
         logger_1.logger.debug('Checking video channels search query', { parameters: req.query });
-        if ((0, shared_1.areValidationErrors)(req, res))
+        if (shared_1.areValidationErrors(req, res))
             return;
         return next();
     }
@@ -153,7 +153,7 @@ function checkUserCanDeleteVideoChannel(user, videoChannel, res) {
     return true;
 }
 function checkVideoChannelIsNotTheLastOne(res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const count = yield video_channel_1.VideoChannelModel.countByAccount(res.locals.oauth.token.User.Account.id);
         if (count <= 1) {
             res.fail({

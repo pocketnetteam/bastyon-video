@@ -15,7 +15,7 @@ class Redis {
         if (this.initialized === true)
             return;
         this.initialized = true;
-        this.client = (0, redis_1.createClient)(Redis.getRedisClientOptions());
+        this.client = redis_1.createClient(Redis.getRedisClientOptions());
         this.client.on('error', err => {
             logger_1.logger.error('Error in Redis client.', { err });
             process.exit(-1);
@@ -37,48 +37,48 @@ class Redis {
         return this.prefix;
     }
     setResetPasswordVerificationString(userId) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            const generatedString = yield (0, utils_1.generateRandomString)(32);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const generatedString = yield utils_1.generateRandomString(32);
             yield this.setValue(this.generateResetPasswordKey(userId), generatedString, constants_1.USER_PASSWORD_RESET_LIFETIME);
             return generatedString;
         });
     }
     setCreatePasswordVerificationString(userId) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            const generatedString = yield (0, utils_1.generateRandomString)(32);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const generatedString = yield utils_1.generateRandomString(32);
             yield this.setValue(this.generateResetPasswordKey(userId), generatedString, constants_1.USER_PASSWORD_CREATE_LIFETIME);
             return generatedString;
         });
     }
     removePasswordVerificationString(userId) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             return this.removeValue(this.generateResetPasswordKey(userId));
         });
     }
     getResetPasswordLink(userId) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             return this.getValue(this.generateResetPasswordKey(userId));
         });
     }
     setVerifyEmailVerificationString(userId) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            const generatedString = yield (0, utils_1.generateRandomString)(32);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const generatedString = yield utils_1.generateRandomString(32);
             yield this.setValue(this.generateVerifyEmailKey(userId), generatedString, constants_1.USER_EMAIL_VERIFY_LIFETIME);
             return generatedString;
         });
     }
     getVerifyEmailLink(userId) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             return this.getValue(this.generateVerifyEmailKey(userId));
         });
     }
     setContactFormIp(ip) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             return this.setValue(this.generateContactFormKey(ip), '1', constants_1.CONTACT_FORM_LIFETIME);
         });
     }
     doesContactFormIpExist(ip) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             return this.exists(this.generateContactFormKey(ip));
         });
     }
@@ -89,7 +89,7 @@ class Redis {
         return this.setValue(this.generateViewKey(ip, videoUUID), '1', lifetime);
     }
     doesVideoIPViewExist(ip, videoUUID) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             return this.exists(this.generateViewKey(ip, videoUUID));
         });
     }
@@ -97,12 +97,12 @@ class Redis {
         return this.setValue(this.generateTrackerBlockIPKey(ip), '1', constants_1.TRACKER_RATE_LIMITS.BLOCK_IP_LIFETIME);
     }
     doesTrackerBlockIPExist(ip) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             return this.exists(this.generateTrackerBlockIPKey(ip));
         });
     }
     getCachedRoute(req) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const cached = yield this.getObject(this.generateCachedRouteKey(req));
             return cached;
         });
@@ -120,7 +120,7 @@ class Redis {
         ]);
     }
     getVideoViews(videoId, hour) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const key = this.generateVideoViewKey(videoId, hour);
             const valueString = yield this.getValue(key);
             const valueInt = parseInt(valueString, 10);
@@ -132,7 +132,7 @@ class Redis {
         });
     }
     getVideosIdViewed(hour) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const key = this.generateVideosViewKey(hour);
             const stringIds = yield this.getSet(key);
             return stringIds.map(s => parseInt(s, 10));

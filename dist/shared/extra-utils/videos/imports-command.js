@@ -11,7 +11,7 @@ class ImportsCommand extends shared_1.AbstractCommand {
         let attaches = {};
         if (attributes.torrentfile)
             attaches = { torrentfile: attributes.torrentfile };
-        return (0, requests_1.unwrapBody)(this.postUploadRequest(Object.assign(Object.assign({}, options), { path,
+        return requests_1.unwrapBody(this.postUploadRequest(Object.assign(Object.assign({}, options), { path,
             attaches, fields: options.attributes, implicitToken: true, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 })));
     }
     getMyVideoImports(options = {}) {

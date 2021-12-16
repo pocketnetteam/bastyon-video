@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.runInReadCommittedTransaction = exports.deleteAllModels = exports.filterNonExistingModels = exports.afterCommitIfTransaction = exports.updateInstanceWithAnother = exports.transactionRetryer = exports.retryTransactionWrapper = exports.resetSequelizeInstance = void 0;
 const tslib_1 = require("tslib");
-const retry_1 = (0, tslib_1.__importDefault)(require("async/retry"));
+const retry_1 = tslib_1.__importDefault(require("async/retry"));
 const sequelize_1 = require("sequelize");
 const database_1 = require("@server/initializers/database");
 const logger_1 = require("./logger");
@@ -20,7 +20,7 @@ function retryTransactionWrapper(functionToRetry, ...args) {
 exports.retryTransactionWrapper = retryTransactionWrapper;
 function transactionRetryer(func) {
     return new Promise((res, rej) => {
-        (0, retry_1.default)({
+        retry_1.default({
             times: 5,
             errorFilter: err => {
                 const willRetry = (err.name === 'SequelizeDatabaseError');

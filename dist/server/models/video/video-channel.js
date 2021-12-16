@@ -30,13 +30,13 @@ var ScopeNames;
 })(ScopeNames = exports.ScopeNames || (exports.ScopeNames = {}));
 let VideoChannelModel = VideoChannelModel_1 = class VideoChannelModel extends sequelize_typescript_1.Model {
     static sendDeleteIfOwned(instance, options) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (!instance.Actor) {
                 instance.Actor = yield instance.$get('Actor', { transaction: options.transaction });
             }
             yield actor_follow_1.ActorFollowModel.removeFollowsOf(instance.Actor.id, options.transaction);
             if (instance.Actor.isOwned()) {
-                return (0, send_1.sendDeleteActor)(instance.Actor, options.transaction);
+                return send_1.sendDeleteActor(instance.Actor, options.transaction);
             }
             return undefined;
         });
@@ -50,7 +50,7 @@ let VideoChannelModel = VideoChannelModel_1 = class VideoChannelModel extends se
         return VideoChannelModel_1.count(query);
     }
     static getStats() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             function getActiveVideoChannels(days) {
                 const options = {
                     type: sequelize_1.QueryTypes.SELECT,
@@ -90,7 +90,7 @@ ON              "Account->Actor"."serverId" = "Account->Actor->Server"."id"`;
         const query = {
             attributes: [],
             offset: 0,
-            order: (0, utils_1.getSort)(sort),
+            order: utils_1.getSort(sort),
             include: [
                 {
                     attributes: ['preferredUsername', 'serverId'],
@@ -110,7 +110,7 @@ ON              "Account->Actor"."serverId" = "Account->Actor->Server"."id"`;
         const query = {
             offset: parameters.start,
             limit: parameters.count,
-            order: (0, utils_1.getSort)(parameters.sort)
+            order: utils_1.getSort(parameters.sort)
         };
         return VideoChannelModel_1
             .scope({
@@ -122,12 +122,12 @@ ON              "Account->Actor"."serverId" = "Account->Actor->Server"."id"`;
         });
     }
     static searchForApi(options) {
-        let attributesInclude = [(0, sequelize_1.literal)('0 as similarity')];
+        let attributesInclude = [sequelize_1.literal('0 as similarity')];
         let where;
         if (options.search) {
             const escapedSearch = VideoChannelModel_1.sequelize.escape(options.search);
             const escapedLikeSearch = VideoChannelModel_1.sequelize.escape('%' + options.search + '%');
-            attributesInclude = [(0, utils_1.createSimilarityAttribute)('VideoChannelModel.name', options.search)];
+            attributesInclude = [utils_1.createSimilarityAttribute('VideoChannelModel.name', options.search)];
             where = {
                 [sequelize_1.Op.or]: [
                     sequelize_typescript_1.Sequelize.literal('lower(immutable_unaccent("VideoChannelModel"."name")) % lower(immutable_unaccent(' + escapedSearch + '))'),
@@ -141,12 +141,12 @@ ON              "Account->Actor"."serverId" = "Account->Actor->Server"."id"`;
             },
             offset: options.start,
             limit: options.count,
-            order: (0, utils_1.getSort)(options.sort),
+            order: utils_1.getSort(options.sort),
             where
         };
         return VideoChannelModel_1
             .scope({
-            method: [ScopeNames.FOR_API, (0, core_utils_1.pick)(options, ['actorId', 'host', 'handles'])]
+            method: [ScopeNames.FOR_API, core_utils_1.pick(options, ['actorId', 'host', 'handles'])]
         })
             .findAndCountAll(query)
             .then(({ rows, count }) => {
@@ -167,7 +167,7 @@ ON              "Account->Actor"."serverId" = "Account->Actor->Server"."id"`;
         const query = {
             offset: options.start,
             limit: options.count,
-            order: (0, utils_1.getSort)(options.sort),
+            order: utils_1.getSort(options.sort),
             include: [
                 {
                     model: account_1.AccountModel,
@@ -342,66 +342,66 @@ ON              "Account->Actor"."serverId" = "Account->Actor->Server"."id"`;
         return this.Actor.isOutdated();
     }
     setAsUpdated(transaction) {
-        return (0, shared_1.setAsUpdated)('videoChannel', this.id, transaction);
+        return shared_1.setAsUpdated('videoChannel', this.id, transaction);
     }
 };
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(false),
-    (0, sequelize_typescript_1.Is)('VideoChannelName', value => (0, utils_1.throwIfNotValid)(value, video_channels_1.isVideoChannelDisplayNameValid, 'name')),
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(false),
+    sequelize_typescript_1.Is('VideoChannelName', value => utils_1.throwIfNotValid(value, video_channels_1.isVideoChannelDisplayNameValid, 'name')),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", String)
+    tslib_1.__metadata("design:type", String)
 ], VideoChannelModel.prototype, "name", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(true),
-    (0, sequelize_typescript_1.Default)(null),
-    (0, sequelize_typescript_1.Is)('VideoChannelDescription', value => (0, utils_1.throwIfNotValid)(value, video_channels_1.isVideoChannelDescriptionValid, 'description', true)),
-    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.VIDEO_CHANNELS.DESCRIPTION.max)),
-    (0, tslib_1.__metadata)("design:type", String)
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(true),
+    sequelize_typescript_1.Default(null),
+    sequelize_typescript_1.Is('VideoChannelDescription', value => utils_1.throwIfNotValid(value, video_channels_1.isVideoChannelDescriptionValid, 'description', true)),
+    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.VIDEO_CHANNELS.DESCRIPTION.max)),
+    tslib_1.__metadata("design:type", String)
 ], VideoChannelModel.prototype, "description", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(true),
-    (0, sequelize_typescript_1.Default)(null),
-    (0, sequelize_typescript_1.Is)('VideoChannelSupport', value => (0, utils_1.throwIfNotValid)(value, video_channels_1.isVideoChannelSupportValid, 'support', true)),
-    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.VIDEO_CHANNELS.SUPPORT.max)),
-    (0, tslib_1.__metadata)("design:type", String)
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(true),
+    sequelize_typescript_1.Default(null),
+    sequelize_typescript_1.Is('VideoChannelSupport', value => utils_1.throwIfNotValid(value, video_channels_1.isVideoChannelSupportValid, 'support', true)),
+    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.VIDEO_CHANNELS.SUPPORT.max)),
+    tslib_1.__metadata("design:type", String)
 ], VideoChannelModel.prototype, "support", void 0);
-(0, tslib_1.__decorate)([
+tslib_1.__decorate([
     sequelize_typescript_1.CreatedAt,
-    (0, tslib_1.__metadata)("design:type", Date)
+    tslib_1.__metadata("design:type", Date)
 ], VideoChannelModel.prototype, "createdAt", void 0);
-(0, tslib_1.__decorate)([
+tslib_1.__decorate([
     sequelize_typescript_1.UpdatedAt,
-    (0, tslib_1.__metadata)("design:type", Date)
+    tslib_1.__metadata("design:type", Date)
 ], VideoChannelModel.prototype, "updatedAt", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.ForeignKey)(() => actor_1.ActorModel),
+tslib_1.__decorate([
+    sequelize_typescript_1.ForeignKey(() => actor_1.ActorModel),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", Number)
+    tslib_1.__metadata("design:type", Number)
 ], VideoChannelModel.prototype, "actorId", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.BelongsTo)(() => actor_1.ActorModel, {
+tslib_1.__decorate([
+    sequelize_typescript_1.BelongsTo(() => actor_1.ActorModel, {
         foreignKey: {
             allowNull: false
         },
         onDelete: 'cascade'
     }),
-    (0, tslib_1.__metadata)("design:type", actor_1.ActorModel)
+    tslib_1.__metadata("design:type", actor_1.ActorModel)
 ], VideoChannelModel.prototype, "Actor", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.ForeignKey)(() => account_1.AccountModel),
+tslib_1.__decorate([
+    sequelize_typescript_1.ForeignKey(() => account_1.AccountModel),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", Number)
+    tslib_1.__metadata("design:type", Number)
 ], VideoChannelModel.prototype, "accountId", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.BelongsTo)(() => account_1.AccountModel, {
+tslib_1.__decorate([
+    sequelize_typescript_1.BelongsTo(() => account_1.AccountModel, {
         foreignKey: {
             allowNull: false
         }
     }),
-    (0, tslib_1.__metadata)("design:type", account_1.AccountModel)
+    tslib_1.__metadata("design:type", account_1.AccountModel)
 ], VideoChannelModel.prototype, "Account", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.HasMany)(() => video_1.VideoModel, {
+tslib_1.__decorate([
+    sequelize_typescript_1.HasMany(() => video_1.VideoModel, {
         foreignKey: {
             name: 'channelId',
             allowNull: false
@@ -409,26 +409,26 @@ ON              "Account->Actor"."serverId" = "Account->Actor->Server"."id"`;
         onDelete: 'CASCADE',
         hooks: true
     }),
-    (0, tslib_1.__metadata)("design:type", Array)
+    tslib_1.__metadata("design:type", Array)
 ], VideoChannelModel.prototype, "Videos", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.HasMany)(() => video_playlist_1.VideoPlaylistModel, {
+tslib_1.__decorate([
+    sequelize_typescript_1.HasMany(() => video_playlist_1.VideoPlaylistModel, {
         foreignKey: {
             allowNull: true
         },
         onDelete: 'CASCADE',
         hooks: true
     }),
-    (0, tslib_1.__metadata)("design:type", Array)
+    tslib_1.__metadata("design:type", Array)
 ], VideoChannelModel.prototype, "VideoPlaylists", void 0);
-(0, tslib_1.__decorate)([
+tslib_1.__decorate([
     sequelize_typescript_1.BeforeDestroy,
-    (0, tslib_1.__metadata)("design:type", Function),
-    (0, tslib_1.__metadata)("design:paramtypes", [VideoChannelModel, Object]),
-    (0, tslib_1.__metadata)("design:returntype", Promise)
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [VideoChannelModel, Object]),
+    tslib_1.__metadata("design:returntype", Promise)
 ], VideoChannelModel, "sendDeleteIfOwned", null);
-VideoChannelModel = VideoChannelModel_1 = (0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.DefaultScope)(() => ({
+VideoChannelModel = VideoChannelModel_1 = tslib_1.__decorate([
+    sequelize_typescript_1.DefaultScope(() => ({
         include: [
             {
                 model: actor_1.ActorModel,
@@ -436,9 +436,9 @@ VideoChannelModel = VideoChannelModel_1 = (0, tslib_1.__decorate)([
             }
         ]
     })),
-    (0, sequelize_typescript_1.Scopes)(() => ({
+    sequelize_typescript_1.Scopes(() => ({
         [ScopeNames.FOR_API]: (options) => {
-            const inQueryInstanceFollow = (0, utils_1.buildServerIdsFollowedBy)(options.actorId);
+            const inQueryInstanceFollow = utils_1.buildServerIdsFollowedBy(options.actorId);
             const whereActorAnd = [
                 {
                     [sequelize_1.Op.or]: [
@@ -604,11 +604,11 @@ VideoChannelModel = VideoChannelModel_1 = (0, tslib_1.__decorate)([
                 attributes: {
                     include: [
                         [
-                            (0, sequelize_1.literal)('(SELECT COUNT(*) FROM "video" WHERE "channelId" = "VideoChannelModel"."id")'),
+                            sequelize_1.literal('(SELECT COUNT(*) FROM "video" WHERE "channelId" = "VideoChannelModel"."id")'),
                             'videosCount'
                         ],
                         [
-                            (0, sequelize_1.literal)('(' +
+                            sequelize_1.literal('(' +
                                 `SELECT string_agg(concat_ws('|', t.day, t.views), ',') ` +
                                 'FROM ( ' +
                                 'WITH ' +
@@ -633,10 +633,10 @@ VideoChannelModel = VideoChannelModel_1 = (0, tslib_1.__decorate)([
             };
         }
     })),
-    (0, sequelize_typescript_1.Table)({
+    sequelize_typescript_1.Table({
         tableName: 'videoChannel',
         indexes: [
-            (0, utils_1.buildTrigramSearchIndex)('video_channel_name_trigram', 'name'),
+            utils_1.buildTrigramSearchIndex('video_channel_name_trigram', 'name'),
             {
                 fields: ['accountId']
             },

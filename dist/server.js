@@ -2,38 +2,38 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const register_ts_paths_1 = require("./server/helpers/register-ts-paths");
-(0, register_ts_paths_1.registerTSPaths)();
+register_ts_paths_1.registerTSPaths();
 const core_utils_1 = require("./server/helpers/core-utils");
-if ((0, core_utils_1.isTestInstance)()) {
+if (core_utils_1.isTestInstance()) {
     require('source-map-support').install();
 }
-const express_1 = (0, tslib_1.__importDefault)(require("express"));
-const morgan_1 = (0, tslib_1.__importStar)(require("morgan"));
-const cors_1 = (0, tslib_1.__importDefault)(require("cors"));
-const cookie_parser_1 = (0, tslib_1.__importDefault)(require("cookie-parser"));
+const express_1 = tslib_1.__importDefault(require("express"));
+const morgan_1 = tslib_1.__importStar(require("morgan"));
+const cors_1 = tslib_1.__importDefault(require("cors"));
+const cookie_parser_1 = tslib_1.__importDefault(require("cookie-parser"));
 const helmet_1 = require("helmet");
 const useragent_1 = require("useragent");
-const ip_anonymize_1 = (0, tslib_1.__importDefault)(require("ip-anonymize"));
+const ip_anonymize_1 = tslib_1.__importDefault(require("ip-anonymize"));
 const commander_1 = require("commander");
 process.title = 'peertube';
-const app = (0, express_1.default)().disable("x-powered-by");
+const app = express_1.default().disable("x-powered-by");
 const checker_before_init_1 = require("./server/initializers/checker-before-init");
 const config_1 = require("./server/initializers/config");
 const constants_1 = require("./server/initializers/constants");
 const logger_1 = require("./server/helpers/logger");
-const missed = (0, checker_before_init_1.checkMissedConfig)();
+const missed = checker_before_init_1.checkMissedConfig();
 if (missed.length !== 0) {
     logger_1.logger.error('Your configuration files miss keys: ' + missed);
     process.exit(-1);
 }
-(0, checker_before_init_1.checkFFmpeg)(config_1.CONFIG)
+checker_before_init_1.checkFFmpeg(config_1.CONFIG)
     .catch(err => {
     logger_1.logger.error('Error in ffmpeg check.', { err });
     process.exit(-1);
 });
-(0, checker_before_init_1.checkNodeVersion)();
+checker_before_init_1.checkNodeVersion();
 const checker_after_init_1 = require("./server/initializers/checker-after-init");
-const errorMessage = (0, checker_after_init_1.checkConfig)();
+const errorMessage = checker_after_init_1.checkConfig();
 if (errorMessage !== null) {
     throw new Error(errorMessage);
 }
@@ -43,21 +43,21 @@ if (config_1.CONFIG.CSP.ENABLED) {
     app.use(csp_1.baseCSP);
 }
 if (config_1.CONFIG.SECURITY.FRAMEGUARD.ENABLED) {
-    app.use((0, helmet_1.frameguard)({
+    app.use(helmet_1.frameguard({
         action: 'deny'
     }));
 }
 const database_1 = require("./server/initializers/database");
-(0, database_1.checkDatabaseConnectionOrDie)();
+database_1.checkDatabaseConnectionOrDie();
 const migrator_1 = require("./server/initializers/migrator");
-(0, migrator_1.migrate)()
-    .then(() => (0, database_1.initDatabaseModels)(false))
+migrator_1.migrate()
+    .then(() => database_1.initDatabaseModels(false))
     .then(() => startApplication())
     .catch(err => {
     logger_1.logger.error('Cannot start application.', { err });
     process.exit(-1);
 });
-(0, constants_1.loadLanguages)();
+constants_1.loadLanguages();
 const installer_1 = require("./server/initializers/installer");
 const emailer_1 = require("./server/lib/emailer");
 const job_queue_1 = require("./server/lib/job-queue");
@@ -91,26 +91,26 @@ commander_1.program
     .option('--no-client', 'Start PeerTube without client interface')
     .option('--no-plugins', 'Start PeerTube without plugins/themes enabled')
     .parse(process.argv);
-if ((0, core_utils_1.isTestInstance)()) {
-    app.use((0, cors_1.default)({
+if (core_utils_1.isTestInstance()) {
+    app.use(cors_1.default({
         origin: '*',
         exposedHeaders: 'Retry-After',
         credentials: true
     }));
 }
-(0, morgan_1.token)('remote-addr', (req) => {
+morgan_1.token('remote-addr', (req) => {
     if (config_1.CONFIG.LOG.ANONYMIZE_IP === true || req.get('DNT') === '1') {
-        return (0, ip_anonymize_1.default)(req.ip, 16, 16);
+        return ip_anonymize_1.default(req.ip, 16, 16);
     }
     return req.ip;
 });
-(0, morgan_1.token)('user-agent', (req) => {
+morgan_1.token('user-agent', (req) => {
     if (req.get('DNT') === '1') {
-        return (0, useragent_1.parse)(req.get('user-agent')).family;
+        return useragent_1.parse(req.get('user-agent')).family;
     }
     return req.get('user-agent');
 });
-app.use((0, morgan_1.default)('combined', {
+app.use(morgan_1.default('combined', {
     stream: {
         write: (str) => logger_1.logger.info(str.trim(), { tags: ['http'] })
     },
@@ -122,7 +122,7 @@ app.use(express_1.default.json({
     type: ['application/json', 'application/*+json'],
     limit: '500kb',
     verify: (req, res, buf) => {
-        const valid = (0, peertube_crypto_1.isHTTPSignatureDigestValid)(buf, req);
+        const valid = peertube_crypto_1.isHTTPSignatureDigestValid(buf, req);
         if (valid !== true) {
             res.fail({
                 status: http_error_codes_1.HttpStatusCode.FORBIDDEN_403,
@@ -131,7 +131,7 @@ app.use(express_1.default.json({
         }
     }
 }));
-app.use((0, cookie_parser_1.default)());
+app.use(cookie_parser_1.default());
 app.use(dnt_1.advertiseDoNotTrack);
 const apiRoute = '/api/' + constants_1.API_VERSION;
 app.use(apiRoute, controllers_1.apiRouter);
@@ -165,18 +165,18 @@ app.use((err, req, res, next) => {
         type: err.name
     });
 });
-const server = (0, controllers_1.createWebsocketTrackerServer)(app);
+const server = controllers_1.createWebsocketTrackerServer(app);
 function startApplication() {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const port = config_1.CONFIG.LISTEN.PORT;
         const hostname = config_1.CONFIG.LISTEN.HOSTNAME;
-        yield (0, installer_1.installApplication)();
-        (0, checker_after_init_1.checkActivityPubUrls)()
+        yield installer_1.installApplication();
+        checker_after_init_1.checkActivityPubUrls()
             .catch(err => {
             logger_1.logger.error('Error in ActivityPub URLs checker.', { err });
             process.exit(-1);
         });
-        (0, checker_after_init_1.checkFFmpegVersion)()
+        checker_after_init_1.checkFFmpegVersion()
             .catch(err => logger_1.logger.error('Cannot check ffmpeg version', { err }));
         emailer_1.Emailer.Instance.init();
         yield Promise.all([
@@ -201,12 +201,12 @@ function startApplication() {
         remove_dangling_resumable_uploads_scheduler_1.RemoveDanglingResumableUploadsScheduler.Instance.enable();
         redis_1.Redis.Instance.init();
         peertube_socket_1.PeerTubeSocket.Instance.init(server);
-        (0, hls_1.updateStreamingPlaylistsInfohashesIfNeeded)()
+        hls_1.updateStreamingPlaylistsInfohashesIfNeeded()
             .catch(err => logger_1.logger.error('Cannot update streaming playlist infohashes.', { err }));
         live_1.LiveManager.Instance.init();
         if (config_1.CONFIG.LIVE.ENABLED)
             live_1.LiveManager.Instance.run();
-        server.listen(port, hostname, () => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        server.listen(port, hostname, () => tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (cliOptions.plugins) {
                 try {
                     yield plugin_manager_1.PluginManager.Instance.registerPluginsAndThemes();

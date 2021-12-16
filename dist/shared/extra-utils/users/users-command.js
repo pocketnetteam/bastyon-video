@@ -52,7 +52,7 @@ class UsersCommand extends shared_1.AbstractCommand {
     create(options) {
         const { username, adminFlags, password = 'password', videoQuota = 42000000, videoQuotaDaily = -1, role = models_1.UserRole.USER } = options;
         const path = '/api/v1/users';
-        return (0, requests_1.unwrapBody)(this.postBodyRequest(Object.assign(Object.assign({}, options), { path, fields: {
+        return requests_1.unwrapBody(this.postBodyRequest(Object.assign(Object.assign({}, options), { path, fields: {
                 username,
                 password,
                 role,
@@ -63,7 +63,7 @@ class UsersCommand extends shared_1.AbstractCommand {
             }, implicitToken: true, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 }))).then(res => res.user);
     }
     generate(username) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const password = 'password';
             const user = yield this.create({ username, password });
             const token = yield this.server.login.getAccessToken({ username, password });
@@ -76,7 +76,7 @@ class UsersCommand extends shared_1.AbstractCommand {
         });
     }
     generateUserAndToken(username) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const password = 'password';
             yield this.create({ username, password });
             return this.server.login.getAccessToken({ username, password });
@@ -112,7 +112,7 @@ class UsersCommand extends shared_1.AbstractCommand {
     }
     updateMe(options) {
         const path = '/api/v1/users/me';
-        const toSend = (0, lodash_1.omit)(options, 'url', 'accessToken');
+        const toSend = lodash_1.omit(options, 'url', 'accessToken');
         return this.putBodyRequest(Object.assign(Object.assign({}, options), { path, fields: toSend, implicitToken: true, defaultExpectedStatus: models_1.HttpStatusCode.NO_CONTENT_204 }));
     }
     updateMyAvatar(options) {
@@ -128,7 +128,7 @@ class UsersCommand extends shared_1.AbstractCommand {
     }
     list(options = {}) {
         const path = '/api/v1/users';
-        return this.getRequestBody(Object.assign(Object.assign({}, options), { path, query: (0, core_utils_1.pick)(options, ['start', 'count', 'sort', 'search', 'blocked']), implicitToken: true, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 }));
+        return this.getRequestBody(Object.assign(Object.assign({}, options), { path, query: core_utils_1.pick(options, ['start', 'count', 'sort', 'search', 'blocked']), implicitToken: true, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 }));
     }
     remove(options) {
         const { userId } = options;

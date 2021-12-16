@@ -9,15 +9,15 @@ const paginationValidator = paginationValidatorBuilder();
 exports.paginationValidator = paginationValidator;
 function paginationValidatorBuilder(tags = []) {
     return [
-        (0, express_validator_1.query)('start')
+        express_validator_1.query('start')
             .optional()
             .isInt({ min: 0 }).withMessage('Should have a number start'),
-        (0, express_validator_1.query)('count')
+        express_validator_1.query('count')
             .optional()
             .isInt({ min: 0, max: constants_1.PAGINATION.GLOBAL.COUNT.MAX }).withMessage(`Should have a number count (max: ${constants_1.PAGINATION.GLOBAL.COUNT.MAX})`),
         (req, res, next) => {
             logger_1.logger.debug('Checking pagination parameters', { parameters: req.query, tags });
-            if ((0, shared_1.areValidationErrors)(req, res))
+            if (shared_1.areValidationErrors(req, res))
                 return;
             return next();
         }

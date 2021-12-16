@@ -9,15 +9,15 @@ const shared_1 = require("../shared");
 class ChannelsCommand extends shared_1.AbstractCommand {
     list(options = {}) {
         const path = '/api/v1/video-channels';
-        return this.getRequestBody(Object.assign(Object.assign({}, options), { path, query: (0, core_utils_1.pick)(options, ['start', 'count', 'sort', 'withStats']), implicitToken: false, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 }));
+        return this.getRequestBody(Object.assign(Object.assign({}, options), { path, query: core_utils_1.pick(options, ['start', 'count', 'sort', 'withStats']), implicitToken: false, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 }));
     }
     listByAccount(options) {
         const { accountName, sort = 'createdAt' } = options;
         const path = '/api/v1/accounts/' + accountName + '/video-channels';
-        return this.getRequestBody(Object.assign(Object.assign({}, options), { path, query: Object.assign({ sort }, (0, core_utils_1.pick)(options, ['start', 'count', 'withStats', 'search'])), implicitToken: false, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 }));
+        return this.getRequestBody(Object.assign(Object.assign({}, options), { path, query: Object.assign({ sort }, core_utils_1.pick(options, ['start', 'count', 'withStats', 'search'])), implicitToken: false, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 }));
     }
     create(options) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const path = '/api/v1/video-channels/';
             const defaultAttributes = {
                 displayName: 'my super video channel',
@@ -25,7 +25,7 @@ class ChannelsCommand extends shared_1.AbstractCommand {
                 support: 'my super channel support'
             };
             const attributes = Object.assign(Object.assign({}, defaultAttributes), options.attributes);
-            const body = yield (0, requests_1.unwrapBody)(this.postBodyRequest(Object.assign(Object.assign({}, options), { path, fields: attributes, implicitToken: true, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 })));
+            const body = yield requests_1.unwrapBody(this.postBodyRequest(Object.assign(Object.assign({}, options), { path, fields: attributes, implicitToken: true, defaultExpectedStatus: models_1.HttpStatusCode.OK_200 })));
             return body.videoChannel;
         });
     }

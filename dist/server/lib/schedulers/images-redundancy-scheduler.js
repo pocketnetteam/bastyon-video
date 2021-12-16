@@ -12,20 +12,20 @@ const fs_1 = require("fs");
 const util_1 = require("util");
 const stream_1 = require("stream");
 const image_1 = require("@server/models/image/image");
-const node_fetch_1 = (0, tslib_1.__importDefault)(require("node-fetch"));
+const node_fetch_1 = tslib_1.__importDefault(require("node-fetch"));
 const fs_extra_1 = require("fs-extra");
 const path_1 = require("path");
-const streamPipeline = (0, util_1.promisify)(stream_1.pipeline);
+const streamPipeline = util_1.promisify(stream_1.pipeline);
 class ImagesRedundancyScheduler extends abstract_scheduler_1.AbstractScheduler {
     constructor() {
         super();
         this.schedulerIntervalMs = config_1.CONFIG.REDUNDANCY.IMAGES.CHECK_INTERVAL;
     }
     internalExecute() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             logger_1.logger.info('Running images redundancy scheduler');
             const actors = yield this.getAllActorsWithRedundancy();
-            yield Promise.all(actors.map((actor) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            yield Promise.all(actors.map((actor) => tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const serverUrl = new URL(actor.url).origin;
                 const currentImageRedundancy = (yield image_redundancy_1.ImageRedundancyModel.getImageRedundancyForActor(serverUrl))[0];
                 var response;
@@ -50,8 +50,8 @@ class ImagesRedundancyScheduler extends abstract_scheduler_1.AbstractScheduler {
         });
     }
     getAllActorsWithRedundancy() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            const serverActor = yield (0, application_1.getServerActor)();
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const serverActor = yield application_1.getServerActor();
             const resultList = yield actor_follow_1.ActorFollowModel.listFollowingForApi({
                 id: serverActor.id,
                 start: undefined,
@@ -64,13 +64,13 @@ class ImagesRedundancyScheduler extends abstract_scheduler_1.AbstractScheduler {
         });
     }
     downloadImagesFromServer(serverUrl, imagesToDownload) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             var resDate;
-            yield Promise.all(imagesToDownload.map((imageToDownload) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, fs_extra_1.ensureDir)((0, path_1.join)(config_1.CONFIG.STORAGE.IMAGES_DIR, imageToDownload.id));
+            yield Promise.all(imagesToDownload.map((imageToDownload) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield fs_extra_1.ensureDir(path_1.join(config_1.CONFIG.STORAGE.IMAGES_DIR, imageToDownload.id));
                 yield this.downloadFile(image_1.ImageModel.getImageStaticUrl(imageToDownload.id, imageToDownload.filename, serverUrl), image_1.ImageModel.getImageStaticPath(imageToDownload.id, imageToDownload.filename));
                 yield this.downloadFile(image_1.ImageModel.getImageStaticUrl(imageToDownload.id, imageToDownload.thumbnailname, serverUrl), image_1.ImageModel.getImageStaticPath(imageToDownload.id, imageToDownload.thumbnailname));
-                const torrentHash = yield image_1.ImageModel.generateTorrentForImage(imageToDownload.id, (0, path_1.join)(config_1.CONFIG.STORAGE.IMAGES_DIR, imageToDownload.id));
+                const torrentHash = yield image_1.ImageModel.generateTorrentForImage(imageToDownload.id, path_1.join(config_1.CONFIG.STORAGE.IMAGES_DIR, imageToDownload.id));
                 const currentCreatedAt = new Date(imageToDownload.createdAt);
                 resDate = (!resDate || resDate < currentCreatedAt) ? currentCreatedAt : resDate;
                 imageToDownload.createdAt = imageToDownload.updatedAt = new Date();
@@ -82,11 +82,11 @@ class ImagesRedundancyScheduler extends abstract_scheduler_1.AbstractScheduler {
         });
     }
     downloadFile(url, filePath) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            const response = yield (0, node_fetch_1.default)(url);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const response = yield node_fetch_1.default(url);
             if (!response.ok)
                 throw new Error(`downloadFile: Unexpected response ${response.statusText}`);
-            yield streamPipeline(response.body, (0, fs_1.createWriteStream)(filePath));
+            yield streamPipeline(response.body, fs_1.createWriteStream(filePath));
         });
     }
     static get Instance() {

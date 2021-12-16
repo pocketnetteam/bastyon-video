@@ -12,14 +12,14 @@ const database_utils_1 = require("../../../helpers/database-utils");
 const logger_1 = require("../../../helpers/logger");
 const database_1 = require("../../../initializers/database");
 function processFlagActivity(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { activity, byActor } = options;
-        return (0, database_utils_1.retryTransactionWrapper)(processCreateAbuse, activity, byActor);
+        return database_utils_1.retryTransactionWrapper(processCreateAbuse, activity, byActor);
     });
 }
 exports.processFlagActivity = processFlagActivity;
 function processCreateAbuse(activity, byActor) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const flag = activity.type === 'Flag' ? activity : activity.object;
         const account = byActor.Account;
         if (!account)
@@ -33,9 +33,9 @@ function processCreateAbuse(activity, byActor) {
         const endAt = flag.endAt;
         for (const object of objects) {
             try {
-                const uri = (0, activitypub_1.getAPId)(object);
+                const uri = activitypub_1.getAPId(object);
                 logger_1.logger.debug('Reporting remote abuse for object %s.', uri);
-                yield database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
                     const video = yield video_1.VideoModel.loadByUrlAndPopulateAccount(uri, t);
                     let videoComment;
                     let flaggedAccount;
@@ -54,7 +54,7 @@ function processCreateAbuse(activity, byActor) {
                         predefinedReasons
                     };
                     if (video) {
-                        return (0, moderation_1.createVideoAbuse)({
+                        return moderation_1.createVideoAbuse({
                             baseAbuse,
                             startAt,
                             endAt,
@@ -64,14 +64,14 @@ function processCreateAbuse(activity, byActor) {
                         });
                     }
                     if (videoComment) {
-                        return (0, moderation_1.createVideoCommentAbuse)({
+                        return moderation_1.createVideoCommentAbuse({
                             baseAbuse,
                             reporterAccount,
                             transaction: t,
                             commentInstance: videoComment
                         });
                     }
-                    return yield (0, moderation_1.createAccountAbuse)({
+                    return yield moderation_1.createAccountAbuse({
                         baseAbuse,
                         reporterAccount,
                         transaction: t,
@@ -80,7 +80,7 @@ function processCreateAbuse(activity, byActor) {
                 }));
             }
             catch (err) {
-                logger_1.logger.debug('Cannot process report of %s', (0, activitypub_1.getAPId)(object), { err });
+                logger_1.logger.debug('Cannot process report of %s', activitypub_1.getAPId(object), { err });
             }
         }
     });

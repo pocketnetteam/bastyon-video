@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.unwrapText = exports.unwrapBodyOrDecodeToJSON = exports.unwrapTextOrDecode = exports.unwrapBody = exports.makeActivityPubGetRequest = exports.makeRawRequest = exports.makeDeleteRequest = exports.makePutBodyRequest = exports.makePostBodyRequest = exports.makeUploadRequest = exports.decodeQueryString = exports.makeGetRequest = exports.makeHTMLRequest = void 0;
 const tslib_1 = require("tslib");
 const querystring_1 = require("querystring");
-const supertest_1 = (0, tslib_1.__importDefault)(require("supertest"));
+const supertest_1 = tslib_1.__importDefault(require("supertest"));
 const url_1 = require("url");
 const models_1 = require("@shared/models");
 const tests_1 = require("../miscs/tests");
@@ -13,7 +13,7 @@ function makeRawRequest(url, expectedStatus, range) {
 }
 exports.makeRawRequest = makeRawRequest;
 function makeGetRequest(options) {
-    const req = (0, supertest_1.default)(options.url).get(options.path);
+    const req = supertest_1.default(options.url).get(options.path);
     if (options.query)
         req.query(options.query);
     if (options.rawQuery)
@@ -40,7 +40,7 @@ function makeActivityPubGetRequest(url, path, expectedStatus = models_1.HttpStat
 }
 exports.makeActivityPubGetRequest = makeActivityPubGetRequest;
 function makeDeleteRequest(options) {
-    const req = (0, supertest_1.default)(options.url).delete(options.path);
+    const req = supertest_1.default(options.url).delete(options.path);
     if (options.query)
         req.query(options.query);
     if (options.rawQuery)
@@ -50,36 +50,36 @@ function makeDeleteRequest(options) {
 exports.makeDeleteRequest = makeDeleteRequest;
 function makeUploadRequest(options) {
     let req = options.method === 'PUT'
-        ? (0, supertest_1.default)(options.url).put(options.path)
-        : (0, supertest_1.default)(options.url).post(options.path);
+        ? supertest_1.default(options.url).put(options.path)
+        : supertest_1.default(options.url).post(options.path);
     req = buildRequest(req, Object.assign({ accept: 'application/json', expectedStatus: models_1.HttpStatusCode.BAD_REQUEST_400 }, options));
     buildFields(req, options.fields);
     Object.keys(options.attaches || {}).forEach(attach => {
         const value = options.attaches[attach];
         if (Array.isArray(value)) {
-            req.attach(attach, (0, tests_1.buildAbsoluteFixturePath)(value[0]), value[1]);
+            req.attach(attach, tests_1.buildAbsoluteFixturePath(value[0]), value[1]);
         }
         else {
-            req.attach(attach, (0, tests_1.buildAbsoluteFixturePath)(value));
+            req.attach(attach, tests_1.buildAbsoluteFixturePath(value));
         }
     });
     return req;
 }
 exports.makeUploadRequest = makeUploadRequest;
 function makePostBodyRequest(options) {
-    const req = (0, supertest_1.default)(options.url).post(options.path)
+    const req = supertest_1.default(options.url).post(options.path)
         .send(options.fields);
     return buildRequest(req, Object.assign({ accept: 'application/json', expectedStatus: models_1.HttpStatusCode.BAD_REQUEST_400 }, options));
 }
 exports.makePostBodyRequest = makePostBodyRequest;
 function makePutBodyRequest(options) {
-    const req = (0, supertest_1.default)(options.url).put(options.path)
+    const req = supertest_1.default(options.url).put(options.path)
         .send(options.fields);
     return buildRequest(req, Object.assign({ accept: 'application/json', expectedStatus: models_1.HttpStatusCode.BAD_REQUEST_400 }, options));
 }
 exports.makePutBodyRequest = makePutBodyRequest;
 function decodeQueryString(path) {
-    return (0, querystring_1.decode)(path.split('?')[1]);
+    return querystring_1.decode(path.split('?')[1]);
 }
 exports.decodeQueryString = decodeQueryString;
 function unwrapBody(test) {

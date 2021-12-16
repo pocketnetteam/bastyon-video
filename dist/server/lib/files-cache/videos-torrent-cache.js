@@ -17,19 +17,19 @@ class VideosTorrentCache extends abstract_video_static_file_cache_1.AbstractVide
         return this.instance || (this.instance = new this());
     }
     getFilePathImpl(filename) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const file = yield video_file_1.VideoFileModel.loadWithVideoOrPlaylistByTorrentFilename(filename);
             if (!file)
                 return undefined;
             if (file.getVideo().isOwned()) {
                 const downloadName = this.buildDownloadName(file.getVideo(), file);
-                return { isOwned: true, path: (0, path_1.join)(config_1.CONFIG.STORAGE.TORRENTS_DIR, file.torrentFilename), downloadName };
+                return { isOwned: true, path: path_1.join(config_1.CONFIG.STORAGE.TORRENTS_DIR, file.torrentFilename), downloadName };
             }
             return this.loadRemoteFile(filename);
         });
     }
     loadRemoteFile(key) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const file = yield video_file_1.VideoFileModel.loadWithVideoOrPlaylistByTorrentFilename(key);
             if (!file)
                 return undefined;
@@ -39,8 +39,8 @@ class VideosTorrentCache extends abstract_video_static_file_cache_1.AbstractVide
             if (!video)
                 return undefined;
             const remoteUrl = file.getRemoteTorrentUrl(video);
-            const destPath = (0, path_1.join)(constants_1.FILES_CACHE.TORRENTS.DIRECTORY, file.torrentFilename);
-            yield (0, requests_1.doRequestAndSaveToFile)(remoteUrl, destPath);
+            const destPath = path_1.join(constants_1.FILES_CACHE.TORRENTS.DIRECTORY, file.torrentFilename);
+            yield requests_1.doRequestAndSaveToFile(remoteUrl, destPath);
             const downloadName = this.buildDownloadName(video, file);
             return { isOwned: false, path: destPath, downloadName };
         });

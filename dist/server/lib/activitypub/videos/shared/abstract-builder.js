@@ -16,19 +16,19 @@ const object_to_model_attributes_1 = require("./object-to-model-attributes");
 const trackers_1 = require("./trackers");
 class APVideoAbstractBuilder {
     getOrCreateVideoChannelFromVideoObject() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const channel = this.videoObject.attributedTo.find(a => a.type === 'Group');
             if (!channel)
                 throw new Error('Cannot find associated video channel to video ' + this.videoObject.url);
-            if ((0, activitypub_1.checkUrlsSameHost)(channel.id, this.videoObject.id) !== true) {
+            if (activitypub_1.checkUrlsSameHost(channel.id, this.videoObject.id) !== true) {
                 throw new Error(`Video channel url ${channel.id} does not have the same host than video object id ${this.videoObject.id}`);
             }
-            return (0, actors_1.getOrCreateAPActor)(channel.id, 'all');
+            return actors_1.getOrCreateAPActor(channel.id, 'all');
         });
     }
     tryToGenerateThumbnail(video) {
-        return (0, thumbnail_1.updateVideoMiniatureFromUrl)({
-            downloadUrl: (0, object_to_model_attributes_1.getThumbnailFromIcons)(this.videoObject).url,
+        return thumbnail_1.updateVideoMiniatureFromUrl({
+            downloadUrl: object_to_model_attributes_1.getThumbnailFromIcons(this.videoObject).url,
             video,
             type: 1
         }).catch(err => {
@@ -37,11 +37,11 @@ class APVideoAbstractBuilder {
         });
     }
     setPreview(video, t) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            const previewIcon = (0, object_to_model_attributes_1.getPreviewFromIcons)(this.videoObject);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const previewIcon = object_to_model_attributes_1.getPreviewFromIcons(this.videoObject);
             if (!previewIcon)
                 return;
-            const previewModel = (0, thumbnail_1.updatePlaceholderThumbnail)({
+            const previewModel = thumbnail_1.updatePlaceholderThumbnail({
                 fileUrl: previewIcon.url,
                 video,
                 type: 2,
@@ -51,21 +51,21 @@ class APVideoAbstractBuilder {
         });
     }
     setTags(video, t) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            const tags = (0, object_to_model_attributes_1.getTagsFromObject)(this.videoObject);
-            yield (0, video_1.setVideoTags)({ video, tags, transaction: t });
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const tags = object_to_model_attributes_1.getTagsFromObject(this.videoObject);
+            yield video_1.setVideoTags({ video, tags, transaction: t });
         });
     }
     setTrackers(video, t) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            const trackers = (0, trackers_1.getTrackerUrls)(this.videoObject, video);
-            yield (0, trackers_1.setVideoTrackers)({ video, trackers, transaction: t });
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const trackers = trackers_1.getTrackerUrls(this.videoObject, video);
+            yield trackers_1.setVideoTrackers({ video, trackers, transaction: t });
         });
     }
     insertOrReplaceCaptions(video, t) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const existingCaptions = yield video_caption_1.VideoCaptionModel.listVideoCaptions(video.id, t);
-            let captionsToCreate = (0, object_to_model_attributes_1.getCaptionAttributesFromObject)(video, this.videoObject)
+            let captionsToCreate = object_to_model_attributes_1.getCaptionAttributesFromObject(video, this.videoObject)
                 .map(a => new video_caption_1.VideoCaptionModel(a));
             for (const existingCaption of existingCaptions) {
                 const filtered = captionsToCreate.filter(c => !c.isEqual(existingCaption));
@@ -81,26 +81,26 @@ class APVideoAbstractBuilder {
         });
     }
     insertOrReplaceLive(video, transaction) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            const attributes = (0, object_to_model_attributes_1.getLiveAttributesFromObject)(video, this.videoObject);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const attributes = object_to_model_attributes_1.getLiveAttributesFromObject(video, this.videoObject);
             const [videoLive] = yield video_live_1.VideoLiveModel.upsert(attributes, { transaction, returning: true });
             video.VideoLive = videoLive;
         });
     }
     setWebTorrentFiles(video, t) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            const videoFileAttributes = (0, object_to_model_attributes_1.getFileAttributesFromUrl)(video, this.videoObject.url);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const videoFileAttributes = object_to_model_attributes_1.getFileAttributesFromUrl(video, this.videoObject.url);
             const newVideoFiles = videoFileAttributes.map(a => new video_file_1.VideoFileModel(a));
-            yield (0, database_utils_1.deleteAllModels)((0, database_utils_1.filterNonExistingModels)(video.VideoFiles || [], newVideoFiles), t);
+            yield database_utils_1.deleteAllModels(database_utils_1.filterNonExistingModels(video.VideoFiles || [], newVideoFiles), t);
             const upsertTasks = newVideoFiles.map(f => video_file_1.VideoFileModel.customUpsert(f, 'video', t));
             video.VideoFiles = yield Promise.all(upsertTasks);
         });
     }
     setStreamingPlaylists(video, t) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            const streamingPlaylistAttributes = (0, object_to_model_attributes_1.getStreamingPlaylistAttributesFromObject)(video, this.videoObject, video.VideoFiles || []);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const streamingPlaylistAttributes = object_to_model_attributes_1.getStreamingPlaylistAttributesFromObject(video, this.videoObject, video.VideoFiles || []);
             const newStreamingPlaylists = streamingPlaylistAttributes.map(a => new video_streaming_playlist_1.VideoStreamingPlaylistModel(a));
-            yield (0, database_utils_1.deleteAllModels)((0, database_utils_1.filterNonExistingModels)(video.VideoStreamingPlaylists || [], newStreamingPlaylists), t);
+            yield database_utils_1.deleteAllModels(database_utils_1.filterNonExistingModels(video.VideoStreamingPlaylists || [], newStreamingPlaylists), t);
             video.VideoStreamingPlaylists = [];
             for (const playlistAttributes of streamingPlaylistAttributes) {
                 const streamingPlaylistModel = yield this.insertOrReplaceStreamingPlaylist(playlistAttributes, t);
@@ -111,7 +111,7 @@ class APVideoAbstractBuilder {
         });
     }
     insertOrReplaceStreamingPlaylist(attributes, t) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const [streamingPlaylist] = yield video_streaming_playlist_1.VideoStreamingPlaylistModel.upsert(attributes, { returning: true, transaction: t });
             return streamingPlaylist;
         });
@@ -123,10 +123,10 @@ class APVideoAbstractBuilder {
         return playlist.VideoFiles;
     }
     setStreamingPlaylistFiles(video, playlistModel, tagObjects, t) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const oldStreamingPlaylistFiles = this.getStreamingPlaylistFiles(video, playlistModel.type);
-            const newVideoFiles = (0, object_to_model_attributes_1.getFileAttributesFromUrl)(playlistModel, tagObjects).map(a => new video_file_1.VideoFileModel(a));
-            yield (0, database_utils_1.deleteAllModels)((0, database_utils_1.filterNonExistingModels)(oldStreamingPlaylistFiles, newVideoFiles), t);
+            const newVideoFiles = object_to_model_attributes_1.getFileAttributesFromUrl(playlistModel, tagObjects).map(a => new video_file_1.VideoFileModel(a));
+            yield database_utils_1.deleteAllModels(database_utils_1.filterNonExistingModels(oldStreamingPlaylistFiles, newVideoFiles), t);
             const upsertTasks = newVideoFiles.map(f => video_file_1.VideoFileModel.customUpsert(f, 'streaming-playlist', t));
             playlistModel.VideoFiles = yield Promise.all(upsertTasks);
         });

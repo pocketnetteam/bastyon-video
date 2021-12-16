@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const register_ts_paths_1 = require("../server/helpers/register-ts-paths");
-(0, register_ts_paths_1.registerTSPaths)();
+register_ts_paths_1.registerTSPaths();
 const constants_1 = require("../server/initializers/constants");
 const actor_follow_1 = require("../server/models/actor/actor-follow");
 const video_1 = require("../server/models/video/video");
@@ -22,9 +22,9 @@ run()
     process.exit(-1);
 });
 function run() {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        yield (0, database_1.initDatabaseModels)(true);
-        const serverAccount = yield (0, application_1.getServerActor)();
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        yield database_1.initDatabaseModels(true);
+        const serverAccount = yield application_1.getServerActor();
         {
             const res = yield actor_follow_1.ActorFollowModel.listAcceptedFollowingUrlsForApi([serverAccount.id], undefined);
             const hasFollowing = res.total > 0;
@@ -50,8 +50,8 @@ function run() {
                 continue;
             console.log('Updating actor ' + actor.url);
             const newUrl = actor.Account
-                ? (0, url_1.getLocalAccountActivityPubUrl)(actor.preferredUsername)
-                : (0, url_1.getLocalVideoChannelActivityPubUrl)(actor.preferredUsername);
+                ? url_1.getLocalAccountActivityPubUrl(actor.preferredUsername)
+                : url_1.getLocalVideoChannelActivityPubUrl(actor.preferredUsername);
             actor.url = newUrl;
             actor.inboxUrl = newUrl + '/inbox';
             actor.outboxUrl = newUrl + '/outbox';
@@ -68,7 +68,7 @@ function run() {
             if (videoShare.Video.isOwned() === false)
                 continue;
             console.log('Updating video share ' + videoShare.url);
-            videoShare.url = (0, url_1.getLocalVideoAnnounceActivityPubUrl)(videoShare.Actor, videoShare.Video);
+            videoShare.url = url_1.getLocalVideoAnnounceActivityPubUrl(videoShare.Actor, videoShare.Video);
             yield videoShare.save();
         }
         console.log('Updating video comments.');
@@ -91,7 +91,7 @@ function run() {
             if (comment.isOwned() === false)
                 continue;
             console.log('Updating comment ' + comment.url);
-            comment.url = (0, url_1.getLocalVideoCommentActivityPubUrl)(comment.Video, comment);
+            comment.url = url_1.getLocalVideoCommentActivityPubUrl(comment.Video, comment);
             yield comment.save();
         }
         console.log('Updating video and torrent files.');
@@ -99,17 +99,17 @@ function run() {
         for (const localVideo of localVideos) {
             const video = yield video_1.VideoModel.loadAndPopulateAccountAndServerAndTags(localVideo.id);
             console.log('Updating video ' + video.uuid);
-            video.url = (0, url_1.getLocalVideoActivityPubUrl)(video);
+            video.url = url_1.getLocalVideoActivityPubUrl(video);
             yield video.save();
             for (const file of video.VideoFiles) {
                 console.log('Updating torrent file %s of video %s.', file.resolution, video.uuid);
-                yield (0, webtorrent_1.updateTorrentUrls)(video, file);
+                yield webtorrent_1.updateTorrentUrls(video, file);
                 yield file.save();
             }
             const playlist = video.getHLSPlaylist();
             for (const file of ((playlist === null || playlist === void 0 ? void 0 : playlist.VideoFiles) || [])) {
                 console.log('Updating fragmented torrent file %s of video %s.', file.resolution, video.uuid);
-                yield (0, webtorrent_1.updateTorrentUrls)(video, file);
+                yield webtorrent_1.updateTorrentUrls(video, file);
                 yield file.save();
             }
         }

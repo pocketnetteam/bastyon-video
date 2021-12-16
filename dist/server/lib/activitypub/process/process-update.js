@@ -15,35 +15,35 @@ const playlists_1 = require("../playlists");
 const utils_1 = require("../send/utils");
 const videos_2 = require("../videos");
 function processUpdateActivity(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { activity, byActor } = options;
         const objectType = activity.object.type;
         if (objectType === 'Video') {
-            return (0, database_utils_1.retryTransactionWrapper)(processUpdateVideo, activity);
+            return database_utils_1.retryTransactionWrapper(processUpdateVideo, activity);
         }
         if (objectType === 'Person' || objectType === 'Application' || objectType === 'Group') {
             const byActorFull = yield actor_1.ActorModel.loadByUrlAndPopulateAccountAndChannel(byActor.url);
-            return (0, database_utils_1.retryTransactionWrapper)(processUpdateActor, byActorFull, activity);
+            return database_utils_1.retryTransactionWrapper(processUpdateActor, byActorFull, activity);
         }
         if (objectType === 'CacheFile') {
             const byActorFull = yield actor_1.ActorModel.loadByUrlAndPopulateAccountAndChannel(byActor.url);
-            return (0, database_utils_1.retryTransactionWrapper)(processUpdateCacheFile, byActorFull, activity);
+            return database_utils_1.retryTransactionWrapper(processUpdateCacheFile, byActorFull, activity);
         }
         if (objectType === 'Playlist') {
-            return (0, database_utils_1.retryTransactionWrapper)(processUpdatePlaylist, byActor, activity);
+            return database_utils_1.retryTransactionWrapper(processUpdatePlaylist, byActor, activity);
         }
         return undefined;
     });
 }
 exports.processUpdateActivity = processUpdateActivity;
 function processUpdateVideo(activity) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const videoObject = activity.object;
-        if ((0, videos_1.sanitizeAndCheckVideoTorrentObject)(videoObject) === false) {
+        if (videos_1.sanitizeAndCheckVideoTorrentObject(videoObject) === false) {
             logger_1.logger.debug('Video sent by update is not valid.', { videoObject });
             return undefined;
         }
-        const { video, created } = yield (0, videos_2.getOrCreateAPVideo)({
+        const { video, created } = yield videos_2.getOrCreateAPVideo({
             videoObject: videoObject.id,
             allowRefresh: false,
             fetchType: 'all'
@@ -55,26 +55,26 @@ function processUpdateVideo(activity) {
     });
 }
 function processUpdateCacheFile(byActor, activity) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-        if ((yield (0, redundancy_1.isRedundancyAccepted)(activity, byActor)) !== true)
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        if ((yield redundancy_1.isRedundancyAccepted(activity, byActor)) !== true)
             return;
         const cacheFileObject = activity.object;
-        if (!(0, cache_file_1.isCacheFileObjectValid)(cacheFileObject)) {
+        if (!cache_file_1.isCacheFileObjectValid(cacheFileObject)) {
             logger_1.logger.debug('Cache file object sent by update is not valid.', { cacheFileObject });
             return undefined;
         }
-        const { video } = yield (0, videos_2.getOrCreateAPVideo)({ videoObject: cacheFileObject.object });
-        yield database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            yield (0, cache_file_2.createOrUpdateCacheFile)(cacheFileObject, video, byActor, t);
+        const { video } = yield videos_2.getOrCreateAPVideo({ videoObject: cacheFileObject.object });
+        yield database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield cache_file_2.createOrUpdateCacheFile(cacheFileObject, video, byActor, t);
         }));
         if (video.isOwned()) {
             const exceptions = [byActor];
-            yield (0, utils_1.forwardVideoRelatedActivity)(activity, undefined, exceptions, video);
+            yield utils_1.forwardVideoRelatedActivity(activity, undefined, exceptions, video);
         }
     });
 }
 function processUpdateActor(actor, activity) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const actorObject = activity.object;
         logger_1.logger.debug('Updating remote account "%s".', actorObject.url);
         const updater = new updater_1.APActorUpdater(actorObject, actor);
@@ -82,11 +82,11 @@ function processUpdateActor(actor, activity) {
     });
 }
 function processUpdatePlaylist(byActor, activity) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const playlistObject = activity.object;
         const byAccount = byActor.Account;
         if (!byAccount)
             throw new Error('Cannot update video playlist with the non account actor ' + byActor.url);
-        yield (0, playlists_1.createOrUpdateVideoPlaylist)(playlistObject, activity.to);
+        yield playlists_1.createOrUpdateVideoPlaylist(playlistObject, activity.to);
     });
 }

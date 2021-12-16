@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isObjectValid = exports.setValidAttributedTo = exports.isBaseActivityValid = exports.isActivityPubUrlValid = exports.isUrlValid = void 0;
 const tslib_1 = require("tslib");
-const validator_1 = (0, tslib_1.__importDefault)(require("validator"));
+const validator_1 = tslib_1.__importDefault(require("validator"));
 const constants_1 = require("../../../initializers/constants");
 const core_utils_1 = require("../../core-utils");
 const misc_1 = require("../misc");
@@ -14,10 +14,10 @@ function isUrlValid(url) {
         require_valid_protocol: true,
         protocols: ['http', 'https']
     };
-    if ((0, core_utils_1.isTestInstance)()) {
+    if (core_utils_1.isTestInstance()) {
         isURLOptions.require_tld = false;
     }
-    return (0, misc_1.exists)(url) && validator_1.default.isURL('' + url, isURLOptions);
+    return misc_1.exists(url) && validator_1.default.isURL('' + url, isURLOptions);
 }
 exports.isUrlValid = isUrlValid;
 function isActivityPubUrlValid(url) {
@@ -37,7 +37,7 @@ function isUrlCollectionValid(collection) {
         (Array.isArray(collection) && collection.every(t => isActivityPubUrlValid(t)));
 }
 function isObjectValid(object) {
-    return (0, misc_1.exists)(object) &&
+    return misc_1.exists(object) &&
         (isActivityPubUrlValid(object) || isActivityPubUrlValid(object.id));
 }
 exports.isObjectValid = isObjectValid;

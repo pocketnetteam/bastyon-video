@@ -11,7 +11,7 @@ class ApiCache {
         this.options = Object.assign({ headerBlacklist: [], excludeStatus: [] }, options);
     }
     buildMiddleware(strDuration) {
-        const duration = (0, core_utils_1.parseDurationToMs)(strDuration);
+        const duration = core_utils_1.parseDurationToMs(strDuration);
         return (req, res, next) => {
             const key = redis_1.Redis.Instance.getPrefix() + 'api-cache-' + req.originalUrl;
             const redis = redis_1.Redis.Instance.getClient();
@@ -131,7 +131,7 @@ class ApiCache {
     }
     sendCachedResponse(request, response, cacheObject, duration) {
         const headers = response.getHeaders();
-        if ((0, core_utils_1.isTestInstance)()) {
+        if (core_utils_1.isTestInstance()) {
             Object.assign(headers, {
                 'x-api-cache-cached': 'true'
             });

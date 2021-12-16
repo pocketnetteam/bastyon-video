@@ -6,7 +6,7 @@ const database_utils_1 = require("../helpers/database-utils");
 function asyncMiddleware(fun) {
     return (req, res, next) => {
         if (Array.isArray(fun) === true) {
-            return (0, async_1.eachSeries)(fun, (f, cb) => {
+            return async_1.eachSeries(fun, (f, cb) => {
                 Promise.resolve(f(req, res, err => cb(err)))
                     .catch(err => next(err));
             }, next);
@@ -18,7 +18,7 @@ function asyncMiddleware(fun) {
 exports.asyncMiddleware = asyncMiddleware;
 function asyncRetryTransactionMiddleware(fun) {
     return (req, res, next) => {
-        return Promise.resolve((0, database_utils_1.retryTransactionWrapper)(fun, req, res, next)).catch(err => next(err));
+        return Promise.resolve(database_utils_1.retryTransactionWrapper(fun, req, res, next)).catch(err => next(err));
     };
 }
 exports.asyncRetryTransactionMiddleware = asyncRetryTransactionMiddleware;

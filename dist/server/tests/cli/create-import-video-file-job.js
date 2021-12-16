@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = (0, tslib_1.__importStar)(require("chai"));
+const chai = tslib_1.__importStar(require("chai"));
 const extra_utils_1 = require("@shared/extra-utils");
 const models_1 = require("@shared/models");
 const expect = chai.expect;
@@ -16,11 +16,11 @@ function assertVideoProperties(video, resolution, extname, size) {
         expect(video.size).to.equal(size);
 }
 function checkFiles(video, objectStorage) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         for (const file of video.files) {
             if (objectStorage)
-                (0, extra_utils_1.expectStartWith)(file.fileUrl, extra_utils_1.ObjectStorageCommand.getWebTorrentBaseUrl());
-            yield (0, extra_utils_1.makeRawRequest)(file.fileUrl, models_1.HttpStatusCode.OK_200);
+                extra_utils_1.expectStartWith(file.fileUrl, extra_utils_1.ObjectStorageCommand.getWebTorrentBaseUrl());
+            yield extra_utils_1.makeRawRequest(file.fileUrl, models_1.HttpStatusCode.OK_200);
         }
     });
 }
@@ -29,14 +29,14 @@ function runTests(objectStorage) {
     let video2UUID;
     let servers = [];
     before(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(90000);
             const config = objectStorage
                 ? extra_utils_1.ObjectStorageCommand.getDefaultConfig()
                 : {};
-            servers = yield (0, extra_utils_1.createMultipleServers)(2, config);
-            yield (0, extra_utils_1.setAccessTokensToServers)(servers);
-            yield (0, extra_utils_1.doubleFollow)(servers[0], servers[1]);
+            servers = yield extra_utils_1.createMultipleServers(2, config);
+            yield extra_utils_1.setAccessTokensToServers(servers);
+            yield extra_utils_1.doubleFollow(servers[0], servers[1]);
             if (objectStorage)
                 yield extra_utils_1.ObjectStorageCommand.prepareDefaultBuckets();
             {
@@ -47,14 +47,14 @@ function runTests(objectStorage) {
                 const { uuid } = yield servers[1].videos.upload({ attributes: { name: 'video2' } });
                 video2UUID = uuid;
             }
-            yield (0, extra_utils_1.waitJobs)(servers);
+            yield extra_utils_1.waitJobs(servers);
         });
     });
     it('Should run a import job on video 1 with a lower resolution', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const command = `npm run create-import-video-file-job -- -v ${video1ShortId} -i server/tests/fixtures/video_short-480.webm`;
             yield servers[0].cli.execWithEnv(command);
-            yield (0, extra_utils_1.waitJobs)(servers);
+            yield extra_utils_1.waitJobs(servers);
             for (const server of servers) {
                 const { data: videos } = yield server.videos.list();
                 expect(videos).to.have.lengthOf(2);
@@ -69,10 +69,10 @@ function runTests(objectStorage) {
         });
     });
     it('Should run a import job on video 2 with the same resolution and a different extension', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const command = `npm run create-import-video-file-job -- -v ${video2UUID} -i server/tests/fixtures/video_short.ogv`;
             yield servers[1].cli.execWithEnv(command);
-            yield (0, extra_utils_1.waitJobs)(servers);
+            yield extra_utils_1.waitJobs(servers);
             for (const server of servers) {
                 const { data: videos } = yield server.videos.list();
                 expect(videos).to.have.lengthOf(2);
@@ -89,10 +89,10 @@ function runTests(objectStorage) {
         });
     });
     it('Should run a import job on video 2 with the same resolution and the same extension', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const command = `npm run create-import-video-file-job -- -v ${video1ShortId} -i server/tests/fixtures/video_short2.webm`;
             yield servers[0].cli.execWithEnv(command);
-            yield (0, extra_utils_1.waitJobs)(servers);
+            yield extra_utils_1.waitJobs(servers);
             for (const server of servers) {
                 const { data: videos } = yield server.videos.list();
                 expect(videos).to.have.lengthOf(2);
@@ -107,8 +107,8 @@ function runTests(objectStorage) {
         });
     });
     after(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            yield (0, extra_utils_1.cleanupTests)(servers);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield extra_utils_1.cleanupTests(servers);
         });
     });
 }
@@ -117,7 +117,7 @@ describe('Test create import video jobs', function () {
         runTests(false);
     });
     describe('On object storage', function () {
-        if ((0, extra_utils_1.areObjectStorageTestsDisabled)())
+        if (extra_utils_1.areObjectStorageTestsDisabled())
             return;
         runTests(true);
     });

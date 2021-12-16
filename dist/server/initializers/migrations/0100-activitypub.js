@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.down = exports.up = void 0;
 const tslib_1 = require("tslib");
-const Sequelize = (0, tslib_1.__importStar)(require("sequelize"));
+const Sequelize = tslib_1.__importStar(require("sequelize"));
 const peertube_crypto_1 = require("../../helpers/peertube-crypto");
 const share_1 = require("../../lib/activitypub/share");
 const url_1 = require("../../lib/activitypub/url");
@@ -10,7 +10,7 @@ const user_1 = require("../../lib/user");
 const application_1 = require("../../models/application/application");
 const constants_1 = require("../constants");
 function up(utils) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const q = utils.queryInterface;
         const db = utils.db;
         {
@@ -47,13 +47,13 @@ function up(utils) {
         yield utils.queryInterface.dropTable('Requests');
         {
             const applicationInstance = yield application_1.ApplicationModel.findOne();
-            const accountCreated = yield (0, user_1.createLocalAccountWithoutKeys)({
+            const accountCreated = yield user_1.createLocalAccountWithoutKeys({
                 name: constants_1.SERVER_ACTOR_NAME,
                 userId: null,
                 applicationId: applicationInstance.id,
                 t: undefined
             });
-            const { publicKey, privateKey } = yield (0, peertube_crypto_1.createPrivateAndPublicKeys)();
+            const { publicKey, privateKey } = yield peertube_crypto_1.createPrivateAndPublicKeys();
             accountCreated.Actor.publicKey = publicKey;
             accountCreated.Actor.privateKey = privateKey;
             yield accountCreated.save();
@@ -64,8 +64,8 @@ function up(utils) {
         }
         const users = yield db.User.findAll();
         for (const user of users) {
-            const account = yield (0, user_1.createLocalAccountWithoutKeys)({ name: user.username, userId: user.id, applicationId: null, t: undefined });
-            const { publicKey, privateKey } = yield (0, peertube_crypto_1.createPrivateAndPublicKeys)();
+            const account = yield user_1.createLocalAccountWithoutKeys({ name: user.username, userId: user.id, applicationId: null, t: undefined });
+            const { publicKey, privateKey } = yield peertube_crypto_1.createPrivateAndPublicKeys();
             account.Actor.publicKey = publicKey;
             account.Actor.privateKey = privateKey;
             yield account.save();
@@ -100,7 +100,7 @@ function up(utils) {
             yield q.addColumn('Videos', 'url', data);
             const videos = yield db.Video.findAll();
             for (const video of videos) {
-                video.url = (0, url_1.getLocalVideoActivityPubUrl)(video);
+                video.url = url_1.getLocalVideoActivityPubUrl(video);
                 yield video.save();
             }
             data.allowNull = false;
@@ -115,7 +115,7 @@ function up(utils) {
             yield q.addColumn('VideoChannels', 'url', data);
             const videoChannels = yield db.VideoChannel.findAll();
             for (const videoChannel of videoChannels) {
-                videoChannel.url = (0, url_1.getLocalVideoChannelActivityPubUrl)(videoChannel);
+                videoChannel.url = url_1.getLocalVideoChannelActivityPubUrl(videoChannel);
                 yield videoChannel.save();
             }
             data.allowNull = false;
@@ -158,7 +158,7 @@ function up(utils) {
                 ]
             });
             for (const video of videos) {
-                yield (0, share_1.shareVideoByServerAndChannel)(video, undefined);
+                yield share_1.shareVideoByServerAndChannel(video, undefined);
             }
         }
     });

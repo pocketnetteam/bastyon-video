@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = (0, tslib_1.__importStar)(require("chai"));
+const chai = tslib_1.__importStar(require("chai"));
 const extra_utils_1 = require("@shared/extra-utils");
 const expect = chai.expect;
 describe('Test playlists search', function () {
@@ -12,16 +12,16 @@ describe('Test playlists search', function () {
     let playlistUUID;
     let playlistShortUUID;
     before(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(120000);
             const servers = yield Promise.all([
-                (0, extra_utils_1.createSingleServer)(1),
-                (0, extra_utils_1.createSingleServer)(2, { transcoding: { enabled: false } })
+                extra_utils_1.createSingleServer(1),
+                extra_utils_1.createSingleServer(2, { transcoding: { enabled: false } })
             ]);
             server = servers[0];
             remoteServer = servers[1];
-            yield (0, extra_utils_1.setAccessTokensToServers)([remoteServer, server]);
-            yield (0, extra_utils_1.setDefaultVideoChannel)([remoteServer, server]);
+            yield extra_utils_1.setAccessTokensToServers([remoteServer, server]);
+            yield extra_utils_1.setDefaultVideoChannel([remoteServer, server]);
             {
                 const videoId = (yield server.videos.upload()).uuid;
                 const attributes = {
@@ -52,19 +52,19 @@ describe('Test playlists search', function () {
                 };
                 yield server.playlists.create({ attributes });
             }
-            yield (0, extra_utils_1.doubleFollow)(server, remoteServer);
+            yield extra_utils_1.doubleFollow(server, remoteServer);
             command = server.search;
         });
     });
     it('Should make a simple search and not have results', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const body = yield command.searchPlaylists({ search: 'abc' });
             expect(body.total).to.equal(0);
             expect(body.data).to.have.lengthOf(0);
         });
     });
     it('Should make a search and have results', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             {
                 const search = {
                     search: 'tenma',
@@ -93,7 +93,7 @@ describe('Test playlists search', function () {
         });
     });
     it('Should filter by host', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             {
                 const search = { search: 'tenma', host: server.host };
                 const body = yield command.advancedPlaylistSearch({ search });
@@ -119,7 +119,7 @@ describe('Test playlists search', function () {
         });
     });
     it('Should filter by UUIDs', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             for (const uuid of [playlistUUID, playlistShortUUID]) {
                 const body = yield command.advancedPlaylistSearch({ search: { uuids: [uuid] } });
                 expect(body.total).to.equal(1);
@@ -133,7 +133,7 @@ describe('Test playlists search', function () {
         });
     });
     it('Should not display playlists without videos', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const search = {
                 search: 'Lunge',
                 start: 0,
@@ -145,8 +145,8 @@ describe('Test playlists search', function () {
         });
     });
     after(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            yield (0, extra_utils_1.cleanupTests)([server, remoteServer]);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield extra_utils_1.cleanupTests([server, remoteServer]);
         });
     });
 });

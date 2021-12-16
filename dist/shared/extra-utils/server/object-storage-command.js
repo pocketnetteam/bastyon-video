@@ -41,24 +41,24 @@ class ObjectStorageCommand extends shared_1.AbstractCommand {
         return `http://${this.DEFAULT_PLAYLIST_BUCKET}.${this.getEndpointHost()}/`;
     }
     static prepareDefaultBuckets() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             yield this.createBucket(this.DEFAULT_PLAYLIST_BUCKET);
             yield this.createBucket(this.DEFAULT_WEBTORRENT_BUCKET);
         });
     }
     static createBucket(name) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            yield (0, requests_1.makePostBodyRequest)({
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield requests_1.makePostBodyRequest({
                 url: this.getEndpointHost(),
                 path: '/ui/' + name + '?delete',
                 expectedStatus: models_1.HttpStatusCode.TEMPORARY_REDIRECT_307
             });
-            yield (0, requests_1.makePostBodyRequest)({
+            yield requests_1.makePostBodyRequest({
                 url: this.getEndpointHost(),
                 path: '/ui/' + name + '?create',
                 expectedStatus: models_1.HttpStatusCode.TEMPORARY_REDIRECT_307
             });
-            yield (0, requests_1.makePostBodyRequest)({
+            yield requests_1.makePostBodyRequest({
                 url: this.getEndpointHost(),
                 path: '/ui/' + name + '?make-public',
                 expectedStatus: models_1.HttpStatusCode.TEMPORARY_REDIRECT_307

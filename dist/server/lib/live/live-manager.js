@@ -35,7 +35,7 @@ const config = {
         ffmpeg: 'ffmpeg'
     }
 };
-const lTags = (0, logger_1.loggerTagsFactory)('live');
+const lTags = logger_1.loggerTagsFactory('live');
 class LiveManager {
     constructor() {
         this.muxingSessions = new Map();
@@ -57,7 +57,7 @@ class LiveManager {
         events.on('donePublish', sessionId => {
             logger_1.logger.info('Live session ended.', Object.assign({ sessionId }, lTags(sessionId)));
         });
-        (0, config_1.registerConfigChangedHandler)(() => {
+        config_1.registerConfigChangedHandler(() => {
             if (!this.rtmpServer && config_1.CONFIG.LIVE.ENABLED === true) {
                 this.run();
                 return;
@@ -72,7 +72,7 @@ class LiveManager {
     }
     run() {
         logger_1.logger.info('Running RTMP server on port %d', config.rtmp.port, lTags());
-        this.rtmpServer = (0, net_1.createServer)(socket => {
+        this.rtmpServer = net_1.createServer(socket => {
             const session = new NodeRtmpSession(config, socket);
             session.run();
         });
@@ -127,7 +127,7 @@ class LiveManager {
         }
     }
     handleSession(sessionId, streamPath, streamKey) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const pendingStreamJobs = yield job_queue_1.JobQueue.Instance.getQueues('video-live-ending', ['delayed']);
             const currentSessionJob = pendingStreamJobs.find((job) => job.data.name === streamKey);
             const videoLive = currentSessionJob
@@ -150,11 +150,11 @@ class LiveManager {
             this.videoSessions.set(video.id, sessionId);
             const rtmpUrl = 'rtmp://127.0.0.1:' + config.rtmp.port + streamPath;
             const now = Date.now();
-            const probe = yield (0, ffprobe_utils_1.ffprobePromise)(rtmpUrl);
+            const probe = yield ffprobe_utils_1.ffprobePromise(rtmpUrl);
             const [{ resolution, ratio }, fps, bitrate] = yield Promise.all([
-                (0, ffprobe_utils_1.getVideoFileResolution)(rtmpUrl, probe),
-                (0, ffprobe_utils_1.getVideoFileFPS)(rtmpUrl, probe),
-                (0, ffprobe_utils_1.getVideoFileBitrate)(rtmpUrl, probe)
+                ffprobe_utils_1.getVideoFileResolution(rtmpUrl, probe),
+                ffprobe_utils_1.getVideoFileFPS(rtmpUrl, probe),
+                ffprobe_utils_1.getVideoFileBitrate(rtmpUrl, probe)
             ]);
             logger_1.logger.info('%s probing took %d ms (bitrate: %d, fps: %d, resolution: %d)', rtmpUrl, Date.now() - now, bitrate, fps, resolution, lTags(sessionId, video.uuid));
             const allResolutions = this.buildAllResolutionsToTranscode(resolution);
@@ -180,7 +180,7 @@ class LiveManager {
         });
     }
     runMuxingSession(options) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const { sessionId, videoLive, streamingPlaylist, allResolutions, fps, bitrate, ratio, rtmpUrl } = options;
             const videoUUID = videoLive.Video.uuid;
             const localLTags = lTags(sessionId, videoUUID);
@@ -231,7 +231,7 @@ class LiveManager {
         });
     }
     publishAndFederateLive(live, localLTags) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const videoId = live.videoId;
             try {
                 const video = yield video_1.VideoModel.loadAndPopulateAccountAndServerAndTags(videoId);
@@ -240,7 +240,7 @@ class LiveManager {
                 yield video.save();
                 live.Video = video;
                 setTimeout(() => {
-                    (0, videos_1.federateVideoIfNeeded)(video, false)
+                    videos_1.federateVideoIfNeeded(video, false)
                         .catch(err => logger_1.logger.error('Cannot federate live video %s.', video.url, Object.assign({ err }, localLTags)));
                     peertube_socket_1.PeerTubeSocket.Instance.sendVideoLiveNewState(video);
                 }, constants_1.VIDEO_LIVE.SEGMENT_TIME_SECONDS * 1000 * constants_1.VIDEO_LIVE.EDGE_LIVE_DELAY_SEGMENTS_NOTIFICATION);
@@ -255,7 +255,7 @@ class LiveManager {
         this.videoSessions.delete(videoId);
     }
     onAfterMuxingCleanup(videoUUID, cleanupNow = false, jobName) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
                 const fullVideo = yield video_1.VideoModel.loadAndPopulateAccountAndServerAndTags(videoUUID);
                 if (!fullVideo)
@@ -276,7 +276,7 @@ class LiveManager {
                 }
                 yield fullVideo.save();
                 peertube_socket_1.PeerTubeSocket.Instance.sendVideoLiveNewState(fullVideo);
-                yield (0, videos_1.federateVideoIfNeeded)(fullVideo, false);
+                yield videos_1.federateVideoIfNeeded(fullVideo, false);
             }
             catch (err) {
                 logger_1.logger.error('Cannot save/federate new video state of live streaming of video %d.', videoUUID, Object.assign({ err }, lTags(videoUUID)));
@@ -284,10 +284,10 @@ class LiveManager {
         });
     }
     updateLiveViews() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (!this.isRunning())
                 return;
-            if (!(0, core_utils_1.isTestInstance)())
+            if (!core_utils_1.isTestInstance())
                 logger_1.logger.info('Updating live video views.', lTags());
             for (const videoId of this.watchersPerVideo.keys()) {
                 const notBefore = new Date().getTime() - constants_1.VIEW_LIFETIME.LIVE;
@@ -296,7 +296,7 @@ class LiveManager {
                 const video = yield video_1.VideoModel.loadAndPopulateAccountAndServerAndTags(videoId);
                 video.views = numWatchers;
                 yield video.save();
-                yield (0, videos_1.federateVideoIfNeeded)(video, false);
+                yield videos_1.federateVideoIfNeeded(video, false);
                 peertube_socket_1.PeerTubeSocket.Instance.sendVideoViewsUpdate(video);
                 const newWatchers = watchers.filter(w => w > notBefore);
                 this.watchersPerVideo.set(videoId, newWatchers);
@@ -305,7 +305,7 @@ class LiveManager {
         });
     }
     handleBrokenLives() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const videoUUIDs = yield video_1.VideoModel.listPublishedLiveUUIDs();
             for (const uuid of videoUUIDs) {
                 yield this.onAfterMuxingCleanup(uuid, true);
@@ -314,15 +314,15 @@ class LiveManager {
     }
     buildAllResolutionsToTranscode(originResolution) {
         const resolutionsEnabled = config_1.CONFIG.LIVE.TRANSCODING.ENABLED
-            ? (0, ffprobe_utils_1.computeResolutionsToTranscode)(originResolution, 'live')
+            ? ffprobe_utils_1.computeResolutionsToTranscode(originResolution, 'live')
             : [];
         return resolutionsEnabled.concat([originResolution]);
     }
     createLivePlaylist(video, allResolutions) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const playlist = yield video_streaming_playlist_1.VideoStreamingPlaylistModel.loadOrGenerate(video);
-            playlist.playlistFilename = (0, paths_1.generateHLSMasterPlaylistFilename)(true);
-            playlist.segmentsSha256Filename = (0, paths_1.generateHlsSha256SegmentsFilename)(true);
+            playlist.playlistFilename = paths_1.generateHLSMasterPlaylistFilename(true);
+            playlist.segmentsSha256Filename = paths_1.generateHlsSha256SegmentsFilename(true);
             playlist.p2pMediaLoaderPeerVersion = constants_1.P2P_MEDIA_LOADER_PEER_VERSION;
             playlist.type = 1;
             playlist.assignP2PMediaLoaderInfoHashes(video, allResolutions);

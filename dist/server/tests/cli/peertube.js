@@ -10,10 +10,10 @@ describe('Test CLI wrapper', function () {
     let cliCommand;
     const cmd = 'node ./dist/server/tools/peertube.js';
     before(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(30000);
-            server = yield (0, extra_utils_1.createSingleServer)(1);
-            yield (0, extra_utils_1.setAccessTokensToServers)([server]);
+            server = yield extra_utils_1.createSingleServer(1);
+            yield extra_utils_1.setAccessTokensToServers([server]);
             yield server.users.create({ username: 'user_1', password: 'super_password' });
             userAccessToken = yield server.login.getAccessToken({ username: 'user_1', password: 'super_password' });
             {
@@ -25,28 +25,28 @@ describe('Test CLI wrapper', function () {
     });
     describe('Authentication and instance selection', function () {
         it('Should get an access token', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const stdout = yield cliCommand.execWithEnv(`${cmd} token --url ${server.url} --username user_1 --password super_password`);
                 const token = stdout.trim();
                 const body = yield server.users.getMyInfo({ token });
-                (0, chai_1.expect)(body.username).to.equal('user_1');
+                chai_1.expect(body.username).to.equal('user_1');
             });
         });
         it('Should display no selected instance', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(60000);
                 const stdout = yield cliCommand.execWithEnv(`${cmd} --help`);
-                (0, chai_1.expect)(stdout).to.contain('no instance selected');
+                chai_1.expect(stdout).to.contain('no instance selected');
             });
         });
         it('Should add a user', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(60000);
                 yield cliCommand.execWithEnv(`${cmd} auth add -u ${server.url} -U user_1 -p super_password`);
             });
         });
         it('Should not fail to add a user if there is a slash at the end of the instance URL', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(60000);
                 let fullServerURL = server.url + '/';
                 yield cliCommand.execWithEnv(`${cmd} auth add -u ${fullServerURL} -U user_1 -p super_password`);
@@ -55,42 +55,42 @@ describe('Test CLI wrapper', function () {
             });
         });
         it('Should default to this user', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(60000);
                 const stdout = yield cliCommand.execWithEnv(`${cmd} --help`);
-                (0, chai_1.expect)(stdout).to.contain(`instance ${server.url} selected`);
+                chai_1.expect(stdout).to.contain(`instance ${server.url} selected`);
             });
         });
         it('Should remember the user', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(60000);
                 const stdout = yield cliCommand.execWithEnv(`${cmd} auth list`);
-                (0, chai_1.expect)(stdout).to.contain(server.url);
+                chai_1.expect(stdout).to.contain(server.url);
             });
         });
     });
     describe('Video upload/import', function () {
         it('Should upload a video', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(60000);
-                const fixture = (0, extra_utils_1.buildAbsoluteFixturePath)('60fps_720p_small.mp4');
+                const fixture = extra_utils_1.buildAbsoluteFixturePath('60fps_720p_small.mp4');
                 const params = `-f ${fixture} --video-name 'test upload' --channel-name user_channel --support 'support_text'`;
                 yield cliCommand.execWithEnv(`${cmd} upload ${params}`);
             });
         });
         it('Should have the video uploaded', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const { total, data } = yield server.videos.list();
-                (0, chai_1.expect)(total).to.equal(1);
+                chai_1.expect(total).to.equal(1);
                 const video = yield server.videos.get({ id: data[0].uuid });
-                (0, chai_1.expect)(video.name).to.equal('test upload');
-                (0, chai_1.expect)(video.support).to.equal('support_text');
-                (0, chai_1.expect)(video.channel.name).to.equal('user_channel');
+                chai_1.expect(video.name).to.equal('test upload');
+                chai_1.expect(video.support).to.equal('support_text');
+                chai_1.expect(video.channel.name).to.equal('user_channel');
             });
         });
         it('Should import a video', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                if ((0, extra_utils_1.areHttpImportTestsDisabled)())
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                if (extra_utils_1.areHttpImportTestsDisabled())
                     return;
                 this.timeout(60000);
                 const params = `--target-url ${extra_utils_1.FIXTURE_URLS.youtube} --channel-name user_channel`;
@@ -98,81 +98,81 @@ describe('Test CLI wrapper', function () {
             });
         });
         it('Should have imported the video', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                if ((0, extra_utils_1.areHttpImportTestsDisabled)())
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                if (extra_utils_1.areHttpImportTestsDisabled())
                     return;
                 this.timeout(60000);
-                yield (0, extra_utils_1.waitJobs)([server]);
+                yield extra_utils_1.waitJobs([server]);
                 const { total, data } = yield server.videos.list();
-                (0, chai_1.expect)(total).to.equal(2);
+                chai_1.expect(total).to.equal(2);
                 const video = data.find(v => v.name === 'small video - youtube');
-                (0, chai_1.expect)(video).to.not.be.undefined;
+                chai_1.expect(video).to.not.be.undefined;
                 const videoDetails = yield server.videos.get({ id: video.id });
-                (0, chai_1.expect)(videoDetails.channel.name).to.equal('user_channel');
-                (0, chai_1.expect)(videoDetails.support).to.equal('super support text');
-                (0, chai_1.expect)(videoDetails.nsfw).to.be.false;
+                chai_1.expect(videoDetails.channel.name).to.equal('user_channel');
+                chai_1.expect(videoDetails.support).to.equal('super support text');
+                chai_1.expect(videoDetails.nsfw).to.be.false;
                 yield server.videos.remove({ token: userAccessToken, id: video.id });
             });
         });
         it('Should import and override some imported attributes', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                if ((0, extra_utils_1.areHttpImportTestsDisabled)())
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                if (extra_utils_1.areHttpImportTestsDisabled())
                     return;
                 this.timeout(60000);
                 const params = `--target-url ${extra_utils_1.FIXTURE_URLS.youtube} ` +
                     `--channel-name user_channel --video-name toto --nsfw --support support`;
                 yield cliCommand.execWithEnv(`${cmd} import ${params}`);
-                yield (0, extra_utils_1.waitJobs)([server]);
+                yield extra_utils_1.waitJobs([server]);
                 {
                     const { total, data } = yield server.videos.list();
-                    (0, chai_1.expect)(total).to.equal(2);
+                    chai_1.expect(total).to.equal(2);
                     const video = data.find(v => v.name === 'toto');
-                    (0, chai_1.expect)(video).to.not.be.undefined;
+                    chai_1.expect(video).to.not.be.undefined;
                     const videoDetails = yield server.videos.get({ id: video.id });
-                    (0, chai_1.expect)(videoDetails.channel.name).to.equal('user_channel');
-                    (0, chai_1.expect)(videoDetails.support).to.equal('support');
-                    (0, chai_1.expect)(videoDetails.nsfw).to.be.true;
-                    (0, chai_1.expect)(videoDetails.commentsEnabled).to.be.true;
+                    chai_1.expect(videoDetails.channel.name).to.equal('user_channel');
+                    chai_1.expect(videoDetails.support).to.equal('support');
+                    chai_1.expect(videoDetails.nsfw).to.be.true;
+                    chai_1.expect(videoDetails.commentsEnabled).to.be.true;
                 }
             });
         });
     });
     describe('Admin auth', function () {
         it('Should remove the auth user', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 yield cliCommand.execWithEnv(`${cmd} auth del ${server.url}`);
                 const stdout = yield cliCommand.execWithEnv(`${cmd} --help`);
-                (0, chai_1.expect)(stdout).to.contain('no instance selected');
+                chai_1.expect(stdout).to.contain('no instance selected');
             });
         });
         it('Should add the admin user', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 yield cliCommand.execWithEnv(`${cmd} auth add -u ${server.url} -U root -p test${server.internalServerNumber}`);
             });
         });
     });
     describe('Manage plugins', function () {
         it('Should install a plugin', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(60000);
                 yield cliCommand.execWithEnv(`${cmd} plugins install --npm-name peertube-plugin-hello-world`);
             });
         });
         it('Should have registered settings', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.testHelloWorldRegisteredSettings)(server);
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.testHelloWorldRegisteredSettings(server);
             });
         });
         it('Should list installed plugins', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const res = yield cliCommand.execWithEnv(`${cmd} plugins list`);
-                (0, chai_1.expect)(res).to.contain('peertube-plugin-hello-world');
+                chai_1.expect(res).to.contain('peertube-plugin-hello-world');
             });
         });
         it('Should uninstall the plugin', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const res = yield cliCommand.execWithEnv(`${cmd} plugins uninstall --npm-name peertube-plugin-hello-world`);
-                (0, chai_1.expect)(res).to.not.contain('peertube-plugin-hello-world');
+                chai_1.expect(res).to.not.contain('peertube-plugin-hello-world');
             });
         });
     });
@@ -181,61 +181,61 @@ describe('Test CLI wrapper', function () {
         let video1Server2;
         let servers;
         before(function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(120000);
-                anotherServer = yield (0, extra_utils_1.createSingleServer)(2);
-                yield (0, extra_utils_1.setAccessTokensToServers)([anotherServer]);
-                yield (0, extra_utils_1.doubleFollow)(server, anotherServer);
+                anotherServer = yield extra_utils_1.createSingleServer(2);
+                yield extra_utils_1.setAccessTokensToServers([anotherServer]);
+                yield extra_utils_1.doubleFollow(server, anotherServer);
                 servers = [server, anotherServer];
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 const { uuid } = yield anotherServer.videos.quickUpload({ name: 'super video' });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 video1Server2 = yield server.videos.getId({ uuid });
             });
         });
         it('Should add a redundancy', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(60000);
                 const params = `add --video ${video1Server2}`;
                 yield cliCommand.execWithEnv(`${cmd} redundancy ${params}`);
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
             });
         });
         it('Should list redundancies', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(60000);
                 {
                     const params = 'list-my-redundancies';
                     const stdout = yield cliCommand.execWithEnv(`${cmd} redundancy ${params}`);
-                    (0, chai_1.expect)(stdout).to.contain('super video');
-                    (0, chai_1.expect)(stdout).to.contain(`localhost:${server.port}`);
+                    chai_1.expect(stdout).to.contain('super video');
+                    chai_1.expect(stdout).to.contain(`localhost:${server.port}`);
                 }
             });
         });
         it('Should remove a redundancy', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(60000);
                 const params = `remove --video ${video1Server2}`;
                 yield cliCommand.execWithEnv(`${cmd} redundancy ${params}`);
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 {
                     const params = 'list-my-redundancies';
                     const stdout = yield cliCommand.execWithEnv(`${cmd} redundancy ${params}`);
-                    (0, chai_1.expect)(stdout).to.not.contain('super video');
+                    chai_1.expect(stdout).to.not.contain('super video');
                 }
             });
         });
         after(function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(10000);
-                yield (0, extra_utils_1.cleanupTests)([anotherServer]);
+                yield extra_utils_1.cleanupTests([anotherServer]);
             });
         });
     });
     after(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(10000);
-            yield (0, extra_utils_1.cleanupTests)([server]);
+            yield extra_utils_1.cleanupTests([server]);
         });
     });
 });

@@ -8,7 +8,7 @@ const user_1 = require("@server/models/user/user");
 const abstract_new_abuse_message_1 = require("./abstract-new-abuse-message");
 class NewAbuseMessageForReporter extends abstract_new_abuse_message_1.AbstractNewAbuseMessage {
     prepare() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (this.abuse.ReporterAccount.isOwned() !== true)
                 return;
             yield this.loadMessageAccount();
@@ -19,7 +19,7 @@ class NewAbuseMessageForReporter extends abstract_new_abuse_message_1.AbstractNe
         });
     }
     log() {
-        logger_1.logger.info('Notifying reporter of new abuse message on %s.', (0, url_1.getAbuseTargetUrl)(this.abuse));
+        logger_1.logger.info('Notifying reporter of new abuse message on %s.', url_1.getAbuseTargetUrl(this.abuse));
     }
     getTargetUsers() {
         if (!this.reporter)

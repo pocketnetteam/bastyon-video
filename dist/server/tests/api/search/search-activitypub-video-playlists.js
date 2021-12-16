@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = (0, tslib_1.__importStar)(require("chai"));
+const chai = tslib_1.__importStar(require("chai"));
 const extra_utils_1 = require("@shared/extra-utils");
 const expect = chai.expect;
 describe('Test ActivityPub playlists search', function () {
@@ -12,11 +12,11 @@ describe('Test ActivityPub playlists search', function () {
     let video2Server2;
     let command;
     before(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(120000);
-            servers = yield (0, extra_utils_1.createMultipleServers)(2);
-            yield (0, extra_utils_1.setAccessTokensToServers)(servers);
-            yield (0, extra_utils_1.setDefaultVideoChannel)(servers);
+            servers = yield extra_utils_1.createMultipleServers(2);
+            yield extra_utils_1.setAccessTokensToServers(servers);
+            yield extra_utils_1.setDefaultVideoChannel(servers);
             {
                 const video1 = (yield servers[0].videos.quickUpload({ name: 'video 1' })).uuid;
                 const video2 = (yield servers[0].videos.quickUpload({ name: 'video 2' })).uuid;
@@ -43,12 +43,12 @@ describe('Test ActivityPub playlists search', function () {
                 playlistServer2UUID = created.uuid;
                 yield servers[1].playlists.addElement({ playlistId: playlistServer2UUID, attributes: { videoId } });
             }
-            yield (0, extra_utils_1.waitJobs)(servers);
+            yield extra_utils_1.waitJobs(servers);
             command = servers[0].search;
         });
     });
     it('Should not find a remote playlist', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             {
                 const search = 'http://localhost:' + servers[1].port + '/video-playlists/43';
                 const body = yield command.searchPlaylists({ search, token: servers[0].accessToken });
@@ -66,7 +66,7 @@ describe('Test ActivityPub playlists search', function () {
         });
     });
     it('Should search a local playlist', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const search = 'http://localhost:' + servers[0].port + '/video-playlists/' + playlistServer1UUID;
             const body = yield command.searchPlaylists({ search });
             expect(body.total).to.equal(1);
@@ -77,7 +77,7 @@ describe('Test ActivityPub playlists search', function () {
         });
     });
     it('Should search a local playlist with an alternative URL', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const searches = [
                 'http://localhost:' + servers[0].port + '/videos/watch/playlist/' + playlistServer1UUID,
                 'http://localhost:' + servers[0].port + '/w/p/' + playlistServer1UUID
@@ -95,7 +95,7 @@ describe('Test ActivityPub playlists search', function () {
         });
     });
     it('Should search a remote playlist', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const searches = [
                 'http://localhost:' + servers[1].port + '/video-playlists/' + playlistServer2UUID,
                 'http://localhost:' + servers[1].port + '/videos/watch/playlist/' + playlistServer2UUID,
@@ -112,7 +112,7 @@ describe('Test ActivityPub playlists search', function () {
         });
     });
     it('Should not list this remote playlist', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const body = yield servers[0].playlists.list({ start: 0, count: 10 });
             expect(body.total).to.equal(1);
             expect(body.data).to.have.lengthOf(1);
@@ -120,14 +120,14 @@ describe('Test ActivityPub playlists search', function () {
         });
     });
     it('Should update the playlist of server 2, and refresh it on server 1', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(60000);
             yield servers[1].playlists.addElement({ playlistId: playlistServer2UUID, attributes: { videoId: video2Server2 } });
-            yield (0, extra_utils_1.waitJobs)(servers);
-            yield (0, extra_utils_1.wait)(10000);
+            yield extra_utils_1.waitJobs(servers);
+            yield extra_utils_1.wait(10000);
             const search = 'http://localhost:' + servers[1].port + '/video-playlists/' + playlistServer2UUID;
             yield command.searchPlaylists({ search, token: servers[0].accessToken });
-            yield (0, extra_utils_1.wait)(5000);
+            yield extra_utils_1.wait(5000);
             const body = yield command.searchPlaylists({ search, token: servers[0].accessToken });
             expect(body.total).to.equal(1);
             expect(body.data).to.have.lengthOf(1);
@@ -136,22 +136,22 @@ describe('Test ActivityPub playlists search', function () {
         });
     });
     it('Should delete playlist of server 2, and delete it on server 1', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(60000);
             yield servers[1].playlists.delete({ playlistId: playlistServer2UUID });
-            yield (0, extra_utils_1.waitJobs)(servers);
-            yield (0, extra_utils_1.wait)(10000);
+            yield extra_utils_1.waitJobs(servers);
+            yield extra_utils_1.wait(10000);
             const search = 'http://localhost:' + servers[1].port + '/video-playlists/' + playlistServer2UUID;
             yield command.searchPlaylists({ search, token: servers[0].accessToken });
-            yield (0, extra_utils_1.wait)(5000);
+            yield extra_utils_1.wait(5000);
             const body = yield command.searchPlaylists({ search, token: servers[0].accessToken });
             expect(body.total).to.equal(0);
             expect(body.data).to.have.lengthOf(0);
         });
     });
     after(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            yield (0, extra_utils_1.cleanupTests)(servers);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield extra_utils_1.cleanupTests(servers);
         });
     });
 });

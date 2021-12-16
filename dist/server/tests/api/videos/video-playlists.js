@@ -2,12 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = (0, tslib_1.__importStar)(require("chai"));
+const chai = tslib_1.__importStar(require("chai"));
 const extra_utils_1 = require("@shared/extra-utils");
 const models_1 = require("@shared/models");
 const expect = chai.expect;
 function checkPlaylistElementType(servers, playlistId, type, position, name, total) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         for (const server of servers) {
             const body = yield server.playlists.listVideos({ token: server.accessToken, playlistId, start: 0, count: 10 });
             expect(body.total).to.equal(total);
@@ -38,13 +38,13 @@ describe('Test video playlists', function () {
     let userTokenServer1;
     let commands;
     before(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(120000);
-            servers = yield (0, extra_utils_1.createMultipleServers)(3, { transcoding: { enabled: false } });
-            yield (0, extra_utils_1.setAccessTokensToServers)(servers);
-            yield (0, extra_utils_1.setDefaultVideoChannel)(servers);
-            yield (0, extra_utils_1.doubleFollow)(servers[0], servers[1]);
-            yield (0, extra_utils_1.doubleFollow)(servers[0], servers[2]);
+            servers = yield extra_utils_1.createMultipleServers(3, { transcoding: { enabled: false } });
+            yield extra_utils_1.setAccessTokensToServers(servers);
+            yield extra_utils_1.setDefaultVideoChannel(servers);
+            yield extra_utils_1.doubleFollow(servers[0], servers[1]);
+            yield extra_utils_1.doubleFollow(servers[0], servers[2]);
             commands = servers.map(s => s.playlists);
             {
                 servers[0].store.videos = [];
@@ -60,19 +60,19 @@ describe('Test video playlists', function () {
             }
             nsfwVideoServer1 = (yield servers[0].videos.quickUpload({ name: 'NSFW video', nsfw: true })).id;
             userTokenServer1 = yield servers[0].users.generateUserAndToken('user1');
-            yield (0, extra_utils_1.waitJobs)(servers);
+            yield extra_utils_1.waitJobs(servers);
         });
     });
     describe('Get default playlists', function () {
         it('Should list video playlist privacies', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const privacies = yield commands[0].getPrivacies();
                 expect(Object.keys(privacies)).to.have.length.at.least(3);
                 expect(privacies[3]).to.equal('Private');
             });
         });
         it('Should list watch later playlist', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const token = servers[0].accessToken;
                 {
                     const body = yield commands[0].listByAccount({ token, handle: 'root', playlistType: 2 });
@@ -96,7 +96,7 @@ describe('Test video playlists', function () {
             });
         });
         it('Should get private playlist for a classic user', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const token = yield servers[0].users.generateUserAndToken('toto');
                 const body = yield commands[0].listByAccount({ token, handle: 'toto' });
                 expect(body.total).to.equal(1);
@@ -108,7 +108,7 @@ describe('Test video playlists', function () {
     });
     describe('Create and federate playlists', function () {
         it('Should create a playlist on server 1 and have the playlist on server 2 and 3', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(30000);
                 yield commands[0].create({
                     attributes: {
@@ -119,8 +119,8 @@ describe('Test video playlists', function () {
                         videoChannelId: servers[0].store.channel.id
                     }
                 });
-                yield (0, extra_utils_1.waitJobs)(servers);
-                yield (0, extra_utils_1.wait)(3000);
+                yield extra_utils_1.waitJobs(servers);
+                yield extra_utils_1.wait(3000);
                 for (const server of servers) {
                     const body = yield server.playlists.list({ start: 0, count: 5 });
                     expect(body.total).to.equal(1);
@@ -148,7 +148,7 @@ describe('Test video playlists', function () {
             });
         });
         it('Should create a playlist on server 2 and have the playlist on server 1 but not on server 3', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(30000);
                 {
                     const playlist = yield servers[1].playlists.create({
@@ -182,16 +182,16 @@ describe('Test video playlists', function () {
                         attributes: { videoId: servers[1].store.videos[1].id }
                     });
                 }
-                yield (0, extra_utils_1.waitJobs)(servers);
-                yield (0, extra_utils_1.wait)(3000);
+                yield extra_utils_1.waitJobs(servers);
+                yield extra_utils_1.wait(3000);
                 for (const server of [servers[0], servers[1]]) {
                     const body = yield server.playlists.list({ start: 0, count: 5 });
                     const playlist2 = body.data.find(p => p.displayName === 'playlist 2');
                     expect(playlist2).to.not.be.undefined;
-                    yield (0, extra_utils_1.testImage)(server.url, 'thumbnail-playlist', playlist2.thumbnailPath);
+                    yield extra_utils_1.testImage(server.url, 'thumbnail-playlist', playlist2.thumbnailPath);
                     const playlist3 = body.data.find(p => p.displayName === 'playlist 3');
                     expect(playlist3).to.not.be.undefined;
-                    yield (0, extra_utils_1.testImage)(server.url, 'thumbnail', playlist3.thumbnailPath);
+                    yield extra_utils_1.testImage(server.url, 'thumbnail', playlist3.thumbnailPath);
                 }
                 const body = yield servers[2].playlists.list({ start: 0, count: 5 });
                 expect(body.data.find(p => p.displayName === 'playlist 2')).to.be.undefined;
@@ -199,20 +199,20 @@ describe('Test video playlists', function () {
             });
         });
         it('Should have the playlist on server 3 after a new follow', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(30000);
-                yield (0, extra_utils_1.doubleFollow)(servers[1], servers[2]);
+                yield extra_utils_1.doubleFollow(servers[1], servers[2]);
                 const body = yield servers[2].playlists.list({ start: 0, count: 5 });
                 const playlist2 = body.data.find(p => p.displayName === 'playlist 2');
                 expect(playlist2).to.not.be.undefined;
-                yield (0, extra_utils_1.testImage)(servers[2].url, 'thumbnail-playlist', playlist2.thumbnailPath);
+                yield extra_utils_1.testImage(servers[2].url, 'thumbnail-playlist', playlist2.thumbnailPath);
                 expect(body.data.find(p => p.displayName === 'playlist 3')).to.not.be.undefined;
             });
         });
     });
     describe('List playlists', function () {
         it('Should correctly list the playlists', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(30000);
                 {
                     const body = yield servers[2].playlists.list({ start: 1, count: 2, sort: 'createdAt' });
@@ -233,7 +233,7 @@ describe('Test video playlists', function () {
             });
         });
         it('Should list video channel playlists', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(30000);
                 {
                     const body = yield commands[0].listByChannel({ handle: 'root_channel', start: 0, count: 2, sort: '-createdAt' });
@@ -245,7 +245,7 @@ describe('Test video playlists', function () {
             });
         });
         it('Should list account playlists', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(30000);
                 {
                     const body = yield servers[1].playlists.listByAccount({ handle: 'root', start: 1, count: 2, sort: '-createdAt' });
@@ -281,7 +281,7 @@ describe('Test video playlists', function () {
         let unlistedPlaylist;
         let privatePlaylist;
         before(function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(30000);
                 {
                     unlistedPlaylist = yield servers[1].playlists.create({
@@ -300,12 +300,12 @@ describe('Test video playlists', function () {
                         }
                     });
                 }
-                yield (0, extra_utils_1.waitJobs)(servers);
-                yield (0, extra_utils_1.wait)(3000);
+                yield extra_utils_1.waitJobs(servers);
+                yield extra_utils_1.wait(3000);
             });
         });
         it('Should not list unlisted or private playlists', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 for (const server of servers) {
                     const results = [
                         yield server.playlists.listByAccount({ handle: 'root@localhost:' + servers[1].port, sort: '-createdAt' }),
@@ -323,25 +323,25 @@ describe('Test video playlists', function () {
             });
         });
         it('Should not get unlisted playlist using only the id', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 yield servers[1].playlists.get({ playlistId: unlistedPlaylist.id, expectedStatus: 404 });
             });
         });
         it('Should get unlisted plyaylist using uuid or shortUUID', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 yield servers[1].playlists.get({ playlistId: unlistedPlaylist.uuid });
                 yield servers[1].playlists.get({ playlistId: unlistedPlaylist.shortUUID });
             });
         });
         it('Should not get private playlist without token', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 for (const id of [privatePlaylist.id, privatePlaylist.uuid, privatePlaylist.shortUUID]) {
                     yield servers[1].playlists.get({ playlistId: id, expectedStatus: 401 });
                 }
             });
         });
         it('Should get private playlist with a token', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 for (const id of [privatePlaylist.id, privatePlaylist.uuid, privatePlaylist.shortUUID]) {
                     yield servers[1].playlists.get({ token: servers[1].accessToken, playlistId: id });
                 }
@@ -350,7 +350,7 @@ describe('Test video playlists', function () {
     });
     describe('Update playlists', function () {
         it('Should update a playlist', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(30000);
                 yield servers[1].playlists.update({
                     attributes: {
@@ -362,7 +362,7 @@ describe('Test video playlists', function () {
                     },
                     playlistId: playlistServer2Id2
                 });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 for (const server of servers) {
                     const playlist = yield server.playlists.get({ playlistId: playlistServer2UUID2 });
                     expect(playlist.displayName).to.equal('playlist 3 updated');
@@ -382,7 +382,7 @@ describe('Test video playlists', function () {
     });
     describe('Element timestamps', function () {
         it('Should create a playlist containing different startTimestamp/endTimestamp videos', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(30000);
                 const addVideo = (attributes) => {
                     return commands[0].addElement({ playlistId: playlistServer1Id, attributes });
@@ -413,11 +413,11 @@ describe('Test video playlists', function () {
                     yield addVideo({ videoId: nsfwVideoServer1, startTimestamp: 4 });
                     yield addVideo({ videoId: nsfwVideoServer1 });
                 }
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
             });
         });
         it('Should correctly list playlist videos', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(30000);
                 for (const server of servers) {
                     {
@@ -475,7 +475,7 @@ describe('Test video playlists', function () {
         let video2;
         let video3;
         before(function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(60000);
                 groupUser1 = [Object.assign({}, servers[0], { accessToken: userTokenServer1 })];
                 groupWithoutToken1 = [Object.assign({}, servers[0], { accessToken: undefined })];
@@ -497,21 +497,21 @@ describe('Test video playlists', function () {
                 video1 = (yield servers[0].videos.quickUpload({ name: 'video 89', token: userTokenServer1 })).uuid;
                 video2 = (yield servers[1].videos.quickUpload({ name: 'video 90' })).uuid;
                 video3 = (yield servers[0].videos.quickUpload({ name: 'video 91', nsfw: true })).uuid;
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 yield addVideo({ videoId: video1, startTimestamp: 15, stopTimestamp: 28 });
                 yield addVideo({ videoId: video2, startTimestamp: 35 });
                 yield addVideo({ videoId: video3 });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
             });
         });
         it('Should update the element type if the video is private', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(20000);
                 const name = 'video 89';
                 const position = 1;
                 {
                     yield servers[0].videos.update({ id: video1, attributes: { privacy: 3 } });
-                    yield (0, extra_utils_1.waitJobs)(servers);
+                    yield extra_utils_1.waitJobs(servers);
                     yield checkPlaylistElementType(groupUser1, playlistServer1UUID2, 0, position, name, 3);
                     yield checkPlaylistElementType(groupWithoutToken1, playlistServer1UUID2, 2, position, name, 3);
                     yield checkPlaylistElementType(group1, playlistServer1UUID2, 2, position, name, 3);
@@ -519,7 +519,7 @@ describe('Test video playlists', function () {
                 }
                 {
                     yield servers[0].videos.update({ id: video1, attributes: { privacy: 1 } });
-                    yield (0, extra_utils_1.waitJobs)(servers);
+                    yield extra_utils_1.waitJobs(servers);
                     yield checkPlaylistElementType(groupUser1, playlistServer1UUID2, 0, position, name, 3);
                     yield checkPlaylistElementType(groupWithoutToken1, playlistServer1UUID2, 0, position, name, 3);
                     yield checkPlaylistElementType(group1, playlistServer1UUID2, 0, position, name, 3);
@@ -528,13 +528,13 @@ describe('Test video playlists', function () {
             });
         });
         it('Should update the element type if the video is blacklisted', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(20000);
                 const name = 'video 89';
                 const position = 1;
                 {
                     yield servers[0].blacklist.add({ videoId: video1, reason: 'reason', unfederate: true });
-                    yield (0, extra_utils_1.waitJobs)(servers);
+                    yield extra_utils_1.waitJobs(servers);
                     yield checkPlaylistElementType(groupUser1, playlistServer1UUID2, 0, position, name, 3);
                     yield checkPlaylistElementType(groupWithoutToken1, playlistServer1UUID2, 3, position, name, 3);
                     yield checkPlaylistElementType(group1, playlistServer1UUID2, 3, position, name, 3);
@@ -542,7 +542,7 @@ describe('Test video playlists', function () {
                 }
                 {
                     yield servers[0].blacklist.remove({ videoId: video1 });
-                    yield (0, extra_utils_1.waitJobs)(servers);
+                    yield extra_utils_1.waitJobs(servers);
                     yield checkPlaylistElementType(groupUser1, playlistServer1UUID2, 0, position, name, 3);
                     yield checkPlaylistElementType(groupWithoutToken1, playlistServer1UUID2, 0, position, name, 3);
                     yield checkPlaylistElementType(group1, playlistServer1UUID2, 0, position, name, 3);
@@ -551,51 +551,51 @@ describe('Test video playlists', function () {
             });
         });
         it('Should update the element type if the account or server of the video is blocked', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(90000);
                 const command = servers[0].blocklist;
                 const name = 'video 90';
                 const position = 2;
                 {
                     yield command.addToMyBlocklist({ token: userTokenServer1, account: 'root@localhost:' + servers[1].port });
-                    yield (0, extra_utils_1.waitJobs)(servers);
+                    yield extra_utils_1.waitJobs(servers);
                     yield checkPlaylistElementType(groupUser1, playlistServer1UUID2, 3, position, name, 3);
                     yield checkPlaylistElementType(group2, playlistServer1UUID2, 0, position, name, 3);
                     yield command.removeFromMyBlocklist({ token: userTokenServer1, account: 'root@localhost:' + servers[1].port });
-                    yield (0, extra_utils_1.waitJobs)(servers);
+                    yield extra_utils_1.waitJobs(servers);
                     yield checkPlaylistElementType(group2, playlistServer1UUID2, 0, position, name, 3);
                 }
                 {
                     yield command.addToMyBlocklist({ token: userTokenServer1, server: 'localhost:' + servers[1].port });
-                    yield (0, extra_utils_1.waitJobs)(servers);
+                    yield extra_utils_1.waitJobs(servers);
                     yield checkPlaylistElementType(groupUser1, playlistServer1UUID2, 3, position, name, 3);
                     yield checkPlaylistElementType(group2, playlistServer1UUID2, 0, position, name, 3);
                     yield command.removeFromMyBlocklist({ token: userTokenServer1, server: 'localhost:' + servers[1].port });
-                    yield (0, extra_utils_1.waitJobs)(servers);
+                    yield extra_utils_1.waitJobs(servers);
                     yield checkPlaylistElementType(group2, playlistServer1UUID2, 0, position, name, 3);
                 }
                 {
                     yield command.addToServerBlocklist({ account: 'root@localhost:' + servers[1].port });
-                    yield (0, extra_utils_1.waitJobs)(servers);
+                    yield extra_utils_1.waitJobs(servers);
                     yield checkPlaylistElementType(groupUser1, playlistServer1UUID2, 3, position, name, 3);
                     yield checkPlaylistElementType(group2, playlistServer1UUID2, 0, position, name, 3);
                     yield command.removeFromServerBlocklist({ account: 'root@localhost:' + servers[1].port });
-                    yield (0, extra_utils_1.waitJobs)(servers);
+                    yield extra_utils_1.waitJobs(servers);
                     yield checkPlaylistElementType(group2, playlistServer1UUID2, 0, position, name, 3);
                 }
                 {
                     yield command.addToServerBlocklist({ server: 'localhost:' + servers[1].port });
-                    yield (0, extra_utils_1.waitJobs)(servers);
+                    yield extra_utils_1.waitJobs(servers);
                     yield checkPlaylistElementType(groupUser1, playlistServer1UUID2, 3, position, name, 3);
                     yield checkPlaylistElementType(group2, playlistServer1UUID2, 0, position, name, 3);
                     yield command.removeFromServerBlocklist({ server: 'localhost:' + servers[1].port });
-                    yield (0, extra_utils_1.waitJobs)(servers);
+                    yield extra_utils_1.waitJobs(servers);
                     yield checkPlaylistElementType(group2, playlistServer1UUID2, 0, position, name, 3);
                 }
             });
         });
         it('Should hide the video if it is NSFW', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const body = yield commands[0].listVideos({ token: userTokenServer1, playlistId: playlistServer1UUID2, query: { nsfw: 'false' } });
                 expect(body.total).to.equal(3);
                 const elements = body.data;
@@ -608,7 +608,7 @@ describe('Test video playlists', function () {
     });
     describe('Managing playlist elements', function () {
         it('Should reorder the playlist', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(30000);
                 {
                     yield commands[0].reorderElements({
@@ -618,7 +618,7 @@ describe('Test video playlists', function () {
                             insertAfterPosition: 3
                         }
                     });
-                    yield (0, extra_utils_1.waitJobs)(servers);
+                    yield extra_utils_1.waitJobs(servers);
                     for (const server of servers) {
                         const body = yield server.playlists.listVideos({ playlistId: playlistServer1UUID, start: 0, count: 10 });
                         const names = body.data.map(v => v.video.name);
@@ -643,7 +643,7 @@ describe('Test video playlists', function () {
                             insertAfterPosition: 4
                         }
                     });
-                    yield (0, extra_utils_1.waitJobs)(servers);
+                    yield extra_utils_1.waitJobs(servers);
                     for (const server of servers) {
                         const body = yield server.playlists.listVideos({ playlistId: playlistServer1UUID, start: 0, count: 10 });
                         const names = body.data.map(v => v.video.name);
@@ -667,7 +667,7 @@ describe('Test video playlists', function () {
                             insertAfterPosition: 3
                         }
                     });
-                    yield (0, extra_utils_1.waitJobs)(servers);
+                    yield extra_utils_1.waitJobs(servers);
                     for (const server of servers) {
                         const { data: elements } = yield server.playlists.listVideos({ playlistId: playlistServer1UUID, start: 0, count: 10 });
                         const names = elements.map(v => v.video.name);
@@ -689,7 +689,7 @@ describe('Test video playlists', function () {
             });
         });
         it('Should update startTimestamp/endTimestamp of some elements', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(30000);
                 yield commands[0].updateElement({
                     playlistId: playlistServer1Id,
@@ -705,7 +705,7 @@ describe('Test video playlists', function () {
                         stopTimestamp: null
                     }
                 });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 for (const server of servers) {
                     const { data: elements } = yield server.playlists.listVideos({ playlistId: playlistServer1UUID, start: 0, count: 10 });
                     expect(elements[0].video.name).to.equal('video 3 server 1');
@@ -720,7 +720,7 @@ describe('Test video playlists', function () {
             });
         });
         it('Should check videos existence in my playlist', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const videoIds = [
                     servers[0].store.videos[0].id,
                     42000,
@@ -757,11 +757,11 @@ describe('Test video playlists', function () {
             });
         });
         it('Should automatically update updatedAt field of playlists', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const server = servers[1];
                 const videoId = servers[1].store.videos[5].id;
                 function getPlaylistNames() {
-                    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                    return tslib_1.__awaiter(this, void 0, void 0, function* () {
                         const { data } = yield server.playlists.listByAccount({ token: server.accessToken, handle: 'root', sort: '-updatedAt' });
                         return data.map(p => p.displayName);
                     });
@@ -783,11 +783,11 @@ describe('Test video playlists', function () {
             });
         });
         it('Should delete some elements', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(30000);
                 yield commands[0].removeElement({ playlistId: playlistServer1Id, elementId: playlistElementServer1Video4 });
                 yield commands[0].removeElement({ playlistId: playlistServer1Id, elementId: playlistElementNSFW });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 for (const server of servers) {
                     const body = yield server.playlists.listVideos({ playlistId: playlistServer1UUID, start: 0, count: 10 });
                     expect(body.total).to.equal(6);
@@ -809,7 +809,7 @@ describe('Test video playlists', function () {
             });
         });
         it('Should be able to create a public playlist, and set it to private', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(30000);
                 const videoPlaylistIds = yield commands[0].create({
                     attributes: {
@@ -818,13 +818,13 @@ describe('Test video playlists', function () {
                         videoChannelId: servers[0].store.channel.id
                     }
                 });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 for (const server of servers) {
                     yield server.playlists.get({ playlistId: videoPlaylistIds.uuid, expectedStatus: models_1.HttpStatusCode.OK_200 });
                 }
                 const attributes = { privacy: 3 };
                 yield commands[0].update({ playlistId: videoPlaylistIds.id, attributes });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 for (const server of [servers[1], servers[2]]) {
                     yield server.playlists.get({ playlistId: videoPlaylistIds.uuid, expectedStatus: models_1.HttpStatusCode.NOT_FOUND_404 });
                 }
@@ -835,25 +835,25 @@ describe('Test video playlists', function () {
     });
     describe('Playlist deletion', function () {
         it('Should delete the playlist on server 1 and delete on server 2 and 3', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(30000);
                 yield commands[0].delete({ playlistId: playlistServer1Id });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 for (const server of servers) {
                     yield server.playlists.get({ playlistId: playlistServer1UUID, expectedStatus: models_1.HttpStatusCode.NOT_FOUND_404 });
                 }
             });
         });
         it('Should have deleted the thumbnail on server 1, 2 and 3', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(30000);
                 for (const server of servers) {
-                    yield (0, extra_utils_1.checkPlaylistFilesWereRemoved)(playlistServer1UUID, server.internalServerNumber);
+                    yield extra_utils_1.checkPlaylistFilesWereRemoved(playlistServer1UUID, server.internalServerNumber);
                 }
             });
         });
         it('Should unfollow servers 1 and 2 and hide their playlists', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(30000);
                 const finder = (data) => data.find(p => p.displayName === 'my super playlist');
                 {
@@ -870,7 +870,7 @@ describe('Test video playlists', function () {
             });
         });
         it('Should delete a channel and put the associated playlist in private mode', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(30000);
                 const channel = yield servers[0].channels.create({ attributes: { name: 'super_channel', displayName: 'super channel' } });
                 const playlistCreated = yield commands[0].create({
@@ -880,9 +880,9 @@ describe('Test video playlists', function () {
                         videoChannelId: channel.id
                     }
                 });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 yield servers[0].channels.delete({ channelName: 'super_channel' });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 const body = yield commands[0].get({ token: servers[0].accessToken, playlistId: playlistCreated.uuid });
                 expect(body.displayName).to.equal('channel playlist');
                 expect(body.privacy.id).to.equal(3);
@@ -890,7 +890,7 @@ describe('Test video playlists', function () {
             });
         });
         it('Should delete an account and delete its playlists', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 this.timeout(30000);
                 const { userId, token } = yield servers[0].users.generate('user_1');
                 const { videoChannels } = yield servers[0].users.getMyInfo({ token });
@@ -902,7 +902,7 @@ describe('Test video playlists', function () {
                         videoChannelId: userChannel.id
                     }
                 });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 const finder = (data) => data.find(p => p.displayName === 'playlist to be deleted');
                 {
                     for (const server of [servers[0], servers[1]]) {
@@ -911,7 +911,7 @@ describe('Test video playlists', function () {
                     }
                 }
                 yield servers[0].users.remove({ userId });
-                yield (0, extra_utils_1.waitJobs)(servers);
+                yield extra_utils_1.waitJobs(servers);
                 {
                     for (const server of [servers[0], servers[1]]) {
                         const body = yield server.playlists.list({ start: 0, count: 15 });
@@ -922,8 +922,8 @@ describe('Test video playlists', function () {
         });
     });
     after(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            yield (0, extra_utils_1.cleanupTests)(servers);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield extra_utils_1.cleanupTests(servers);
         });
     });
 });

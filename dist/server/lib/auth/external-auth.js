@@ -11,7 +11,7 @@ const oauth_token_1 = require("@server/models/oauth/oauth-token");
 const models_1 = require("@shared/models");
 const authBypassTokens = new Map();
 function onExternalUserAuthenticated(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { npmName, authName, authResult } = options;
         if (!authResult.req || !authResult.res) {
             logger_1.logger.error('Cannot authenticate external user for auth %s of plugin %s: no req or res are provided.', authName, npmName);
@@ -23,7 +23,7 @@ function onExternalUserAuthenticated(options) {
             return;
         }
         logger_1.logger.info('Generating auth bypass token for %s in auth %s of plugin %s.', authResult.username, authName, npmName);
-        const bypassToken = yield (0, utils_1.generateRandomString)(32);
+        const bypassToken = yield utils_1.generateRandomString(32);
         const expires = new Date();
         expires.setTime(expires.getTime() + constants_1.PLUGIN_EXTERNAL_AUTH_TOKEN_LIFETIME);
         const user = buildUserResult(authResult);
@@ -44,7 +44,7 @@ function onExternalUserAuthenticated(options) {
 }
 exports.onExternalUserAuthenticated = onExternalUserAuthenticated;
 function getAuthNameFromRefreshGrant(refreshToken) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         if (!refreshToken)
             return undefined;
         const tokenModel = yield oauth_token_1.OAuthTokenModel.loadByRefreshToken(refreshToken);
@@ -53,7 +53,7 @@ function getAuthNameFromRefreshGrant(refreshToken) {
 }
 exports.getAuthNameFromRefreshGrant = getAuthNameFromRefreshGrant;
 function getBypassFromPasswordGrant(username, password) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const plugins = plugin_manager_1.PluginManager.Instance.getIdAndPassAuths();
         const pluginAuths = [];
         for (const plugin of plugins) {
@@ -127,7 +127,7 @@ function getBypassFromExternalAuth(username, externalAuthToken) {
 }
 exports.getBypassFromExternalAuth = getBypassFromExternalAuth;
 function isAuthResultValid(npmName, authName, result) {
-    if (!(0, users_1.isUserUsernameValid)(result.username)) {
+    if (!users_1.isUserUsernameValid(result.username)) {
         logger_1.logger.error('Auth method %s of plugin %s did not provide a valid username.', authName, npmName, { username: result.username });
         return false;
     }
@@ -135,11 +135,11 @@ function isAuthResultValid(npmName, authName, result) {
         logger_1.logger.error('Auth method %s of plugin %s did not provide a valid email.', authName, npmName, { email: result.email });
         return false;
     }
-    if (result.role && !(0, users_1.isUserRoleValid)(result.role)) {
+    if (result.role && !users_1.isUserRoleValid(result.role)) {
         logger_1.logger.error('Auth method %s of plugin %s did not provide a valid role.', authName, npmName, { role: result.role });
         return false;
     }
-    if (result.displayName && !(0, users_1.isUserDisplayNameValid)(result.displayName)) {
+    if (result.displayName && !users_1.isUserDisplayNameValid(result.displayName)) {
         logger_1.logger.error('Auth method %s of plugin %s did not provide a valid display name.', authName, npmName, { displayName: result.displayName });
         return false;
     }

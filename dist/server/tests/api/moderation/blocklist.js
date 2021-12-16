@@ -2,11 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = (0, tslib_1.__importStar)(require("chai"));
+const chai = tslib_1.__importStar(require("chai"));
 const extra_utils_1 = require("@shared/extra-utils");
 const expect = chai.expect;
 function checkAllVideos(server, token) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         {
             const { data } = yield server.videos.listWithToken({ token });
             expect(data).to.have.lengthOf(5);
@@ -18,7 +18,7 @@ function checkAllVideos(server, token) {
     });
 }
 function checkAllComments(server, token, videoUUID) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { data } = yield server.comments.listThreads({ videoId: videoUUID, start: 0, count: 25, sort: '-createdAt', token });
         const threads = data.filter(t => t.isDeleted === false);
         expect(threads).to.have.lengthOf(2);
@@ -29,10 +29,10 @@ function checkAllComments(server, token, videoUUID) {
     });
 }
 function checkCommentNotification(mainServer, comment, check) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const command = comment.server.comments;
         const { threadId, createdAt } = yield command.createThread({ token: comment.token, videoId: comment.videoUUID, text: comment.text });
-        yield (0, extra_utils_1.waitJobs)([mainServer, comment.server]);
+        yield extra_utils_1.waitJobs([mainServer, comment.server]);
         const { data } = yield mainServer.notifications.list({ start: 0, count: 30 });
         const commentNotifications = data.filter(n => n.comment && n.comment.video.uuid === comment.videoUUID && n.createdAt >= createdAt);
         if (check === 'presence')
@@ -40,7 +40,7 @@ function checkCommentNotification(mainServer, comment, check) {
         else
             expect(commentNotifications).to.have.lengthOf(0);
         yield command.delete({ token: comment.token, videoId: comment.videoUUID, commentId: threadId });
-        yield (0, extra_utils_1.waitJobs)([mainServer, comment.server]);
+        yield extra_utils_1.waitJobs([mainServer, comment.server]);
     });
 }
 describe('Test blocklist', function () {
@@ -54,10 +54,10 @@ describe('Test blocklist', function () {
     let command;
     let commentsCommand;
     before(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(120000);
-            servers = yield (0, extra_utils_1.createMultipleServers)(3);
-            yield (0, extra_utils_1.setAccessTokensToServers)(servers);
+            servers = yield extra_utils_1.createMultipleServers(3);
+            yield extra_utils_1.setAccessTokensToServers(servers);
             command = servers[0].blocklist;
             commentsCommand = servers.map(s => s.comments);
             {
@@ -89,8 +89,8 @@ describe('Test blocklist', function () {
                 const { uuid } = yield servers[0].videos.upload({ attributes: { name: 'video 2 server 1' } });
                 videoUUID3 = uuid;
             }
-            yield (0, extra_utils_1.doubleFollow)(servers[0], servers[1]);
-            yield (0, extra_utils_1.doubleFollow)(servers[0], servers[2]);
+            yield extra_utils_1.doubleFollow(servers[0], servers[1]);
+            yield extra_utils_1.doubleFollow(servers[0], servers[2]);
             {
                 const created = yield commentsCommand[0].createThread({ videoId: videoUUID1, text: 'comment root 1' });
                 const reply = yield commentsCommand[0].addReply({
@@ -105,7 +105,7 @@ describe('Test blocklist', function () {
                 const created = yield commentsCommand[0].createThread({ token: userToken1, videoId: videoUUID1, text: 'comment user 1' });
                 yield commentsCommand[0].addReply({ videoId: videoUUID1, toCommentId: created.id, text: 'comment root 1' });
             }
-            yield (0, extra_utils_1.waitJobs)(servers);
+            yield extra_utils_1.waitJobs(servers);
         });
     });
     describe('User blocklist', function () {
@@ -117,12 +117,12 @@ describe('Test blocklist', function () {
                 return checkAllComments(servers[0], servers[0].accessToken, videoUUID1);
             });
             it('Should block a remote account', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     yield command.addToMyBlocklist({ account: 'user2@localhost:' + servers[1].port });
                 });
             });
             it('Should hide its videos', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     const { data } = yield servers[0].videos.listWithToken();
                     expect(data).to.have.lengthOf(4);
                     const v = data.find(v => v.name === 'video user 2');
@@ -130,12 +130,12 @@ describe('Test blocklist', function () {
                 });
             });
             it('Should block a local account', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     yield command.addToMyBlocklist({ account: 'user1' });
                 });
             });
             it('Should hide its videos', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     const { data } = yield servers[0].videos.listWithToken();
                     expect(data).to.have.lengthOf(3);
                     const v = data.find(v => v.name === 'video user 1');
@@ -143,7 +143,7 @@ describe('Test blocklist', function () {
                 });
             });
             it('Should hide its comments', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     const { data } = yield commentsCommand[0].listThreads({
                         token: servers[0].accessToken,
                         videoId: videoUUID1,
@@ -166,7 +166,7 @@ describe('Test blocklist', function () {
                 });
             });
             it('Should not have notifications from blocked accounts', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     this.timeout(20000);
                     {
                         const comment = { server: servers[0], token: userToken1, videoUUID: videoUUID1, text: 'hidden comment' };
@@ -184,12 +184,12 @@ describe('Test blocklist', function () {
                 });
             });
             it('Should list all the videos with another user', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     return checkAllVideos(servers[0], userToken1);
                 });
             });
             it('Should list blocked accounts', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     {
                         const body = yield command.listMyAccountBlocklist({ start: 0, count: 1, sort: 'createdAt' });
                         expect(body.total).to.equal(2);
@@ -213,18 +213,18 @@ describe('Test blocklist', function () {
                 });
             });
             it('Should not allow a remote blocked user to comment my videos', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     this.timeout(60000);
                     {
                         yield commentsCommand[1].createThread({ token: userToken2, videoId: videoUUID3, text: 'comment user 2' });
-                        yield (0, extra_utils_1.waitJobs)(servers);
+                        yield extra_utils_1.waitJobs(servers);
                         yield commentsCommand[0].createThread({ token: servers[0].accessToken, videoId: videoUUID3, text: 'uploader' });
-                        yield (0, extra_utils_1.waitJobs)(servers);
+                        yield extra_utils_1.waitJobs(servers);
                         const commentId = yield commentsCommand[1].findCommentId({ videoId: videoUUID3, text: 'uploader' });
                         const message = 'reply by user 2';
                         const reply = yield commentsCommand[1].addReply({ token: userToken2, videoId: videoUUID3, toCommentId: commentId, text: message });
                         yield commentsCommand[1].addReply({ videoId: videoUUID3, toCommentId: reply.id, text: 'another reply' });
-                        yield (0, extra_utils_1.waitJobs)(servers);
+                        yield extra_utils_1.waitJobs(servers);
                     }
                     {
                         const { data } = yield commentsCommand[1].listThreads({ videoId: videoUUID3, count: 25, sort: '-createdAt' });
@@ -250,12 +250,12 @@ describe('Test blocklist', function () {
                 });
             });
             it('Should unblock the remote account', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     yield command.removeFromMyBlocklist({ account: 'user2@localhost:' + servers[1].port });
                 });
             });
             it('Should display its videos', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     const { data } = yield servers[0].videos.listWithToken();
                     expect(data).to.have.lengthOf(4);
                     const v = data.find(v => v.name === 'video user 2');
@@ -263,7 +263,7 @@ describe('Test blocklist', function () {
                 });
             });
             it('Should display its comments on my video', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     for (const server of servers) {
                         const { data } = yield server.comments.listThreads({ videoId: videoUUID3, count: 25, sort: '-createdAt' });
                         if (server.serverNumber === 3) {
@@ -282,7 +282,7 @@ describe('Test blocklist', function () {
                 });
             });
             it('Should unblock the local account', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     yield command.removeFromMyBlocklist({ account: 'user1' });
                 });
             });
@@ -290,7 +290,7 @@ describe('Test blocklist', function () {
                 return checkAllComments(servers[0], servers[0].accessToken, videoUUID1);
             });
             it('Should have a notification from a non blocked account', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     this.timeout(20000);
                     {
                         const comment = { server: servers[1], token: userToken2, videoUUID: videoUUID1, text: 'displayed comment' };
@@ -316,12 +316,12 @@ describe('Test blocklist', function () {
                 return checkAllComments(servers[0], servers[0].accessToken, videoUUID1);
             });
             it('Should block a remote server', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     yield command.addToMyBlocklist({ server: 'localhost:' + servers[1].port });
                 });
             });
             it('Should hide its videos', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     const { data } = yield servers[0].videos.listWithToken();
                     expect(data).to.have.lengthOf(3);
                     const v1 = data.find(v => v.name === 'video user 2');
@@ -331,21 +331,21 @@ describe('Test blocklist', function () {
                 });
             });
             it('Should list all the videos with another user', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     return checkAllVideos(servers[0], userToken1);
                 });
             });
             it('Should hide its comments', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     this.timeout(10000);
                     const { id } = yield commentsCommand[1].createThread({ token: userToken2, videoId: videoUUID1, text: 'hidden comment 2' });
-                    yield (0, extra_utils_1.waitJobs)(servers);
+                    yield extra_utils_1.waitJobs(servers);
                     yield checkAllComments(servers[0], servers[0].accessToken, videoUUID1);
                     yield commentsCommand[1].delete({ token: userToken2, videoId: videoUUID1, commentId: id });
                 });
             });
             it('Should not have notifications from blocked server', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     this.timeout(20000);
                     {
                         const comment = { server: servers[1], token: userToken2, videoUUID: videoUUID1, text: 'hidden comment' };
@@ -363,7 +363,7 @@ describe('Test blocklist', function () {
                 });
             });
             it('Should list blocked servers', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     const body = yield command.listMyServerBlocklist({ start: 0, count: 1, sort: 'createdAt' });
                     expect(body.total).to.equal(1);
                     const block = body.data[0];
@@ -373,7 +373,7 @@ describe('Test blocklist', function () {
                 });
             });
             it('Should unblock the remote server', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     yield command.removeFromMyBlocklist({ server: 'localhost:' + servers[1].port });
                 });
             });
@@ -384,7 +384,7 @@ describe('Test blocklist', function () {
                 return checkAllComments(servers[0], servers[0].accessToken, videoUUID1);
             });
             it('Should have notification from unblocked server', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     this.timeout(20000);
                     {
                         const comment = { server: servers[1], token: userToken2, videoUUID: videoUUID1, text: 'displayed comment' };
@@ -406,26 +406,26 @@ describe('Test blocklist', function () {
     describe('Server blocklist', function () {
         describe('When managing account blocklist', function () {
             it('Should list all videos', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     for (const token of [userModeratorToken, servers[0].accessToken]) {
                         yield checkAllVideos(servers[0], token);
                     }
                 });
             });
             it('Should list the comments', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     for (const token of [userModeratorToken, servers[0].accessToken]) {
                         yield checkAllComments(servers[0], token, videoUUID1);
                     }
                 });
             });
             it('Should block a remote account', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     yield command.addToServerBlocklist({ account: 'user2@localhost:' + servers[1].port });
                 });
             });
             it('Should hide its videos', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     for (const token of [userModeratorToken, servers[0].accessToken]) {
                         const { data } = yield servers[0].videos.listWithToken({ token });
                         expect(data).to.have.lengthOf(4);
@@ -435,12 +435,12 @@ describe('Test blocklist', function () {
                 });
             });
             it('Should block a local account', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     yield command.addToServerBlocklist({ account: 'user1' });
                 });
             });
             it('Should hide its videos', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     for (const token of [userModeratorToken, servers[0].accessToken]) {
                         const { data } = yield servers[0].videos.listWithToken({ token });
                         expect(data).to.have.lengthOf(3);
@@ -450,7 +450,7 @@ describe('Test blocklist', function () {
                 });
             });
             it('Should hide its comments', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     for (const token of [userModeratorToken, servers[0].accessToken]) {
                         const { data } = yield commentsCommand[0].listThreads({ videoId: videoUUID1, count: 20, sort: '-createdAt', token });
                         const threads = data.filter(t => t.isDeleted === false);
@@ -466,7 +466,7 @@ describe('Test blocklist', function () {
                 });
             });
             it('Should not have notification from blocked accounts by instance', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     this.timeout(20000);
                     {
                         const comment = { server: servers[0], token: userToken1, videoUUID: videoUUID1, text: 'hidden comment' };
@@ -484,7 +484,7 @@ describe('Test blocklist', function () {
                 });
             });
             it('Should list blocked accounts', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     {
                         const body = yield command.listServerAccountBlocklist({ start: 0, count: 1, sort: 'createdAt' });
                         expect(body.total).to.equal(2);
@@ -508,12 +508,12 @@ describe('Test blocklist', function () {
                 });
             });
             it('Should unblock the remote account', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     yield command.removeFromServerBlocklist({ account: 'user2@localhost:' + servers[1].port });
                 });
             });
             it('Should display its videos', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     for (const token of [userModeratorToken, servers[0].accessToken]) {
                         const { data } = yield servers[0].videos.listWithToken({ token });
                         expect(data).to.have.lengthOf(4);
@@ -523,19 +523,19 @@ describe('Test blocklist', function () {
                 });
             });
             it('Should unblock the local account', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     yield command.removeFromServerBlocklist({ account: 'user1' });
                 });
             });
             it('Should display its comments', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     for (const token of [userModeratorToken, servers[0].accessToken]) {
                         yield checkAllComments(servers[0], token, videoUUID1);
                     }
                 });
             });
             it('Should have notifications from unblocked accounts', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     this.timeout(20000);
                     {
                         const comment = { server: servers[0], token: userToken1, videoUUID: videoUUID1, text: 'displayed comment' };
@@ -555,26 +555,26 @@ describe('Test blocklist', function () {
         });
         describe('When managing server blocklist', function () {
             it('Should list all videos', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     for (const token of [userModeratorToken, servers[0].accessToken]) {
                         yield checkAllVideos(servers[0], token);
                     }
                 });
             });
             it('Should list the comments', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     for (const token of [userModeratorToken, servers[0].accessToken]) {
                         yield checkAllComments(servers[0], token, videoUUID1);
                     }
                 });
             });
             it('Should block a remote server', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     yield command.addToServerBlocklist({ server: 'localhost:' + servers[1].port });
                 });
             });
             it('Should hide its videos', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     for (const token of [userModeratorToken, servers[0].accessToken]) {
                         const requests = [
                             servers[0].videos.list(),
@@ -592,16 +592,16 @@ describe('Test blocklist', function () {
                 });
             });
             it('Should hide its comments', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     this.timeout(10000);
                     const { id } = yield commentsCommand[1].createThread({ token: userToken2, videoId: videoUUID1, text: 'hidden comment 2' });
-                    yield (0, extra_utils_1.waitJobs)(servers);
+                    yield extra_utils_1.waitJobs(servers);
                     yield checkAllComments(servers[0], servers[0].accessToken, videoUUID1);
                     yield commentsCommand[1].delete({ token: userToken2, videoId: videoUUID1, commentId: id });
                 });
             });
             it('Should not have notification from blocked instances by instance', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     this.timeout(50000);
                     {
                         const comment = { server: servers[1], token: userToken2, videoUUID: videoUUID1, text: 'hidden comment' };
@@ -619,9 +619,9 @@ describe('Test blocklist', function () {
                     {
                         const now = new Date();
                         yield servers[1].follows.unfollow({ target: servers[0] });
-                        yield (0, extra_utils_1.waitJobs)(servers);
+                        yield extra_utils_1.waitJobs(servers);
                         yield servers[1].follows.follow({ hosts: [servers[0].host] });
-                        yield (0, extra_utils_1.waitJobs)(servers);
+                        yield extra_utils_1.waitJobs(servers);
                         const { data } = yield servers[0].notifications.list({ start: 0, count: 30 });
                         const commentNotifications = data.filter(n => {
                             return n.type === 13 && n.createdAt >= now.toISOString();
@@ -631,7 +631,7 @@ describe('Test blocklist', function () {
                 });
             });
             it('Should list blocked servers', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     const body = yield command.listServerServerBlocklist({ start: 0, count: 1, sort: 'createdAt' });
                     expect(body.total).to.equal(1);
                     const block = body.data[0];
@@ -641,26 +641,26 @@ describe('Test blocklist', function () {
                 });
             });
             it('Should unblock the remote server', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     yield command.removeFromServerBlocklist({ server: 'localhost:' + servers[1].port });
                 });
             });
             it('Should list all videos', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     for (const token of [userModeratorToken, servers[0].accessToken]) {
                         yield checkAllVideos(servers[0], token);
                     }
                 });
             });
             it('Should list the comments', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     for (const token of [userModeratorToken, servers[0].accessToken]) {
                         yield checkAllComments(servers[0], token, videoUUID1);
                     }
                 });
             });
             it('Should have notification from unblocked instances', function () {
-                return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                return tslib_1.__awaiter(this, void 0, void 0, function* () {
                     this.timeout(50000);
                     {
                         const comment = { server: servers[1], token: userToken2, videoUUID: videoUUID1, text: 'displayed comment' };
@@ -678,9 +678,9 @@ describe('Test blocklist', function () {
                     {
                         const now = new Date();
                         yield servers[1].follows.unfollow({ target: servers[0] });
-                        yield (0, extra_utils_1.waitJobs)(servers);
+                        yield extra_utils_1.waitJobs(servers);
                         yield servers[1].follows.follow({ hosts: [servers[0].host] });
-                        yield (0, extra_utils_1.waitJobs)(servers);
+                        yield extra_utils_1.waitJobs(servers);
                         const { data } = yield servers[0].notifications.list({ start: 0, count: 30 });
                         const commentNotifications = data.filter(n => {
                             return n.type === 13 && n.createdAt >= now.toISOString();
@@ -692,8 +692,8 @@ describe('Test blocklist', function () {
         });
     });
     after(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            yield (0, extra_utils_1.cleanupTests)(servers);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield extra_utils_1.cleanupTests(servers);
         });
     });
 });

@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PluginManager = void 0;
 const tslib_1 = require("tslib");
-const decache_1 = (0, tslib_1.__importDefault)(require("decache"));
+const decache_1 = tslib_1.__importDefault(require("decache"));
 const fs_1 = require("fs");
 const fs_extra_1 = require("fs-extra");
 const path_1 = require("path");
@@ -85,7 +85,7 @@ class PluginManager {
         return this.translations[locale] || {};
     }
     isTokenValid(token, type) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const auth = this.getAuth(token.User.pluginAuth, token.authName);
             if (!auth)
                 return true;
@@ -106,7 +106,7 @@ class PluginManager {
         });
     }
     onLogout(npmName, authName, user, req) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const auth = this.getAuth(npmName, authName);
             if (auth === null || auth === void 0 ? void 0 : auth.onLogout) {
                 logger_1.logger.info('Running onLogout function from auth %s of plugin %s', authName, npmName);
@@ -124,7 +124,7 @@ class PluginManager {
         });
     }
     onSettingsChanged(name, settings) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const registered = this.getRegisteredPluginByShortName(name);
             if (!registered) {
                 logger_1.logger.error('Cannot find plugin %s to call on settings changed.', name);
@@ -140,13 +140,13 @@ class PluginManager {
         });
     }
     runHook(hookName, result, params) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (!this.hooks[hookName])
                 return Promise.resolve(result);
-            const hookType = (0, hooks_1.getHookType)(hookName);
+            const hookType = hooks_1.getHookType(hookName);
             for (const hook of this.hooks[hookName]) {
                 logger_1.logger.debug('Running hook %s of plugin %s.', hookName, hook.npmName);
-                result = yield (0, hooks_1.internalRunHook)(hook.handler, hookType, result, params, err => {
+                result = yield hooks_1.internalRunHook(hook.handler, hookType, result, params, err => {
                     logger_1.logger.error('Cannot run hook %s of plugin %s.', hookName, hook.pluginName, { err });
                 });
             }
@@ -154,7 +154,7 @@ class PluginManager {
         });
     }
     registerPluginsAndThemes() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             yield this.resetCSSGlobalFile();
             const plugins = yield plugin_1.PluginModel.listEnabledPluginsAndThemes();
             for (const plugin of plugins) {
@@ -174,7 +174,7 @@ class PluginManager {
         });
     }
     unregister(npmName) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             logger_1.logger.info('Unregister plugin %s.', npmName);
             const plugin = this.getRegisteredPluginOrTheme(npmName);
             if (!plugin) {
@@ -196,15 +196,15 @@ class PluginManager {
         });
     }
     install(toInstall, version, fromDisk = false) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             let plugin;
             let npmName;
             logger_1.logger.info('Installing plugin %s.', toInstall);
             try {
                 fromDisk
-                    ? yield (0, yarn_1.installNpmPluginFromDisk)(toInstall)
-                    : yield (0, yarn_1.installNpmPlugin)(toInstall, version);
-                npmName = fromDisk ? (0, path_1.basename)(toInstall) : toInstall;
+                    ? yield yarn_1.installNpmPluginFromDisk(toInstall)
+                    : yield yarn_1.installNpmPlugin(toInstall, version);
+                npmName = fromDisk ? path_1.basename(toInstall) : toInstall;
                 const pluginType = plugin_1.PluginModel.getTypeFromNpmName(npmName);
                 const pluginName = plugin_1.PluginModel.normalizePluginName(npmName);
                 const packageJSON = yield this.getPackageJSON(pluginName, pluginType);
@@ -230,7 +230,7 @@ class PluginManager {
                 catch (err) {
                     logger_1.logger.error('Cannot uninstall plugin %s after failed installation.', toInstall, { err });
                     try {
-                        yield (0, yarn_1.removeNpmPlugin)(npmName);
+                        yield yarn_1.removeNpmPlugin(npmName);
                     }
                     catch (err) {
                         logger_1.logger.error('Cannot remove plugin %s after failed installation.', toInstall, { err });
@@ -242,8 +242,8 @@ class PluginManager {
         });
     }
     update(toUpdate, fromDisk = false) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            const npmName = fromDisk ? (0, path_1.basename)(toUpdate) : toUpdate;
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const npmName = fromDisk ? path_1.basename(toUpdate) : toUpdate;
             logger_1.logger.info('Updating plugin %s.', npmName);
             let version;
             if (!fromDisk) {
@@ -255,7 +255,7 @@ class PluginManager {
         });
     }
     uninstall(npmName) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             logger_1.logger.info('Uninstalling plugin %s.', npmName);
             try {
                 yield this.unregister(npmName);
@@ -271,12 +271,12 @@ class PluginManager {
             plugin.enabled = false;
             plugin.uninstalled = true;
             yield plugin.save();
-            yield (0, yarn_1.removeNpmPlugin)(npmName);
+            yield yarn_1.removeNpmPlugin(npmName);
             logger_1.logger.info('Plugin %s uninstalled.', npmName);
         });
     }
     registerPluginOrTheme(plugin) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const npmName = plugin_1.PluginModel.buildNpmName(plugin.name, plugin.type);
             logger_1.logger.info('Registering plugin or theme %s.', npmName);
             const packageJSON = yield this.getPackageJSON(plugin.name, plugin.type);
@@ -311,16 +311,16 @@ class PluginManager {
         });
     }
     registerPlugin(plugin, pluginPath, packageJSON) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const npmName = plugin_1.PluginModel.buildNpmName(plugin.name, plugin.type);
-            const modulePath = (0, path_1.join)(pluginPath, packageJSON.library);
-            (0, decache_1.default)(modulePath);
+            const modulePath = path_1.join(pluginPath, packageJSON.library);
+            decache_1.default(modulePath);
             const library = require(modulePath);
-            if (!(0, plugins_1.isLibraryCodeValid)(library)) {
+            if (!plugins_1.isLibraryCodeValid(library)) {
                 throw new Error('Library code is not valid (miss register or unregister function)');
             }
             const { registerOptions, registerStore } = this.getRegisterHelpers(npmName, plugin);
-            yield (0, fs_extra_1.ensureDir)(registerOptions.peertubeHelpers.plugin.getDataDirectoryPath());
+            yield fs_extra_1.ensureDir(registerOptions.peertubeHelpers.plugin.getDataDirectoryPath());
             yield library.register(registerOptions);
             logger_1.logger.info('Add plugin %s CSS to global file.', npmName);
             yield this.addCSSToGlobalFile(pluginPath, packageJSON.css);
@@ -328,11 +328,11 @@ class PluginManager {
         });
     }
     addTranslations(plugin, npmName, translationPaths) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             for (const locale of Object.keys(translationPaths)) {
                 const path = translationPaths[locale];
-                const json = yield (0, fs_extra_1.readJSON)((0, path_1.join)(this.getPluginPath(plugin.name, plugin.type), path));
-                const completeLocale = (0, core_utils_1.getCompleteLocale)(locale);
+                const json = yield fs_extra_1.readJSON(path_1.join(this.getPluginPath(plugin.name, plugin.type), path));
+                const completeLocale = core_utils_1.getCompleteLocale(locale);
                 if (!this.translations[completeLocale])
                     this.translations[completeLocale] = {};
                 this.translations[completeLocale][npmName] = json;
@@ -348,27 +348,27 @@ class PluginManager {
     }
     resetCSSGlobalFile() {
         client_html_1.ClientHtml.invalidCache();
-        return (0, fs_extra_1.outputFile)(constants_1.PLUGIN_GLOBAL_CSS_PATH, '');
+        return fs_extra_1.outputFile(constants_1.PLUGIN_GLOBAL_CSS_PATH, '');
     }
     addCSSToGlobalFile(pluginPath, cssRelativePaths) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             for (const cssPath of cssRelativePaths) {
-                yield this.concatFiles((0, path_1.join)(pluginPath, cssPath), constants_1.PLUGIN_GLOBAL_CSS_PATH);
+                yield this.concatFiles(path_1.join(pluginPath, cssPath), constants_1.PLUGIN_GLOBAL_CSS_PATH);
             }
             client_html_1.ClientHtml.invalidCache();
         });
     }
     concatFiles(input, output) {
         return new Promise((res, rej) => {
-            const inputStream = (0, fs_1.createReadStream)(input);
-            const outputStream = (0, fs_1.createWriteStream)(output, { flags: 'a' });
+            const inputStream = fs_1.createReadStream(input);
+            const outputStream = fs_1.createWriteStream(output, { flags: 'a' });
             inputStream.pipe(outputStream);
             inputStream.on('end', () => res());
             inputStream.on('error', err => rej(err));
         });
     }
     regeneratePluginGlobalCSS() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             yield this.resetCSSGlobalFile();
             for (const plugin of this.getRegisteredPlugins()) {
                 yield this.addCSSToGlobalFile(plugin.path, plugin.css);
@@ -383,12 +383,12 @@ class PluginManager {
         }
     }
     getPackageJSON(pluginName, pluginType) {
-        const pluginPath = (0, path_1.join)(this.getPluginPath(pluginName, pluginType), 'package.json');
-        return (0, fs_extra_1.readJSON)(pluginPath);
+        const pluginPath = path_1.join(this.getPluginPath(pluginName, pluginType), 'package.json');
+        return fs_extra_1.readJSON(pluginPath);
     }
     getPluginPath(pluginName, pluginType) {
         const npmName = plugin_1.PluginModel.buildNpmName(pluginName, pluginType);
-        return (0, path_1.join)(config_1.CONFIG.STORAGE.PLUGINS_DIR, 'node_modules', npmName);
+        return path_1.join(config_1.CONFIG.STORAGE.PLUGINS_DIR, 'node_modules', npmName);
     }
     getAuth(npmName, authName) {
         const plugin = this.getRegisteredPluginOrTheme(npmName);
@@ -434,7 +434,7 @@ class PluginManager {
             packageJSON.clientScripts = [];
         if (!packageJSON.translations)
             packageJSON.translations = {};
-        const { result: packageJSONValid, badFields } = (0, plugins_1.isPackageJSONValid)(packageJSON, pluginType);
+        const { result: packageJSONValid, badFields } = plugins_1.isPackageJSONValid(packageJSON, pluginType);
         if (!packageJSONValid) {
             const formattedFields = badFields.map(f => `"${f}"`)
                 .join(', ');

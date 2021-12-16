@@ -5,7 +5,7 @@ const tslib_1 = require("tslib");
 const video_caption_1 = require("@server/models/video/video-caption");
 const models_1 = require("@shared/models");
 function doesVideoCaptionExist(video, language, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const videoCaption = yield video_caption_1.VideoCaptionModel.loadByVideoIdAndLanguage(video.id, language);
         if (!videoCaption) {
             res.fail({

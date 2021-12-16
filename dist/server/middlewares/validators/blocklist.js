@@ -13,12 +13,12 @@ const server_1 = require("../../models/server/server");
 const server_blocklist_1 = require("../../models/server/server-blocklist");
 const shared_1 = require("./shared");
 const blockAccountValidator = [
-    (0, express_validator_1.body)('accountName').exists().withMessage('Should have an account name with host'),
-    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
+    express_validator_1.body('accountName').exists().withMessage('Should have an account name with host'),
+    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking blockAccountByAccountValidator parameters', { parameters: req.body });
-        if ((0, shared_1.areValidationErrors)(req, res))
+        if (shared_1.areValidationErrors(req, res))
             return;
-        if (!(yield (0, shared_1.doesAccountNameWithHostExist)(req.body.accountName, res)))
+        if (!(yield shared_1.doesAccountNameWithHostExist(req.body.accountName, res)))
             return;
         const user = res.locals.oauth.token.User;
         const accountToBlock = res.locals.account;
@@ -34,12 +34,12 @@ const blockAccountValidator = [
 ];
 exports.blockAccountValidator = blockAccountValidator;
 const unblockAccountByAccountValidator = [
-    (0, express_validator_1.param)('accountName').exists().withMessage('Should have an account name with host'),
-    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
+    express_validator_1.param('accountName').exists().withMessage('Should have an account name with host'),
+    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking unblockAccountByAccountValidator parameters', { parameters: req.params });
-        if ((0, shared_1.areValidationErrors)(req, res))
+        if (shared_1.areValidationErrors(req, res))
             return;
-        if (!(yield (0, shared_1.doesAccountNameWithHostExist)(req.params.accountName, res)))
+        if (!(yield shared_1.doesAccountNameWithHostExist(req.params.accountName, res)))
             return;
         const user = res.locals.oauth.token.User;
         const targetAccount = res.locals.account;
@@ -50,14 +50,14 @@ const unblockAccountByAccountValidator = [
 ];
 exports.unblockAccountByAccountValidator = unblockAccountByAccountValidator;
 const unblockAccountByServerValidator = [
-    (0, express_validator_1.param)('accountName').exists().withMessage('Should have an account name with host'),
-    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
+    express_validator_1.param('accountName').exists().withMessage('Should have an account name with host'),
+    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking unblockAccountByServerValidator parameters', { parameters: req.params });
-        if ((0, shared_1.areValidationErrors)(req, res))
+        if (shared_1.areValidationErrors(req, res))
             return;
-        if (!(yield (0, shared_1.doesAccountNameWithHostExist)(req.params.accountName, res)))
+        if (!(yield shared_1.doesAccountNameWithHostExist(req.params.accountName, res)))
             return;
-        const serverActor = yield (0, application_1.getServerActor)();
+        const serverActor = yield application_1.getServerActor();
         const targetAccount = res.locals.account;
         if (!(yield doesUnblockAccountExist(serverActor.Account.id, targetAccount.id, res)))
             return;
@@ -66,10 +66,10 @@ const unblockAccountByServerValidator = [
 ];
 exports.unblockAccountByServerValidator = unblockAccountByServerValidator;
 const blockServerValidator = [
-    (0, express_validator_1.body)('host').custom(servers_1.isHostValid).withMessage('Should have a valid host'),
-    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
+    express_validator_1.body('host').custom(servers_1.isHostValid).withMessage('Should have a valid host'),
+    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking serverGetValidator parameters', { parameters: req.body });
-        if ((0, shared_1.areValidationErrors)(req, res))
+        if (shared_1.areValidationErrors(req, res))
             return;
         const host = req.body.host;
         if (host === constants_1.WEBSERVER.HOST) {
@@ -85,10 +85,10 @@ const blockServerValidator = [
 ];
 exports.blockServerValidator = blockServerValidator;
 const unblockServerByAccountValidator = [
-    (0, express_validator_1.param)('host').custom(servers_1.isHostValid).withMessage('Should have an account name with host'),
-    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
+    express_validator_1.param('host').custom(servers_1.isHostValid).withMessage('Should have an account name with host'),
+    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking unblockServerByAccountValidator parameters', { parameters: req.params });
-        if ((0, shared_1.areValidationErrors)(req, res))
+        if (shared_1.areValidationErrors(req, res))
             return;
         const user = res.locals.oauth.token.User;
         if (!(yield doesUnblockServerExist(user.Account.id, req.params.host, res)))
@@ -98,12 +98,12 @@ const unblockServerByAccountValidator = [
 ];
 exports.unblockServerByAccountValidator = unblockServerByAccountValidator;
 const unblockServerByServerValidator = [
-    (0, express_validator_1.param)('host').custom(servers_1.isHostValid).withMessage('Should have an account name with host'),
-    (req, res, next) => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
+    express_validator_1.param('host').custom(servers_1.isHostValid).withMessage('Should have an account name with host'),
+    (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
         logger_1.logger.debug('Checking unblockServerByServerValidator parameters', { parameters: req.params });
-        if ((0, shared_1.areValidationErrors)(req, res))
+        if (shared_1.areValidationErrors(req, res))
             return;
-        const serverActor = yield (0, application_1.getServerActor)();
+        const serverActor = yield application_1.getServerActor();
         if (!(yield doesUnblockServerExist(serverActor.Account.id, req.params.host, res)))
             return;
         return next();
@@ -111,7 +111,7 @@ const unblockServerByServerValidator = [
 ];
 exports.unblockServerByServerValidator = unblockServerByServerValidator;
 function doesUnblockAccountExist(accountId, targetAccountId, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const accountBlock = yield account_blocklist_1.AccountBlocklistModel.loadByAccountAndTarget(accountId, targetAccountId);
         if (!accountBlock) {
             res.fail({
@@ -125,7 +125,7 @@ function doesUnblockAccountExist(accountId, targetAccountId, res) {
     });
 }
 function doesUnblockServerExist(accountId, host, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const serverBlock = yield server_blocklist_1.ServerBlocklistModel.loadByAccountAndHost(accountId, host);
         if (!serverBlock) {
             res.fail({

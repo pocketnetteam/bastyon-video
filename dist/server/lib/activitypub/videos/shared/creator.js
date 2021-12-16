@@ -12,21 +12,21 @@ class APVideoCreator extends abstract_builder_1.APVideoAbstractBuilder {
     constructor(videoObject) {
         super();
         this.videoObject = videoObject;
-        this.lTags = (0, logger_1.loggerTagsFactory)('ap', 'video', 'create', this.videoObject.uuid, this.videoObject.id);
+        this.lTags = logger_1.loggerTagsFactory('ap', 'video', 'create', this.videoObject.uuid, this.videoObject.id);
     }
     create(waitThumbnail = false) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             logger_1.logger.debug('Adding remote video %s.', this.videoObject.id, this.lTags());
             const channelActor = yield this.getOrCreateVideoChannelFromVideoObject();
             const channel = channelActor.VideoChannel;
-            const videoData = (0, object_to_model_attributes_1.getVideoAttributesFromObject)(channel, this.videoObject, this.videoObject.to);
+            const videoData = object_to_model_attributes_1.getVideoAttributesFromObject(channel, this.videoObject, this.videoObject.to);
             const video = video_1.VideoModel.build(videoData);
             const promiseThumbnail = this.tryToGenerateThumbnail(video);
             let thumbnailModel;
             if (waitThumbnail === true) {
                 thumbnailModel = yield promiseThumbnail;
             }
-            const { autoBlacklisted, videoCreated } = yield database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            const { autoBlacklisted, videoCreated } = yield database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
                 try {
                     const videoCreated = yield video.save({ transaction: t });
                     videoCreated.VideoChannel = channel;
@@ -40,7 +40,7 @@ class APVideoCreator extends abstract_builder_1.APVideoAbstractBuilder {
                     yield this.insertOrReplaceCaptions(videoCreated, t);
                     yield this.insertOrReplaceLive(videoCreated, t);
                     yield channel.setAsUpdated(t);
-                    const autoBlacklisted = yield (0, video_blacklist_1.autoBlacklistVideoIfNeeded)({
+                    const autoBlacklisted = yield video_blacklist_1.autoBlacklistVideoIfNeeded({
                         video: videoCreated,
                         user: undefined,
                         isRemote: true,

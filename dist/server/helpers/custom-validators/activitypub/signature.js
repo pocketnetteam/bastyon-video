@@ -4,14 +4,14 @@ exports.isSignatureValueValid = exports.isSignatureCreatorValid = exports.isSign
 const misc_1 = require("../misc");
 const misc_2 = require("./misc");
 function isSignatureTypeValid(signatureType) {
-    return (0, misc_1.exists)(signatureType) && signatureType === 'RsaSignature2017';
+    return misc_1.exists(signatureType) && signatureType === 'RsaSignature2017';
 }
 exports.isSignatureTypeValid = isSignatureTypeValid;
 function isSignatureCreatorValid(signatureCreator) {
-    return (0, misc_1.exists)(signatureCreator) && (0, misc_2.isActivityPubUrlValid)(signatureCreator);
+    return misc_1.exists(signatureCreator) && misc_2.isActivityPubUrlValid(signatureCreator);
 }
 exports.isSignatureCreatorValid = isSignatureCreatorValid;
 function isSignatureValueValid(signatureValue) {
-    return (0, misc_1.exists)(signatureValue) && signatureValue.length > 0;
+    return misc_1.exists(signatureValue) && signatureValue.length > 0;
 }
 exports.isSignatureValueValid = isSignatureValueValid;

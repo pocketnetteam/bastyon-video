@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.reloadConfig = exports.isEmailEnabled = exports.registerConfigChangedHandler = exports.CONFIG = void 0;
 const tslib_1 = require("tslib");
-const bytes_1 = (0, tslib_1.__importDefault)(require("bytes"));
-const decache_1 = (0, tslib_1.__importDefault)(require("decache"));
+const bytes_1 = tslib_1.__importDefault(require("bytes"));
+const decache_1 = tslib_1.__importDefault(require("decache"));
 const path_1 = require("path");
 const core_utils_1 = require("../helpers/core-utils");
 let config = require('config');
@@ -53,20 +53,20 @@ const CONFIG = {
         }
     },
     STORAGE: {
-        TMP_DIR: (0, core_utils_1.buildPath)(config.get('storage.tmp')),
-        ACTOR_IMAGES: (0, core_utils_1.buildPath)(config.get('storage.avatars')),
-        LOG_DIR: (0, core_utils_1.buildPath)(config.get('storage.logs')),
-        VIDEOS_DIR: (0, core_utils_1.buildPath)(config.get('storage.videos')),
-        IMAGES_DIR: (0, core_utils_1.buildPath)(config.get('storage.images')),
-        STREAMING_PLAYLISTS_DIR: (0, core_utils_1.buildPath)(config.get('storage.streaming_playlists')),
-        REDUNDANCY_DIR: (0, core_utils_1.buildPath)(config.get('storage.redundancy')),
-        THUMBNAILS_DIR: (0, core_utils_1.buildPath)(config.get('storage.thumbnails')),
-        PREVIEWS_DIR: (0, core_utils_1.buildPath)(config.get('storage.previews')),
-        CAPTIONS_DIR: (0, core_utils_1.buildPath)(config.get('storage.captions')),
-        TORRENTS_DIR: (0, core_utils_1.buildPath)(config.get('storage.torrents')),
-        CACHE_DIR: (0, core_utils_1.buildPath)(config.get('storage.cache')),
-        PLUGINS_DIR: (0, core_utils_1.buildPath)(config.get('storage.plugins')),
-        CLIENT_OVERRIDES_DIR: (0, core_utils_1.buildPath)(config.get('storage.client_overrides'))
+        TMP_DIR: core_utils_1.buildPath(config.get('storage.tmp')),
+        ACTOR_IMAGES: core_utils_1.buildPath(config.get('storage.avatars')),
+        LOG_DIR: core_utils_1.buildPath(config.get('storage.logs')),
+        VIDEOS_DIR: core_utils_1.buildPath(config.get('storage.videos')),
+        IMAGES_DIR: core_utils_1.buildPath(config.get('storage.images')),
+        STREAMING_PLAYLISTS_DIR: core_utils_1.buildPath(config.get('storage.streaming_playlists')),
+        REDUNDANCY_DIR: core_utils_1.buildPath(config.get('storage.redundancy')),
+        THUMBNAILS_DIR: core_utils_1.buildPath(config.get('storage.thumbnails')),
+        PREVIEWS_DIR: core_utils_1.buildPath(config.get('storage.previews')),
+        CAPTIONS_DIR: core_utils_1.buildPath(config.get('storage.captions')),
+        TORRENTS_DIR: core_utils_1.buildPath(config.get('storage.torrents')),
+        CACHE_DIR: core_utils_1.buildPath(config.get('storage.cache')),
+        PLUGINS_DIR: core_utils_1.buildPath(config.get('storage.plugins')),
+        CLIENT_OVERRIDES_DIR: core_utils_1.buildPath(config.get('storage.client_overrides'))
     },
     OBJECT_STORAGE: {
         ENABLED: config.get('object_storage.enabled'),
@@ -96,19 +96,19 @@ const CONFIG = {
     },
     RATES_LIMIT: {
         API: {
-            WINDOW_MS: (0, core_utils_1.parseDurationToMs)(config.get('rates_limit.api.window')),
+            WINDOW_MS: core_utils_1.parseDurationToMs(config.get('rates_limit.api.window')),
             MAX: config.get('rates_limit.api.max')
         },
         SIGNUP: {
-            WINDOW_MS: (0, core_utils_1.parseDurationToMs)(config.get('rates_limit.signup.window')),
+            WINDOW_MS: core_utils_1.parseDurationToMs(config.get('rates_limit.signup.window')),
             MAX: config.get('rates_limit.signup.max')
         },
         LOGIN: {
-            WINDOW_MS: (0, core_utils_1.parseDurationToMs)(config.get('rates_limit.login.window')),
+            WINDOW_MS: core_utils_1.parseDurationToMs(config.get('rates_limit.login.window')),
             MAX: config.get('rates_limit.login.max')
         },
         ASK_SEND_EMAIL: {
-            WINDOW_MS: (0, core_utils_1.parseDurationToMs)(config.get('rates_limit.ask_send_email.window')),
+            WINDOW_MS: core_utils_1.parseDurationToMs(config.get('rates_limit.ask_send_email.window')),
             MAX: config.get('rates_limit.ask_send_email.max')
         }
     },
@@ -135,11 +135,11 @@ const CONFIG = {
     },
     REDUNDANCY: {
         VIDEOS: {
-            CHECK_INTERVAL: (0, core_utils_1.parseDurationToMs)(config.get('redundancy.videos.check_interval')),
+            CHECK_INTERVAL: core_utils_1.parseDurationToMs(config.get('redundancy.videos.check_interval')),
             STRATEGIES: buildVideosRedundancy(config.get('redundancy.videos.strategies'))
         },
         IMAGES: {
-            CHECK_INTERVAL: (0, core_utils_1.parseDurationToMs)(config.get('redundancy.images.check_interval')),
+            CHECK_INTERVAL: core_utils_1.parseDurationToMs(config.get('redundancy.images.check_interval')),
             NB_IMAGES_PER_REQ: config.get('redundancy.images.nb_images_per_req')
         }
     },
@@ -165,20 +165,20 @@ const CONFIG = {
     },
     HISTORY: {
         VIDEOS: {
-            MAX_AGE: (0, core_utils_1.parseDurationToMs)(config.get('history.videos.max_age'))
+            MAX_AGE: core_utils_1.parseDurationToMs(config.get('history.videos.max_age'))
         }
     },
     VIEWS: {
         VIDEOS: {
             REMOTE: {
-                MAX_AGE: (0, core_utils_1.parseDurationToMs)(config.get('views.videos.remote.max_age'))
+                MAX_AGE: core_utils_1.parseDurationToMs(config.get('views.videos.remote.max_age'))
             }
         }
     },
     PLUGINS: {
         INDEX: {
             ENABLED: config.get('plugins.index.enabled'),
-            CHECK_LATEST_VERSIONS_INTERVAL: (0, core_utils_1.parseDurationToMs)(config.get('plugins.index.check_latest_versions_interval')),
+            CHECK_LATEST_VERSIONS_INTERVAL: core_utils_1.parseDurationToMs(config.get('plugins.index.check_latest_versions_interval')),
             URL: config.get('plugins.index.url')
         }
     },
@@ -213,8 +213,8 @@ const CONFIG = {
         }
     },
     USER: {
-        get VIDEO_QUOTA() { return (0, core_utils_1.parseBytes)(config.get('user.video_quota')); },
-        get VIDEO_QUOTA_DAILY() { return (0, core_utils_1.parseBytes)(config.get('user.video_quota_daily')); }
+        get VIDEO_QUOTA() { return core_utils_1.parseBytes(config.get('user.video_quota')); },
+        get VIDEO_QUOTA_DAILY() { return core_utils_1.parseBytes(config.get('user.video_quota_daily')); }
     },
     TRANSCODING: {
         get ENABLED() { return config.get('transcoding.enabled'); },
@@ -243,7 +243,7 @@ const CONFIG = {
     },
     LIVE: {
         get ENABLED() { return config.get('live.enabled'); },
-        get MAX_DURATION() { return (0, core_utils_1.parseDurationToMs)(config.get('live.max_duration')); },
+        get MAX_DURATION() { return core_utils_1.parseDurationToMs(config.get('live.max_duration')); },
         get MAX_INSTANCE_LIVES() { return config.get('live.max_instance_lives'); },
         get MAX_USER_LIVES() { return config.get('live.max_user_lives'); },
         get ALLOW_REPLAY() { return config.get('live.allow_replay'); },
@@ -397,7 +397,7 @@ function getLocalConfigFilePath() {
         filename += `-${process.env.NODE_ENV}`;
     if (process.env.NODE_APP_INSTANCE)
         filename += `-${process.env.NODE_APP_INSTANCE}`;
-    return (0, path_1.join)((0, path_1.dirname)(configSources[0].name), filename + '.json');
+    return path_1.join(path_1.dirname(configSources[0].name), filename + '.json');
 }
 function buildVideosRedundancy(objs) {
     if (!objs)
@@ -406,7 +406,7 @@ function buildVideosRedundancy(objs) {
         return objs;
     return objs.map(obj => {
         return Object.assign({}, obj, {
-            minLifetime: (0, core_utils_1.parseDurationToMs)(obj.min_lifetime),
+            minLifetime: core_utils_1.parseDurationToMs(obj.min_lifetime),
             size: bytes_1.default.parse(obj.size),
             minViews: obj.min_views
         });
@@ -417,7 +417,7 @@ function reloadConfig() {
         if (process.env.NODE_CONFIG_DIR) {
             return process.env.NODE_CONFIG_DIR;
         }
-        return (0, path_1.join)((0, core_utils_1.root)(), 'config');
+        return path_1.join(core_utils_1.root(), 'config');
     }
     function purge() {
         const directory = getConfigDirectory();
@@ -427,7 +427,7 @@ function reloadConfig() {
             }
             delete require.cache[fileName];
         }
-        (0, decache_1.default)('config');
+        decache_1.default('config');
     }
     purge();
     config = require('config');

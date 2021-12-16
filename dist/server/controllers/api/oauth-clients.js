@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.oauthClientsRouter = void 0;
 const tslib_1 = require("tslib");
-const express_1 = (0, tslib_1.__importDefault)(require("express"));
+const express_1 = tslib_1.__importDefault(require("express"));
 const http_error_codes_1 = require("../../../shared/models/http/http-error-codes");
 const logger_1 = require("../../helpers/logger");
 const config_1 = require("../../initializers/config");
@@ -10,9 +10,9 @@ const middlewares_1 = require("../../middlewares");
 const oauth_client_1 = require("../../models/oauth/oauth-client");
 const oauthClientsRouter = express_1.default.Router();
 exports.oauthClientsRouter = oauthClientsRouter;
-oauthClientsRouter.get('/local', (0, middlewares_1.openapiOperationDoc)({ operationId: 'getOAuthClient' }), (0, middlewares_1.asyncMiddleware)(getLocalClient));
+oauthClientsRouter.get('/local', middlewares_1.openapiOperationDoc({ operationId: 'getOAuthClient' }), middlewares_1.asyncMiddleware(getLocalClient));
 function getLocalClient(req, res, next) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const serverHostname = config_1.CONFIG.WEBSERVER.HOSTNAME;
         const serverPort = config_1.CONFIG.WEBSERVER.PORT;
         let headerHostShouldBe = serverHostname;

@@ -5,7 +5,7 @@ const tslib_1 = require("tslib");
 const video_import_1 = require("@server/models/video/video-import");
 const models_1 = require("@shared/models");
 function doesVideoImportExist(id, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const videoImport = yield video_import_1.VideoImportModel.loadAndPopulateVideo(id);
         if (!videoImport) {
             res.fail({

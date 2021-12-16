@@ -2,10 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.videoImportsRouter = void 0;
 const tslib_1 = require("tslib");
-const express_1 = (0, tslib_1.__importDefault)(require("express"));
+const express_1 = tslib_1.__importDefault(require("express"));
 const fs_extra_1 = require("fs-extra");
 const magnet_uri_1 = require("magnet-uri");
-const parse_torrent_1 = (0, tslib_1.__importDefault)(require("parse-torrent"));
+const parse_torrent_1 = tslib_1.__importDefault(require("parse-torrent"));
 const path_1 = require("path");
 const videos_1 = require("@server/helpers/custom-validators/videos");
 const server_config_manager_1 = require("@server/lib/server-config-manager");
@@ -28,15 +28,15 @@ const middlewares_1 = require("../../../middlewares");
 const video_2 = require("../../../models/video/video");
 const video_caption_1 = require("../../../models/video/video-caption");
 const video_import_1 = require("../../../models/video/video-import");
-const auditLogger = (0, audit_logger_1.auditLoggerFactory)('video-imports');
+const auditLogger = audit_logger_1.auditLoggerFactory('video-imports');
 const videoImportsRouter = express_1.default.Router();
 exports.videoImportsRouter = videoImportsRouter;
-const reqVideoFileImport = (0, express_utils_1.createReqFiles)(['thumbnailfile', 'previewfile', 'torrentfile'], Object.assign({}, constants_1.MIMETYPES.TORRENT.MIMETYPE_EXT, constants_1.MIMETYPES.IMAGE.MIMETYPE_EXT), {
+const reqVideoFileImport = express_utils_1.createReqFiles(['thumbnailfile', 'previewfile', 'torrentfile'], Object.assign({}, constants_1.MIMETYPES.TORRENT.MIMETYPE_EXT, constants_1.MIMETYPES.IMAGE.MIMETYPE_EXT), {
     thumbnailfile: config_1.CONFIG.STORAGE.TMP_DIR,
     previewfile: config_1.CONFIG.STORAGE.TMP_DIR,
     torrentfile: config_1.CONFIG.STORAGE.TMP_DIR
 });
-videoImportsRouter.post('/imports', middlewares_1.authenticate, reqVideoFileImport, (0, middlewares_1.asyncMiddleware)(middlewares_1.videoImportAddValidator), (0, middlewares_1.asyncRetryTransactionMiddleware)(addVideoImport));
+videoImportsRouter.post('/imports', middlewares_1.authenticate, reqVideoFileImport, middlewares_1.asyncMiddleware(middlewares_1.videoImportAddValidator), middlewares_1.asyncRetryTransactionMiddleware(addVideoImport));
 function addVideoImport(req, res) {
     var _a, _b;
     if (req.body.targetUrl)
@@ -46,7 +46,7 @@ function addVideoImport(req, res) {
         return addTorrentImport(req, res, file);
 }
 function addTorrentImport(req, res, torrentfile) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const body = req.body;
         const user = res.locals.oauth.token.User;
         let videoName;
@@ -89,12 +89,12 @@ function addTorrentImport(req, res, torrentfile) {
             magnetUri
         };
         yield job_queue_1.JobQueue.Instance.createJobWithPromise({ type: 'video-import', payload });
-        auditLogger.create((0, audit_logger_1.getAuditIdFromRes)(res), new audit_logger_1.VideoImportAuditView(videoImport.toFormattedJSON()));
+        auditLogger.create(audit_logger_1.getAuditIdFromRes(res), new audit_logger_1.VideoImportAuditView(videoImport.toFormattedJSON()));
         return res.json(videoImport.toFormattedJSON()).end();
     });
 }
 function addYoutubeDLImport(req, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const body = req.body;
         const targetUrl = body.targetUrl;
         const user = res.locals.oauth.token.User;
@@ -146,7 +146,7 @@ function addYoutubeDLImport(req, res) {
         });
         yield processYoutubeSubtitles(youtubeDL, targetUrl, video.id);
         let fileExt = `.${youtubeDLInfo.ext}`;
-        if (!(0, videos_1.isVideoFileExtnameValid)(fileExt))
+        if (!videos_1.isVideoFileExtnameValid(fileExt))
             fileExt = '.mp4';
         const payload = {
             type: 'youtube-dl',
@@ -154,7 +154,7 @@ function addYoutubeDLImport(req, res) {
             fileExt
         };
         yield job_queue_1.JobQueue.Instance.createJobWithPromise({ type: 'video-import', payload });
-        auditLogger.create((0, audit_logger_1.getAuditIdFromRes)(res), new audit_logger_1.VideoImportAuditView(videoImport.toFormattedJSON()));
+        auditLogger.create(audit_logger_1.getAuditIdFromRes(res), new audit_logger_1.VideoImportAuditView(videoImport.toFormattedJSON()));
         return res.json(videoImport.toFormattedJSON()).end();
     });
 }
@@ -180,15 +180,15 @@ function buildVideo(channelId, body, importData) {
             : importData.originallyPublishedAt
     };
     const video = new video_2.VideoModel(videoData);
-    video.url = (0, url_1.getLocalVideoActivityPubUrl)(video);
+    video.url = url_1.getLocalVideoActivityPubUrl(video);
     return video;
 }
 function processThumbnail(req, video) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const thumbnailField = req.files ? req.files['thumbnailfile'] : undefined;
         if (thumbnailField) {
             const thumbnailPhysicalFile = thumbnailField[0];
-            return (0, thumbnail_1.updateVideoMiniatureFromExisting)({
+            return thumbnail_1.updateVideoMiniatureFromExisting({
                 inputPath: thumbnailPhysicalFile.path,
                 video,
                 type: 1,
@@ -199,11 +199,11 @@ function processThumbnail(req, video) {
     });
 }
 function processPreview(req, video) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const previewField = req.files ? req.files['previewfile'] : undefined;
         if (previewField) {
             const previewPhysicalFile = previewField[0];
-            return (0, thumbnail_1.updateVideoMiniatureFromExisting)({
+            return thumbnail_1.updateVideoMiniatureFromExisting({
                 inputPath: previewPhysicalFile.path,
                 video,
                 type: 2,
@@ -214,9 +214,9 @@ function processPreview(req, video) {
     });
 }
 function processThumbnailFromUrl(url, video) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         try {
-            return (0, thumbnail_1.updateVideoMiniatureFromUrl)({ downloadUrl: url, video, type: 1 });
+            return thumbnail_1.updateVideoMiniatureFromUrl({ downloadUrl: url, video, type: 1 });
         }
         catch (err) {
             logger_1.logger.warn('Cannot generate video thumbnail %s for %s.', url, video.url, { err });
@@ -225,9 +225,9 @@ function processThumbnailFromUrl(url, video) {
     });
 }
 function processPreviewFromUrl(url, video) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         try {
-            return (0, thumbnail_1.updateVideoMiniatureFromUrl)({ downloadUrl: url, video, type: 2 });
+            return thumbnail_1.updateVideoMiniatureFromUrl({ downloadUrl: url, video, type: 2 });
         }
         catch (err) {
             logger_1.logger.warn('Cannot generate video preview %s for %s.', url, video.url, { err });
@@ -236,9 +236,9 @@ function processPreviewFromUrl(url, video) {
     });
 }
 function insertIntoDB(parameters) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { video, thumbnailModel, previewModel, videoChannel, tags, videoImportAttributes, user } = parameters;
-        const videoImport = yield database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        const videoImport = yield database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
             const sequelizeOptions = { transaction: t };
             const videoCreated = yield video.save(sequelizeOptions);
             videoCreated.VideoChannel = videoChannel;
@@ -246,7 +246,7 @@ function insertIntoDB(parameters) {
                 yield videoCreated.addAndSaveThumbnail(thumbnailModel, t);
             if (previewModel)
                 yield videoCreated.addAndSaveThumbnail(previewModel, t);
-            yield (0, video_blacklist_1.autoBlacklistVideoIfNeeded)({
+            yield video_blacklist_1.autoBlacklistVideoIfNeeded({
                 video: videoCreated,
                 user,
                 notify: false,
@@ -254,7 +254,7 @@ function insertIntoDB(parameters) {
                 isNew: true,
                 transaction: t
             });
-            yield (0, video_1.setVideoTags)({ video: videoCreated, tags, transaction: t });
+            yield video_1.setVideoTags({ video: videoCreated, tags, transaction: t });
             const videoImport = yield video_import_1.VideoImportModel.create(Object.assign({ videoId: videoCreated.id }, videoImportAttributes), sequelizeOptions);
             videoImport.Video = videoCreated;
             return videoImport;
@@ -263,15 +263,15 @@ function insertIntoDB(parameters) {
     });
 }
 function processTorrentOrAbortRequest(req, res, torrentfile) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const torrentName = torrentfile.originalname;
-        const newTorrentPath = (0, path_1.join)(config_1.CONFIG.STORAGE.TORRENTS_DIR, (0, utils_1.getSecureTorrentName)(torrentName));
-        yield (0, fs_extra_1.move)(torrentfile.path, newTorrentPath, { overwrite: true });
+        const newTorrentPath = path_1.join(config_1.CONFIG.STORAGE.TORRENTS_DIR, utils_1.getSecureTorrentName(torrentName));
+        yield fs_extra_1.move(torrentfile.path, newTorrentPath, { overwrite: true });
         torrentfile.path = newTorrentPath;
-        const buf = yield (0, fs_extra_1.readFile)(torrentfile.path);
-        const parsedTorrent = (0, parse_torrent_1.default)(buf);
+        const buf = yield fs_extra_1.readFile(torrentfile.path);
+        const parsedTorrent = parse_torrent_1.default(buf);
         if (parsedTorrent.files.length !== 1) {
-            (0, express_utils_1.cleanUpReqFiles)(req);
+            express_utils_1.cleanUpReqFiles(req);
             res.fail({
                 type: "incorrect_files_in_torrent",
                 message: 'Torrents with only 1 file are supported.'
@@ -286,17 +286,17 @@ function processTorrentOrAbortRequest(req, res, torrentfile) {
 }
 function processMagnetURI(body) {
     const magnetUri = body.magnetUri;
-    const parsed = (0, magnet_uri_1.decode)(magnetUri);
+    const parsed = magnet_uri_1.decode(magnetUri);
     return {
         name: extractNameFromArray(parsed.name),
         magnetUri
     };
 }
 function extractNameFromArray(name) {
-    return (0, misc_1.isArray)(name) ? name[0] : name;
+    return misc_1.isArray(name) ? name[0] : name;
 }
 function processYoutubeSubtitles(youtubeDL, targetUrl, videoId) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         try {
             const subtitles = yield youtubeDL.getYoutubeDLSubs();
             logger_1.logger.info('Will create %s subtitles from youtube import %s.', subtitles.length, targetUrl);
@@ -306,8 +306,8 @@ function processYoutubeSubtitles(youtubeDL, targetUrl, videoId) {
                     language: subtitle.language,
                     filename: video_caption_1.VideoCaptionModel.generateCaptionName(subtitle.language)
                 });
-                yield (0, captions_utils_1.moveAndProcessCaptionFile)(subtitle, videoCaption);
-                yield database_1.sequelizeTypescript.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield captions_utils_1.moveAndProcessCaptionFile(subtitle, videoCaption);
+                yield database_1.sequelizeTypescript.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
                     yield video_caption_1.VideoCaptionModel.insertOrReplaceLanguage(videoCaption, t);
                 }));
             }

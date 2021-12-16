@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.JobQueue = exports.jobTypes = void 0;
 const tslib_1 = require("tslib");
-const bull_1 = (0, tslib_1.__importDefault)(require("bull"));
+const bull_1 = tslib_1.__importDefault(require("bull"));
 const jobs_1 = require("@server/helpers/custom-validators/jobs");
 const config_1 = require("@server/initializers/config");
 const video_redundancy_1 = require("@server/lib/job-queue/handlers/video-redundancy");
@@ -23,7 +23,7 @@ const video_import_1 = require("./handlers/video-import");
 const video_live_ending_1 = require("./handlers/video-live-ending");
 const video_transcoding_1 = require("./handlers/video-transcoding");
 const video_views_1 = require("./handlers/video-views");
-const node_fetch_1 = (0, tslib_1.__importDefault)(require("node-fetch"));
+const node_fetch_1 = tslib_1.__importDefault(require("node-fetch"));
 const handlers = {
     'activitypub-http-broadcast': activitypub_http_broadcast_1.processActivityPubHttpBroadcast,
     'activitypub-http-unicast': activitypub_http_unicast_1.processActivityPubHttpUnicast,
@@ -87,8 +87,9 @@ class JobQueue {
                     info: job.data,
                     errText: err
                 };
-                return (0, node_fetch_1.default)(constants_1.LOGGER_ENDPOINT, {
-                    body: Object.assign({}, errorData)
+                return node_fetch_1.default(constants_1.LOGGER_ENDPOINT, {
+                    method: 'post',
+                    body: JSON.stringify(Object.assign({}, errorData))
                 });
             });
             queue.on('error', err => {
@@ -124,7 +125,7 @@ class JobQueue {
         return queue.add(obj.payload, jobArgs);
     }
     listForApi(options) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const { state, start, count, asc, jobType } = options;
             const states = state ? [state] : jobs_1.jobStates;
             let results = [];
@@ -151,7 +152,7 @@ class JobQueue {
         });
     }
     count(state, jobType) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const states = state ? [state] : jobs_1.jobStates;
             let total = 0;
             const filteredJobTypes = this.filterJobTypes(jobType);
@@ -170,7 +171,7 @@ class JobQueue {
         });
     }
     removeOldJobs() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             for (const key of Object.keys(this.queues)) {
                 const queue = this.queues[key];
                 yield queue.clean(constants_1.JOB_COMPLETED_LIFETIME, 'completed');

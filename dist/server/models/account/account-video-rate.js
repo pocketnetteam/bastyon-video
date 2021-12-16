@@ -47,7 +47,7 @@ let AccountVideoRateModel = AccountVideoRateModel_1 = class AccountVideoRateMode
         const query = {
             offset: options.start,
             limit: options.count,
-            order: (0, utils_1.getSort)(options.sort),
+            order: utils_1.getSort(options.sort),
             where: {
                 accountId: options.accountId
             },
@@ -147,7 +147,7 @@ let AccountVideoRateModel = AccountVideoRateModel_1 = class AccountVideoRateMode
         return AccountVideoRateModel_1.findAndCountAll(query);
     }
     static cleanOldRatesOf(videoId, type, beforeUpdatedAt) {
-        return AccountVideoRateModel_1.sequelize.transaction((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return AccountVideoRateModel_1.sequelize.transaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
             const query = {
                 where: {
                     updatedAt: {
@@ -156,7 +156,7 @@ let AccountVideoRateModel = AccountVideoRateModel_1 = class AccountVideoRateMode
                     videoId,
                     type,
                     accountId: {
-                        [sequelize_1.Op.notIn]: (0, utils_1.buildLocalAccountIdsIn)()
+                        [sequelize_1.Op.notIn]: utils_1.buildLocalAccountIdsIn()
                     }
                 },
                 transaction: t
@@ -172,55 +172,55 @@ let AccountVideoRateModel = AccountVideoRateModel_1 = class AccountVideoRateMode
         };
     }
 };
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(false),
-    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.ENUM(...(0, lodash_1.values)(constants_1.VIDEO_RATE_TYPES))),
-    (0, tslib_1.__metadata)("design:type", String)
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(false),
+    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.ENUM(...lodash_1.values(constants_1.VIDEO_RATE_TYPES))),
+    tslib_1.__metadata("design:type", String)
 ], AccountVideoRateModel.prototype, "type", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.AllowNull)(false),
-    (0, sequelize_typescript_1.Is)('AccountVideoRateUrl', value => (0, utils_1.throwIfNotValid)(value, misc_1.isActivityPubUrlValid, 'url')),
-    (0, sequelize_typescript_1.Column)(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.VIDEO_RATES.URL.max)),
-    (0, tslib_1.__metadata)("design:type", String)
+tslib_1.__decorate([
+    sequelize_typescript_1.AllowNull(false),
+    sequelize_typescript_1.Is('AccountVideoRateUrl', value => utils_1.throwIfNotValid(value, misc_1.isActivityPubUrlValid, 'url')),
+    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.STRING(constants_1.CONSTRAINTS_FIELDS.VIDEO_RATES.URL.max)),
+    tslib_1.__metadata("design:type", String)
 ], AccountVideoRateModel.prototype, "url", void 0);
-(0, tslib_1.__decorate)([
+tslib_1.__decorate([
     sequelize_typescript_1.CreatedAt,
-    (0, tslib_1.__metadata)("design:type", Date)
+    tslib_1.__metadata("design:type", Date)
 ], AccountVideoRateModel.prototype, "createdAt", void 0);
-(0, tslib_1.__decorate)([
+tslib_1.__decorate([
     sequelize_typescript_1.UpdatedAt,
-    (0, tslib_1.__metadata)("design:type", Date)
+    tslib_1.__metadata("design:type", Date)
 ], AccountVideoRateModel.prototype, "updatedAt", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.ForeignKey)(() => video_1.VideoModel),
+tslib_1.__decorate([
+    sequelize_typescript_1.ForeignKey(() => video_1.VideoModel),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", Number)
+    tslib_1.__metadata("design:type", Number)
 ], AccountVideoRateModel.prototype, "videoId", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.BelongsTo)(() => video_1.VideoModel, {
+tslib_1.__decorate([
+    sequelize_typescript_1.BelongsTo(() => video_1.VideoModel, {
         foreignKey: {
             allowNull: false
         },
         onDelete: 'CASCADE'
     }),
-    (0, tslib_1.__metadata)("design:type", video_1.VideoModel)
+    tslib_1.__metadata("design:type", video_1.VideoModel)
 ], AccountVideoRateModel.prototype, "Video", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.ForeignKey)(() => account_1.AccountModel),
+tslib_1.__decorate([
+    sequelize_typescript_1.ForeignKey(() => account_1.AccountModel),
     sequelize_typescript_1.Column,
-    (0, tslib_1.__metadata)("design:type", Number)
+    tslib_1.__metadata("design:type", Number)
 ], AccountVideoRateModel.prototype, "accountId", void 0);
-(0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.BelongsTo)(() => account_1.AccountModel, {
+tslib_1.__decorate([
+    sequelize_typescript_1.BelongsTo(() => account_1.AccountModel, {
         foreignKey: {
             allowNull: false
         },
         onDelete: 'CASCADE'
     }),
-    (0, tslib_1.__metadata)("design:type", account_1.AccountModel)
+    tslib_1.__metadata("design:type", account_1.AccountModel)
 ], AccountVideoRateModel.prototype, "Account", void 0);
-AccountVideoRateModel = AccountVideoRateModel_1 = (0, tslib_1.__decorate)([
-    (0, sequelize_typescript_1.Table)({
+AccountVideoRateModel = AccountVideoRateModel_1 = tslib_1.__decorate([
+    sequelize_typescript_1.Table({
         tableName: 'accountVideoRate',
         indexes: [
             {

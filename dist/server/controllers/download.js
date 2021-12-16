@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.downloadRouter = void 0;
 const tslib_1 = require("tslib");
-const cors_1 = (0, tslib_1.__importDefault)(require("cors"));
-const express_1 = (0, tslib_1.__importDefault)(require("express"));
+const cors_1 = tslib_1.__importDefault(require("cors"));
+const express_1 = tslib_1.__importDefault(require("express"));
 const logger_1 = require("@server/helpers/logger");
 const videos_torrent_cache_1 = require("@server/lib/files-cache/videos-torrent-cache");
 const hooks_1 = require("@server/lib/plugins/hooks");
@@ -13,12 +13,12 @@ const constants_1 = require("../initializers/constants");
 const middlewares_1 = require("../middlewares");
 const downloadRouter = express_1.default.Router();
 exports.downloadRouter = downloadRouter;
-downloadRouter.use((0, cors_1.default)());
-downloadRouter.use(constants_1.STATIC_DOWNLOAD_PATHS.TORRENTS + ':filename', (0, middlewares_1.asyncMiddleware)(downloadTorrent));
-downloadRouter.use(constants_1.STATIC_DOWNLOAD_PATHS.VIDEOS + ':id-:resolution([0-9]+).:extension', (0, middlewares_1.asyncMiddleware)(middlewares_1.videosDownloadValidator), (0, middlewares_1.asyncMiddleware)(downloadVideoFile));
-downloadRouter.use(constants_1.STATIC_DOWNLOAD_PATHS.HLS_VIDEOS + ':id-:resolution([0-9]+)-fragmented.:extension', (0, middlewares_1.asyncMiddleware)(middlewares_1.videosDownloadValidator), (0, middlewares_1.asyncMiddleware)(downloadHLSVideoFile));
+downloadRouter.use(cors_1.default());
+downloadRouter.use(constants_1.STATIC_DOWNLOAD_PATHS.TORRENTS + ':filename', middlewares_1.asyncMiddleware(downloadTorrent));
+downloadRouter.use(constants_1.STATIC_DOWNLOAD_PATHS.VIDEOS + ':id-:resolution([0-9]+).:extension', middlewares_1.asyncMiddleware(middlewares_1.videosDownloadValidator), middlewares_1.asyncMiddleware(downloadVideoFile));
+downloadRouter.use(constants_1.STATIC_DOWNLOAD_PATHS.HLS_VIDEOS + ':id-:resolution([0-9]+)-fragmented.:extension', middlewares_1.asyncMiddleware(middlewares_1.videosDownloadValidator), middlewares_1.asyncMiddleware(downloadHLSVideoFile));
 function downloadTorrent(req, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const result = yield videos_torrent_cache_1.VideosTorrentCache.Instance.getFilePath(req.params.filename);
         if (!result) {
             return res.fail({
@@ -34,7 +34,7 @@ function downloadTorrent(req, res) {
     });
 }
 function downloadVideoFile(req, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const video = res.locals.videoAll;
         const videoFile = getVideoFile(req, video.VideoFiles);
         if (!videoFile) {
@@ -57,7 +57,7 @@ function downloadVideoFile(req, res) {
     });
 }
 function downloadHLSVideoFile(req, res) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const video = res.locals.videoAll;
         const streamingPlaylist = getHLSPlaylist(video);
         if (!streamingPlaylist)

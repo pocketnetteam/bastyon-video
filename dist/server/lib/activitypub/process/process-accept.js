@@ -5,7 +5,7 @@ const tslib_1 = require("tslib");
 const actor_follow_1 = require("../../../models/actor/actor-follow");
 const outbox_1 = require("../outbox");
 function processAcceptActivity(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { byActor: targetActor, inboxActor } = options;
         if (inboxActor === undefined)
             throw new Error('Need to accept on explicit inbox.');
@@ -14,14 +14,14 @@ function processAcceptActivity(options) {
 }
 exports.processAcceptActivity = processAcceptActivity;
 function processAccept(actor, targetActor) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const follow = yield actor_follow_1.ActorFollowModel.loadByActorAndTarget(actor.id, targetActor.id);
         if (!follow)
             throw new Error('Cannot find associated follow.');
         if (follow.state !== 'accepted') {
             follow.state = 'accepted';
             yield follow.save();
-            yield (0, outbox_1.addFetchOutboxJob)(targetActor);
+            yield outbox_1.addFetchOutboxJob(targetActor);
         }
     });
 }

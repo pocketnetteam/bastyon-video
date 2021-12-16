@@ -18,10 +18,10 @@ class APVideoUpdater extends shared_1.APVideoAbstractBuilder {
         this.wasUnlistedVideo = this.video.privacy === 2;
         this.oldVideoChannel = this.video.VideoChannel;
         this.videoFieldsSave = this.video.toJSON();
-        this.lTags = (0, logger_1.loggerTagsFactory)('ap', 'video', 'update', video.uuid, video.url);
+        this.lTags = logger_1.loggerTagsFactory('ap', 'video', 'update', video.uuid, video.url);
     }
     update(overrideTo) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             logger_1.logger.debug('Updating remote video "%s".', this.videoObject.uuid, Object.assign({ videoObject: this.videoObject }, this.lTags()));
             try {
                 const channelActor = yield this.getOrCreateVideoChannelFromVideoObject();
@@ -30,18 +30,18 @@ class APVideoUpdater extends shared_1.APVideoAbstractBuilder {
                 const videoUpdated = yield this.updateVideo(channelActor.VideoChannel, undefined, overrideTo);
                 if (thumbnailModel)
                     yield videoUpdated.addAndSaveThumbnail(thumbnailModel);
-                yield (0, database_utils_1.runInReadCommittedTransaction)((t) => (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+                yield database_utils_1.runInReadCommittedTransaction((t) => tslib_1.__awaiter(this, void 0, void 0, function* () {
                     yield this.setWebTorrentFiles(videoUpdated, t);
                     yield this.setStreamingPlaylists(videoUpdated, t);
                 }));
                 yield Promise.all([
-                    (0, database_utils_1.runInReadCommittedTransaction)(t => this.setTags(videoUpdated, t)),
-                    (0, database_utils_1.runInReadCommittedTransaction)(t => this.setTrackers(videoUpdated, t)),
+                    database_utils_1.runInReadCommittedTransaction(t => this.setTags(videoUpdated, t)),
+                    database_utils_1.runInReadCommittedTransaction(t => this.setTrackers(videoUpdated, t)),
                     this.setOrDeleteLive(videoUpdated),
                     this.setPreview(videoUpdated)
                 ]);
-                yield (0, database_utils_1.runInReadCommittedTransaction)(t => this.setCaptions(videoUpdated, t));
-                yield (0, video_blacklist_1.autoBlacklistVideoIfNeeded)({
+                yield database_utils_1.runInReadCommittedTransaction(t => this.setCaptions(videoUpdated, t));
+                yield video_blacklist_1.autoBlacklistVideoIfNeeded({
                     video: videoUpdated,
                     user: undefined,
                     isRemote: true,
@@ -73,7 +73,7 @@ class APVideoUpdater extends shared_1.APVideoAbstractBuilder {
     }
     updateVideo(channel, transaction, overrideTo) {
         const to = overrideTo || this.videoObject.to;
-        const videoData = (0, shared_1.getVideoAttributesFromObject)(channel, this.videoObject, to);
+        const videoData = shared_1.getVideoAttributesFromObject(channel, this.videoObject, to);
         this.video.name = videoData.name;
         this.video.uuid = videoData.uuid;
         this.video.url = videoData.url;
@@ -100,12 +100,12 @@ class APVideoUpdater extends shared_1.APVideoAbstractBuilder {
         return this.video.save({ transaction });
     }
     setCaptions(videoUpdated, t) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             yield this.insertOrReplaceCaptions(videoUpdated, t);
         });
     }
     setOrDeleteLive(videoUpdated, transaction) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (!this.video.isLive)
                 return;
             if (this.video.isLive)
@@ -121,7 +121,7 @@ class APVideoUpdater extends shared_1.APVideoAbstractBuilder {
     }
     catchUpdateError(err) {
         if (this.video !== undefined && this.videoFieldsSave !== undefined) {
-            (0, database_utils_1.resetSequelizeInstance)(this.video, this.videoFieldsSave);
+            database_utils_1.resetSequelizeInstance(this.video, this.videoFieldsSave);
         }
         logger_1.logger.debug('Cannot update the remote video.', Object.assign({ err }, this.lTags()));
         throw err;

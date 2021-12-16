@@ -12,11 +12,11 @@ function getHookType(hookName) {
 }
 exports.getHookType = getHookType;
 function internalRunHook(handler, hookType, result, params, onError) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         try {
             if (hookType === 3) {
                 const p = handler(result, params);
-                if ((0, promises_1.isPromise)(p))
+                if (promises_1.isPromise(p))
                     result = yield p;
                 else
                     result = p;
@@ -24,12 +24,12 @@ function internalRunHook(handler, hookType, result, params, onError) {
             }
             const p = handler(params);
             if (hookType === 1) {
-                if ((0, promises_1.isPromise)(p))
+                if (promises_1.isPromise(p))
                     yield p;
                 return undefined;
             }
             if (hookType === 2) {
-                if ((0, promises_1.isCatchable)(p))
+                if (promises_1.isCatchable(p))
                     p.catch((err) => onError(err));
                 return undefined;
             }

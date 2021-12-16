@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TokensCache = void 0;
 const tslib_1 = require("tslib");
-const lru_cache_1 = (0, tslib_1.__importDefault)(require("lru-cache"));
+const lru_cache_1 = tslib_1.__importDefault(require("lru-cache"));
 const constants_1 = require("../../initializers/constants");
 class TokensCache {
     constructor() {

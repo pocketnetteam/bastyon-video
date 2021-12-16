@@ -10,7 +10,7 @@ const constants_1 = require("@server/initializers/constants");
 const plugin_1 = require("@server/models/server/plugin");
 const plugin_manager_1 = require("./plugin-manager");
 function listAvailablePluginsFromIndex(options) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const { start = 0, count = 20, search, sort = 'npmName', pluginType } = options;
         const searchParams = {
             start,
@@ -22,7 +22,7 @@ function listAvailablePluginsFromIndex(options) {
         };
         const uri = config_1.CONFIG.PLUGINS.INDEX.URL + '/api/v1/plugins';
         try {
-            const { body } = yield (0, requests_1.doJSONRequest)(uri, { searchParams });
+            const { body } = yield requests_1.doJSONRequest(uri, { searchParams });
             logger_1.logger.debug('Got result from PeerTube index.', { body });
             addInstanceInformation(body);
             return body;
@@ -42,23 +42,23 @@ function addInstanceInformation(result) {
     return result;
 }
 function getLatestPluginsVersion(npmNames) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const bodyRequest = {
             npmNames,
             currentPeerTubeEngine: constants_1.PEERTUBE_VERSION
         };
-        const uri = (0, core_utils_1.sanitizeUrl)(config_1.CONFIG.PLUGINS.INDEX.URL) + '/api/v1/plugins/latest-version';
+        const uri = core_utils_1.sanitizeUrl(config_1.CONFIG.PLUGINS.INDEX.URL) + '/api/v1/plugins/latest-version';
         const options = {
             json: bodyRequest,
             method: 'POST'
         };
-        const { body } = yield (0, requests_1.doJSONRequest)(uri, options);
+        const { body } = yield requests_1.doJSONRequest(uri, options);
         return body;
     });
 }
 exports.getLatestPluginsVersion = getLatestPluginsVersion;
 function getLatestPluginVersion(npmName) {
-    return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const results = yield getLatestPluginsVersion([npmName]);
         if (Array.isArray(results) === false || results.length !== 1) {
             logger_1.logger.warn('Cannot get latest supported plugin version of %s.', npmName);

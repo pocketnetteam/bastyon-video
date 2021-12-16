@@ -9,7 +9,7 @@ const user_notification_1 = require("@server/models/user/user-notification");
 const abstract_notification_1 = require("../common/abstract-notification");
 class FollowForUser extends abstract_notification_1.AbstractNotification {
     prepare() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.followType = 'channel';
             this.user = yield user_1.UserModel.loadByChannelActorId(this.actorFollow.ActorFollowing.id);
             if (!this.user) {
@@ -19,12 +19,12 @@ class FollowForUser extends abstract_notification_1.AbstractNotification {
         });
     }
     isDisabled() {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             if (this.payload.ActorFollowing.isOwned() === false)
                 return true;
             const followerAccount = this.actorFollow.ActorFollower.Account;
             const followerAccountWithActor = Object.assign(followerAccount, { Actor: this.actorFollow.ActorFollower });
-            return (0, blocklist_1.isBlockedByServerOrAccount)(followerAccountWithActor, this.user.Account);
+            return blocklist_1.isBlockedByServerOrAccount(followerAccountWithActor, this.user.Account);
         });
     }
     log() {
@@ -39,7 +39,7 @@ class FollowForUser extends abstract_notification_1.AbstractNotification {
         return [this.user];
     }
     createNotification(user) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const notification = yield user_notification_1.UserNotificationModel.create({
                 type: 10,
                 userId: user.id,

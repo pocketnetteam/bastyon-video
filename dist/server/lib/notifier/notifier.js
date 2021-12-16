@@ -127,7 +127,7 @@ class Notifier {
             .catch(err => logger_1.logger.error('Cannot notify on new plugin version %s.', plugin.name, { err }));
     }
     notify(object) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             yield object.prepare();
             const users = object.getTargetUsers();
             if (users.length === 0)
@@ -161,7 +161,7 @@ class Notifier {
         return value & 1;
     }
     sendNotifications(models, payload) {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             for (const model of models) {
                 yield this.notify(new model(payload));
             }

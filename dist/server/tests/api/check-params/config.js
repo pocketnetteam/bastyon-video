@@ -176,10 +176,10 @@ describe('Test config API validators', function () {
         }
     };
     before(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(30000);
-            server = yield (0, extra_utils_1.createSingleServer)(1);
-            yield (0, extra_utils_1.setAccessTokensToServers)([server]);
+            server = yield extra_utils_1.createSingleServer(1);
+            yield extra_utils_1.setAccessTokensToServers([server]);
             const user = {
                 username: 'user1',
                 password: 'password'
@@ -190,8 +190,8 @@ describe('Test config API validators', function () {
     });
     describe('When getting the configuration', function () {
         it('Should fail without token', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makeGetRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makeGetRequest({
                     url: server.url,
                     path,
                     expectedStatus: models_1.HttpStatusCode.UNAUTHORIZED_401
@@ -199,8 +199,8 @@ describe('Test config API validators', function () {
             });
         });
         it('Should fail if the user is not an administrator', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makeGetRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makeGetRequest({
                     url: server.url,
                     path,
                     token: userAccessToken,
@@ -211,8 +211,8 @@ describe('Test config API validators', function () {
     });
     describe('When updating the configuration', function () {
         it('Should fail without token', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makePutBodyRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makePutBodyRequest({
                     url: server.url,
                     path,
                     fields: updateParams,
@@ -221,8 +221,8 @@ describe('Test config API validators', function () {
             });
         });
         it('Should fail if the user is not an administrator', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makePutBodyRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makePutBodyRequest({
                     url: server.url,
                     path,
                     fields: updateParams,
@@ -232,9 +232,9 @@ describe('Test config API validators', function () {
             });
         });
         it('Should fail if it misses a key', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                const newUpdateParams = (0, lodash_1.omit)(updateParams, 'admin.email');
-                yield (0, extra_utils_1.makePutBodyRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                const newUpdateParams = lodash_1.omit(updateParams, 'admin.email');
+                yield extra_utils_1.makePutBodyRequest({
                     url: server.url,
                     path,
                     fields: newUpdateParams,
@@ -244,11 +244,11 @@ describe('Test config API validators', function () {
             });
         });
         it('Should fail with a bad default NSFW policy', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const newUpdateParams = Object.assign(Object.assign({}, updateParams), { instance: {
                         defaultNSFWPolicy: 'hello'
                     } });
-                yield (0, extra_utils_1.makePutBodyRequest)({
+                yield extra_utils_1.makePutBodyRequest({
                     url: server.url,
                     path,
                     fields: newUpdateParams,
@@ -258,13 +258,13 @@ describe('Test config API validators', function () {
             });
         });
         it('Should fail if email disabled and signup requires email verification', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const newUpdateParams = Object.assign(Object.assign({}, updateParams), { signup: {
                         enabled: true,
                         limit: 5,
                         requiresEmailVerification: true
                     } });
-                yield (0, extra_utils_1.makePutBodyRequest)({
+                yield extra_utils_1.makePutBodyRequest({
                     url: server.url,
                     path,
                     fields: newUpdateParams,
@@ -274,7 +274,7 @@ describe('Test config API validators', function () {
             });
         });
         it('Should fail with a disabled webtorrent & hls transcoding', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
                 const newUpdateParams = Object.assign(Object.assign({}, updateParams), { transcoding: {
                         hls: {
                             enabled: false
@@ -283,7 +283,7 @@ describe('Test config API validators', function () {
                             enabled: false
                         }
                     } });
-                yield (0, extra_utils_1.makePutBodyRequest)({
+                yield extra_utils_1.makePutBodyRequest({
                     url: server.url,
                     path,
                     fields: newUpdateParams,
@@ -293,8 +293,8 @@ describe('Test config API validators', function () {
             });
         });
         it('Should success with the correct parameters', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makePutBodyRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makePutBodyRequest({
                     url: server.url,
                     path,
                     fields: updateParams,
@@ -306,8 +306,8 @@ describe('Test config API validators', function () {
     });
     describe('When deleting the configuration', function () {
         it('Should fail without token', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makeDeleteRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makeDeleteRequest({
                     url: server.url,
                     path,
                     expectedStatus: models_1.HttpStatusCode.UNAUTHORIZED_401
@@ -315,8 +315,8 @@ describe('Test config API validators', function () {
             });
         });
         it('Should fail if the user is not an administrator', function () {
-            return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-                yield (0, extra_utils_1.makeDeleteRequest)({
+            return tslib_1.__awaiter(this, void 0, void 0, function* () {
+                yield extra_utils_1.makeDeleteRequest({
                     url: server.url,
                     path,
                     token: userAccessToken,
@@ -326,8 +326,8 @@ describe('Test config API validators', function () {
         });
     });
     after(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
-            yield (0, extra_utils_1.cleanupTests)([server]);
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            yield extra_utils_1.cleanupTests([server]);
         });
     });
 });

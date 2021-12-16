@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 require("mocha");
-const chai = (0, tslib_1.__importStar)(require("chai"));
+const chai = tslib_1.__importStar(require("chai"));
 const extra_utils_1 = require("@shared/extra-utils");
 const models_1 = require("@shared/models");
 const expect = chai.expect;
@@ -22,7 +22,7 @@ describe('Test users account verification', function () {
     };
     const emails = [];
     before(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(30000);
             const port = yield extra_utils_1.MockSmtpServer.Instance.collectEmails(emails);
             const overrideConfig = {
@@ -31,12 +31,12 @@ describe('Test users account verification', function () {
                     port
                 }
             };
-            server = yield (0, extra_utils_1.createSingleServer)(1, overrideConfig);
-            yield (0, extra_utils_1.setAccessTokensToServers)([server]);
+            server = yield extra_utils_1.createSingleServer(1, overrideConfig);
+            yield extra_utils_1.setAccessTokensToServers([server]);
         });
     });
     it('Should register user and send verification email if verification required', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(30000);
             yield server.config.updateCustomSubConfig({
                 newConfig: {
@@ -48,7 +48,7 @@ describe('Test users account verification', function () {
                 }
             });
             yield server.users.register(user1);
-            yield (0, extra_utils_1.waitJobs)(server);
+            yield extra_utils_1.waitJobs(server);
             expectedEmailsLength++;
             expect(emails).to.have.lengthOf(expectedEmailsLength);
             const email = emails[expectedEmailsLength - 1];
@@ -64,13 +64,13 @@ describe('Test users account verification', function () {
         });
     });
     it('Should not allow login for user with unverified email', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const { detail } = yield server.login.login({ user: user1, expectedStatus: models_1.HttpStatusCode.BAD_REQUEST_400 });
             expect(detail).to.contain('User email is not verified.');
         });
     });
     it('Should verify the user via email and allow login', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             yield server.users.verifyEmail({ userId, verificationString });
             const body = yield server.login.login({ user: user1 });
             userAccessToken = body.access_token;
@@ -79,7 +79,7 @@ describe('Test users account verification', function () {
         });
     });
     it('Should be able to change the user email', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(10000);
             let updateVerificationString;
             {
@@ -88,7 +88,7 @@ describe('Test users account verification', function () {
                     email: 'updated@example.com',
                     currentPassword: user1.password
                 });
-                yield (0, extra_utils_1.waitJobs)(server);
+                yield extra_utils_1.waitJobs(server);
                 expectedEmailsLength++;
                 expect(emails).to.have.lengthOf(expectedEmailsLength);
                 const email = emails[expectedEmailsLength - 1];
@@ -109,7 +109,7 @@ describe('Test users account verification', function () {
         });
     });
     it('Should register user not requiring email verification if setting not enabled', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             this.timeout(5000);
             yield server.config.updateCustomSubConfig({
                 newConfig: {
@@ -121,7 +121,7 @@ describe('Test users account verification', function () {
                 }
             });
             yield server.users.register(user2);
-            yield (0, extra_utils_1.waitJobs)(server);
+            yield extra_utils_1.waitJobs(server);
             expect(emails).to.have.lengthOf(expectedEmailsLength);
             const accessToken = yield server.login.getAccessToken(user2);
             const user = yield server.users.getMyInfo({ token: accessToken });
@@ -129,7 +129,7 @@ describe('Test users account verification', function () {
         });
     });
     it('Should allow login for user with unverified email when setting later enabled', function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             yield server.config.updateCustomSubConfig({
                 newConfig: {
                     signup: {
@@ -143,9 +143,9 @@ describe('Test users account verification', function () {
         });
     });
     after(function () {
-        return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
             extra_utils_1.MockSmtpServer.Instance.kill();
-            yield (0, extra_utils_1.cleanupTests)([server]);
+            yield extra_utils_1.cleanupTests([server]);
         });
     });
 });
