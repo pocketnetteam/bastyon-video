@@ -113,8 +113,8 @@ async function addImage (options: {
     destImage.scaleToFit(thumbnailSize.w, thumbnailSize.h).quality(90).write(join(imageFile.destination, image.thumbnailname));
 
     // Determine images static path
-    var imageStaticUrl = ImageModel.getImageStaticUrl(imageFile.imageId, imageFile.filename);
-    var thumbnailStaticUrl = ImageModel.getImageStaticUrl(imageFile.imageId, image.thumbnailname);
+    var imageStaticUrl = ImageModel.getImageStaticUrl(imageFile.imageId, imageFile.filename, req.headers.host);
+    var thumbnailStaticUrl = ImageModel.getImageStaticUrl(imageFile.imageId, image.thumbnailname, req.headers.host);
 
     // If image is smaller than 600, delete original and use the thumbnail only
     if (isAvatar == false && originalSize.w < 600 && originalSize.h < 600) {
