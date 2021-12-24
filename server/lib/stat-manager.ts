@@ -213,6 +213,10 @@ class StatsManager {
     })
   }
 
+  buildSingleRedundancyStat (strategy: VideoRedundancyStrategyWithManual) {
+    return VideoRedundancyModel.getStats(strategy)
+  }
+
   private buildAPPerType () {
     return {
       Create: 0,
