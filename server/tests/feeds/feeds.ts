@@ -255,7 +255,7 @@ describe('Test syndication feeds', () => {
       const jsonObj = JSON.parse(json)
       expect(jsonObj.items.length).to.be.equal(1)
       expect(jsonObj.items[0].attachments).to.exist
-      expect(jsonObj.items[0].attachments.length).to.be.eq(4)
+      expect(jsonObj.items[0].attachments.length).to.be.eq(5)
 
       for (let i = 0; i < 4; i++) {
         expect(jsonObj.items[0].attachments[i].mime_type).to.be.eq('application/x-bittorrent')
