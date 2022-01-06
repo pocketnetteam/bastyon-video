@@ -110,7 +110,7 @@ describe('Test update host scripts', function () {
       const videoDetails = await server.videos.get({ id: video.id })
       const files = videoDetails.files.concat(videoDetails.streamingPlaylists[0].files)
 
-      expect(files).to.have.lengthOf(8)
+      expect(files).to.have.lengthOf(10)
 
       for (const file of files) {
         expect(file.magnetUri).to.contain('localhost%3A9002%2Ftracker%2Fsocket')

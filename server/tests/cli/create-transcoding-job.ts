@@ -100,7 +100,7 @@ function runTests (objectStorage: boolean) {
         const videoDetails = await server.videos.get({ id: video.uuid })
 
         if (video.shortUUID === videosUUID[1] || video.uuid === videosUUID[1]) {
-          expect(videoDetails.files).to.have.lengthOf(4)
+          expect(videoDetails.files).to.have.lengthOf(5)
           expect(videoDetails.streamingPlaylists).to.have.lengthOf(0)
 
           if (objectStorage) await checkFilesInObjectStorage(videoDetails.files, 'webtorrent')
@@ -203,7 +203,7 @@ function runTests (objectStorage: boolean) {
       expect(videoDetails.streamingPlaylists).to.have.lengthOf(1)
 
       const files = videoDetails.streamingPlaylists[0].files
-      expect(files).to.have.lengthOf(4)
+      expect(files).to.have.lengthOf(5)
 
       if (objectStorage) await checkFilesInObjectStorage(files, 'playlist')
     }
@@ -220,9 +220,9 @@ function runTests (objectStorage: boolean) {
     for (const server of servers) {
       const videoDetails = await server.videos.get({ id: videosUUID[4] })
 
-      expect(videoDetails.files).to.have.lengthOf(4)
+      expect(videoDetails.files).to.have.lengthOf(5)
       expect(videoDetails.streamingPlaylists).to.have.lengthOf(1)
-      expect(videoDetails.streamingPlaylists[0].files).to.have.lengthOf(4)
+      expect(videoDetails.streamingPlaylists[0].files).to.have.lengthOf(5)
 
       if (objectStorage) {
         await checkFilesInObjectStorage(videoDetails.files, 'webtorrent')
