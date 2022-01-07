@@ -1,12 +1,12 @@
 import express from 'express'
 import { move, remove, ensureDir } from 'fs-extra'
-import { join, parse } from 'path'
+import { extname, join, parse } from 'path'
 import { HttpStatusCode } from '../../../../shared/models'
 import { createReqFiles } from '../../../helpers/express-utils'
 import { logger } from '../../../helpers/logger'
 import { CONFIG } from '../../../initializers/config'
 import { MIMETYPES, STATIC_PATHS, WEBSERVER } from '../../../initializers/constants'
-import { asyncRetryTransactionMiddleware, authenticate } from '../../../middlewares'
+import { asyncMiddleware, asyncRetryTransactionMiddleware, authenticate } from '../../../middlewares'
 import * as Jimp from 'jimp'
 import { ImageModel } from '@server/models/image/image'
 
@@ -57,6 +57,12 @@ export async function addImageLegacy (req: express.Request, res: express.Respons
   }
 
   const imageFile = req.files['imagefile'][0]
+  
+  // Check file is an image
+  if (!imageFile.mimetype || !MIMETYPES.IMAGE.MIMETYPE_EXT[imageFile.mimetype]) {
+    logger.error('Wrong file type (must be an image).');
+    return res.sendStatus(HttpStatusCode.UNSUPPORTED_MEDIA_TYPE_415);
+  }
 
   return addImage({ req, res, imageFile })
 }
@@ -109,8 +115,8 @@ async function addImage (options: {
     var originalSize = { w: destImage.getWidth(), h: destImage.getHeight() };
 
     // Create the thumbnail image
-    var thumbnailSize = calculateImageSizeReduction(originalSize, thumbnailSize);
-    destImage.scaleToFit(thumbnailSize.w, thumbnailSize.h).quality(90).write(join(imageFile.destination, image.thumbnailname));
+    var newThumbnailSize = calculateImageSizeReduction(originalSize, thumbnailSize);
+    destImage.scaleToFit(newThumbnailSize.w, newThumbnailSize.h).quality(90).write(join(imageFile.destination, image.thumbnailname));
 
     // Determine images static path
     var imageStaticUrl = ImageModel.getImageStaticUrl(imageFile.imageId, imageFile.filename, req.headers.host);
@@ -125,8 +131,8 @@ async function addImage (options: {
     }
     // Else, we keep the original image, but we lower its size
     else {
-      var regularSize = calculateImageSizeReduction(originalSize, regularSize);
-      destImage.scaleToFit(regularSize.w, regularSize.h).write(join(imageFile.destination, imageFile.filename));
+      var newRegularSize = calculateImageSizeReduction(originalSize, regularSize);
+      destImage.scaleToFit(newRegularSize.w, newRegularSize.h).write(join(imageFile.destination, imageFile.filename));
     }
 
     // We can now generate the torrent file
