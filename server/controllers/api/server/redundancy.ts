@@ -156,6 +156,6 @@ async function getRedundancyStats (req: express.Request, res: express.Response) 
   return res.json({
     totalVideosMirrored: redundancyStats.totalVideos,
     totalVideosLocal: totalVideos,
-    followers: resultList.data.map((follower: any) => follower?.follower?.host)
+    followers: resultList.data.map(follower => follower?.ActorFollower?.Server?.host)
   })
 }
