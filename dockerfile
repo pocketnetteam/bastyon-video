@@ -35,6 +35,9 @@ RUN chown -R peertube:peertube /data /config
 ENV NODE_ENV production
 ENV NODE_CONFIG_DIR /config
 
+# Running PSQL in the same container
+# RUN sudo -u postgres createuser -P peertube
+
 VOLUME /data
 VOLUME /config
 
