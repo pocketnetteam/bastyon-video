@@ -81,16 +81,15 @@ export class ImageModel extends Model {
 
   static getImageStaticUrl(imageId, imageName, webServUrl = WEBSERVER.URL) {
     const ipRegex = new RegExp(/\d+\.\d+\.\d+\.\d+/);
-    if (webServUrl.indexOf('localhost') == -1) {
-      // If webserver url is an IP, use HTTP without SSL
-      if (ipRegex.test(webServUrl) == true && !webServUrl.startsWith('http'))
-        webServUrl = 'http://' + webServUrl;
-      // Else if webserver url already has HTTP, force https
-      else if (webServUrl.startsWith('http:'))
-        webServUrl = webServUrl.replace('http:', 'https:');
-    }
-    return webServUrl + join(STATIC_PATHS.IMAGES, imageId, imageName);
+    if (!webServUrl.startsWith('http'))
+      webServUrl = 'http://' + webServUrl;
+    // Localhost or IP address
+    if (webServUrl.indexOf('localhost') != -1 || ipRegex.test(webServUrl) == true)
+      return webServUrl.replace('https:', 'http:') + join(STATIC_PATHS.IMAGES, imageId, imageName);
+    // Domain name
+    return webServUrl.replace('http:', 'https:') + join(STATIC_PATHS.IMAGES, imageId, imageName);
   }
+
   static getTorrentStaticUrl(imageId, webServUrl = WEBSERVER.URL) {
     return webServUrl.replace('http:', 'https:') + join(STATIC_PATHS.TORRENTS, imageId + '.torrent');
   }
