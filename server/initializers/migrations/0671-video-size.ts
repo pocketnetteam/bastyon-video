@@ -8,9 +8,9 @@ function up (utils: {
   const q = utils.queryInterface
 
   const data = {
-    type: Sequelize.DOUBLE,
+    type: Sequelize.DECIMAL,
     allowNull: false,
-    defaultValue: 1
+    defaultValue: 1.0
   }
 
   return q.addColumn('video', 'aspectRatio', data)

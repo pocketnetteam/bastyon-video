@@ -80,11 +80,11 @@ export class ImageModel extends Model {
   infoHash: string
 
   static getImageStaticUrl(imageId, imageName, webServUrl = WEBSERVER.URL) {
-    const ipRegex = new RegExp('\d+\.\d+\.\d+\.\d+');
+    const ipRegex = new RegExp(/\d+\.\d+\.\d+\.\d+/);
     if (webServUrl.indexOf('localhost') == -1) {
       // If webserver url is an IP, use HTTP without SSL
       if (ipRegex.test(webServUrl) == true && !webServUrl.startsWith('http'))
-        webServUrl = 'http:' + webServUrl;
+        webServUrl = 'http://' + webServUrl;
       // Else if webserver url already has HTTP, force https
       else if (webServUrl.startsWith('http:'))
         webServUrl = webServUrl.replace('http:', 'https:');

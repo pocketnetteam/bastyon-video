@@ -565,12 +565,12 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
 
   @AllowNull(true)
   @Default(null)
-  @Column(DataType.DOUBLE)
+  @Column
   originallyPublishedAt: Date
 
   @AllowNull(false)
-  @Default(0)
-  @Column
+  @Default(1.0)
+  @Column(DataType.DECIMAL)
   aspectRatio: number
 
   @ForeignKey(() => VideoChannelModel)
