@@ -31,8 +31,8 @@ server {
   # Certificates
   # you need a certificate to run in production. see https://letsencrypt.org/
   ##
-  ssl_certificate     /etc/letsencrypt/live/${WEBSERVER_HOST}/fullchain.pem;
-  ssl_certificate_key /etc/letsencrypt/live/${WEBSERVER_HOST}/privkey.pem;
+  ssl_certificate     /etc/letsencrypt/live/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/privkey.pem;
 
   location ^~ '/.well-known/acme-challenge' {
     default_type "text/plain";
