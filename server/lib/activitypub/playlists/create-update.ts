@@ -30,7 +30,6 @@ async function createAccountPlaylists (playlistUrls: string[]) {
       if (exists === true) return
 
       const { playlistObject } = await fetchRemoteVideoPlaylist(playlistUrl)
-
       if (playlistObject === undefined) {
         throw new Error(`Cannot refresh remote playlist ${playlistUrl}: invalid body.`)
       }
