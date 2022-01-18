@@ -23,4 +23,15 @@ if [ "$1" = 'npm' -a "$(id -u)" = '0' ]; then
     exec gosu peertube "$0" "$@"
 fi
 
+#First start options
+CONTAINER_ALREADY_STARTED="CONTAINER_ALREADY_STARTED_PLACEHOLDER"
+if [ ! -e $CONTAINER_ALREADY_STARTED ]; then
+    touch $CONTAINER_ALREADY_STARTED
+    echo "-- First container startup --"
+    # Change Admin Password
+    echo 'testPassword123' | NODE_CONFIG_DIR=/app/config NODE_ENV=production npm run reset-password -- -u root
+else
+    echo "-- Not first container startup --"
+fi
+
 exec "$@"
