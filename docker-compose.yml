@@ -80,6 +80,7 @@ services:
     volumes:
       - ./docker-volume/redis:/data
     restart: "always"
+    command: ["redis-server", "--bind", "redis", "--port", "6379"]
 
   postfix:
     image: mwader/postfix-relay

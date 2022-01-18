@@ -34,10 +34,10 @@ trust_proxy:
 
 # Your database name will be database.name OR "peertube"+database.suffix
 database:
-  hostname: 'localhost'
+  hostname: 'postgres'
   port: 5432
   ssl: false
-  suffix: '_prod'
+  suffix: '_dev'
   username: 'peertube'
   password: 'peertube'
   pool:
@@ -47,7 +47,7 @@ database:
 # You can also specify a 'socket' path to a unix socket but first need to
 # comment out hostname and port
 redis:
-  hostname: 'localhost'
+  hostname: 'redis'
   port: 6379
   auth: null
   db: 0
