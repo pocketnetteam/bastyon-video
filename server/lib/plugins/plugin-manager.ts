@@ -435,7 +435,7 @@ export class PluginManager implements ServerHook {
 
     logger.info('Add plugin %s CSS to global file.', npmName)
 
-    await this.addCSSToGlobalFile(pluginPath, packageJSON.css)
+    // await this.addCSSToGlobalFile(pluginPath, packageJSON.css)
 
     return { library, registerStore }
   }
