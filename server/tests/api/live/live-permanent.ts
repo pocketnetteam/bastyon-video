@@ -160,7 +160,7 @@ describe('Permanent live', function () {
 
     const count = await servers[0].live.countPlaylists({ videoUUID })
     // master playlist and 720p playlist
-    expect(count).to.equal(2)
+    expect(count).to.equal(5)
 
     await stopFfmpeg(ffmpegCommand)
   })

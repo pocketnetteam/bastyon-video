@@ -247,7 +247,7 @@ describe('Test plugin filter hooks', function () {
     expect(total).to.equal(2)
   })
 
-  it('Should run filter:api.video-thread-comments.list.params')
+  // it('Should run filter:api.video-thread-comments.list.params')
 
   it('Should run filter:api.video-thread-comments.list.result', async function () {
     const thread = await servers[0].comments.getThread({ videoId: videoUUID, threadId })
