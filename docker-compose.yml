@@ -17,8 +17,8 @@ services:
     volumes:
       - type: bind
         # Switch sources if you downloaded the whole repository
-        source: ./support/nginx/peertube
-        # source: ./docker-volume/nginx/peertube
+        # source: ./support/nginx/peertube
+        source: ./docker-volume/nginx/peertube
         target: /etc/nginx/conf.d/peertube.template
       - assets:/var/www/peertube/peertube-latest/client/dist:ro
       - ./docker-volume/data:/var/www/peertube/storage
