@@ -38,6 +38,8 @@ ENV NODE_CONFIG_DIR /config
 VOLUME /data
 VOLUME /config
 
+COPY ./support/docker/production/peertubeStart.sh /usr/local/bin/peertubeStart.sh
+
 COPY ./support/docker/production/entrypoint.sh /usr/local/bin/entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
@@ -45,4 +47,4 @@ ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 EXPOSE 9000 1935
 
 # Run the application
-CMD ["npm", "start"]
+CMD ["/bin/sh", "/usr/local/bin/peertubeStart.sh"]
