@@ -23,7 +23,10 @@ import { getLocalVideoCacheFileActivityPubUrl, getLocalVideoCacheStreamingPlayli
 import { getOrCreateAPVideo } from '../activitypub/videos'
 import { downloadPlaylistSegments } from '../hls'
 import { removeVideoRedundancy } from '../redundancy'
-import { generateHLSRedundancyUrl, generateWebTorrentRedundancyUrl } from '../video-urls'
+import {
+  generateHLSRedundancyUrl,
+  generateWebTorrentRedundancyUrl
+} from '../video-urls'
 import { AbstractScheduler } from './abstract-scheduler'
 
 const lTags = loggerTagsFactory('redundancy')
@@ -270,12 +273,13 @@ export class VideosRedundancyScheduler extends AbstractScheduler {
 
     logger.info('Duplicating %s streaming playlist in videos redundancy with "%s" strategy.', video.url, strategy, lTags(video.uuid))
 
+    const segmentsUrl = playlist.getSha256SegmentsUrl(video)
     const destDirectory = join(HLS_REDUNDANCY_DIRECTORY, video.uuid)
     const masterPlaylistUrl = playlist.getMasterPlaylistUrl(video)
 
     const maxSizeKB = this.getTotalFileSizes([], [ playlist ]) / 1000
     const toleranceKB = maxSizeKB + ((5 * maxSizeKB) / 100) // 5% more tolerance
-    await downloadPlaylistSegments(masterPlaylistUrl, destDirectory, VIDEO_IMPORT_TIMEOUT, toleranceKB)
+    await downloadPlaylistSegments(masterPlaylistUrl, destDirectory, VIDEO_IMPORT_TIMEOUT, toleranceKB, segmentsUrl)
 
     const createdModel: MVideoRedundancyStreamingPlaylistVideo = await VideoRedundancyModel.create({
       expiresOn,
