@@ -141,6 +141,8 @@ function videoModelToFormattedDetailsJSON (video: MVideoFormattableDetails): Vid
 
   const streamingPlaylists = streamingPlaylistsModelToFormattedJSON(video, video.VideoStreamingPlaylists)
 
+  const videoIsMirrored = !!isArray(video.VideoStreamingPlaylists?.[0]?.RedundancyVideos)
+
   const detailsJson = {
     support: video.support,
     descriptionPath: video.getDescriptionAPIPath(),
@@ -155,7 +157,7 @@ function videoModelToFormattedDetailsJSON (video: MVideoFormattableDetails): Vid
       label: getStateLabel(video.state)
     },
 
-    trackerUrls: video.getTrackerUrls(),
+    trackerUrls: video.getTrackerUrls(videoIsMirrored),
 
     files: [],
     streamingPlaylists,
