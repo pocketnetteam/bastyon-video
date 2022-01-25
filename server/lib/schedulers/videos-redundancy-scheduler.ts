@@ -23,7 +23,10 @@ import { getLocalVideoCacheFileActivityPubUrl, getLocalVideoCacheStreamingPlayli
 import { getOrCreateAPVideo } from '../activitypub/videos'
 import { downloadPlaylistSegments } from '../hls'
 import { removeVideoRedundancy } from '../redundancy'
-import { generateHLSRedundancyUrl, generateWebTorrentRedundancyUrl } from '../video-urls'
+import {
+  generateHLSRedundancyUrl,
+  generateWebTorrentRedundancyUrl
+} from '../video-urls'
 import { AbstractScheduler } from './abstract-scheduler'
 
 const lTags = loggerTagsFactory('redundancy')

@@ -181,13 +181,15 @@ function streamingPlaylistsModelToFormattedJSON (
         ? playlist.RedundancyVideos.map(r => ({ baseUrl: r.fileUrl }))
         : []
 
+      const isDuplicated = !!isArray(playlist.RedundancyVideos)
+
       const files = videoFilesModelToFormattedJSON(video, playlist.VideoFiles)
 
       return {
         id: playlist.id,
         type: playlist.type,
-        playlistUrl: playlist.getMasterPlaylistUrl(video),
-        segmentsSha256Url: playlist.getSha256SegmentsUrl(video),
+        playlistUrl: playlist.getMasterPlaylistUrl(video, isDuplicated),
+        segmentsSha256Url: playlist.getSha256SegmentsUrl(video, isDuplicated),
         redundancies,
         files
       }
