@@ -47,4 +47,4 @@ ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 EXPOSE 9000 1935
 
 # Run the application
-CMD ["/bin/sh", "/usr/local/bin/peertubeStart.sh"]
+CMD ["/bin/bash", "/usr/local/bin/peertubeStart.sh"]
