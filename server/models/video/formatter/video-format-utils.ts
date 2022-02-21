@@ -141,7 +141,13 @@ function videoModelToFormattedDetailsJSON (video: MVideoFormattableDetails): Vid
 
   const streamingPlaylists = streamingPlaylistsModelToFormattedJSON(video, video.VideoStreamingPlaylists)
 
-  const videoIsMirrored = !!isArray(video.VideoStreamingPlaylists?.[0]?.RedundancyVideos)
+  const redundancies = isArray(
+    video.VideoStreamingPlaylists?.[0]?.RedundancyVideos
+  )
+    ? video.VideoStreamingPlaylists?.[0]?.RedundancyVideos
+    : []
+
+  const videoIsMirrored = !!redundancies.length
 
   const detailsJson = {
     support: video.support,
@@ -183,7 +189,7 @@ function streamingPlaylistsModelToFormattedJSON (
         ? playlist.RedundancyVideos.map(r => ({ baseUrl: r.fileUrl }))
         : []
 
-      const isDuplicated = !!isArray(playlist.RedundancyVideos)
+      const isDuplicated = !!redundancies.length
 
       const files = videoFilesModelToFormattedJSON(video, playlist.VideoFiles)
 
