@@ -3,17 +3,17 @@
 # STANDARD HTTP MODULES: Core, Proxy, Rewrite, Access, Gzip, Headers, HTTP/2, Log, Real IP, SSL, Thread Pool, Upstream, AIO Multithreading.
 # THIRD PARTY MODULES:   None.
 
-server {
-  listen 80;
-  listen [::]:80;
-  server_name ${WEBSERVER_HOST};
-
-  location /.well-known/acme-challenge/ {
-    default_type "text/plain";
-    root /var/www/certbot;
-  }
-  location / { return 301 https://$host$request_uri; }
-}
+# server {
+#   listen 80;
+#   listen [::]:80;
+#   server_name ${WEBSERVER_HOST};
+#
+#   location /.well-known/acme-challenge/ {
+#     default_type "text/plain";
+#     root /var/www/certbot;
+#   }
+#   location / { return 301 https://$host$request_uri; }
+# }
 
 upstream backend {
   server ${PEERTUBE_HOST};
