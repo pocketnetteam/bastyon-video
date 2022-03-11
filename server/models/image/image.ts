@@ -79,23 +79,27 @@ export class ImageModel extends Model {
   @Column
   infoHash: string
 
-  static getImageStaticUrl(imageId, imageName, webServUrl = WEBSERVER.URL) {
+  static getImageStaticUrl(imageId, imageName, isThumbnail, webServUrl = WEBSERVER.URL) {
     const ipRegex = new RegExp(/\d+\.\d+\.\d+\.\d+/);
     if (!webServUrl.startsWith('http'))
       webServUrl = 'http://' + webServUrl;
     // Localhost or IP address
     if (webServUrl.indexOf('localhost') != -1 || ipRegex.test(webServUrl) == true)
-      return webServUrl.replace('https:', 'http:') + join(STATIC_PATHS.IMAGES, imageId, imageName);
-    // Domain name
-    return webServUrl.replace('http:', 'https:') + join(STATIC_PATHS.IMAGES, imageId, imageName);
+      webServUrl = webServUrl.replace('https:', 'http:');
+    else
+      webServUrl = webServUrl.replace('http:', 'https:');
+    var folder = (isThumbnail == true) ? 'thumbnail' : 'original';
+    return webServUrl + join(STATIC_PATHS.IMAGES, imageId, folder, imageName);
   }
 
   static getTorrentStaticUrl(imageId, webServUrl = WEBSERVER.URL) {
     return webServUrl.replace('http:', 'https:') + join(STATIC_PATHS.TORRENTS, imageId + '.torrent');
   }
 
-  static getImageStaticPath(imageId, imageName) {
-    return join(CONFIG.STORAGE.IMAGES_DIR, imageId, imageName);
+  static getImageStaticPath(imageId, imageName, isThumbnail) {
+    if (isThumbnail == true)
+      return join(CONFIG.STORAGE.IMAGES_DIR, imageId, 'thumbnail', imageName);
+    return join(CONFIG.STORAGE.IMAGES_DIR, imageId, 'original', imageName);
   }
   static getTorrentStaticPath(imageId) {
     return join(CONFIG.STORAGE.TORRENTS_DIR, imageId + '.torrent')
