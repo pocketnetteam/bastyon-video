@@ -205,7 +205,7 @@ async function addVideoChannel (req: express.Request, res: express.Response) {
   await JobQueue.Instance.createJobWithPromise({ type: 'actor-keys', payload })
 
   auditLogger.create(getAuditIdFromRes(res), new VideoChannelAuditView(videoChannelCreated.toFormattedJSON()))
-  logger.info('Video channel %s created.', videoChannelCreated.Actor.url)
+  // logger.info('Video channel %s created.', videoChannelCreated.Actor.url)
 
   return res.json({
     videoChannel: {
@@ -245,7 +245,7 @@ async function updateVideoChannel (req: express.Request, res: express.Response) 
         oldVideoChannelAuditKeys
       )
 
-      logger.info('Video channel %s updated.', videoChannelInstance.Actor.url)
+      // logger.info('Video channel %s updated.', videoChannelInstance.Actor.url)
     })
   } catch (err) {
     logger.debug('Cannot update the video channel.', { err })
@@ -275,7 +275,7 @@ async function removeVideoChannel (req: express.Request, res: express.Response) 
     await videoChannelInstance.destroy({ transaction: t })
 
     auditLogger.delete(getAuditIdFromRes(res), new VideoChannelAuditView(videoChannelInstance.toFormattedJSON()))
-    logger.info('Video channel %s deleted.', videoChannelInstance.Actor.url)
+    // logger.info('Video channel %s deleted.', videoChannelInstance.Actor.url)
   })
 
   return res.type('json').status(HttpStatusCode.NO_CONTENT_204).end()

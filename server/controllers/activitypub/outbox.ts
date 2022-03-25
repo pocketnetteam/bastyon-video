@@ -38,7 +38,7 @@ async function outboxController (req: express.Request, res: express.Response) {
   const actor = accountOrVideoChannel.Actor
   const actorOutboxUrl = actor.url + '/outbox'
 
-  logger.info('Receiving outbox request for %s.', actorOutboxUrl)
+  // logger.info('Receiving outbox request for %s.', actorOutboxUrl)
 
   const handler = (start: number, count: number) => buildActivities(actor, start, count)
   const json = await activityPubCollectionPagination(actorOutboxUrl, handler, req.query.page, req.query.size)
