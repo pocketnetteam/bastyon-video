@@ -99,26 +99,24 @@ function createWebsocketTrackerServer (app: express.Application) {
 
   server.on('upgrade', (request: express.Request, socket, head) => {
     if (request.url === '/tracker/socket') {
-      const ip = proxyAddr(request, CONFIG.TRUST_PROXY)
+      // const ip = proxyAddr(request, CONFIG.TRUST_PROXY)
 
-      logger.info('Checking User IP: %s', ip)
+      // Redis.Instance.doesTrackerBlockIPExist(ip)
+      //   .then(result => {
+      //     if (result === true) {
+      //       logger.debug('Blocking IP %s from tracker.', ip)
 
-      Redis.Instance.doesTrackerBlockIPExist(ip)
-        .then(result => {
-          if (result === true) {
-            logger.debug('Blocking IP %s from tracker.', ip)
+      //       socket.write('HTTP/1.1 403 Forbidden\r\n\r\n')
+      //       socket.destroy()
+      //       return
+      //     }
 
-            socket.write('HTTP/1.1 403 Forbidden\r\n\r\n')
-            socket.destroy()
-            return
-          }
+      //     // FIXME: typings
+      //     return wss.handleUpgrade(request, socket as any, head, ws => wss.emit('connection', ws, request))
+      //   })
+      //   .catch(err => logger.error('Cannot check if tracker block ip exists.', { err }))
 
-          // FIXME: typings
-          return wss.handleUpgrade(request, socket as any, head, ws => wss.emit('connection', ws, request))
-        })
-        .catch(err => logger.error('Cannot check if tracker block ip exists.', { err }))
-
-      // return wss.handleUpgrade(request, socket as any, head, ws => wss.emit('connection', ws, request))
+      return wss.handleUpgrade(request, socket as any, head, ws => wss.emit('connection', ws, request))
     }
 
     // Don't destroy socket, we have Socket.IO too
