@@ -176,10 +176,10 @@ class StatsManager {
       speedByResolution
     }
 
-    logger.info(
-      "Speed %s ",
-      speedByResolution
-    )
+    // logger.info(
+    //   "Speed %s ",
+    //   speedByResolution
+    // )
 
     return data
   }

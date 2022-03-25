@@ -78,9 +78,9 @@ if (CONFIG.TRACKER.ENABLED !== false) {
     logger.error('Error in tracker.', { err })
   })
 
-  trackerServer.on('warning', function (err) {
-    logger.warn('Warning in tracker.', { err })
-  })
+  // trackerServer.on('warning', function (err) {
+  //   logger.warn('Warning in tracker.', { err })
+  // })
 }
 
 const onHttpRequest = trackerServer.onHttpRequest.bind(trackerServer)
