@@ -21,8 +21,8 @@ server {
     ssl_certificate /etc/letsencrypt/live/${WEBSERVER_HOST}/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/${WEBSERVER_HOST}/privkey.pem;
 
-    limit_req zone=ddos_req burst=50 nodelay;
-    limit_conn ddos_ip 15;
+#    limit_req zone=ddos_req burst=50 nodelay;
+#    limit_conn ddos_ip 15;
 
     location @api_websocket {
         proxy_http_version 1.1;
