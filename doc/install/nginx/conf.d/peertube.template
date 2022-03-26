@@ -4,46 +4,13 @@ upstream backend {
 
 server {
     listen 80;
-    server_name ${WEBSERVER_IP};
+    server_name ${WEBSERVER_IP} ${WEBSERVER_HOST};
 
-#    limit_req zone=ddos_req burst=50 nodelay;
-#    limit_conn ddos_ip 15;
-
-    location / {
-        proxy_http_version 1.1;
-        proxy_pass http://127.0.0.1:8080;
-
-        #proxy_cache CHUNK_CACHE;
-        #proxy_cache_key $scheme$request_method$proxy_host$request_uri;
-        #proxy_cache_valid 10m;
-        #add_header X-Cache-Status $upstream_cache_status;
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
     }
 
-    ##
-    # Websocket
-    ##
-    location @api_websocket {
-        proxy_http_version 1.1;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-
-        proxy_pass http://backend;
-    }
-
-    location /socket.io {
-        try_files /dev/null @api_websocket;
-    }
-
-    location /tracker/socket {
-        # Peers send a message to the tracker every 15 minutes
-        # Don't close the websocket before then
-        proxy_read_timeout 15m; # default is 60s
-
-        try_files /dev/null @api_websocket;
-    }
+    return 301 https://${WEBSERVER_HOST}$request_uri;
 }
 
 server {
@@ -54,22 +21,9 @@ server {
     ssl_certificate /etc/letsencrypt/live/${WEBSERVER_HOST}/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/${WEBSERVER_HOST}/privkey.pem;
 
-#    limit_req zone=ddos_req burst=50 nodelay;
-#    limit_conn ddos_ip 15;
+    limit_req zone=ddos_req burst=50 nodelay;
+    limit_conn ddos_ip 15;
 
-    location / {
-        proxy_http_version 1.1;
-        proxy_pass http://127.0.0.1:8080;
-
-        #proxy_cache CHUNK_CACHE;
-        #proxy_cache_key $scheme$request_method$proxy_host$request_uri;
-        #proxy_cache_valid 10m;
-        #add_header X-Cache-Status $upstream_cache_status;
-    }
-
-    ##
-    # Websocket
-    ##
     location @api_websocket {
         proxy_http_version 1.1;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -92,10 +46,6 @@ server {
 
         try_files /dev/null @api_websocket;
     }
-}
-
-server {
-    listen 8080;
 
     location /.well-known/acme-challenge {
         root /var/www/certbot;
