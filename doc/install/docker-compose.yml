@@ -6,7 +6,7 @@ services:
     image: pocketnetteam/peertube:latest
     restart: always
     networks:
-        peertube_net
+      - peertube_net
     env_file:
       - .env
     ports:
@@ -35,7 +35,7 @@ services:
      - 80:80
      - 443:443
     networks:
-        peertube_net
+      - peertube_net
     volumes:
       - ./data/nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./data/nginx/conf.d:/etc/nginx/conf.d
@@ -62,7 +62,7 @@ services:
     image: certbot/certbot
     restart: always
     networks:
-        peertube_net
+      - peertube_net
     volumes:
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
@@ -75,7 +75,7 @@ services:
     image: postgres:13-alpine
     restart: always
     networks:
-        peertube_net
+      - peertube_net
     env_file:
       - .env
     volumes:
@@ -90,7 +90,7 @@ services:
     image: redis:6-alpine
     restart: always
     networks:
-        peertube_net
+      - peertube_net
     volumes:
       - ./data/redis:/data
     command: ["redis-server", "--bind", "redis", "--port", "6379"]
@@ -104,7 +104,7 @@ services:
     image: mwader/postfix-relay
     restart: always
     networks:
-        peertube_net
+      - peertube_net
     env_file:
       - .env
     volumes:
