@@ -114,12 +114,40 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  netdata:
+    image: netdata/netdata
+    container_name: netdata
+    hostname: example.com # set to fqdn of host
+    ports:
+      - 19999:19999
+    restart: unless-stopped
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - netdataconfig:/etc/netdata
+      - netdatalib:/var/lib/netdata
+      - netdatacache:/var/cache/netdata
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc/os-release:/host/etc/os-release:ro
+    environment:
+      - NETDATA_CLAIM_TOKEN=NscVTet2vW42hdBo6xBgX9vD0N3JDtJnC8G0-4UXPwdQ9nZIKEN1djWCY4WyuG0o1CJ5C3EFecWQ6D_AWlsAA93D6ON7MeoJGPFnl8LH4gcx-F3jkmipfzgYamf9HSw_nNYo69Y
+      - NETDATA_CLAIM_URL=https://app.netdata.cloud
+      - NETDATA_CLAIM_ROOMS=34d3383c-61dd-4557-98db-d5525a4e3f88
+
+volumes:
+  assets:
+  netdataconfig:
+  netdatalib:
+  netdatacache:
+
 networks:
   peertube_net:
     ipam:
       driver: default
       config:
       - subnet: 172.18.0.0/16
-
-volumes:
-  assets:
