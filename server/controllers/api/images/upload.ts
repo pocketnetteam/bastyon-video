@@ -102,13 +102,10 @@ async function addImage (options: {
 
   // Move image inside folder
   const newDestination = join(CONFIG.STORAGE.IMAGES_DIR, imageFile.imageId);
-  const newPath = join(newDestination, imageFile.filename);
+  const newPath = join(newDestination, 'original', imageFile.filename);
   await move(imageFile.path, newPath);
   imageFile.path = newPath;
   imageFile.destination = newDestination;
-
-  // Create a thumbnail version of the image
-  image.thumbnailname = imageFile.imageId + '-thumbnail' + imageFile.extname;
 
   Jimp.read(imageFile.path).then(async (destImage) => {
 
@@ -116,23 +113,23 @@ async function addImage (options: {
 
     // Create the thumbnail image
     var newThumbnailSize = calculateImageSizeReduction(originalSize, thumbnailSize);
-    destImage.scaleToFit(newThumbnailSize.w, newThumbnailSize.h).quality(90).write(join(imageFile.destination, image.thumbnailname));
+    destImage.scaleToFit(newThumbnailSize.w, newThumbnailSize.h).quality(90).write(join(imageFile.destination, 'thumbnail', image.filename));
 
     // Determine images static path
-    var imageStaticUrl = ImageModel.getImageStaticUrl(imageFile.imageId, imageFile.filename, req.headers.host);
-    var thumbnailStaticUrl = ImageModel.getImageStaticUrl(imageFile.imageId, image.thumbnailname, req.headers.host);
+    var imageStaticUrl = ImageModel.getImageStaticUrl(imageFile.imageId, imageFile.filename, false, req.headers.host);
+    var thumbnailStaticUrl = ImageModel.getImageStaticUrl(imageFile.imageId, image.filename, true, req.headers.host);
 
     // If image is smaller than 600, delete original and use the thumbnail only
     if (isAvatar == false && originalSize.w < 600 && originalSize.h < 600) {
       await remove(imageFile.path);
-      image.filename = image.thumbnailname;
+      image.filename = image.filename;
       imageFile.path = join(imageFile.destination, image.filename);
       imageStaticUrl = thumbnailStaticUrl;
     }
     // Else, we keep the original image, but we lower its size
     else {
       var newRegularSize = calculateImageSizeReduction(originalSize, regularSize);
-      destImage.scaleToFit(newRegularSize.w, newRegularSize.h).write(join(imageFile.destination, imageFile.filename));
+      destImage.scaleToFit(newRegularSize.w, newRegularSize.h).write(join(imageFile.destination, 'original', imageFile.filename));
     }
 
     // We can now generate the torrent file
@@ -150,6 +147,7 @@ async function addImage (options: {
       image: {
         id: imageFile.imageId,
         url: imageStaticUrl,
+        filename: imageFile.filename,
         thumbnailUrl: thumbnailStaticUrl
       }
     });

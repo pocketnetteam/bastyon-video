@@ -1,0 +1,153 @@
+version: "3.3"
+services:
+
+  peertube:
+    container_name: peertube
+    image: pocketnetteam/peertube:latest
+    restart: always
+    networks:
+      - peertube_net
+    env_file:
+      - .env
+    ports:
+     - 1935:1935
+     #- 9000:9000
+    volumes:
+      - assets:/app/client/dist
+      - ./storage:/data
+      - ./data/peertube/config:/config
+    depends_on:
+      - postgres
+      - redis
+      - postfix
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  webserver:
+    container_name: webserver
+    image: pocketnetteam/peertube-webserver:0.1
+    restart: always
+    env_file:
+      - .env
+    ports:
+     - 80:80
+     - 443:443
+    networks:
+      - peertube_net
+    volumes:
+      - ./data/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./data/nginx/conf.d:/etc/nginx/conf.d
+      - ./data/nginx/log:/var/log/nginx
+      - ./storage:/var/www/peertube/storage
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+      - assets:/var/www/peertube/peertube-latest/client/dist:ro
+    tmpfs:
+      - /var/cache/nginx/chunk
+    depends_on:
+      - peertube
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  certbot:
+    container_name: certbot
+    image: certbot/certbot
+    restart: always
+    networks:
+      - peertube_net
+    volumes:
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+    entrypoint: /bin/sh -c "trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot; sleep 12h & wait $${!}; done;"
+    depends_on:
+      - webserver
+
+  postgres:
+    container_name: postgres
+    image: postgres:13-alpine
+    restart: always
+    networks:
+      - peertube_net
+    env_file:
+      - .env
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  redis:
+    container_name: redis
+    image: redis:6-alpine
+    restart: always
+    networks:
+      - peertube_net
+    volumes:
+      - ./data/redis:/data
+    command: ["redis-server", "--bind", "redis", "--port", "6379"]
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  postfix:
+    container_name: postfix
+    image: mwader/postfix-relay
+    restart: always
+    networks:
+      - peertube_net
+    env_file:
+      - .env
+    volumes:
+      - ./data/opendkim/keys:/etc/opendkim/keys
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  netdata:
+    image: netdata/netdata
+    container_name: netdata
+    hostname: example.com # set to fqdn of host
+    ports:
+      - 19999:19999
+    restart: unless-stopped
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - netdataconfig:/etc/netdata
+      - netdatalib:/var/lib/netdata
+      - netdatacache:/var/cache/netdata
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc/os-release:/host/etc/os-release:ro
+    environment:
+      - NETDATA_CLAIM_TOKEN=NscVTet2vW42hdBo6xBgX9vD0N3JDtJnC8G0-4UXPwdQ9nZIKEN1djWCY4WyuG0o1CJ5C3EFecWQ6D_AWlsAA93D6ON7MeoJGPFnl8LH4gcx-F3jkmipfzgYamf9HSw_nNYo69Y
+      - NETDATA_CLAIM_URL=https://app.netdata.cloud
+      - NETDATA_CLAIM_ROOMS=34d3383c-61dd-4557-98db-d5525a4e3f88
+
+volumes:
+  assets:
+  netdataconfig:
+  netdatalib:
+  netdatacache:
+
+networks:
+  peertube_net:
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.18.0.0/16

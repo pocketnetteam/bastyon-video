@@ -433,7 +433,7 @@ export class PluginManager implements ServerHook {
 
     await library.register(registerOptions)
 
-    logger.info('Add plugin %s CSS to global file.', npmName)
+    logger.info('Add plugin %s CSS to global file. asd', npmName)
 
     await this.addCSSToGlobalFile(pluginPath, packageJSON.css)
 
@@ -474,6 +474,7 @@ export class PluginManager implements ServerHook {
 
   private async addCSSToGlobalFile (pluginPath: string, cssRelativePaths: string[]) {
     for (const cssPath of cssRelativePaths) {
+      logger.info('Computing Path, %s, %s, %s', cssPath, join(pluginPath, cssPath), PLUGIN_GLOBAL_CSS_PATH)
       await this.concatFiles(join(pluginPath, cssPath), PLUGIN_GLOBAL_CSS_PATH)
     }
 
@@ -487,8 +488,16 @@ export class PluginManager implements ServerHook {
 
       inputStream.pipe(outputStream)
 
-      inputStream.on('end', () => res())
-      inputStream.on('error', err => rej(err))
+      logger.info('Created Stream')
+
+      inputStream.on('end', () => {
+        logger.info('Ended')
+        res()
+      })
+      inputStream.on('error', err => {
+        logger.info('Stalled')
+        rej(err)
+      })
     })
   }
 

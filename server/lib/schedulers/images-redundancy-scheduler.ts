@@ -76,18 +76,20 @@ export class ImagesRedundancyScheduler extends AbstractScheduler {
     let resDate: Date
     // For each file
     await Promise.all(imagesToDownload.map(async (imageToDownload) => {
-      // Create the images folder if needed
-      await ensureDir(join(CONFIG.STORAGE.IMAGES_DIR, imageToDownload.id))
+      // Create the images folders if needed
+      await ensureDir(join(CONFIG.STORAGE.IMAGES_DIR, imageToDownload.id, 'original'));
+      await ensureDir(join(CONFIG.STORAGE.IMAGES_DIR, imageToDownload.id, 'thumbnail'));
       // Download the main image
       await this.downloadFile(
-        ImageModel.getImageStaticUrl(imageToDownload.id, imageToDownload.filename, serverUrl),
-        ImageModel.getImageStaticPath(imageToDownload.id, imageToDownload.filename)
-      )
+        ImageModel.getImageStaticUrl(imageToDownload.id, imageToDownload.filename, false, serverUrl),
+        ImageModel.getImageStaticPath(imageToDownload.id, imageToDownload.filename, false),
+        true  // Might fail if image only has a thumbnail, so add this boolean
+      );
       // Download the thumbnail
       await this.downloadFile(
-        ImageModel.getImageStaticUrl(imageToDownload.id, imageToDownload.thumbnailname, serverUrl),
-        ImageModel.getImageStaticPath(imageToDownload.id, imageToDownload.thumbnailname)
-      )
+        ImageModel.getImageStaticUrl(imageToDownload.id, imageToDownload.filename, true, serverUrl),
+        ImageModel.getImageStaticPath(imageToDownload.id, imageToDownload.filename, true)
+      );
       // Generate the torrent file
       const torrentHash = await ImageModel.generateTorrentForImage(imageToDownload.id, join(CONFIG.STORAGE.IMAGES_DIR, imageToDownload.id))
       // Update the result date (highest date) if needed
@@ -103,10 +105,21 @@ export class ImagesRedundancyScheduler extends AbstractScheduler {
   }
 
   // Download a file, and save it
-  private async downloadFile (url, filePath) {
-    const response = await fetch(url)
-    if (!response.ok) { throw new Error(`downloadFile: Unexpected response ${response.statusText}`) }
-    await streamPipeline(response.body, createWriteStream(filePath))
+  private async downloadFile(url, filePath, allowError = false) {
+    var response;
+    try {
+      response = await fetch(url);
+    } catch(err) {
+      if (!allowError)
+        throw new Error(`downloadFile: Request failed`);
+      return;
+    }
+    if (!response.ok) {
+      if (!allowError)
+        throw new Error(`downloadFile: Unexpected response: ${response.statusText}`);
+      return;
+    }
+    await streamPipeline(response.body, createWriteStream(filePath));
   }
 
   static get Instance () {

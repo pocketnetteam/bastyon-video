@@ -1,5 +1,6 @@
 webserver:
   hostname: "PEERTUBE_WEBSERVER_HOSTNAME"
+  ip: "PEERTUBE_WEBSERVER_IP"
   port:
     __name: "PEERTUBE_WEBSERVER_PORT"
     __format: "json"
