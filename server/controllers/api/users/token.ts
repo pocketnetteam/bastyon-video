@@ -17,19 +17,13 @@ import {
   openapiOperationDoc
 } from "@server/middlewares"
 import { ScopedToken } from "@shared/models/users/user-scoped-token"
-import { pocketnet } from "@server/lib/auth/blockChainAuth/pocketnet"
 import {
-  Api,
-  ProxyRequest,
-  Proxy16,
-  Node
-} from "@server/lib/auth/blockChainAuth/api"
-import querystring from "querystring"
-import { hexEncode } from "@server/lib/auth/blockChainAuth/hex"
-import { signatureChecker } from "@server/lib/auth/blockChainAuth/authMethods"
-import { generateError } from "@server/lib/auth/blockChainAuth/errorGenerator"
-import { ReputationStorageController } from "@server/lib/auth/blockChainAuth/reputationCache"
-import { getUserQuota } from "@server/lib/auth/blockChainAuth/quotaCalculator"
+  Api
+} from "./../../../lib/auth/blockChainAuth"
+import { signatureChecker } from "./../../../lib/auth/blockChainAuth/authMethods.js"
+import { generateError } from "./../../../lib/auth/blockChainAuth/errorGenerator.js"
+import { ReputationStorageController } from "./../../../lib/auth/blockChainAuth/reputationCache.js"
+import { getUserQuota } from "./../../../lib/auth/blockChainAuth/quotaCalculator.js"
 import { generateRandomString } from "@server/helpers/utils"
 import { UserRole } from "@shared/models"
 import {
