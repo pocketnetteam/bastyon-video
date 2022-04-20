@@ -17,13 +17,6 @@ import {
   openapiOperationDoc
 } from "@server/middlewares"
 import { ScopedToken } from "@shared/models/users/user-scoped-token"
-import {
-  Api
-} from "./../../../lib/auth/blockChainAuth"
-import { signatureChecker } from "./../../../lib/auth/blockChainAuth/authMethods.js"
-import { generateError } from "./../../../lib/auth/blockChainAuth/errorGenerator.js"
-import { ReputationStorageController } from "./../../../lib/auth/blockChainAuth/reputationCache.js"
-import { getUserQuota } from "./../../../lib/auth/blockChainAuth/quotaCalculator.js"
 import { generateRandomString } from "@server/helpers/utils"
 import { UserRole } from "@shared/models"
 import {
@@ -35,6 +28,12 @@ import {
   POCKETNET_PROXY_META_TEST,
   PLUGIN_EXTERNAL_AUTH_TOKEN_LIFETIME
 } from "@server/initializers/constants"
+
+const { Api } = require('./../../../lib/auth/blockChainAuth/api.js')
+const signatureChecker = require('./../../../lib/auth/blockChainAuth/authMethods.js')
+const generateError = require('./../../../lib/auth/blockChainAuth/errorGenerator.js')
+const ReputationStorageController = require('./../../../lib/auth/blockChainAuth/reputationCache.js')
+const getUserQuota = require('./../../../lib/auth/blockChainAuth/quotaCalculator.js')
 
 const tokensRouter = express.Router()
 
