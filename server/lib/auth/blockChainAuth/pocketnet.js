@@ -1,9 +1,9 @@
-var bitcoin = require('./btc16.js');
+var bitcoin = require("./btc16.js");
 
 var kit = {
   verifyhash(keyPair, signature, hash) {
     try {
-      var v = keyPair.verify(hash, Buffer.from(signature, 'hex'));
+      var v = keyPair.verify(hash, Buffer.from(signature, "hex"));
 
       return v;
     } catch (e) {
@@ -12,7 +12,9 @@ var kit = {
   },
 
   addressByPublicKey: function (pubkey) {
-    return bitcoin.payments.p2pkh({ pubkey: pubkey }).address;
+    return bitcoin.payments.p2pkh({
+      pubkey: pubkey,
+    }).address;
   },
 };
 
@@ -28,15 +30,17 @@ var Pocketnet = {
   },
 
   addressByPublicKey: function (pubkey) {
-    return bitcoin.payments.p2pkh({ pubkey: pubkey }).address;
+    return bitcoin.payments.p2pkh({
+      pubkey: pubkey,
+    }).address;
   },
 
   parsesignature: function (nonce) {
-    var ch = nonce.split(',');
+    var ch = nonce.split(",");
     var obj = {};
 
     ch.forEach(function (p) {
-      var ch2 = p.split('=');
+      var ch2 = p.split("=");
 
       if (!ch2[1] || !ch2[0]) return;
 
@@ -53,21 +57,21 @@ var Pocketnet = {
       if (!signature.address) return false;
 
       try {
-        var pkbuffer = Buffer.from(signature.pubkey, 'hex');
+        var pkbuffer = Buffer.from(signature.pubkey, "hex");
 
         var keyPair = bitcoin.ECPair.fromPublicKey(pkbuffer);
 
-        var hash = Buffer.from(signature.nonce, 'utf8');
+        var hash = Buffer.from(signature.nonce, "utf8");
 
         var verify =
-          keyPair.verify(hash, Buffer.from(signature.signature, 'hex')) &&
+          keyPair.verify(hash, Buffer.from(signature.signature, "hex")) &&
           signature.address == Pocketnet.addressByPublicKey(pkbuffer);
 
         if (!addresses) addresses = signature.address;
 
         if (!Array.isArray(addresses)) addresses = [addresses];
 
-        console.log('Verification successfull');
+        console.log("Verification successfull");
 
         return verify && addresses.includes(signature.address);
       } catch (e) {
@@ -76,39 +80,79 @@ var Pocketnet = {
     },
 
     signature: function (signature = {}, addresses) {
-      if (!signature.pubkey) return false;
-      if (!signature.nonce) return false;
-      if (!signature.address) return false;
+      if (!signature.pubkey)
+        return {
+          valid: false,
+          error: "NO_PUBKEY",
+        };
+      if (!signature.nonce)
+        return {
+          valid: false,
+          error: "NO_NOONCE",
+        };
+      if (!signature.address)
+        return {
+          valid: false,
+          error: "NO_ADDRESS_CHECKING",
+        };
 
       try {
-        var pkbuffer = Buffer.from(signature.pubkey, 'hex');
+        var pkbuffer = Buffer.from(signature.pubkey, "hex");
 
         var keyPair = bitcoin.ECPair.fromPublicKey(pkbuffer);
-        var hash = Buffer.from(signature.nonce, 'utf8');
+        var hash = Buffer.from(signature.nonce, "utf8");
         var hashtrue = bitcoin.crypto.sha256(
-          Buffer.from(signature.nonce, 'utf8'),
+          Buffer.from(signature.nonce, "utf8")
         );
         var verify = false;
 
-        if (!signature.v) {
-          var verify =
-            kit.verifyhash(keyPair, signature.signature, hash) &&
-            signature.address === kit.addressByPublicKey(pkbuffer);
-        } else {
-          var verify =
-            kit.verifyhash(keyPair, signature.signature, hashtrue) &&
-            signature.address === kit.addressByPublicKey(pkbuffer);
+        var passedHash = signature.v ? hashtrue : hash;
+
+        if (!kit.verifyhash(keyPair, signature.signature, passedHash)) {
+          return {
+            valid: false,
+            error: "HASH_VERIFICATION_ERROR",
+          };
         }
+
+        if (!(signature.address === kit.addressByPublicKey(pkbuffer))) {
+          return {
+            valid: false,
+            error: "ADDRESS_VERIFICATION_ERROR",
+          };
+        }
+
+        // Old verification
+        // if (!signature.v) {
+        //   var verify =
+        //     kit.verifyhash(keyPair, signature.signature, hash) &&
+        //     signature.address === kit.addressByPublicKey(pkbuffer);
+        // } else {
+        //   var verify =
+        //     kit.verifyhash(keyPair, signature.signature, hashtrue) &&
+        //     signature.address === kit.addressByPublicKey(pkbuffer);
+        // }
 
         if (!addresses) addresses = signature.address;
 
         if (!Array.isArray(addresses)) addresses = [addresses];
 
-        return verify && addresses.includes(signature.address) > -1;
-      } catch (e) {
-        console.error(e);
+        if (!addresses.includes(signature.address)) {
+          return {
+            valid: false,
+            error: "ADDRESS_NOT_INCLUDED_IN_SIGNATURE",
+          };
+        }
 
-        return false;
+        return {
+          valid: true,
+        };
+      } catch (e) {
+        return {
+          valid: false,
+          error: "CHECKING_EXECUTION_ERROR",
+          body: JSON.stringify(e || {}),
+        };
       }
     },
   },

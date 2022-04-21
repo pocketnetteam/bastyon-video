@@ -22,18 +22,17 @@ import { UserRole } from "@shared/models"
 import {
   MINUTES_STORED,
   MINIMUM_QUOTA,
-  DEFAULT_AUTH_ERROR_TEXT,
-  NOT_ENOUGH_COINS_TEXT,
   POCKETNET_PROXY_META,
-  POCKETNET_PROXY_META_TEST,
-  PLUGIN_EXTERNAL_AUTH_TOKEN_LIFETIME
+  PLUGIN_EXTERNAL_AUTH_TOKEN_LIFETIME,
+  AUTH_ERROR_STATUS,
+  AUTH_ERRORS
 } from "@server/initializers/constants"
 
-const { Api } = require('./../../../lib/auth/blockChainAuth/api.js')
-const signatureChecker = require('./../../../lib/auth/blockChainAuth/authMethods.js')
-const generateError = require('./../../../lib/auth/blockChainAuth/errorGenerator.js')
-const ReputationStorageController = require('./../../../lib/auth/blockChainAuth/reputationCache.js')
-const getUserQuota = require('./../../../lib/auth/blockChainAuth/quotaCalculator.js')
+const { Api } = require("./../../../lib/auth/blockChainAuth/api.js")
+const signatureChecker = require("./../../../lib/auth/blockChainAuth/authMethods.js")
+const generateError = require("./../../../lib/auth/blockChainAuth/errorGenerator.js")
+const ReputationStorageController = require("./../../../lib/auth/blockChainAuth/reputationCache.js")
+const getUserQuota = require("./../../../lib/auth/blockChainAuth/quotaCalculator.js")
 
 const tokensRouter = express.Router()
 
@@ -158,8 +157,8 @@ async function handleTokenBlockChain (
 
   if (!address) {
     return res
-      .status(400)
-      .send(generateError("Ivalid Credentials: no address field"))
+      .status(AUTH_ERROR_STATUS)
+      .send(generateError(AUTH_ERRORS.NO_ADDRESS))
   }
 
   const authDataValid = signatureChecker.v1({
@@ -170,10 +169,15 @@ async function handleTokenBlockChain (
     v
   })
 
-  if (!authDataValid.result) {
+  if (!authDataValid.valid) {
     return res
-      .status(400)
-      .send(generateError(authDataValid.error || NOT_ENOUGH_COINS_TEXT))
+      .status(AUTH_ERROR_STATUS)
+      .send(
+        generateError(
+          AUTH_ERRORS[authDataValid.error],
+          authDataValid.body || ""
+        )
+      )
   }
 
   if (reputationController.check(address)) {
@@ -183,7 +187,7 @@ async function handleTokenBlockChain (
   // Check user reputation
   return api
     .rpc("getuserstate", [ address ])
-    .then((data: { trial?: Boolean }) => {
+    .then((data: any) => {
       console.log("Node data", data)
 
       const userQuota = getUserQuota(data)
@@ -193,20 +197,20 @@ async function handleTokenBlockChain (
 
         return createUserFromBlockChain(res, address, userQuota)
       } else {
-        return res
-          .status(400)
-          .send(generateError(authDataValid.error || DEFAULT_AUTH_ERROR_TEXT))
+        return res.status(AUTH_ERROR_STATUS).send(
+          generateError(
+            AUTH_ERRORS.QUOTA_ERROR,
+            {
+              coins: data.balance,
+              reputation: data.reputation
+            }
+          )
+        )
       }
     })
     .catch(() => {
       // temporary solution befory dynamic reputation
-      const userQuota = getUserQuota({})
-
-      if (userQuota) {
-        return createUserFromBlockChain(res, address, userQuota)
-      } else {
-        return createUserFromBlockChain(res, address, MINIMUM_QUOTA)
-      }
+      return createUserFromBlockChain(res, address, MINIMUM_QUOTA)
     })
 }
 

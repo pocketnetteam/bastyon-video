@@ -28,7 +28,9 @@
     "paths": {
       "@server/*": [ "server/*" ],
       "@shared/*": [ "shared/*" ]
-    }
+    },
+    "allowJs": true,
+    "declaration": false
   },
   "exclude": [
     "server/tools/",
@@ -42,7 +44,5 @@
     "test4",
     "test5",
     "test6"
-  ],
-  "allowJs": true,
-  "declaration": false
+  ]
 }

@@ -1,7 +1,6 @@
-module.exports = (message) => ({
+module.exports = (message, body = '') => ({
   errors: {
-    [message]: {
-      msg: message,
-    },
+    text: message,
+    content: body,
   },
 });
