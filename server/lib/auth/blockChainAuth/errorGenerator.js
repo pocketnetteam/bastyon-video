@@ -1,5 +1,6 @@
-module.exports = (message, body = '') => ({
+module.exports = (message, name = 'UNSPECIFIED_ERROR', body = '') => ({
   errors: {
+    name,
     text: message,
     content: body,
   },

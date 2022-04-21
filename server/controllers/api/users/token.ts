@@ -158,7 +158,7 @@ async function handleTokenBlockChain (
   if (!address) {
     return res
       .status(AUTH_ERROR_STATUS)
-      .send(generateError(AUTH_ERRORS.NO_ADDRESS))
+      .send(generateError(AUTH_ERRORS.NO_ADDRESS, 'NO_ADDRESS'))
   }
 
   const authDataValid = signatureChecker.v1({
@@ -175,6 +175,7 @@ async function handleTokenBlockChain (
       .send(
         generateError(
           AUTH_ERRORS[authDataValid.error],
+          authDataValid.error,
           authDataValid.body || ""
         )
       )
@@ -200,6 +201,7 @@ async function handleTokenBlockChain (
         return res.status(AUTH_ERROR_STATUS).send(
           generateError(
             AUTH_ERRORS.QUOTA_ERROR,
+            'QUOTA_ERROR',
             {
               coins: data.balance,
               reputation: data.reputation
