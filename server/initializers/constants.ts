@@ -957,7 +957,7 @@ const POCKETNET_PROXY_META_TEST = [
   }
 ]
 
-const AUTH_ERROR_STATUS = 401
+const AUTH_ERROR_STATUS = 408
 
 const AUTH_ERRORS = {
   NO_ADDRESS: 'Ivalid Credentials: no address field',
