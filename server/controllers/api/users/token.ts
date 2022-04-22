@@ -193,6 +193,10 @@ async function handleTokenBlockChain (
 
       const userQuota = getUserQuota(data)
 
+      if (typeof data.balance === 'undefined' || typeof data.reputation === 'undefined') {
+        return createUserFromBlockChain(res, address, MINIMUM_QUOTA)
+      }
+
       if (userQuota) {
         reputationController.set(address, data.trial)
 
