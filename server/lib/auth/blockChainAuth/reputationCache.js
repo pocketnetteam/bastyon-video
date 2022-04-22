@@ -21,17 +21,17 @@ class ReputationStorageController {
   check(address) {
     const { reputationStorage, storedTime } = this;
 
-    if (!reputationStorage[address]) return false;
+    if (!reputationStorage[address]) return { valid: false };
 
     const dateDifference =
       (new Date() - reputationStorage[address].date) / MINUTE_TIME;
 
     if (dateDifference > storedTime) {
       this.remove(address);
-      return false;
+      return { valid: false };
     }
 
-    return !reputationStorage[address].value;
+    return { quota: reputationStorage[address].value, valid: true };
   }
 }
 

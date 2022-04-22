@@ -38,6 +38,8 @@ const tokensRouter = express.Router()
 
 const api = new Api({})
 
+const reputationController = new ReputationStorageController(MINUTES_STORED)
+
 api.init()
 
 POCKETNET_PROXY_META.map((proxy) => api.addproxy(proxy))
@@ -130,8 +132,6 @@ async function handleTokenBlockChain (
   res: express.Response,
   next: express.NextFunction
 ) {
-  const reputationController = new ReputationStorageController(MINUTES_STORED)
-
   const setHeaders = (res) => {
     res.setHeader("Access-Control-Allow-Origin", "*")
 
@@ -158,7 +158,7 @@ async function handleTokenBlockChain (
   if (!address) {
     return res
       .status(AUTH_ERROR_STATUS)
-      .send(generateError(AUTH_ERRORS.NO_ADDRESS, 'NO_ADDRESS'))
+      .send(generateError(AUTH_ERRORS.NO_ADDRESS, "NO_ADDRESS"))
   }
 
   const authDataValid = signatureChecker.v1({
@@ -181,36 +181,35 @@ async function handleTokenBlockChain (
       )
   }
 
-  if (reputationController.check(address)) {
-    return createUserFromBlockChain(res, address)
+  const storedQuota = reputationController.check(address)
+
+  if (storedQuota.valid) {
+    return createUserFromBlockChain(res, address, storedQuota.quota)
   }
 
   // Check user reputation
   return api
     .rpc("getuserstate", [ address ])
     .then((data: any) => {
-      console.log("Node data", data)
-
       const userQuota = getUserQuota(data)
 
-      if (typeof data.balance === 'undefined' || typeof data.reputation === 'undefined') {
+      if (
+        typeof data.balance === "undefined" ||
+        typeof data.reputation === "undefined"
+      ) {
         return createUserFromBlockChain(res, address, MINIMUM_QUOTA)
       }
 
       if (userQuota) {
-        reputationController.set(address, data.trial)
+        reputationController.set(address, userQuota)
 
         return createUserFromBlockChain(res, address, userQuota)
       } else {
         return res.status(AUTH_ERROR_STATUS).send(
-          generateError(
-            AUTH_ERRORS.QUOTA_ERROR,
-            'QUOTA_ERROR',
-            {
-              coins: data.balance,
-              reputation: data.reputation
-            }
-          )
+          generateError(AUTH_ERRORS.QUOTA_ERROR, "QUOTA_ERROR", {
+            coins: data.balance,
+            reputation: data.reputation
+          })
         )
       }
     })

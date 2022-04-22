@@ -929,7 +929,7 @@ export {
 
 // ---------------------------------------------------------------------------
 
-const MINUTES_STORED = 2
+const MINUTES_STORED = 1
 
 const MINIMUM_QUOTA = 2000000000
 
@@ -942,6 +942,18 @@ const POCKETNET_PROXY_META = [
   },
   {
     host: '1.pocketnet.app',
+    port: 8899,
+    wss: 8099,
+    direct: ''
+  },
+  {
+    host: '2.pocketnet.app',
+    port: 8899,
+    wss: 8099,
+    direct: ''
+  },
+  {
+    host: '3.pocketnet.app',
     port: 8899,
     wss: 8099,
     direct: ''
