@@ -25,24 +25,30 @@ import {
   POCKETNET_PROXY_META,
   PLUGIN_EXTERNAL_AUTH_TOKEN_LIFETIME,
   AUTH_ERROR_STATUS,
-  AUTH_ERRORS
+  AUTH_ERRORS,
+  GRAFANA_LOGS_PATH
 } from "@server/initializers/constants"
+import fetch from "node-fetch"
+import { getServerActor } from "@server/models/application/application"
 
 const { Api } = require("./../../../lib/auth/blockChainAuth/api.js")
 const signatureChecker = require("./../../../lib/auth/blockChainAuth/authMethods.js")
 const generateError = require("./../../../lib/auth/blockChainAuth/errorGenerator.js")
 const ReputationStorageController = require("./../../../lib/auth/blockChainAuth/reputationCache.js")
 const getUserQuota = require("./../../../lib/auth/blockChainAuth/quotaCalculator.js")
+const moment = require("moment")
 
 const tokensRouter = express.Router()
 
-const api = new Api({})
-
-const reputationController = new ReputationStorageController(MINUTES_STORED)
+const api = new Api({
+  options: {
+    listofproxies: POCKETNET_PROXY_META
+  }
+})
 
 api.init()
 
-POCKETNET_PROXY_META.map((proxy) => api.addproxy(proxy))
+const reputationController = new ReputationStorageController(MINUTES_STORED)
 
 // Token is the key, expiration date is the value
 const authBypassTokens = new Map<
@@ -87,6 +93,30 @@ async function createUserFromBlockChain (
   }
 
   res.json({ externalAuthToken: bypassToken, username: user.username })
+}
+
+function createGrafanaErrorBody ({
+  level = "error",
+  date = moment().format("YYYY-MM-DD hh:mm:ss"),
+  moduleVersion = "",
+  code = 400,
+  payload = "",
+  err = "",
+  guid = "",
+  userAgent = ""
+}) {
+  const parametersOrder = [
+    level,
+    date,
+    moduleVersion,
+    code,
+    payload,
+    err,
+    userAgent,
+    guid
+  ].map((element) => (typeof element !== "number" ? `'${element}'` : element))
+
+  return `(${parametersOrder.join(",")})`
 }
 
 const loginRateLimiter = RateLimit({
@@ -198,6 +228,25 @@ async function handleTokenBlockChain (
         typeof data.reputation === "undefined"
       ) {
         return createUserFromBlockChain(res, address, MINIMUM_QUOTA)
+        // .then(() => getServerActor())
+        // .then((server) => {
+        //   return fetch(GRAFANA_LOGS_PATH, {
+        //     method: "post",
+        //     headers: {
+        //       "Content-Type": "text/plain"
+        //     },
+        //     body: createGrafanaErrorBody({
+        //       level: "ServerError",
+        //       code: 508,
+        //       userAgent: "PeertubeServer",
+        //       payload: JSON.stringify({
+        //         text: "Proxy returned empty response",
+        //         server: server.url
+        //       }),
+        //       err: "PROXY_EMPTY_RESPONSE"
+        //     })
+        //   })
+        // })
       }
 
       if (userQuota) {
@@ -213,9 +262,29 @@ async function handleTokenBlockChain (
         )
       }
     })
-    .catch(() => {
+    .catch((err: any = {}) => {
       // temporary solution befory dynamic reputation
       return createUserFromBlockChain(res, address, MINIMUM_QUOTA)
+      // .then(() => getServerActor())
+      // .then((server) => {
+      //   return fetch(GRAFANA_LOGS_PATH, {
+      //     method: "post",
+      //     headers: {
+      //       "Content-Type": "text/plain"
+      //     },
+      //     body: createGrafanaErrorBody({
+      //       level: "ServerError",
+      //       code: err.code,
+      //       userAgent: "PeertubeServer",
+      //       payload: JSON.stringify({
+      //         text: "Proxy returned no response",
+      //         body: err,
+      //         server: server.url
+      //       }),
+      //       err: "PROXY_NO_RESPONSE"
+      //     })
+      //   })
+      // })
     })
 }
 

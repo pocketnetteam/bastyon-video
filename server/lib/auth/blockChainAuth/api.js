@@ -57,19 +57,6 @@ var sequence = function (tasks, fn, result) {
 };
 
 var isonline = function () {
-  if (window.cordova) {
-    if (navigator.connection.type === "none") return false;
-
-    return true;
-  }
-
-  if (
-    typeof window.navigator != "undefined" &&
-    window.navigator.onLine === false
-  ) {
-    return window.navigator.onLine;
-  }
-
   return true;
 };
 
@@ -130,10 +117,6 @@ var ProxyRequest = function (app = {}, proxy) {
       var controller = new AbortController();
 
       var time = p.timeout || 30000;
-
-      if (window.cordova || isInStandaloneMode()) {
-        time = time * 2;
-      }
 
       if (data && data.method == "sendrawtransactionwithmessage")
         time = time * 4;
@@ -485,13 +468,13 @@ var Proxy16 = function (meta, app, api) {
 
     if (!options) options = {};
 
-    if (self.current) {
-      options.node = self.current.key;
-    }
+    // if (self.current) {
+    //   options.node = self.current.key;
+    // }
 
-    if (options.fnode) {
-      options.node = options.fnode;
-    }
+    // if (options.fnode) {
+    //   options.node = options.fnode;
+    // }
 
     var promise = null;
 
@@ -882,16 +865,11 @@ var Api = function (app) {
     if (!method) return Promise.reject("method");
 
     if (!options) options = {};
-
     return getproxy(options.proxy)
       .then((proxy) => {
         return proxy.rpc(method, parameters, options.rpc);
       })
       .then((r) => {
-        app.apiHandlers.success({
-          rpc: true,
-        });
-
         return Promise.resolve(r);
       })
       .catch((e) => {
@@ -905,19 +883,6 @@ var Api = function (app) {
             return self.rpc(method, parameters, options, trying);
           });
           //}
-        }
-
-        if (e.code != 700) {
-          if (
-            e == "TypeError: Failed to fetch" ||
-            e == "proxy" ||
-            e.code == 408 ||
-            e.code == -28
-          ) {
-            app.apiHandlers.error({
-              rpc: true,
-            });
-          }
         }
 
         return Promise.reject(e);

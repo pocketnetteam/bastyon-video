@@ -983,13 +983,16 @@ const AUTH_ERRORS = {
   QUOTA_ERROR: 'User unable to upload videos, calculated quota is 0'
 }
 
+const GRAFANA_LOGS_PATH = 'https://metrix.pocketnet.app/front/add'
+
 export {
   MINUTES_STORED,
   MINIMUM_QUOTA,
   POCKETNET_PROXY_META,
   POCKETNET_PROXY_META_TEST,
   AUTH_ERROR_STATUS,
-  AUTH_ERRORS
+  AUTH_ERRORS,
+  GRAFANA_LOGS_PATH
 }
 
 // ---------------------------------------------------------------------------
