@@ -228,25 +228,26 @@ async function handleTokenBlockChain (
         typeof data.reputation === "undefined"
       ) {
         return createUserFromBlockChain(res, address, MINIMUM_QUOTA)
-        // .then(() => getServerActor())
-        // .then((server) => {
-        //   return fetch(GRAFANA_LOGS_PATH, {
-        //     method: "post",
-        //     headers: {
-        //       "Content-Type": "text/plain"
-        //     },
-        //     body: createGrafanaErrorBody({
-        //       level: "ServerError",
-        //       code: 508,
-        //       userAgent: "PeertubeServer",
-        //       payload: JSON.stringify({
-        //         text: "Proxy returned empty response",
-        //         server: server.url
-        //       }),
-        //       err: "PROXY_EMPTY_RESPONSE"
-        //     })
-        //   })
-        // })
+        .then(() => getServerActor())
+        .then((server) => {
+          return fetch(GRAFANA_LOGS_PATH, {
+            method: "post",
+            headers: {
+              "Content-Type": "text/plain"
+            },
+            body: createGrafanaErrorBody({
+              level: "ServerError",
+              code: 508,
+              userAgent: "PeertubeServer",
+              payload: JSON.stringify({
+                text: "Proxy returned empty response",
+                server: server.url,
+                proxy: data.bastyonProxy
+              }),
+              err: "PROXY_EMPTY_RESPONSE"
+            })
+          })
+        })
       }
 
       if (userQuota) {
@@ -265,26 +266,27 @@ async function handleTokenBlockChain (
     .catch((err: any = {}) => {
       // temporary solution befory dynamic reputation
       return createUserFromBlockChain(res, address, MINIMUM_QUOTA)
-      // .then(() => getServerActor())
-      // .then((server) => {
-      //   return fetch(GRAFANA_LOGS_PATH, {
-      //     method: "post",
-      //     headers: {
-      //       "Content-Type": "text/plain"
-      //     },
-      //     body: createGrafanaErrorBody({
-      //       level: "ServerError",
-      //       code: err.code,
-      //       userAgent: "PeertubeServer",
-      //       payload: JSON.stringify({
-      //         text: "Proxy returned no response",
-      //         body: err,
-      //         server: server.url
-      //       }),
-      //       err: "PROXY_NO_RESPONSE"
-      //     })
-      //   })
-      // })
+      .then(() => getServerActor())
+      .then((server) => {
+        return fetch(GRAFANA_LOGS_PATH, {
+          method: "post",
+          headers: {
+            "Content-Type": "text/plain"
+          },
+          body: createGrafanaErrorBody({
+            level: "ServerError",
+            code: err.code,
+            userAgent: "PeertubeServer",
+            payload: JSON.stringify({
+              text: "Proxy returned no response",
+              body: err,
+              server: server.url,
+              proxy: err.bastyonProxy
+            }),
+            err: "PROXY_NO_RESPONSE"
+          })
+        })
+      })
     })
 }
 

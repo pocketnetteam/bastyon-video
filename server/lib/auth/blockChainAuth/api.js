@@ -865,15 +865,20 @@ var Api = function (app) {
     if (!method) return Promise.reject("method");
 
     if (!options) options = {};
+
     return getproxy(options.proxy)
       .then((proxy) => {
         return proxy.rpc(method, parameters, options.rpc);
       })
       .then((r) => {
+        r.bastyonProxy = current;
+
         return Promise.resolve(r);
       })
-      .catch((e) => {
-        if (!e) e = "TypeError: Failed to fetch";
+      .catch((e = {
+        text: "TypeError: Failed to fetch",
+      }) => {
+        e.bastyonProxy = current;
 
         if ((!e.code || e.code == 2000) && trying < 2) {
           //if(isonline()){
