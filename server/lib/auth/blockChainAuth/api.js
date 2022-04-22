@@ -1,19 +1,96 @@
-const { System16 } = require('./system16');
-const fetch = require('node-fetch');
-const AbortController = require('abort-controller');
+const { System16 } = require("./system16");
+const fetch = require("node-fetch");
+const AbortController = require("abort-controller");
+
+const deep = function (obj, key) {
+  var tkey = "";
+  var _key = [];
+
+  if (key[0] == "'") {
+    key = key.substr(1);
+    _key = key.split("'");
+    tkey = _key[0];
+    if (_key[1]) _key[1] = _key[1].substr(1);
+  } else {
+    _key = key.split(".");
+    tkey = _key[0];
+  }
+
+  if (typeof obj == "undefined" || !obj) return undefined;
+
+  if (typeof obj[tkey] != "undefined") {
+    _key.splice(0, 1);
+
+    if (_key.length == 0) {
+      return obj[tkey];
+    } else {
+      return deep(obj[tkey], _key.join("."));
+    }
+  } else {
+    return undefined;
+  }
+};
 
 const localStorage = {};
 
 var electron = null;
 
-var ProxyRequest = function (app = {}) {
+var rand = function (min, max) {
+  min = parseInt(min);
+  max = parseInt(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
+var sequence = function (tasks, fn, result) {
+  if (!tasks) tasks = [];
+  if (!result) result = [];
+
+  if (!tasks.length) return Promise.resolve(result);
+
+  var task = tasks[0];
+
+  return fn(task).then((r) => {
+    result.push(r);
+    tasks.shift();
+    return sequence(tasks, fn, result);
+  });
+};
+
+var isonline = function () {
+  if (window.cordova) {
+    if (navigator.connection.type === "none") return false;
+
+    return true;
+  }
+
+  if (
+    typeof window.navigator != "undefined" &&
+    window.navigator.onLine === false
+  ) {
+    return window.navigator.onLine;
+  }
+
+  return true;
+};
+
+var ProxyRequest = function (app = {}, proxy) {
   var self = this;
 
   var sign = function (data) {
-    const signature = app.signature;
+    var signature = null;
+
+    var session = "";
+
+    if (proxy && proxy.session) session = proxy.session;
+
+    if (app.user && app.user.getstate && app.user.getstate() == 1) {
+      try {
+        signature = app.user.signature(session);
+      } catch (e) {}
+    }
 
     if (signature) {
-      data.signature = { ...signature };
+      data.signature = signature;
     }
 
     return data;
@@ -46,31 +123,67 @@ var ProxyRequest = function (app = {}) {
     });
   };
 
-  var direct = function (url, data) {
-    var controller = new AbortController();
+  var direct = function (url, data, p) {
+    if (!p) p = {};
 
-    var time = 30000;
+    if (typeof AbortController != "undefined") {
+      var controller = new AbortController();
 
-    return timeout(time, directclear(url, data, controller.signal), controller);
+      var time = p.timeout || 30000;
+
+      if (window.cordova || isInStandaloneMode()) {
+        time = time * 2;
+      }
+
+      if (data && data.method == "sendrawtransactionwithmessage")
+        time = time * 4;
+
+      //if(!isonline()) time = 3000
+
+      return timeout(
+        time,
+        directclear(url, data, controller.signal, p),
+        controller
+      );
+    } else {
+      return directclear(url, data, null, p);
+    }
   };
 
-  var directclear = function (url, data, signal) {
+  var directclear = function (url, data, signal, p) {
+    if (!p) p = {};
+
     if (!data) data = {};
+
+    var headers = {
+      Accept: "application/json",
+      "Content-Type": "application/json;charset=utf-8",
+      ...(p.headers || {}),
+    };
+
+    /*if (data.bearer){
+          headers.Authorization = `Bearer ${data.bearer}`
+          delete data.bearer
+      }*/
 
     var er = false;
 
+    if (p.auth) data = sign(data);
+    else {
+      if (app.user && app.user.getstate && app.user.getstate() == 1) {
+        data.state = 1;
+      }
+    }
+
     return fetch(url, {
-      method: 'POST',
-      mode: 'cors',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json;charset=utf-8',
-      },
+      method: p.method || "POST",
+      mode: "cors",
+      headers: headers,
       signal: signal,
-      body: JSON.stringify(sign(data)),
+      body: JSON.stringify(data),
     })
       .then((r) => {
-        signal.dontabortable = true;
+        if (signal) signal.dontabortable = true;
 
         if (!r.ok) {
           er = true;
@@ -88,7 +201,7 @@ var ProxyRequest = function (app = {}) {
       .catch((e) => {
         if (e.code == 20) {
           return Promise.reject({
-            code: 408,
+            code: 2000,
           });
         }
 
@@ -97,44 +210,54 @@ var ProxyRequest = function (app = {}) {
   };
 
   self.rpc = function (url, method, parameters, options) {
-    if (!method) return Promise.reject('method');
+    if (!method) return Promise.reject("method");
 
     var data = {};
 
     data.parameters = parameters || [];
     data.method = method;
 
+    try {
+      data.cachehash = MD5(JSON.stringify(data.parameters));
+    } catch (e) {}
+
     if (options) data.options = options;
 
-    return direct(url + '/rpc/' + method, data);
+    var route = "rpc";
+
+    var requestoptions = {};
+
+    if (options.ex) route = "rpc-ex";
+
+    return direct(url + "/" + route + "/" + method, data, requestoptions);
   };
 
-  self.fetch = function (url, path, data) {
-    return direct(url + '/' + path, data);
+  self.fetch = function (url, path, data, p) {
+    return direct(url + "/" + path, data, p);
   };
 
   return self;
 };
 
-var Node = function (meta, app /*, proxy ??*/) {
+var ProxyNode = function (meta, app) {
   var self = this;
 
-  self.host = meta.host || '';
+  self.host = meta.host || "";
   self.port = meta.port || 0;
   self.wss = meta.wss || 0;
 
-  self.id = self.host + ':' + self.port + ':' + self.wss;
+  self.id = self.host + ":" + self.port + ":" + self.wss;
 
   return self;
 };
 
-var Proxy16 = function (meta = {}, app = {}, api) {
+var Proxy16 = function (meta, app, api) {
   var self = this;
-  var request = new ProxyRequest(app);
+  var request = new ProxyRequest(app, self);
 
   self.system = new System16(app, self, meta.direct);
 
-  self.host = meta.host || '';
+  self.host = meta.host || "";
   self.port = meta.port || 0;
   self.wss = meta.wss || 0;
   self.direct = meta.direct;
@@ -142,7 +265,7 @@ var Proxy16 = function (meta = {}, app = {}, api) {
 
   self.current = null; //current node
 
-  self.id = self.host + ':' + self.port + ':' + self.wss;
+  self.id = self.host + ":" + self.port + ":" + self.wss;
   self.enabled = true;
 
   nodes = [];
@@ -161,7 +284,7 @@ var Proxy16 = function (meta = {}, app = {}, api) {
           });
         },
         add: function (meta) {
-          var node = new Node(meta, app);
+          var node = new ProxyNode(meta, app);
           nodes.push(node);
         },
       },
@@ -169,7 +292,7 @@ var Proxy16 = function (meta = {}, app = {}, api) {
   };
 
   self.changeNode = function (node) {
-    if (node && self.current.key != node.key) {
+    if (node && (!self.current || self.current.key != node.key)) {
       self.current = node;
 
       app.platform.ws.reconnect();
@@ -211,7 +334,7 @@ var Proxy16 = function (meta = {}, app = {}, api) {
 
       var lastid = self.id;
 
-      self.id = self.host + ':' + self.port + ':' + self.wss;
+      self.id = self.host + ":" + self.port + ":" + self.wss;
 
       var currentapi = app.api.get.currentstring();
 
@@ -222,7 +345,7 @@ var Proxy16 = function (meta = {}, app = {}, api) {
       }
     }
 
-    if (typeof settings.enabled != 'undefined') {
+    if (typeof settings.enabled != "undefined") {
       self.enabled = settings.enabled;
     }
 
@@ -240,16 +363,38 @@ var Proxy16 = function (meta = {}, app = {}, api) {
     return reconnectws;
   };
 
+  var freshping = function () {
+    if (!self.ping || self.ping < new Date()) {
+      return false;
+    }
+
+    return true;
+  };
+
   self.api = {
     ping: () => {
       return self
-        .fetch('ping')
+        .fetch("ping", {}, { timeout: 4000 })
         .then((r) => {
-          self.ping = new Date();
+          var rdate = new Date();
+
+          self.ping = rdate.addSeconds(60);
+          self.successping = true;
+          self.session = r.session;
+
+          if (!self.current && r.node && !api.get.fixednode()) {
+            self.current = {
+              key: r.node,
+            };
+          }
 
           return Promise.resolve(r);
         })
         .catch((e) => {
+          var rdate = new Date();
+
+          self.ping = rdate.addSeconds(10);
+
           return Promise.reject(e);
         });
     },
@@ -257,7 +402,7 @@ var Proxy16 = function (meta = {}, app = {}, api) {
     actualping: function () {
       var promise = null;
 
-      if (!self.ping || self.ping.addSeconds(5) < new Date()) {
+      if (!freshping()) {
         promise = self.api.ping();
       } else {
         promise = Promise.resolve(true);
@@ -271,7 +416,7 @@ var Proxy16 = function (meta = {}, app = {}, api) {
     nodes: {
       canchange: function (node) {
         return self
-          .fetch('nodes/canchange', { node }, 'wait')
+          .fetch("nodes/canchange", { node }, "wait")
           .then((r) => {
             return Promise.resolve(self.changeNode(r.node));
           })
@@ -281,22 +426,18 @@ var Proxy16 = function (meta = {}, app = {}, api) {
       },
 
       select: function () {
-        var fixednode = '';
+        var fixednode = "";
 
         if (api && api.get.fixednode()) fixednode = api.get.fixednode();
 
-        console.log('fixednode', fixednode);
-
-        return self.fetch('nodes/select', { fixed: fixednode }).then((r) => {
-          console.log('R', r);
-
+        return self.fetch("nodes/select", { fixed: fixednode }).then((r) => {
           self.current = r.node;
 
           return Promise.resolve(r);
         });
       },
       get: () => {
-        return self.fetch('nodes/get').then((r) => {
+        return self.fetch("nodes/get").then((r) => {
           internal.node.manage.addlist(r.nodes);
 
           return Promise.resolve(r);
@@ -310,7 +451,7 @@ var Proxy16 = function (meta = {}, app = {}, api) {
       },
 
       add: function (meta) {
-        var node = new Node(meta, app);
+        var node = new ProxyNode(meta, app);
 
         if (!this.find(node.id)) {
           nodes.push(node);
@@ -325,10 +466,17 @@ var Proxy16 = function (meta = {}, app = {}, api) {
 
   self.url = {
     https: () => {
-      return 'https://' + self.host + ':' + self.port;
+      return "https://" + self.host + ":" + self.port;
     },
     wss: () => {
-      return 'wss://' + self.host + ':' + self.wss;
+      return "wss://" + self.host + ":" + self.wss;
+    },
+
+    http: () => {
+      return "http://" + self.host + ":" + (self.port - 1);
+    },
+    ws: () => {
+      return "ws://" + self.host + ":" + (self.wss - 1);
     },
   };
 
@@ -339,6 +487,10 @@ var Proxy16 = function (meta = {}, app = {}, api) {
 
     if (self.current) {
       options.node = self.current.key;
+    }
+
+    if (options.fnode) {
+      options.node = options.fnode;
     }
 
     var promise = null;
@@ -354,9 +506,15 @@ var Proxy16 = function (meta = {}, app = {}, api) {
         return Promise.resolve(r);
       })
       .catch((e) => {
-        console.log('E', e);
+        if (options.fnode && e) e.code = 700;
 
-        if (e.code == 408 && options.node && trying < 3) {
+        if (
+          (e.code == 408 || e.code == 429 || e.code == -28) &&
+          options.node &&
+          trying < 2 &&
+          !options.fnode
+        ) {
+          //if(isonline()){
           return self.api.nodes.canchange(options.node).then((r) => {
             if (r) {
               return self.rpc(method, parameters, options, trying + 1);
@@ -364,6 +522,11 @@ var Proxy16 = function (meta = {}, app = {}, api) {
 
             return Promise.reject(e);
           });
+          //}
+        }
+
+        if (e.code == 2000) {
+          return Promise.reject(e);
         }
 
         return Promise.reject(e);
@@ -372,13 +535,13 @@ var Proxy16 = function (meta = {}, app = {}, api) {
 
   var wait = {};
 
-  self.fetch = function (path, data, waiting) {
+  self.fetch = function (path, data, p) {
     var promise = null;
 
     if (self.direct) {
-      promise = self.system.fetch(path, data);
+      promise = self.system.fetch(path, data, p);
     } else {
-      promise = request.fetch(self.url.https(), path, data);
+      promise = request.fetch(self.url.https(), path, data, p);
     }
 
     return promise.then((r) => {
@@ -386,20 +549,27 @@ var Proxy16 = function (meta = {}, app = {}, api) {
     });
   };
 
+  self.fetchauth = function (path, data, p) {
+    if (!p) p = {};
+    p.auth = true;
+
+    return self.fetch(path, data, p);
+  };
+
   self.get = {
     nodes: () => nodes,
 
     name: function () {
-      if (self.direct) return 'Electron Proxy';
+      if (self.direct) return "Electron Proxy";
       else return self.url.https();
     },
 
     info: function () {
-      return self.fetch('info');
+      return self.fetchauth("info");
     },
 
     stats: function () {
-      return self.fetch('stats');
+      return self.fetchauth("stats");
     },
   };
 
@@ -417,7 +587,7 @@ var Proxy16 = function (meta = {}, app = {}, api) {
 
       var hash = bitcoin.crypto.hash256(JSON.stringify(proxystate));
 
-      var change = hash.join('') !== state.hash.join('');
+      var change = hash.join("") !== state.hash.join("");
 
       state.hash = hash;
       state.tick = proxystate;
@@ -427,18 +597,21 @@ var Proxy16 = function (meta = {}, app = {}, api) {
       });
     };
 
-    return self.refreshNodes();
+    if (api && api.get.fixednode()) {
+      self.current = {
+        key: api.get.fixednode(),
+      };
+    }
+
+    return Promise.resolve();
+
+    // return self.refreshNodes()
   };
 
   self.refreshNodes = function () {
-    return self.api.nodes
-      .get()
-      .then((r) => {
-        return self.api.nodes.select();
-      })
-      .catch((e) => {
-        return Promise.resolve();
-      });
+    return self.api.nodes.select().catch((e) => {
+      return Promise.resolve();
+    });
   };
 
   self.destroy = function () {
@@ -456,13 +629,13 @@ var Proxy16 = function (meta = {}, app = {}, api) {
   return self;
 };
 
-var Api = function (app = {}) {
+var Api = function (app) {
   var self = this;
 
   var proxies = [];
   var nodes = [];
 
-  var current = null; // 'localhost:8888:8088' //null;///'pocketnet.app:8899:8099'
+  var current = null;
   var useproxy = true;
   var inited = false;
   var fixednode = null;
@@ -472,25 +645,23 @@ var Api = function (app = {}) {
       key = current;
     }
 
-    if (key && typeof key === 'object') return key;
+    if (typeof key === "object") return key;
 
     var proxy = proxies.find(function (p) {
       return p.id == key;
     });
 
-    if (!proxy && proxies[0]) return proxies[0];
-
     return proxy;
   };
 
   var getproxy = function (key) {
-    var proxy = getproxyas();
+    var proxy = getproxyas(key);
 
-    return proxy ? Promise.resolve(proxy) : Promise.reject('proxy');
+    return proxy ? Promise.resolve(proxy) : Promise.reject("proxy");
   };
 
   self.addproxy = function (meta) {
-    var lsproxies = JSON.parse(localStorage['listofproxies'] || '[]');
+    var lsproxies = JSON.parse(localStorage["listofproxies"] || "[]");
 
     var proxy = internal.proxy.manage.add(meta);
 
@@ -504,10 +675,10 @@ var Api = function (app = {}) {
   };
 
   self.removeproxy = function (key) {
-    var lsproxies = JSON.parse(localStorage['listofproxies'] || '[]');
+    var lsproxies = JSON.parse(localStorage["listofproxies"] || "[]");
 
     lsproxies = lsproxies.filter(function (meta) {
-      var proxy = new Proxy16(meta, app);
+      var proxy = new Proxy16(meta, app, self);
 
       if (proxy.id == key) return false;
 
@@ -527,10 +698,10 @@ var Api = function (app = {}) {
   };
 
   self.editinsaved = function (key, proxy) {
-    var lsproxies = JSON.parse(localStorage['listofproxies'] || '[]');
+    var lsproxies = JSON.parse(localStorage["listofproxies"] || "[]");
 
     var proxyinlist = lsproxies.find(function (p) {
-      var id = p.host + ':' + p.port + ':' + p.wss;
+      var id = p.host + ":" + p.port + ":" + p.wss;
 
       return id == key;
     });
@@ -565,21 +736,32 @@ var Api = function (app = {}) {
     proxy: {
       manage: {
         savelist: function (lsproxies) {
-          localStorage['listofproxies'] = JSON.stringify(lsproxies || []);
+          localStorage["listofproxies"] = JSON.stringify(lsproxies || []);
+        },
+        initialMarker: function (initialProxies) {
+          initialProxies.forEach(function (meta) {
+            var proxy = internal.proxy.manage.find(meta.id);
+
+            if (proxy) proxy.initial = true;
+          });
         },
         init: function () {
+          var initialProxies = deep(app, "options.listofproxies") || [];
+
           return this.addlocalelectronproxy()
             .then((r) => {
-              this.addlist(deep(app, 'options.listofproxies') || []);
+              this.addlist(initialProxies);
 
               try {
-                this.addlist(JSON.parse(localStorage['listofproxies'] || '[]'));
+                this.addlist(JSON.parse(localStorage["listofproxies"] || "[]"));
               } catch (e) {}
 
               return Promise.resolve();
             })
             .then((r) => {
-              var oldc = localStorage['currentproxy'];
+              internal.proxy.manage.initialMarker(initialProxies);
+
+              var oldc = localStorage["currentproxy"];
 
               if (oldc) {
                 return self.set.current(oldc);
@@ -591,11 +773,13 @@ var Api = function (app = {}) {
               return Promise.resolve();
             })
             .then(() => {
-              if (!current && proxies.length) {
-                current = 'pocketnet.app:8899:8099'; //proxies[0].id
+              if (!current && initialProxies.length) {
+                var rps = initialProxies[rand(0, initialProxies.length - 1)];
+                if (rps) {
+                  var randproxy = rps.host + ":" + rps.port + ":" + rps.wss;
+                  current = randproxy;
+                }
               }
-
-              console.log('current', current);
 
               inited = true;
 
@@ -608,14 +792,14 @@ var Api = function (app = {}) {
 
             esystem.listen();
 
-            return esystem.request('get.settings').then((settings) => {
+            return esystem.request("get.settings").then((settings) => {
               esystem.stop();
 
               this.add({
                 direct: true,
-                host: 'localhost',
-                port: deep(settings, 'server.ports.https') || 0,
-                wss: deep(settings, 'server.ports.wss') || 0,
+                host: "localhost",
+                port: deep(settings, "server.ports.https") || 0,
+                wss: deep(settings, "server.ports.wss") || 0,
               });
 
               return Promise.resolve();
@@ -653,12 +837,49 @@ var Api = function (app = {}) {
 
           return Promise.all(promises);
         },
+
+        softping: async function (proxies) {
+          var result = false;
+
+          return sequence(proxies, (proxy) => {
+            if (result) return Promise.resolve();
+
+            return proxy.api.actualping().then((r) => {
+              result = true;
+            });
+          });
+        },
+
+        mixedping: function (proxies) {
+          var current = self.get.current();
+
+          if (!current) return Promise.resolve();
+
+          return current.api
+            .actualping()
+            .catch((e) => {
+              return Promise.resolve();
+            })
+            .then(() => {
+              if (self.ready.use()) return Promise.resolve();
+
+              proxies = proxies.filter(function (p) {
+                return p.id != current.id;
+              });
+
+              return internal.proxy.api.softping(proxies).then((r) => {
+                return Promise.resolve();
+              });
+            });
+        },
       },
     },
   };
 
-  self.rpc = function (method, parameters, options) {
-    if (!method) return Promise.reject('method');
+  self.rpc = function (method, parameters, options, trying) {
+    if (!trying) trying = 0;
+
+    if (!method) return Promise.reject("method");
 
     if (!options) options = {};
 
@@ -667,43 +888,109 @@ var Api = function (app = {}) {
         return proxy.rpc(method, parameters, options.rpc);
       })
       .then((r) => {
+        app.apiHandlers.success({
+          rpc: true,
+        });
+
         return Promise.resolve(r);
       })
       .catch((e) => {
-        if (
-          e == 'TypeError: Failed to fetch' ||
-          e.code == 408 ||
-          e.code == -28
-        ) {
-          app.apiHandlers.error({
-            rpc: true,
+        if (!e) e = "TypeError: Failed to fetch";
+
+        if ((!e.code || e.code == 2000) && trying < 2) {
+          //if(isonline()){
+          return self.changeProxyIfNeedWithDirect().then((r) => {
+            trying++;
+
+            return self.rpc(method, parameters, options, trying);
           });
+          //}
+        }
+
+        if (e.code != 700) {
+          if (
+            e == "TypeError: Failed to fetch" ||
+            e == "proxy" ||
+            e.code == 408 ||
+            e.code == -28
+          ) {
+            app.apiHandlers.error({
+              rpc: true,
+            });
+          }
         }
 
         return Promise.reject(e);
       });
   };
 
+  self.changeProxyIfNeedWithDirect = function () {
+    return self
+      .changeProxyIfNeed()
+      .then((l) => {
+        if (!l) {
+          var proxy = self.get.direct();
+
+          if (proxy) {
+            return self.set.current(proxy.id).then((r) => {
+              proxy.api.nodes.canchange();
+            });
+          }
+        }
+
+        return Promise.resolve();
+      })
+      .catch(() => {
+        return Promise.resolve();
+      });
+  };
+
+  self.fetchauthall = function (path, data) {
+    var promises = proxies.map(function (proxy) {
+      var options = { proxy: proxy.id };
+
+      return self.fetchauth(path, data, options);
+    });
+    return Promise.all(promises).catch((e) => {
+      return Promise.resolve();
+    });
+  };
+
+  self.fetchauth = function (path, data, options) {
+    if (!options) options = {};
+
+    options.auth = true;
+
+    return self.fetch(path, data, options);
+  };
+
   self.fetch = function (path, data, options) {
-    if (!useproxy) return Promise.reject('useproxy');
+    if (!useproxy) return Promise.reject("useproxy");
 
     if (!options) options = {};
 
+    var method = "fetch";
+
+    if (options.auth) method = "fetchauth";
+
+    var requestto = null;
+
     return getproxy(options.proxy)
       .then((proxy) => {
-        return proxy.fetch(path, data);
+        requestto = proxy.id;
+
+        return proxy[method](path, data);
       })
       .then((r) => {
-        app.apiHandlers.success({
-          api: true,
-        });
+        if (requestto == current)
+          app.apiHandlers.success({
+            api: true,
+          });
 
         return Promise.resolve(r);
       })
       .catch((e) => {
-        console.log('ERROR', e);
-
-        if (e == 'TypeError: Failed to fetch') {
+        if (requestto == current && e == "TypeError: Failed to fetch") {
           app.apiHandlers.error({
             api: true,
           });
@@ -716,23 +1003,22 @@ var Api = function (app = {}) {
   self.ready = {
     proxies: () => {
       return proxies.filter((proxy) => {
-        return proxy.ping;
+        return proxy.successping;
       });
     },
 
     use: () => {
-      console.log(
-        'READY',
-        useproxy
-          ? proxies.filter((proxy) => {
-              return proxy.ping && proxy.get.nodes().length;
-            }).length || !proxies.length
-          : false,
-      );
-
       return useproxy
         ? proxies.filter((proxy) => {
-            return proxy.ping && proxy.get.nodes().length;
+            return proxy.successping;
+          }).length || !proxies.length
+        : false;
+    },
+
+    useexternal: () => {
+      return useproxy
+        ? proxies.filter((proxy) => {
+            return proxy.successping && !proxy.direct;
           }).length || !proxies.length
         : false;
     },
@@ -740,36 +1026,53 @@ var Api = function (app = {}) {
 
   self.wait = {
     ready: function (key, total) {
-      if (!key) key = 'use';
+      if (!key) key = "use";
 
-      console.log('WAIT', total, key);
-
-      return pretry(self.ready[key], 50, total);
+      return pretry(self.ready[key], 20, total);
     },
   };
 
   self.set = {
-    current: function (ncurrent, reconnectws) {
+    currentwithnode: function (ncurrent, reconnectws) {
       var proxy = self.get.byid(ncurrent);
 
-      if (!proxy) return Promise.reject('hasnt');
+      if (!proxy) return Promise.reject("hasnt");
 
       current = ncurrent;
 
-      localStorage['currentproxy'] = current;
+      localStorage["currentproxy"] = current;
 
-      if (reconnectws) app.platform.ws.reconnect();
+      return proxy.api.nodes.select().then((r) => {
+        if (reconnectws && app.platform.ws) app.platform.ws.reconnect();
 
-      return Promise.resolve();
+        return Promise.resolve(proxy);
+      });
+    },
+    current: function (ncurrent, reconnectws) {
+      var proxy = self.get.byid(ncurrent);
 
-      if (r.refresh) {
-        return proxy.refreshNodes();
-      } else return Promise.resolve();
+      if (!proxy) return Promise.reject("hasnt");
+
+      current = ncurrent;
+
+      localStorage["currentproxy"] = current;
+
+      if (reconnectws && app.platform.ws) app.platform.ws.reconnect();
+
+      return Promise.resolve(proxy);
     },
     fixednode: function (id) {
       fixednode = id;
 
-      localStorage['fixednode'] = fixednode;
+      localStorage["fixednode"] = fixednode;
+
+      if (fixednode) {
+        proxies.find(function (p) {
+          p.current = {
+            key: fixednode,
+          };
+        });
+      }
     },
   };
 
@@ -826,6 +1129,64 @@ var Api = function (app = {}) {
         });
       });
     },
+
+    direct: function () {
+      var _proxies = proxies.filter(function (proxy) {
+        return proxy.direct;
+      });
+
+      if (_proxies.length) {
+        return _proxies[0];
+      }
+    },
+
+    proxywithwallet: function () {
+      var f = false;
+      var e = false;
+      var es = 0;
+
+      proxies.each(function (p) {
+        p.get
+          .info()
+          .then((r) => {
+            var wallet = deep(r, "info.wallet.addresses.registration") || {};
+
+            if (wallet.ready && wallet.unspents) {
+              f = p;
+            }
+
+            return Promise.resolve();
+          })
+          .catch((e) => {
+            return Promise.resolve();
+          })
+          .finally(() => {
+            es++;
+
+            if (es >= proxies.length) {
+              e = true;
+            }
+
+            return Promise.resolve();
+          });
+      });
+
+      return pretry(function () {
+        return e || f;
+      }).then(() => {
+        return Promise.resolve(f);
+      });
+    },
+  };
+
+  var changeProxyFly = function () {
+    return self.get.working().then((wproxies) => {
+      if (wproxies.length) {
+        return self.set.currentwithnode(wproxies[0].id);
+      }
+
+      return Promise.reject("unableChangeProxy");
+    });
   };
 
   (self.changeProxyIfNeed = function () {
@@ -840,27 +1201,27 @@ var Api = function (app = {}) {
 
     return promise.then((r) => {
       if (r) {
-        return Promise.resolve();
+        return Promise.resolve(1);
       } else {
         return self.get.working().then((wproxies) => {
           if (wproxies.length) {
-            self.set.current(wproxies[0].id);
+            self.set.currentwithnode(wproxies[0].id, true);
           }
 
-          return Promise.resolve();
+          return Promise.resolve(wproxies.length);
         });
       }
     });
   }),
     (self.init = function () {
-      var f = localStorage['fixednode'];
+      var f = localStorage["fixednode"];
 
-      if (f) fixednode = f;
+      if (f && f != "null") fixednode = f;
 
       return internal.proxy.manage.init().then((r) => {
-        internal.proxy.api.ping(proxies).catch((e) => {
-          console.log('ERROR', e);
-        });
+        //softping
+
+        internal.proxy.api.mixedping(proxies).catch((e) => {});
 
         return Promise.resolve();
       });
@@ -879,4 +1240,4 @@ var Api = function (app = {}) {
   return self;
 };
 
-module.exports = { Api, ProxyRequest, Proxy16, Node };
+module.exports = { Api, ProxyRequest, Proxy16, ProxyNode };
