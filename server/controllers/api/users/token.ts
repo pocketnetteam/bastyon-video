@@ -6,7 +6,9 @@ import { CONFIG } from "@server/initializers/config"
 import {
   getAuthNameFromRefreshGrant,
   getBypassFromExternalAuth,
-  getBypassFromPasswordGrant
+  getBypassFromPasswordGrant,
+  setAuthBypassToken,
+  cleanupExpiredTokens
 } from "@server/lib/auth/external-auth"
 import { handleOAuthToken } from "@server/lib/auth/oauth"
 import { BypassLogin, revokeToken } from "@server/lib/auth/oauth-model"
@@ -50,22 +52,6 @@ api.init()
 
 const reputationController = new ReputationStorageController(MINUTES_STORED)
 
-// Token is the key, expiration date is the value
-const authBypassTokens = new Map<
-string,
-{
-  expires: Date
-  user: {
-    username: string
-    email: string
-    displayName: string
-    role: UserRole
-  }
-  authName: string
-  npmName: string
-}
->()
-
 async function createUserFromBlockChain (
   res: express.Response,
   address: String,
@@ -76,7 +62,7 @@ async function createUserFromBlockChain (
   const expires = new Date()
   expires.setTime(expires.getTime() + PLUGIN_EXTERNAL_AUTH_TOKEN_LIFETIME)
 
-  const user = {
+  const user: any = {
     username: address,
     email: `${address}@example.com`,
     role: UserRole.USER,
@@ -84,13 +70,15 @@ async function createUserFromBlockChain (
     userQuota
   }
 
+  setAuthBypassToken(bypassToken, {
+    expires,
+    user,
+    npmName: 'blockChainAuth',
+    authName: 'blockChainAuth'
+  })
+
   // Cleanup expired tokens
-  const now = new Date()
-  for (const [ key, value ] of authBypassTokens) {
-    if (value.expires.getTime() < now.getTime()) {
-      authBypassTokens.delete(key)
-    }
-  }
+  cleanupExpiredTokens()
 
   res.json({ externalAuthToken: bypassToken, username: user.username })
 }

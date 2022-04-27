@@ -70,6 +70,23 @@ async function onExternalUserAuthenticated (options: {
   res.redirect(`/login?externalAuthToken=${bypassToken}&username=${user.username}`)
 }
 
+function setAuthBypassToken (bypassToken: string, info: {
+  expires: Date
+  user: any
+  npmName: string
+  authName: string
+}) {
+  authBypassTokens.set(bypassToken, info)
+}
+function cleanupExpiredTokens () {
+  const now = new Date()
+  for (const [ key, value ] of authBypassTokens) {
+    if (value.expires.getTime() < now.getTime()) {
+      authBypassTokens.delete(key)
+    }
+  }
+}
+
 async function getAuthNameFromRefreshGrant (refreshToken?: string) {
   if (!refreshToken) return undefined
 
@@ -216,5 +233,7 @@ export {
   onExternalUserAuthenticated,
   getBypassFromExternalAuth,
   getAuthNameFromRefreshGrant,
-  getBypassFromPasswordGrant
+  getBypassFromPasswordGrant,
+  setAuthBypassToken,
+  cleanupExpiredTokens
 }
