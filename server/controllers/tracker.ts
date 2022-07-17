@@ -117,6 +117,7 @@ function createWebsocketTrackerServer (app: express.Application) {
       //   .catch(err => logger.error('Cannot check if tracker block ip exists.', { err }))
 
       return wss.handleUpgrade(request, socket as any, head, ws => wss.emit('connection', ws, request))
+
     }
 
     // Don't destroy socket, we have Socket.IO too

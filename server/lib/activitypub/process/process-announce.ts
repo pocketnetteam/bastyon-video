@@ -1,18 +1,22 @@
+import { getAPId } from '@server/lib/activitypub/activity'
 import { ActivityAnnounce } from '../../../../shared/models/activitypub'
 import { retryTransactionWrapper } from '../../../helpers/database-utils'
+import { logger } from '../../../helpers/logger'
 import { sequelizeTypescript } from '../../../initializers/database'
 import { VideoShareModel } from '../../../models/video/video-share'
-import { forwardVideoRelatedActivity } from '../send/utils'
-import { getOrCreateAPVideo } from '../videos'
-import { Notifier } from '../../notifier'
-import { logger } from '../../../helpers/logger'
 import { APProcessorOptions } from '../../../types/activitypub-processor.model'
 import { MActorSignature, MVideoAccountLightBlacklistAllFiles } from '../../../types/models'
+import { Notifier } from '../../notifier'
+import { forwardVideoRelatedActivity } from '../send/shared/send-utils'
+import { getOrCreateAPVideo } from '../videos'
 
 async function processAnnounceActivity (options: APProcessorOptions<ActivityAnnounce>) {
   const { activity, byActor: actorAnnouncer } = options
   // Only notify if it is not from a fetcher job
   const notify = options.fromFetch !== true
+
+  // Announces on accounts are not supported
+  if (actorAnnouncer.type !== 'Application' && actorAnnouncer.type !== 'Group') return
 
   return retryTransactionWrapper(processVideoShare, actorAnnouncer, activity, notify)
 }
@@ -26,7 +30,7 @@ export {
 // ---------------------------------------------------------------------------
 
 async function processVideoShare (actorAnnouncer: MActorSignature, activity: ActivityAnnounce, notify: boolean) {
-  const objectUri = typeof activity.object === 'string' ? activity.object : activity.object.id
+  const objectUri = getAPId(activity.object)
 
   let video: MVideoAccountLightBlacklistAllFiles
   let videoCreated: boolean

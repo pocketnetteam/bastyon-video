@@ -24,7 +24,6 @@ my-edit-button {
   padding-bottom: 0;
 
   my-actor-avatar {
-    @include actor-avatar-size(80px);
     @include margin-right(10px);
   }
 }
@@ -54,14 +53,19 @@ my-edit-button {
   color: $grey-actor-name;
 }
 
+.video-channel-followers {
+  color: pvar(--mainForegroundColor);
+}
+
 .video-channel-buttons {
   margin-top: 10px;
   min-width: 190px;
 }
 
-::ng-deep .chartjs-render-monitor {
-  position: relative;
-  top: 1px;
+.chart-container {
+  // Sync these values with the template
+  width: 40vw;
+  height: 100px;
 }
 
 .video-channels-header {

@@ -1,10 +1,19 @@
-import { uuidToShort } from '@server/helpers/uuid'
 import { generateMagnetUri } from '@server/helpers/webtorrent'
+import { getActivityStreamDuration } from '@server/lib/activitypub/activity'
 import { getLocalVideoFileMetadataUrl } from '@server/lib/video-urls'
-import { VideoFile } from '@shared/models/videos/video-file.model'
-import { ActivityTagObject, ActivityUrlObject, VideoObject } from '../../../../shared/models/activitypub/objects'
-import { Video, VideoDetails } from '../../../../shared/models/videos'
-import { VideoStreamingPlaylist } from '../../../../shared/models/videos/video-streaming-playlist.model'
+import { VideoViewsManager } from '@server/lib/views/video-views-manager'
+import { uuidToShort } from '@shared/extra-utils'
+import {
+  ActivityTagObject,
+  ActivityUrlObject,
+  Video,
+  VideoDetails,
+  VideoFile,
+  VideoInclude,
+  VideoObject,
+  VideosCommonQueryAfterSanitize,
+  VideoStreamingPlaylist
+} from '@shared/models'
 import { isArray } from '../../../helpers/custom-validators/misc'
 import {
   MIMETYPES,
@@ -22,6 +31,7 @@ import {
   getLocalVideoSharesActivityPubUrl
 } from '../../../lib/activitypub/url'
 import {
+  MServer,
   MStreamingPlaylistRedundanciesOpt,
   MVideo,
   MVideoAP,
@@ -34,21 +44,41 @@ import { VideoCaptionModel } from '../video-caption'
 
 export type VideoFormattingJSONOptions = {
   completeDescription?: boolean
-  additionalAttributes: {
+
+  additionalAttributes?: {
     state?: boolean
     waitTranscoding?: boolean
     scheduledUpdate?: boolean
     blacklistInfo?: boolean
+    files?: boolean
+    blockedOwner?: boolean
   }
 }
 
-function videoModelToFormattedJSON (video: MVideoFormattable, options?: VideoFormattingJSONOptions): Video {
+function guessAdditionalAttributesFromQuery (query: VideosCommonQueryAfterSanitize): VideoFormattingJSONOptions {
+  if (!query || !query.include) return {}
+
+  return {
+    additionalAttributes: {
+      state: !!(query.include & VideoInclude.NOT_PUBLISHED_STATE),
+      waitTranscoding: !!(query.include & VideoInclude.NOT_PUBLISHED_STATE),
+      scheduledUpdate: !!(query.include & VideoInclude.NOT_PUBLISHED_STATE),
+      blacklistInfo: !!(query.include & VideoInclude.BLACKLISTED),
+      files: !!(query.include & VideoInclude.FILES),
+      blockedOwner: !!(query.include & VideoInclude.BLOCKED_OWNER)
+    }
+  }
+}
+
+function videoModelToFormattedJSON (video: MVideoFormattable, options: VideoFormattingJSONOptions = {}): Video {
   const userHistory = isArray(video.UserVideoHistories) ? video.UserVideoHistories[0] : undefined
 
   const videoObject: Video = {
     id: video.id,
     uuid: video.uuid,
     shortUUID: uuidToShort(video.uuid),
+
+    url: video.url,
 
     name: video.name,
     category: {
@@ -75,7 +105,10 @@ function videoModelToFormattedJSON (video: MVideoFormattable, options?: VideoFor
 
     isLocal: video.isOwned(),
     duration: video.duration,
+
     views: video.views,
+    viewers: VideoViewsManager.Instance.getViewers(video),
+
     likes: video.likes,
     dislikes: video.dislikes,
     thumbnailPath: video.getMiniatureStaticPath(),
@@ -101,45 +134,55 @@ function videoModelToFormattedJSON (video: MVideoFormattable, options?: VideoFor
     pluginData: (video as any).pluginData
   }
 
-  if (options) {
-    if (options.additionalAttributes.state === true) {
-      videoObject.state = {
-        id: video.state,
-        label: getStateLabel(video.state)
-      }
+  const add = options.additionalAttributes
+  if (add?.state === true) {
+    videoObject.state = {
+      id: video.state,
+      label: getStateLabel(video.state)
     }
+  }
 
-    if (options.additionalAttributes.waitTranscoding === true) {
-      videoObject.waitTranscoding = video.waitTranscoding
-    }
+  if (add?.waitTranscoding === true) {
+    videoObject.waitTranscoding = video.waitTranscoding
+  }
 
-    if (options.additionalAttributes.scheduledUpdate === true && video.ScheduleVideoUpdate) {
-      videoObject.scheduledUpdate = {
-        updateAt: video.ScheduleVideoUpdate.updateAt,
-        privacy: video.ScheduleVideoUpdate.privacy || undefined
-      }
+  if (add?.scheduledUpdate === true && video.ScheduleVideoUpdate) {
+    videoObject.scheduledUpdate = {
+      updateAt: video.ScheduleVideoUpdate.updateAt,
+      privacy: video.ScheduleVideoUpdate.privacy || undefined
     }
+  }
 
-    if (options.additionalAttributes.blacklistInfo === true) {
-      videoObject.blacklisted = !!video.VideoBlacklist
-      videoObject.blacklistedReason = video.VideoBlacklist ? video.VideoBlacklist.reason : null
-    }
+  if (add?.blacklistInfo === true) {
+    videoObject.blacklisted = !!video.VideoBlacklist
+    videoObject.blacklistedReason = video.VideoBlacklist ? video.VideoBlacklist.reason : null
+  }
+
+  if (add?.blockedOwner === true) {
+    videoObject.blockedOwner = video.VideoChannel.Account.isBlocked()
+
+    const server = video.VideoChannel.Account.Actor.Server as MServer
+    videoObject.blockedServer = !!(server?.isBlocked())
+  }
+
+  if (add?.files === true) {
+    videoObject.streamingPlaylists = streamingPlaylistsModelToFormattedJSON(video, video.VideoStreamingPlaylists)
+    videoObject.files = videoFilesModelToFormattedJSON(video, video.VideoFiles)
   }
 
   return videoObject
 }
 
 function videoModelToFormattedDetailsJSON (video: MVideoFormattableDetails): VideoDetails {
-  const formattedJson = video.toFormattedJSON({
+  const videoJSON = video.toFormattedJSON({
     additionalAttributes: {
       scheduledUpdate: true,
-      blacklistInfo: true
+      blacklistInfo: true,
+      files: true
     }
-  })
+  }) as Video & Required<Pick<Video, 'files' | 'streamingPlaylists'>>
 
   const tags = video.Tags ? video.Tags.map(t => t.name) : []
-
-  const streamingPlaylists = streamingPlaylistsModelToFormattedJSON(video, video.VideoStreamingPlaylists)
 
   const redundancies = isArray(
     video.VideoStreamingPlaylists?.[0]?.RedundancyVideos
@@ -149,7 +192,7 @@ function videoModelToFormattedDetailsJSON (video: MVideoFormattableDetails): Vid
 
   const videoIsMirrored = !!redundancies.length
 
-  const detailsJson = {
+  const detailsJSON = {
     support: video.support,
     descriptionPath: video.getDescriptionAPIPath(),
     channel: video.VideoChannel.toFormattedJSON(),
@@ -164,21 +207,14 @@ function videoModelToFormattedDetailsJSON (video: MVideoFormattableDetails): Vid
     },
 
     trackerUrls: video.getTrackerUrls(videoIsMirrored),
-
-    files: [],
-    streamingPlaylists,
-
     aspectRatio: video.aspectRatio
   }
 
-  // Format and sort video files
-  detailsJson.files = videoFilesModelToFormattedJSON(video, video.VideoFiles)
-
-  return Object.assign(formattedJson, detailsJson)
+  return Object.assign(videoJSON, detailsJSON)
 }
 
 function streamingPlaylistsModelToFormattedJSON (
-  video: MVideoFormattableDetails,
+  video: MVideoFormattable,
   playlists: MStreamingPlaylistRedundanciesOpt[]
 ): VideoStreamingPlaylist[] {
   if (isArray(playlists) === false) return []
@@ -211,7 +247,7 @@ function sortByResolutionDesc (fileA: MVideoFile, fileB: MVideoFile) {
 }
 
 function videoFilesModelToFormattedJSON (
-  video: MVideoFormattableDetails,
+  video: MVideoFormattable,
   videoFiles: MVideoFileRedundanciesOpt[],
   includeMagnet = true
 ): VideoFile[] {
@@ -395,17 +431,8 @@ function videoModelToActivityPubObject (video: MVideoAP): VideoObject {
     views: video.views,
     sensitive: video.nsfw,
     waitTranscoding: video.waitTranscoding,
-    isLiveBroadcast: video.isLive,
 
     aspectRatio: video.aspectRatio,
-
-    liveSaveReplay: video.isLive
-      ? video.VideoLive.saveReplay
-      : null,
-
-    permanentLive: video.isLive
-      ? video.VideoLive.permanentLive
-      : null,
 
     state: video.state,
     commentsEnabled: video.commentsEnabled,
@@ -417,10 +444,13 @@ function videoModelToActivityPubObject (video: MVideoAP): VideoObject {
       : null,
 
     updated: video.updatedAt.toISOString(),
+
     mediaType: 'text/markdown',
     content: video.description,
     support: video.support,
+
     subtitleLanguage,
+
     icon: icons.map(i => ({
       type: 'Image',
       url: i.getFileUrl(video),
@@ -428,7 +458,9 @@ function videoModelToActivityPubObject (video: MVideoAP): VideoObject {
       width: i.width,
       height: i.height
     })),
+
     url,
+
     likes: getLocalVideoLikesActivityPubUrl(video),
     dislikes: getLocalVideoDislikesActivityPubUrl(video),
     shares: getLocalVideoSharesActivityPubUrl(video),
@@ -442,13 +474,10 @@ function videoModelToActivityPubObject (video: MVideoAP): VideoObject {
         type: 'Group',
         id: video.VideoChannel.Actor.url
       }
-    ]
-  }
-}
+    ],
 
-function getActivityStreamDuration (duration: number) {
-  // https://www.w3.org/TR/activitystreams-vocabulary/#dfn-duration
-  return 'PT' + duration + 'S'
+    ...buildLiveAPAttributes(video)
+  }
 }
 
 function getCategoryLabel (id: number) {
@@ -476,11 +505,32 @@ export {
   videoModelToFormattedDetailsJSON,
   videoFilesModelToFormattedJSON,
   videoModelToActivityPubObject,
-  getActivityStreamDuration,
+
+  guessAdditionalAttributesFromQuery,
 
   getCategoryLabel,
   getLicenceLabel,
   getLanguageLabel,
   getPrivacyLabel,
   getStateLabel
+}
+
+// ---------------------------------------------------------------------------
+
+function buildLiveAPAttributes (video: MVideoAP) {
+  if (!video.isLive) {
+    return {
+      isLiveBroadcast: false,
+      liveSaveReplay: null,
+      permanentLive: null,
+      latencyMode: null
+    }
+  }
+
+  return {
+    isLiveBroadcast: true,
+    liveSaveReplay: video.VideoLive.saveReplay,
+    permanentLive: video.VideoLive.permanentLive,
+    latencyMode: video.VideoLive.latencyMode
+  }
 }

@@ -1,12 +1,14 @@
-import { ClientScript } from '../plugins/plugin-package-json.model'
+import { VideoPrivacy } from '../videos/video-privacy.enum'
+import { ClientScriptJSON } from '../plugins/plugin-package-json.model'
 import { NSFWPolicyType } from '../videos/nsfw-policy.type'
 import { BroadcastMessageLevel } from './broadcast-message-level.type'
 
 export interface ServerConfigPlugin {
   name: string
+  npmName: string
   version: string
   description: string
-  clientScripts: { [name: string]: ClientScript }
+  clientScripts: { [name: string]: ClientScriptJSON }
 }
 
 export interface ServerConfigTheme extends ServerConfigPlugin {
@@ -32,6 +34,51 @@ export interface RegisteredIdAndPassAuthConfig {
 export interface ServerConfig {
   serverVersion: string
   serverCommit?: string
+
+  client: {
+    videos: {
+      miniature: {
+        displayAuthorAvatar: boolean
+        preferAuthorDisplayName: boolean
+      }
+      resumableUpload: {
+        maxChunkSize: number
+      }
+    }
+
+    menu: {
+      login: {
+        redirectOnSingleExternalAuth: boolean
+      }
+    }
+  }
+
+  defaults: {
+    publish: {
+      downloadEnabled: boolean
+      commentsEnabled: boolean
+      privacy: VideoPrivacy
+      licence: number
+    }
+
+    p2p: {
+      webapp: {
+        enabled: boolean
+      }
+
+      embed: {
+        enabled: boolean
+      }
+    }
+  }
+
+  webadmin: {
+    configuration: {
+      edition: {
+        allowed: boolean
+      }
+    }
+  }
 
   instance: {
     name: string
@@ -105,10 +152,14 @@ export interface ServerConfig {
   live: {
     enabled: boolean
 
+    allowReplay: boolean
+    latencySetting: {
+      enabled: boolean
+    }
+
     maxDuration: number
     maxInstanceLives: number
     maxUserLives: number
-    allowReplay: boolean
 
     transcoding: {
       enabled: boolean
@@ -122,6 +173,10 @@ export interface ServerConfig {
     rtmp: {
       port: number
     }
+  }
+
+  videoStudio: {
+    enabled: boolean
   }
 
   import: {
@@ -185,6 +240,10 @@ export interface ServerConfig {
   user: {
     videoQuota: number
     videoQuotaDaily: number
+  }
+
+  videoChannels: {
+    maxPerUser: number
   }
 
   trending: {

@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions,@typescript-eslint/require-await */
 
 import 'mocha'
+import { expect } from 'chai'
 import { omit } from 'lodash'
+import { buildAbsoluteFixturePath } from '@shared/core-utils'
+import { HttpStatusCode, LiveVideoLatencyMode, VideoCreateResult, VideoPrivacy } from '@shared/models'
 import {
-  buildAbsoluteFixturePath,
   cleanupTests,
   createSingleServer,
   LiveCommand,
@@ -13,8 +15,7 @@ import {
   sendRTMPStream,
   setAccessTokensToServers,
   stopFfmpeg
-} from '@shared/extra-utils'
-import { HttpStatusCode, VideoCreateResult, VideoPrivacy } from '@shared/models'
+} from '@shared/server-commands'
 
 describe('Test video lives API validator', function () {
   const path = '/api/v1/videos/live'
@@ -38,6 +39,9 @@ describe('Test video lives API validator', function () {
       newConfig: {
         live: {
           enabled: true,
+          latencySetting: {
+            enabled: false
+          },
           maxInstanceLives: 20,
           maxUserLives: 20,
           allowReplay: true
@@ -81,7 +85,8 @@ describe('Test video lives API validator', function () {
         privacy: VideoPrivacy.PUBLIC,
         channelId,
         saveReplay: false,
-        permanentLive: false
+        permanentLive: false,
+        latencyMode: LiveVideoLatencyMode.DEFAULT
       }
     })
 
@@ -208,10 +213,16 @@ describe('Test video lives API validator', function () {
       await makeUploadRequest({ url: server.url, path, token: server.accessToken, fields, attaches })
     })
 
-    it('Should fail with save replay and permanent live set to true', async function () {
-      const fields = { ...baseCorrectParams, saveReplay: true, permanentLive: true }
+    it('Should fail with bad latency setting', async function () {
+      const fields = { ...baseCorrectParams, latencyMode: 42 }
 
       await makePostBodyRequest({ url: server.url, path, token: server.accessToken, fields })
+    })
+
+    it('Should fail to set latency if the server does not allow it', async function () {
+      const fields = { ...baseCorrectParams, latencyMode: LiveVideoLatencyMode.HIGH_LATENCY }
+
+      await makePostBodyRequest({ url: server.url, path, token: server.accessToken, fields, expectedStatus: HttpStatusCode.FORBIDDEN_403 })
     })
 
     it('Should succeed with the correct parameters', async function () {
@@ -330,16 +341,32 @@ describe('Test video lives API validator', function () {
 
   describe('When getting live information', function () {
 
-    it('Should fail without access token', async function () {
-      await command.get({ token: '', videoId: video.id, expectedStatus: HttpStatusCode.UNAUTHORIZED_401 })
-    })
-
     it('Should fail with a bad access token', async function () {
       await command.get({ token: 'toto', videoId: video.id, expectedStatus: HttpStatusCode.UNAUTHORIZED_401 })
     })
 
-    it('Should fail with access token of another user', async function () {
-      await command.get({ token: userAccessToken, videoId: video.id, expectedStatus: HttpStatusCode.FORBIDDEN_403 })
+    it('Should not display private information without access token', async function () {
+      const live = await command.get({ token: '', videoId: video.id })
+
+      expect(live.rtmpUrl).to.not.exist
+      expect(live.streamKey).to.not.exist
+      expect(live.latencyMode).to.exist
+    })
+
+    it('Should not display private information with token of another user', async function () {
+      const live = await command.get({ token: userAccessToken, videoId: video.id })
+
+      expect(live.rtmpUrl).to.not.exist
+      expect(live.streamKey).to.not.exist
+      expect(live.latencyMode).to.exist
+    })
+
+    it('Should display private information with appropriate token', async function () {
+      const live = await command.get({ videoId: video.id })
+
+      expect(live.rtmpUrl).to.exist
+      expect(live.streamKey).to.exist
+      expect(live.latencyMode).to.exist
     })
 
     it('Should fail with a bad video id', async function () {
@@ -358,6 +385,52 @@ describe('Test video lives API validator', function () {
       await command.get({ videoId: video.id })
       await command.get({ videoId: video.uuid })
       await command.get({ videoId: video.shortUUID })
+    })
+  })
+
+  describe('When getting live sessions', function () {
+
+    it('Should fail with a bad access token', async function () {
+      await command.listSessions({ token: 'toto', videoId: video.id, expectedStatus: HttpStatusCode.UNAUTHORIZED_401 })
+    })
+
+    it('Should fail without token', async function () {
+      await command.listSessions({ token: null, videoId: video.id, expectedStatus: HttpStatusCode.UNAUTHORIZED_401 })
+    })
+
+    it('Should fail with the token of another user', async function () {
+      await command.listSessions({ token: userAccessToken, videoId: video.id, expectedStatus: HttpStatusCode.FORBIDDEN_403 })
+    })
+
+    it('Should fail with a bad video id', async function () {
+      await command.listSessions({ videoId: 'toto', expectedStatus: HttpStatusCode.BAD_REQUEST_400 })
+    })
+
+    it('Should fail with an unknown video id', async function () {
+      await command.listSessions({ videoId: 454555, expectedStatus: HttpStatusCode.NOT_FOUND_404 })
+    })
+
+    it('Should fail with a non live video', async function () {
+      await command.listSessions({ videoId: videoIdNotLive, expectedStatus: HttpStatusCode.NOT_FOUND_404 })
+    })
+
+    it('Should succeed with the correct params', async function () {
+      await command.listSessions({ videoId: video.id })
+    })
+  })
+
+  describe('When getting live session of a replay', function () {
+
+    it('Should fail with a bad video id', async function () {
+      await command.getReplaySession({ videoId: 'toto', expectedStatus: HttpStatusCode.BAD_REQUEST_400 })
+    })
+
+    it('Should fail with an unknown video id', async function () {
+      await command.getReplaySession({ videoId: 454555, expectedStatus: HttpStatusCode.NOT_FOUND_404 })
+    })
+
+    it('Should fail with a non replay video', async function () {
+      await command.getReplaySession({ videoId: videoIdNotLive, expectedStatus: HttpStatusCode.NOT_FOUND_404 })
     })
   })
 
@@ -387,10 +460,16 @@ describe('Test video lives API validator', function () {
       await command.update({ videoId: videoIdNotLive, fields: {}, expectedStatus: HttpStatusCode.NOT_FOUND_404 })
     })
 
-    it('Should fail with save replay and permanent live set to true', async function () {
-      const fields = { saveReplay: true, permanentLive: true }
+    it('Should fail with bad latency setting', async function () {
+      const fields = { latencyMode: 42 }
 
       await command.update({ videoId: video.id, fields, expectedStatus: HttpStatusCode.BAD_REQUEST_400 })
+    })
+
+    it('Should fail to set latency if the server does not allow it', async function () {
+      const fields = { latencyMode: LiveVideoLatencyMode.HIGH_LATENCY }
+
+      await command.update({ videoId: video.id, fields, expectedStatus: HttpStatusCode.FORBIDDEN_403 })
     })
 
     it('Should succeed with the correct params', async function () {

@@ -2,19 +2,19 @@
 
 import 'mocha'
 import * as chai from 'chai'
+import { HttpStatusCode, VideoDetails, VideoImportState, VideoPlaylist, VideoPlaylistPrivacy, VideoPrivacy } from '@shared/models'
 import {
   cleanupTests,
   createMultipleServers,
   doubleFollow,
-  FIXTURE_URLS,
   makeRawRequest,
   PeerTubeServer,
   PluginsCommand,
   setAccessTokensToServers,
   setDefaultVideoChannel,
   waitJobs
-} from '@shared/extra-utils'
-import { HttpStatusCode, VideoDetails, VideoImportState, VideoPlaylist, VideoPlaylistPrivacy, VideoPrivacy } from '@shared/models'
+} from '@shared/server-commands'
+import { FIXTURE_URLS } from '../shared'
 
 const expect = chai.expect
 
@@ -22,6 +22,7 @@ describe('Test plugin filter hooks', function () {
   let servers: PeerTubeServer[]
   let videoUUID: string
   let threadId: number
+  let videoPlaylistUUID: string
 
   before(async function () {
     this.timeout(60000)
@@ -33,9 +34,20 @@ describe('Test plugin filter hooks', function () {
 
     await servers[0].plugins.install({ path: PluginsCommand.getPluginTestPath() })
     await servers[0].plugins.install({ path: PluginsCommand.getPluginTestPath('-filter-translations') })
+    {
+      ({ uuid: videoPlaylistUUID } = await servers[0].playlists.create({
+        attributes: {
+          displayName: 'my super playlist',
+          privacy: VideoPlaylistPrivacy.PUBLIC,
+          description: 'my super description',
+          videoChannelId: servers[0].store.channel.id
+        }
+      }))
+    }
 
     for (let i = 0; i < 10; i++) {
-      await servers[0].videos.upload({ attributes: { name: 'default video ' + i } })
+      const video = await servers[0].videos.upload({ attributes: { name: 'default video ' + i } })
+      await servers[0].playlists.addElement({ playlistId: videoPlaylistUUID, attributes: { videoId: video.id } })
     }
 
     const { data } = await servers[0].videos.list()
@@ -64,6 +76,26 @@ describe('Test plugin filter hooks', function () {
 
   it('Should run filter:api.videos.list.result', async function () {
     const { total } = await servers[0].videos.list({ start: 0, count: 0 })
+
+    // Plugin do +1 to the total result
+    expect(total).to.equal(11)
+  })
+
+  it('Should run filter:api.video-playlist.videos.list.params', async function () {
+    const { data } = await servers[0].playlists.listVideos({
+      count: 2,
+      playlistId: videoPlaylistUUID
+    })
+
+    // 1 plugin do +1 to the count parameter
+    expect(data).to.have.lengthOf(3)
+  })
+
+  it('Should run filter:api.video-playlist.videos.list.result', async function () {
+    const { total } = await servers[0].playlists.listVideos({
+      count: 0,
+      playlistId: videoPlaylistUUID
+    })
 
     // Plugin do +1 to the total result
     expect(total).to.equal(11)
@@ -410,13 +442,7 @@ describe('Test plugin filter hooks', function () {
     before(async function () {
       this.timeout(60000)
 
-      await servers[0].config.updateCustomSubConfig({
-        newConfig: {
-          transcoding: {
-            enabled: false
-          }
-        }
-      })
+      await servers[0].config.disableTranscoding()
 
       for (const name of [ 'bad embed', 'good embed' ]) {
         {
@@ -535,6 +561,75 @@ describe('Test plugin filter hooks', function () {
       await servers[0].servers.waitUntilLog('Run hook filter:api.search.video-playlists.index.list.params', 1)
       await servers[0].servers.waitUntilLog('Run hook filter:api.search.video-playlists.index.list.result', 1)
     })
+  })
+
+  describe('Upload/import/live attributes filters', function () {
+
+    before(async function () {
+      await servers[0].config.enableLive({ transcoding: false, allowReplay: false })
+      await servers[0].config.enableImports()
+      await servers[0].config.disableTranscoding()
+    })
+
+    it('Should run filter:api.video.upload.video-attribute.result', async function () {
+      for (const mode of [ 'legacy' as 'legacy', 'resumable' as 'resumable' ]) {
+        const { id } = await servers[0].videos.upload({ attributes: { name: 'video', description: 'upload' }, mode })
+
+        const video = await servers[0].videos.get({ id })
+        expect(video.description).to.equal('upload - filter:api.video.upload.video-attribute.result')
+      }
+    })
+
+    it('Should run filter:api.video.import-url.video-attribute.result', async function () {
+      const attributes = {
+        name: 'video',
+        description: 'import url',
+        channelId: servers[0].store.channel.id,
+        targetUrl: FIXTURE_URLS.goodVideo,
+        privacy: VideoPrivacy.PUBLIC
+      }
+      const { video: { id } } = await servers[0].imports.importVideo({ attributes })
+
+      const video = await servers[0].videos.get({ id })
+      expect(video.description).to.equal('import url - filter:api.video.import-url.video-attribute.result')
+    })
+
+    it('Should run filter:api.video.import-torrent.video-attribute.result', async function () {
+      const attributes = {
+        name: 'video',
+        description: 'import torrent',
+        channelId: servers[0].store.channel.id,
+        magnetUri: FIXTURE_URLS.magnet,
+        privacy: VideoPrivacy.PUBLIC
+      }
+      const { video: { id } } = await servers[0].imports.importVideo({ attributes })
+
+      const video = await servers[0].videos.get({ id })
+      expect(video.description).to.equal('import torrent - filter:api.video.import-torrent.video-attribute.result')
+    })
+
+    it('Should run filter:api.video.live.video-attribute.result', async function () {
+      const fields = {
+        name: 'live',
+        description: 'live',
+        channelId: servers[0].store.channel.id,
+        privacy: VideoPrivacy.PUBLIC
+      }
+      const { id } = await servers[0].live.create({ fields })
+
+      const video = await servers[0].videos.get({ id })
+      expect(video.description).to.equal('live - filter:api.video.live.video-attribute.result')
+    })
+  })
+
+  describe('Stats filters', function () {
+
+    it('Should run filter:api.server.stats.get.result', async function () {
+      const data = await servers[0].stats.get()
+
+      expect((data as any).customStats).to.equal(14)
+    })
+
   })
 
   after(async function () {

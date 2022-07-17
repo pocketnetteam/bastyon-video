@@ -1,9 +1,5 @@
 @use '_mixins' as *;
 
-@mixin main {
-  @include actor-avatar-size(35px);
-}
-
 @mixin secondary {
   height: 60%;
   width: 60%;
@@ -14,29 +10,12 @@
 }
 
 .wrapper {
-  @include actor-avatar-size(35px);
   @include margin-right(5px);
 
   position: relative;
   margin-bottom: 5px;
 
-  &.generic-channel {
-    .account {
-      @include main();
-    }
-
-    .channel {
-      display: none !important;
-    }
-  }
-
-  &:not(.generic-channel) {
-    .account {
-      @include secondary();
-    }
-
-    .channel {
-      @include main();
-    }
+  .second-avatar {
+    @include secondary();
   }
 }

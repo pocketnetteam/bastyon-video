@@ -1,15 +1,21 @@
 import express from 'express'
 import { body, param, query } from 'express-validator'
 import { MUserAccountUrl } from '@server/types/models'
-import { UserRight } from '../../../../shared'
-import { HttpStatusCode } from '../../../../shared/models/http/http-error-codes'
+import { HttpStatusCode, UserRight } from '@shared/models'
 import { exists, isBooleanValid, isIdValid, toBooleanOrNull } from '../../../helpers/custom-validators/misc'
 import { isValidVideoCommentText } from '../../../helpers/custom-validators/video-comments'
 import { logger } from '../../../helpers/logger'
 import { AcceptResult, isLocalVideoCommentReplyAccepted, isLocalVideoThreadAccepted } from '../../../lib/moderation'
 import { Hooks } from '../../../lib/plugins/hooks'
 import { MCommentOwnerVideoReply, MVideo, MVideoFullLight } from '../../../types/models/video'
-import { areValidationErrors, doesVideoCommentExist, doesVideoCommentThreadExist, doesVideoExist, isValidVideoIdParam } from '../shared'
+import {
+  areValidationErrors,
+  checkCanSeeVideoIfPrivate,
+  doesVideoCommentExist,
+  doesVideoCommentThreadExist,
+  doesVideoExist,
+  isValidVideoIdParam
+} from '../shared'
 
 const listVideoCommentsValidator = [
   query('isLocal')
@@ -48,6 +54,8 @@ const listVideoCommentThreadsValidator = [
     if (areValidationErrors(req, res)) return
     if (!await doesVideoExist(req.params.videoId, res, 'only-video')) return
 
+    if (!await checkCanSeeVideoIfPrivate(req, res, res.locals.onlyVideo)) return
+
     return next()
   }
 ]
@@ -65,6 +73,8 @@ const listVideoThreadCommentsValidator = [
     if (!await doesVideoExist(req.params.videoId, res, 'only-video')) return
     if (!await doesVideoCommentThreadExist(req.params.threadId, res.locals.onlyVideo, res)) return
 
+    if (!await checkCanSeeVideoIfPrivate(req, res, res.locals.onlyVideo)) return
+
     return next()
   }
 ]
@@ -80,6 +90,9 @@ const addVideoCommentThreadValidator = [
 
     if (areValidationErrors(req, res)) return
     if (!await doesVideoExist(req.params.videoId, res)) return
+
+    if (!await checkCanSeeVideoIfPrivate(req, res, res.locals.videoAll)) return
+
     if (!isVideoCommentsEnabled(res.locals.videoAll, res)) return
     if (!await isVideoCommentAccepted(req, res, res.locals.videoAll, false)) return
 
@@ -99,6 +112,9 @@ const addVideoCommentReplyValidator = [
 
     if (areValidationErrors(req, res)) return
     if (!await doesVideoExist(req.params.videoId, res)) return
+
+    if (!await checkCanSeeVideoIfPrivate(req, res, res.locals.videoAll)) return
+
     if (!isVideoCommentsEnabled(res.locals.videoAll, res)) return
     if (!await doesVideoCommentExist(req.params.commentId, res.locals.videoAll, res)) return
     if (!await isVideoCommentAccepted(req, res, res.locals.videoAll, true)) return

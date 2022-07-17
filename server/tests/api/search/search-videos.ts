@@ -2,6 +2,8 @@
 
 import 'mocha'
 import * as chai from 'chai'
+import { wait } from '@shared/core-utils'
+import { VideoPrivacy } from '@shared/models'
 import {
   cleanupTests,
   createSingleServer,
@@ -9,11 +11,11 @@ import {
   PeerTubeServer,
   SearchCommand,
   setAccessTokensToServers,
+  setDefaultAccountAvatar,
+  setDefaultChannelAvatar,
   setDefaultVideoChannel,
-  stopFfmpeg,
-  wait
-} from '@shared/extra-utils'
-import { VideoPrivacy } from '@shared/models'
+  stopFfmpeg
+} from '@shared/server-commands'
 
 const expect = chai.expect
 
@@ -27,7 +29,7 @@ describe('Test videos search', function () {
   let command: SearchCommand
 
   before(async function () {
-    this.timeout(120000)
+    this.timeout(240000)
 
     const servers = await Promise.all([
       createSingleServer(1),
@@ -38,6 +40,8 @@ describe('Test videos search', function () {
 
     await setAccessTokensToServers([ server, remoteServer ])
     await setDefaultVideoChannel([ server, remoteServer ])
+    await setDefaultChannelAvatar(server)
+    await setDefaultAccountAvatar(servers)
 
     {
       const attributes1 = {

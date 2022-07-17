@@ -3,11 +3,12 @@ import { CONFIG, isEmailEnabled } from '@server/initializers/config'
 import { CONSTRAINTS_FIELDS, DEFAULT_THEME_NAME, PEERTUBE_VERSION } from '@server/initializers/constants'
 import { isSignupAllowed, isSignupAllowedForCurrentIP } from '@server/lib/signup'
 import { ActorCustomPageModel } from '@server/models/account/actor-custom-page'
+import { PluginModel } from '@server/models/server/plugin'
 import { HTMLServerConfig, RegisteredExternalAuthConfig, RegisteredIdAndPassAuthConfig, ServerConfig } from '@shared/models'
 import { Hooks } from './plugins/hooks'
 import { PluginManager } from './plugins/plugin-manager'
 import { getThemeOrDefault } from './plugins/theme-utils'
-import { VideoTranscodingProfilesManager } from './transcoding/video-transcoding-profiles'
+import { VideoTranscodingProfilesManager } from './transcoding/default-transcoding-profiles'
 
 /**
  *
@@ -42,6 +43,48 @@ class ServerConfigManager {
     const defaultTheme = getThemeOrDefault(CONFIG.THEME.DEFAULT, DEFAULT_THEME_NAME)
 
     return {
+      client: {
+        videos: {
+          miniature: {
+            displayAuthorAvatar: CONFIG.CLIENT.VIDEOS.MINIATURE.DISPLAY_AUTHOR_AVATAR,
+            preferAuthorDisplayName: CONFIG.CLIENT.VIDEOS.MINIATURE.PREFER_AUTHOR_DISPLAY_NAME
+          },
+          resumableUpload: {
+            maxChunkSize: CONFIG.CLIENT.VIDEOS.RESUMABLE_UPLOAD.MAX_CHUNK_SIZE
+          }
+        },
+        menu: {
+          login: {
+            redirectOnSingleExternalAuth: CONFIG.CLIENT.MENU.LOGIN.REDIRECT_ON_SINGLE_EXTERNAL_AUTH
+          }
+        }
+      },
+
+      defaults: {
+        publish: {
+          downloadEnabled: CONFIG.DEFAULTS.PUBLISH.DOWNLOAD_ENABLED,
+          commentsEnabled: CONFIG.DEFAULTS.PUBLISH.COMMENTS_ENABLED,
+          privacy: CONFIG.DEFAULTS.PUBLISH.PRIVACY,
+          licence: CONFIG.DEFAULTS.PUBLISH.LICENCE
+        },
+        p2p: {
+          webapp: {
+            enabled: CONFIG.DEFAULTS.P2P.WEBAPP.ENABLED
+          },
+          embed: {
+            enabled: CONFIG.DEFAULTS.P2P.EMBED.ENABLED
+          }
+        }
+      },
+
+      webadmin: {
+        configuration: {
+          edition: {
+            allowed: CONFIG.WEBADMIN.CONFIGURATION.EDITION.ALLOWED
+          }
+        }
+      },
+
       instance: {
         name: CONFIG.INSTANCE.NAME,
         shortDescription: CONFIG.INSTANCE.SHORT_DESCRIPTION,
@@ -97,6 +140,10 @@ class ServerConfigManager {
         enabled: CONFIG.LIVE.ENABLED,
 
         allowReplay: CONFIG.LIVE.ALLOW_REPLAY,
+        latencySetting: {
+          enabled: CONFIG.LIVE.LATENCY_SETTING.ENABLED
+        },
+
         maxDuration: CONFIG.LIVE.MAX_DURATION,
         maxInstanceLives: CONFIG.LIVE.MAX_INSTANCE_LIVES,
         maxUserLives: CONFIG.LIVE.MAX_USER_LIVES,
@@ -111,6 +158,9 @@ class ServerConfigManager {
         rtmp: {
           port: CONFIG.LIVE.RTMP.PORT
         }
+      },
+      videoStudio: {
+        enabled: CONFIG.VIDEO_STUDIO.ENABLED
       },
       import: {
         videos: {
@@ -167,6 +217,9 @@ class ServerConfigManager {
       user: {
         videoQuota: CONFIG.USER.VIDEO_QUOTA,
         videoQuotaDaily: CONFIG.USER.VIDEO_QUOTA_DAILY
+      },
+      videoChannels: {
+        maxPerUser: CONFIG.VIDEO_CHANNELS.MAX_PER_USER
       },
       trending: {
         videos: {
@@ -228,6 +281,7 @@ class ServerConfigManager {
   getRegisteredThemes () {
     return PluginManager.Instance.getRegisteredThemes()
                         .map(t => ({
+                          npmName: PluginModel.buildNpmName(t.name, t.type),
                           name: t.name,
                           version: t.version,
                           description: t.description,
@@ -239,6 +293,7 @@ class ServerConfigManager {
   getRegisteredPlugins () {
     return PluginManager.Instance.getRegisteredPlugins()
                         .map(p => ({
+                          npmName: PluginModel.buildNpmName(p.name, p.type),
                           name: p.name,
                           version: p.version,
                           description: p.description,

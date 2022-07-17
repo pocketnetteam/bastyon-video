@@ -1,9 +1,9 @@
-import { ActivityFollow, ActivityReject } from '../../../../shared/models/activitypub'
+import { ActivityFollow, ActivityReject } from '@shared/models'
 import { logger } from '../../../helpers/logger'
 import { MActor } from '../../../types/models'
 import { getLocalActorFollowRejectActivityPubUrl } from '../url'
 import { buildFollowActivity } from './send-follow'
-import { unicastTo } from './utils'
+import { unicastTo } from './shared/send-utils'
 
 function sendReject (followUrl: string, follower: MActor, following: MActor) {
   if (!follower.serverId) { // This should never happen
@@ -18,7 +18,7 @@ function sendReject (followUrl: string, follower: MActor, following: MActor) {
   const url = getLocalActorFollowRejectActivityPubUrl(follower, following)
   const data = buildRejectActivity(url, following, followData)
 
-  return unicastTo(data, following, follower.inboxUrl)
+  return unicastTo({ data, byActor: following, toActorUrl: follower.inboxUrl, contextType: 'Reject' })
 }
 
 // ---------------------------------------------------------------------------

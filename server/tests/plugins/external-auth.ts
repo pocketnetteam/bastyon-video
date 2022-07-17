@@ -2,16 +2,16 @@
 
 import 'mocha'
 import { expect } from 'chai'
+import { wait } from '@shared/core-utils'
+import { HttpStatusCode, UserRole } from '@shared/models'
 import {
   cleanupTests,
   createSingleServer,
   decodeQueryString,
   PeerTubeServer,
   PluginsCommand,
-  setAccessTokensToServers,
-  wait
-} from '@shared/extra-utils'
-import { HttpStatusCode, UserRole } from '@shared/models'
+  setAccessTokensToServers
+} from '@shared/server-commands'
 
 async function loginExternal (options: {
   server: PeerTubeServer
@@ -125,7 +125,7 @@ describe('Test external auth plugins', function () {
       expectedStatus: HttpStatusCode.BAD_REQUEST_400
     })
 
-    await server.servers.waitUntilLog('expired external auth token', 2)
+    await server.servers.waitUntilLog('expired external auth token', 4)
   })
 
   it('Should auto login Cyan, create the user and use the token', async function () {

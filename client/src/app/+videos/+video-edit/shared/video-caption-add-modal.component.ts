@@ -41,6 +41,10 @@ export class VideoCaptionAddModalComponent extends FormReactive implements OnIni
     return this.serverConfig.videoCaption.file.size.max
   }
 
+  getReactiveFileButtonTooltip () {
+    return `(extensions: ${this.videoCaptionExtensions.join(', ')})`
+  }
+
   ngOnInit () {
     this.serverService.getVideoLanguages()
         .subscribe(languages => this.videoCaptionLanguages = languages)
@@ -77,7 +81,8 @@ export class VideoCaptionAddModalComponent extends FormReactive implements OnIni
 
     this.captionAdded.emit({
       language: languageObject,
-      captionfile: this.form.value['captionfile']
+      captionfile: this.form.value['captionfile'],
+      action: 'CREATE'
     })
 
     this.hide()

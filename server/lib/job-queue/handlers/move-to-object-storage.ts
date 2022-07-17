@@ -1,17 +1,19 @@
 import { Job } from 'bull'
 import { remove } from 'fs-extra'
 import { join } from 'path'
-import { logger } from '@server/helpers/logger'
-import { updateTorrentUrls } from '@server/helpers/webtorrent'
+import { logger, loggerTagsFactory } from '@server/helpers/logger'
+import { updateTorrentMetadata } from '@server/helpers/webtorrent'
 import { CONFIG } from '@server/initializers/config'
 import { P2P_MEDIA_LOADER_PEER_VERSION } from '@server/initializers/constants'
 import { storeHLSFile, storeWebTorrentFile } from '@server/lib/object-storage'
 import { getHLSDirectory, getHlsResolutionPlaylistFilename } from '@server/lib/paths'
-import { moveToNextState } from '@server/lib/video-state'
+import { moveToFailedMoveToObjectStorageState, moveToNextState } from '@server/lib/video-state'
 import { VideoModel } from '@server/models/video/video'
 import { VideoJobInfoModel } from '@server/models/video/video-job-info'
 import { MStreamingPlaylistVideo, MVideo, MVideoFile, MVideoWithAllFiles } from '@server/types/models'
-import { MoveObjectStoragePayload, VideoStorage } from '../../../../shared'
+import { MoveObjectStoragePayload, VideoState, VideoStorage } from '@shared/models'
+
+const lTagsBase = loggerTagsFactory('move-object-storage')
 
 export async function processMoveToObjectStorage (job: Job) {
   const payload = job.data as MoveObjectStoragePayload
@@ -20,22 +22,36 @@ export async function processMoveToObjectStorage (job: Job) {
   const video = await VideoModel.loadWithFiles(payload.videoUUID)
   // No video, maybe deleted?
   if (!video) {
-    logger.info('Can\'t process job %d, video does not exist.', job.id)
+    logger.info('Can\'t process job %d, video does not exist.', job.id, lTagsBase(payload.videoUUID))
     return undefined
   }
 
-  if (video.VideoFiles) {
-    await moveWebTorrentFiles(video)
-  }
+  const lTags = lTagsBase(video.uuid, video.url)
 
-  if (video.VideoStreamingPlaylists) {
-    await moveHLSFiles(video)
-  }
+  try {
+    if (video.VideoFiles) {
+      logger.debug('Moving %d webtorrent files for video %s.', video.VideoFiles.length, video.uuid, lTags)
 
-  const pendingMove = await VideoJobInfoModel.decrease(video.uuid, 'pendingMove')
-  if (pendingMove === 0) {
-    logger.info('Running cleanup after moving files to object storage (video %s in job %d)', video.uuid, job.id)
-    await doAfterLastJob(video, payload.isNewVideo)
+      await moveWebTorrentFiles(video)
+    }
+
+    if (video.VideoStreamingPlaylists) {
+      logger.debug('Moving HLS playlist of %s.', video.uuid)
+
+      await moveHLSFiles(video)
+    }
+
+    const pendingMove = await VideoJobInfoModel.decrease(video.uuid, 'pendingMove')
+    if (pendingMove === 0) {
+      logger.info('Running cleanup after moving files to object storage (video %s in job %d)', video.uuid, job.id, lTags)
+
+      await doAfterLastJob({ video, previousVideoState: payload.previousVideoState, isNewVideo: payload.isNewVideo })
+    }
+  } catch (err) {
+    logger.error('Cannot move video %s to object storage.', video.url, { err, ...lTags })
+
+    await moveToFailedMoveToObjectStorageState(video)
+    await VideoJobInfoModel.abortAllTasks(video.uuid, 'pendingMove')
   }
 
   return payload.videoUUID
@@ -56,16 +72,17 @@ async function moveWebTorrentFiles (video: MVideoWithAllFiles) {
 
 async function moveHLSFiles (video: MVideoWithAllFiles) {
   for (const playlist of video.VideoStreamingPlaylists) {
+    const playlistWithVideo = playlist.withVideo(video)
 
     for (const file of playlist.VideoFiles) {
       if (file.storage !== VideoStorage.FILE_SYSTEM) continue
 
       // Resolution playlist
       const playlistFilename = getHlsResolutionPlaylistFilename(file.filename)
-      await storeHLSFile(playlist, video, playlistFilename)
+      await storeHLSFile(playlistWithVideo, playlistFilename)
 
       // Resolution fragmented file
-      const fileUrl = await storeHLSFile(playlist, video, file.filename)
+      const fileUrl = await storeHLSFile(playlistWithVideo, file.filename)
 
       const oldPath = join(getHLSDirectory(video), file.filename)
 
@@ -74,14 +91,22 @@ async function moveHLSFiles (video: MVideoWithAllFiles) {
   }
 }
 
-async function doAfterLastJob (video: MVideoWithAllFiles, isNewVideo: boolean) {
+async function doAfterLastJob (options: {
+  video: MVideoWithAllFiles
+  previousVideoState: VideoState
+  isNewVideo: boolean
+}) {
+  const { video, previousVideoState, isNewVideo } = options
+
   for (const playlist of video.VideoStreamingPlaylists) {
     if (playlist.storage === VideoStorage.OBJECT_STORAGE) continue
 
+    const playlistWithVideo = playlist.withVideo(video)
+
     // Master playlist
-    playlist.playlistUrl = await storeHLSFile(playlist, video, playlist.playlistFilename)
+    playlist.playlistUrl = await storeHLSFile(playlistWithVideo, playlist.playlistFilename)
     // Sha256 segments file
-    playlist.segmentsSha256Url = await storeHLSFile(playlist, video, playlist.segmentsSha256Filename)
+    playlist.segmentsSha256Url = await storeHLSFile(playlistWithVideo, playlist.segmentsSha256Filename)
 
     playlist.storage = VideoStorage.OBJECT_STORAGE
 
@@ -96,7 +121,7 @@ async function doAfterLastJob (video: MVideoWithAllFiles, isNewVideo: boolean) {
     await remove(getHLSDirectory(video))
   }
 
-  await moveToNextState(video, isNewVideo)
+  await moveToNextState({ video, previousVideoState, isNewVideo })
 }
 
 async function onFileMoved (options: {
@@ -110,7 +135,7 @@ async function onFileMoved (options: {
   file.fileUrl = fileUrl
   file.storage = VideoStorage.OBJECT_STORAGE
 
-  await updateTorrentUrls(videoOrPlaylist, file)
+  await updateTorrentMetadata(videoOrPlaylist, file)
   await file.save()
 
   logger.debug('Removing %s because it\'s now on object storage', oldPath)

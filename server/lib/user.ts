@@ -1,9 +1,11 @@
 import { Transaction } from 'sequelize/types'
-import { buildUUID } from '@server/helpers/uuid'
+import { logger } from '@server/helpers/logger'
+import { CONFIG } from '@server/initializers/config'
 import { UserModel } from '@server/models/user/user'
 import { MActorDefault } from '@server/types/models/actor'
+import { buildUUID } from '@shared/extra-utils'
 import { ActivityPubActorType } from '../../shared/models/activitypub'
-import { UserNotificationSetting, UserNotificationSettingValue } from '../../shared/models/users'
+import { UserAdminFlag, UserNotificationSetting, UserNotificationSettingValue, UserRole } from '../../shared/models/users'
 import { SERVER_ACTOR_NAME, WEBSERVER } from '../initializers/constants'
 import { sequelizeTypescript } from '../initializers/database'
 import { AccountModel } from '../models/account/account'
@@ -21,6 +23,53 @@ import { createLocalVideoChannel } from './video-channel'
 import { createWatchLaterPlaylist } from './video-playlist'
 
 type ChannelNames = { name: string, displayName: string }
+
+function buildUser (options: {
+  username: string
+  password: string
+  email: string
+
+  role?: UserRole // Default to UserRole.User
+  adminFlags?: UserAdminFlag // Default to UserAdminFlag.NONE
+
+  emailVerified: boolean | null
+
+  videoQuota?: number // Default to CONFIG.USER.VIDEO_QUOTA
+  videoQuotaDaily?: number // Default to CONFIG.USER.VIDEO_QUOTA_DAILY
+
+  pluginAuth?: string
+}): MUser {
+  const {
+    username,
+    password,
+    email,
+    role = UserRole.USER,
+    emailVerified,
+    videoQuota = CONFIG.USER.VIDEO_QUOTA,
+    videoQuotaDaily = CONFIG.USER.VIDEO_QUOTA_DAILY,
+    adminFlags = UserAdminFlag.NONE,
+    pluginAuth
+  } = options
+
+  return new UserModel({
+    username,
+    password,
+    email,
+
+    nsfwPolicy: CONFIG.INSTANCE.DEFAULT_NSFW_POLICY,
+    p2pEnabled: CONFIG.DEFAULTS.P2P.WEBAPP.ENABLED,
+    autoPlayVideo: true,
+
+    role,
+    emailVerified,
+    adminFlags,
+
+    videoQuota: videoQuota,
+    videoQuotaDaily: videoQuotaDaily,
+
+    pluginAuth
+  })
+}
 
 async function createUserAccountAndChannelAndPlaylist (parameters: {
   userToCreate: MUser
@@ -117,14 +166,15 @@ async function sendVerifyUserEmail (user: MUser, isPendingEmail = false) {
   const email = isPendingEmail ? user.pendingEmail : user.email
   const username = user.username
 
-  await Emailer.Instance.addVerifyEmailJob(username, email, url)
+  Emailer.Instance.addVerifyEmailJob(username, email, url)
 }
 
 async function getOriginalVideoFileTotalFromUser (user: MUserId) {
   // Don't use sequelize because we need to use a sub query
   const query = UserModel.generateUserQuotaBaseSQL({
     withSelect: true,
-    whereUserId: '$userId'
+    whereUserId: '$userId',
+    daily: false
   }, user as UserModel)
 
   const base = await UserModel.getTotalRawQuery(query, user.id)
@@ -138,7 +188,7 @@ async function getOriginalVideoFileTotalDailyFromUser (user: MUserId) {
   const query = UserModel.generateUserQuotaBaseSQL({
     withSelect: true,
     whereUserId: '$userId',
-    where: '"video"."createdAt" > now() - interval \'24 hours\''
+    daily: true
   }, user as UserModel)
 
   const base = await UserModel.getTotalRawQuery(query, user.id)
@@ -159,6 +209,11 @@ async function isAbleToUploadVideo (userId: number, newVideoSize: number) {
   const uploadedTotal = newVideoSize + totalBytes
   const uploadedDaily = newVideoSize + totalBytesDaily
 
+  logger.debug(
+    'Check user %d quota to upload another video.', userId,
+    { totalBytes, totalBytesDaily, videoQuota: user.videoQuota, videoQuotaDaily: user.videoQuotaDaily, newVideoSize }
+  )
+
   if (user.videoQuotaDaily === -1) return uploadedTotal < user.videoQuota
   if (user.videoQuota === -1) return uploadedDaily < user.videoQuotaDaily
 
@@ -174,7 +229,8 @@ export {
   createUserAccountAndChannelAndPlaylist,
   createLocalAccountWithoutKeys,
   sendVerifyUserEmail,
-  isAbleToUploadVideo
+  isAbleToUploadVideo,
+  buildUser
 }
 
 // ---------------------------------------------------------------------------
@@ -197,7 +253,8 @@ function createDefaultUserNotificationSettings (user: MUserId, t: Transaction | 
     abuseStateChange: UserNotificationSettingValue.WEB | UserNotificationSettingValue.EMAIL,
     autoInstanceFollowing: UserNotificationSettingValue.WEB,
     newPeerTubeVersion: UserNotificationSettingValue.WEB | UserNotificationSettingValue.EMAIL,
-    newPluginVersion: UserNotificationSettingValue.WEB
+    newPluginVersion: UserNotificationSettingValue.WEB,
+    myVideoStudioEditionFinished: UserNotificationSettingValue.WEB
   }
 
   return UserNotificationSettingModel.create(values, { transaction: t })

@@ -1,6 +1,6 @@
 @use '_variables' as *;
 @use '_mixins' as *;
-@use '_actor' as *;
+@use '_account-channel-page' as *;
 @use '_miniature' as *;
 
 .root {
@@ -107,10 +107,6 @@
     display: flex;
     margin-bottom: 15px;
 
-    .account-avatar {
-      @include actor-avatar-size(48px);
-    }
-
     .actor-info {
       @include margin-left(15px);
     }
@@ -127,6 +123,10 @@
     .actor-handle {
       font-size: var(--myGreyOwnerFontSize);
       color: pvar(--greyForegroundColor);
+    }
+
+    .account-avatar {
+      @include actor-avatar-size(48px);
     }
   }
 

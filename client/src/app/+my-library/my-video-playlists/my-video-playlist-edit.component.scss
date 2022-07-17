@@ -16,14 +16,13 @@ input[type=text] {
   display: block;
 }
 
-textarea {
-  @include peertube-textarea(500px, 150px);
-
-  display: block;
-}
-
 .peertube-select-container {
   @include peertube-select-container(340px);
+}
+
+my-select-channel {
+  display: block;
+  max-width: 340px;
 }
 
 input[type=submit] {

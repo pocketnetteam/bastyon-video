@@ -1,5 +1,4 @@
 import express from "express"
-import RateLimit from "express-rate-limit"
 import { logger } from "@server/helpers/logger"
 import { buildUUID } from "@server/helpers/uuid"
 import { CONFIG } from "@server/initializers/config"
@@ -16,6 +15,7 @@ import { Hooks } from "@server/lib/plugins/hooks"
 import {
   asyncMiddleware,
   authenticate,
+  buildRateLimiter,
   openapiOperationDoc
 } from "@server/middlewares"
 import { ScopedToken } from "@shared/models/users/user-scoped-token"
@@ -107,7 +107,7 @@ function createGrafanaErrorBody ({
   return `(${parametersOrder.join(",")})`
 }
 
-const loginRateLimiter = RateLimit({
+const loginRateLimiter = buildRateLimiter({
   windowMs: CONFIG.RATES_LIMIT.LOGIN.WINDOW_MS,
   max: CONFIG.RATES_LIMIT.LOGIN.MAX
 })

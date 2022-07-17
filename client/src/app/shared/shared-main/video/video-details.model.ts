@@ -15,7 +15,6 @@ export class VideoDetails extends Video implements VideoDetailsServerModel {
   support: string
   channel: VideoChannel
   tags: string[]
-  files: VideoFile[]
   account: Account
   commentsEnabled: boolean
   downloadEnabled: boolean
@@ -28,6 +27,7 @@ export class VideoDetails extends Video implements VideoDetailsServerModel {
 
   trackerUrls: string[]
 
+  files: VideoFile[]
   streamingPlaylists: VideoStreamingPlaylist[]
 
   aspectRatio?: number
@@ -36,7 +36,6 @@ export class VideoDetails extends Video implements VideoDetailsServerModel {
     super(hash, translations)
 
     this.descriptionPath = hash.descriptionPath
-    this.files = hash.files
     this.channel = new VideoChannel(hash.channel)
     this.account = new Account(hash.account)
     this.tags = hash.tags
@@ -45,7 +44,6 @@ export class VideoDetails extends Video implements VideoDetailsServerModel {
     this.downloadEnabled = hash.downloadEnabled
 
     this.trackerUrls = hash.trackerUrls
-    this.streamingPlaylists = hash.streamingPlaylists
 
     this.buildLikeAndDislikePercents()
   }

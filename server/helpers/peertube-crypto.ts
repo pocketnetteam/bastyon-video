@@ -2,9 +2,10 @@ import { compare, genSalt, hash } from 'bcrypt'
 import { createSign, createVerify } from 'crypto'
 import { Request } from 'express'
 import { cloneDeep } from 'lodash'
+import { sha256 } from '@shared/extra-utils'
 import { BCRYPT_SALT_SIZE, HTTP_SIGNATURE, PRIVATE_RSA_KEY_SIZE } from '../initializers/constants'
 import { MActor } from '../types/models'
-import { createPrivateKey, getPublicKey, promisify1, promisify2, sha256 } from './core-utils'
+import { createPrivateKey, getPublicKey, promisify1, promisify2 } from './core-utils'
 import { jsonld } from './custom-jsonld-signature'
 import { logger } from './logger'
 
@@ -12,7 +13,7 @@ const bcryptComparePromise = promisify2<any, string, boolean>(compare)
 const bcryptGenSaltPromise = promisify1<number, string>(genSalt)
 const bcryptHashPromise = promisify2<any, string | number, string>(hash)
 
-const httpSignature = require('http-signature')
+const httpSignature = require('@peertube/http-signature')
 
 async function createPrivateAndPublicKeys () {
   logger.info('Generating a RSA key...')
@@ -50,11 +51,18 @@ function isHTTPSignatureVerified (httpSignatureParsed: any, actor: MActor): bool
 }
 
 function parseHTTPSignature (req: Request, clockSkew?: number) {
-  const headers = req.method === 'POST'
-    ? HTTP_SIGNATURE.REQUIRED_HEADERS.POST
-    : HTTP_SIGNATURE.REQUIRED_HEADERS.ALL
+  const requiredHeaders = req.method === 'POST'
+    ? [ '(request-target)', 'host', 'digest' ]
+    : [ '(request-target)', 'host' ]
 
-  return httpSignature.parse(req, { clockSkew, headers })
+  const parsed = httpSignature.parse(req, { clockSkew, headers: requiredHeaders })
+
+  const parsedHeaders = parsed.params.headers
+  if (!parsedHeaders.includes('date') && !parsedHeaders.includes('(created)')) {
+    throw new Error(`date or (created) must be included in signature`)
+  }
+
+  return parsed
 }
 
 // JSONLD

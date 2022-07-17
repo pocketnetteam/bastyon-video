@@ -6,6 +6,11 @@ export const serverFilterHookObject = {
   'filter:api.videos.list.params': true,
   'filter:api.videos.list.result': true,
 
+  // Filter params/result used to list a video playlists videos
+  // for the REST API
+  'filter:api.video-playlist.videos.list.params': true,
+  'filter:api.video-playlist.videos.list.result': true,
+
   // Filter params/result used to list account videos for the REST API
   'filter:api.accounts.videos.list.params': true,
   'filter:api.accounts.videos.list.result': true,
@@ -53,6 +58,12 @@ export const serverFilterHookObject = {
   'filter:api.video-thread.create.accept.result': true,
   'filter:api.video-comment-reply.create.accept.result': true,
 
+  // Filter attributes when creating video object
+  'filter:api.video.upload.video-attribute.result': true,
+  'filter:api.video.import-url.video-attribute.result': true,
+  'filter:api.video.import-torrent.video-attribute.result': true,
+  'filter:api.video.live.video-attribute.result': true,
+
   // Filter params/result used to list threads of a specific video
   // (used by the video watch page)
   'filter:api.video-threads.list.params': true,
@@ -62,6 +73,9 @@ export const serverFilterHookObject = {
   // (used by the video watch page when we click on the "View replies" button)
   'filter:api.video-thread-comments.list.params': true,
   'filter:api.video-thread-comments.list.result': true,
+
+  // Filter get stats result
+  'filter:api.server.stats.get.result': true,
 
   // Filter result used to check if we need to auto blacklist a video
   // (fired when a local or remote video is created or updated)
@@ -85,6 +99,8 @@ export const serverActionHookObject = {
   // Fired when the application has been loaded and is listening HTTP requests
   'action:application.listening': true,
 
+  // API actions hooks give access to the original express `req` and `res` parameters
+
   // Fired when a local video is updated
   'action:api.video.updated': true,
   // Fired when a local video is deleted
@@ -103,6 +119,11 @@ export const serverActionHookObject = {
   'action:api.video-comment-reply.created': true,
   // Fired when a comment (thread or reply) is deleted
   'action:api.video-comment.deleted': true,
+
+  // Fired when a caption is created
+  'action:api.video-caption.created': true,
+  // Fired when a caption is deleted
+  'action:api.video-caption.deleted': true,
 
   // Fired when a user is blocked (banned)
   'action:api.user.blocked': true,

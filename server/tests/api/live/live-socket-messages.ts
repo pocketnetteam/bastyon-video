@@ -2,6 +2,7 @@
 
 import 'mocha'
 import * as chai from 'chai'
+import { wait } from '@shared/core-utils'
 import { VideoPrivacy, VideoState } from '@shared/models'
 import {
   cleanupTests,
@@ -11,14 +12,13 @@ import {
   setAccessTokensToServers,
   setDefaultVideoChannel,
   stopFfmpeg,
-  wait,
   waitJobs,
   waitUntilLivePublishedOnAllServers
-} from '../../../../shared/extra-utils'
+} from '@shared/server-commands'
 
 const expect = chai.expect
 
-describe('Test live', function () {
+describe('Test live socket messages', function () {
   let servers: PeerTubeServer[] = []
 
   before(async function () {
@@ -140,11 +140,9 @@ describe('Test live', function () {
       expect(localLastVideoViews).to.equal(0)
       expect(remoteLastVideoViews).to.equal(0)
 
-      await servers[0].videos.view({ id: liveVideoUUID })
-      await servers[1].videos.view({ id: liveVideoUUID })
+      await servers[0].views.simulateView({ id: liveVideoUUID })
+      await servers[1].views.simulateView({ id: liveVideoUUID })
 
-      await waitJobs(servers)
-      await wait(5000)
       await waitJobs(servers)
 
       expect(localLastVideoViews).to.equal(2)

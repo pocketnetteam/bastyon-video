@@ -2,19 +2,8 @@
 
 import 'mocha'
 import * as chai from 'chai'
-import {
-  checkPlaylistFilesWereRemoved,
-  cleanupTests,
-  createMultipleServers,
-  doubleFollow,
-  PeerTubeServer,
-  PlaylistsCommand,
-  setAccessTokensToServers,
-  setDefaultVideoChannel,
-  testImage,
-  wait,
-  waitJobs
-} from '@shared/extra-utils'
+import { checkPlaylistFilesWereRemoved, testImage } from '@server/tests/shared'
+import { wait } from '@shared/core-utils'
 import {
   HttpStatusCode,
   VideoPlaylist,
@@ -24,6 +13,17 @@ import {
   VideoPlaylistType,
   VideoPrivacy
 } from '@shared/models'
+import {
+  cleanupTests,
+  createMultipleServers,
+  doubleFollow,
+  PeerTubeServer,
+  PlaylistsCommand,
+  setAccessTokensToServers,
+  setDefaultAccountAvatar,
+  setDefaultVideoChannel,
+  waitJobs
+} from '@shared/server-commands'
 
 const expect = chai.expect
 
@@ -75,11 +75,16 @@ describe('Test video playlists', function () {
   before(async function () {
     this.timeout(120000)
 
-    servers = await createMultipleServers(3, { transcoding: { enabled: false } })
+    servers = await createMultipleServers(3)
 
     // Get the access tokens
     await setAccessTokensToServers(servers)
     await setDefaultVideoChannel(servers)
+    await setDefaultAccountAvatar(servers)
+
+    for (const server of servers) {
+      await server.config.disableTranscoding()
+    }
 
     // Server 1 and server 2 follow each other
     await doubleFollow(servers[0], servers[1])

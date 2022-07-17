@@ -22,10 +22,11 @@ const defaultX264VODOptionsBuilder: EncoderOptionsBuilder = (options: EncoderOpt
 
   return {
     outputOptions: [
-      `-preset veryfast`,
+      `-preset ultrafast`,
       `-r ${fps}`,
       `-maxrate ${targetBitrate}`,
-      `-bufsize ${targetBitrate * 2}`
+      `-bufsize ${targetBitrate * 2}`,
+      `-tune fastdecode`
     ]
   }
 }

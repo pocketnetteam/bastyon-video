@@ -2,11 +2,11 @@
 
 import 'mocha'
 import * as chai from 'chai'
+import { expectStartWith, FIXTURE_URLS } from '@server/tests/shared'
+import { areObjectStorageTestsDisabled } from '@shared/core-utils'
+import { HttpStatusCode, VideoPrivacy } from '@shared/models'
 import {
-  areObjectStorageTestsDisabled,
   createSingleServer,
-  expectStartWith,
-  FIXTURE_URLS,
   killallServers,
   makeRawRequest,
   ObjectStorageCommand,
@@ -14,8 +14,7 @@ import {
   setAccessTokensToServers,
   setDefaultVideoChannel,
   waitJobs
-} from '@shared/extra-utils'
-import { HttpStatusCode, VideoPrivacy } from '@shared/models'
+} from '@shared/server-commands'
 
 const expect = chai.expect
 
@@ -88,9 +87,9 @@ describe('Object storage for video import', function () {
 
       const video = await server.videos.get({ id: uuid })
 
-      expect(video.files).to.have.lengthOf(4)
+      expect(video.files).to.have.lengthOf(5)
       expect(video.streamingPlaylists).to.have.lengthOf(1)
-      expect(video.streamingPlaylists[0].files).to.have.lengthOf(4)
+      expect(video.streamingPlaylists[0].files).to.have.lengthOf(5)
 
       for (const file of video.files) {
         expectStartWith(file.fileUrl, ObjectStorageCommand.getWebTorrentBaseUrl())

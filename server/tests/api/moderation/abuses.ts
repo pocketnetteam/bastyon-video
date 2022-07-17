@@ -2,6 +2,7 @@
 
 import 'mocha'
 import * as chai from 'chai'
+import { AbuseMessage, AbusePredefinedReasonsString, AbuseState, AdminAbuse, UserAbuse } from '@shared/models'
 import {
   AbusesCommand,
   cleanupTests,
@@ -9,9 +10,10 @@ import {
   doubleFollow,
   PeerTubeServer,
   setAccessTokensToServers,
+  setDefaultAccountAvatar,
+  setDefaultChannelAvatar,
   waitJobs
-} from '@shared/extra-utils'
-import { AbuseMessage, AbusePredefinedReasonsString, AbuseState, AdminAbuse, UserAbuse } from '@shared/models'
+} from '@shared/server-commands'
 
 const expect = chai.expect
 
@@ -27,8 +29,9 @@ describe('Test abuses', function () {
     // Run servers
     servers = await createMultipleServers(2)
 
-    // Get the access tokens
     await setAccessTokensToServers(servers)
+    await setDefaultChannelAvatar(servers)
+    await setDefaultAccountAvatar(servers)
 
     // Server 1 and server 2 follow each other
     await doubleFollow(servers[0], servers[1])
@@ -468,7 +471,7 @@ describe('Test abuses', function () {
     })
 
     it('Should have 2 comment abuses on server 1 and 1 on server 2', async function () {
-      const commentServer2 = await getComment(servers[0], servers[1].store.videoCreated.id)
+      const commentServer2 = await getComment(servers[0], servers[1].store.videoCreated.shortUUID)
 
       {
         const body = await commands[0].getAdminList({ filter: 'comment' })

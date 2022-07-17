@@ -1,17 +1,16 @@
 import express from 'express'
 import { Transaction } from 'sequelize/types'
 import { changeVideoChannelShare } from '@server/lib/activitypub/share'
+import { JobQueue } from '@server/lib/job-queue'
 import { buildVideoThumbnailsFromReq, setVideoTags } from '@server/lib/video'
 import { openapiOperationDoc } from '@server/middlewares/doc'
 import { FilteredModelAttributes } from '@server/types'
 import { MVideoFullLight } from '@server/types/models'
-import { VideoUpdate } from '../../../../shared'
-import { HttpStatusCode } from '../../../../shared/models'
+import { HttpStatusCode, ManageVideoTorrentPayload, VideoUpdate } from '@shared/models'
 import { auditLoggerFactory, getAuditIdFromRes, VideoAuditView } from '../../../helpers/audit-logger'
 import { resetSequelizeInstance } from '../../../helpers/database-utils'
 import { createReqFiles } from '../../../helpers/express-utils'
 import { logger, loggerTagsFactory } from '../../../helpers/logger'
-import { CONFIG } from '../../../initializers/config'
 import { MIMETYPES } from '../../../initializers/constants'
 import { sequelizeTypescript } from '../../../initializers/database'
 import { federateVideoIfNeeded } from '../../../lib/activitypub/videos'
@@ -26,14 +25,7 @@ const lTags = loggerTagsFactory('api', 'video')
 const auditLogger = auditLoggerFactory('videos')
 const updateRouter = express.Router()
 
-const reqVideoFileUpdate = createReqFiles(
-  [ 'thumbnailfile', 'previewfile' ],
-  MIMETYPES.IMAGE.MIMETYPE_EXT,
-  {
-    thumbnailfile: CONFIG.STORAGE.TMP_DIR,
-    previewfile: CONFIG.STORAGE.TMP_DIR
-  }
-)
+const reqVideoFileUpdate = createReqFiles([ 'thumbnailfile', 'previewfile' ], MIMETYPES.IMAGE.MIMETYPE_EXT)
 
 updateRouter.put('/:id',
   openapiOperationDoc({ operationId: 'putVideo' }),
@@ -51,26 +43,29 @@ export {
 
 // ---------------------------------------------------------------------------
 
-export async function updateVideo (req: express.Request, res: express.Response) {
-  const videoInstance = res.locals.videoAll
-  const videoFieldsSave = videoInstance.toJSON()
-  const oldVideoAuditView = new VideoAuditView(videoInstance.toFormattedDetailsJSON())
+async function updateVideo (req: express.Request, res: express.Response) {
+  const videoFromReq = res.locals.videoAll
+  const videoFieldsSave = videoFromReq.toJSON()
+  const oldVideoAuditView = new VideoAuditView(videoFromReq.toFormattedDetailsJSON())
   const videoInfoToUpdate: VideoUpdate = req.body
 
-  const wasConfidentialVideo = videoInstance.isConfidential()
-  const hadPrivacyForFederation = videoInstance.hasPrivacyForFederation()
+  const wasConfidentialVideo = videoFromReq.isConfidential()
+  const hadPrivacyForFederation = videoFromReq.hasPrivacyForFederation()
 
   const [ thumbnailModel, previewModel ] = await buildVideoThumbnailsFromReq({
-    video: videoInstance,
+    video: videoFromReq,
     files: req.files,
     fallback: () => Promise.resolve(undefined),
     automaticallyGenerated: false
   })
 
   try {
-    const videoInstanceUpdated = await sequelizeTypescript.transaction(async t => {
+    const { videoInstanceUpdated, isNewVideo } = await sequelizeTypescript.transaction(async t => {
+      // Refresh video since thumbnails to prevent concurrent updates
+      const video = await VideoModel.loadAndPopulateAccountAndServerAndTags(videoFromReq.id, t)
+
       const sequelizeOptions = { transaction: t }
-      const oldVideoChannel = videoInstance.VideoChannel
+      const oldVideoChannel = video.VideoChannel
 
       const keysToUpdate: (keyof VideoUpdate & FilteredModelAttributes<VideoModel>)[] = [
         'name',
@@ -86,20 +81,25 @@ export async function updateVideo (req: express.Request, res: express.Response) 
       ]
 
       for (const key of keysToUpdate) {
-        if (videoInfoToUpdate[key] !== undefined) videoInstance.set(key, videoInfoToUpdate[key])
+        if (videoInfoToUpdate[key] !== undefined) video.set(key, videoInfoToUpdate[key])
       }
 
       if (videoInfoToUpdate.originallyPublishedAt !== undefined && videoInfoToUpdate.originallyPublishedAt !== null) {
-        videoInstance.originallyPublishedAt = new Date(videoInfoToUpdate.originallyPublishedAt)
+        video.originallyPublishedAt = new Date(videoInfoToUpdate.originallyPublishedAt)
       }
 
       // Privacy update?
       let isNewVideo = false
       if (videoInfoToUpdate.privacy !== undefined) {
-        isNewVideo = await updateVideoPrivacy({ videoInstance, videoInfoToUpdate, hadPrivacyForFederation, transaction: t })
+        isNewVideo = await updateVideoPrivacy({ videoInstance: video, videoInfoToUpdate, hadPrivacyForFederation, transaction: t })
       }
 
-      const videoInstanceUpdated = await videoInstance.save(sequelizeOptions) as MVideoFullLight
+      // Force updatedAt attribute change
+      if (!video.changed()) {
+        await video.setAsRefreshed(t)
+      }
+
+      const videoInstanceUpdated = await video.save(sequelizeOptions) as MVideoFullLight
 
       // Thumbnail & preview updates?
       if (thumbnailModel) await videoInstanceUpdated.addAndSaveThumbnail(thumbnailModel, t)
@@ -129,28 +129,28 @@ export async function updateVideo (req: express.Request, res: express.Response) 
         transaction: t
       })
 
-      await federateVideoIfNeeded(videoInstanceUpdated, isNewVideo, t)
-
       auditLogger.update(
         getAuditIdFromRes(res),
         new VideoAuditView(videoInstanceUpdated.toFormattedDetailsJSON()),
         oldVideoAuditView
       )
-      logger.info('Video with name %s and uuid %s updated.', videoInstance.name, videoInstance.uuid, lTags(videoInstance.uuid))
+      logger.info('Video with name %s and uuid %s updated.', video.name, video.uuid, lTags(video.uuid))
 
-      return videoInstanceUpdated
+      return { videoInstanceUpdated, isNewVideo }
     })
 
-    if (wasConfidentialVideo) {
-      Notifier.Instance.notifyOnNewVideoIfNeeded(videoInstanceUpdated)
-    }
+    const refreshedVideo = await updateTorrentsMetadataIfNeeded(videoInstanceUpdated, videoInfoToUpdate)
 
-    Hooks.runAction('action:api.video.updated', { video: videoInstanceUpdated, body: req.body })
+    await sequelizeTypescript.transaction(t => federateVideoIfNeeded(refreshedVideo, isNewVideo, t))
+
+    if (wasConfidentialVideo) Notifier.Instance.notifyOnNewVideoIfNeeded(refreshedVideo)
+
+    Hooks.runAction('action:api.video.updated', { video: refreshedVideo, body: req.body, req, res })
   } catch (err) {
     // Force fields we want to update
     // If the transaction is retried, sequelize will think the object has not changed
     // So it will skip the SQL request, even if the last one was ROLLBACKed!
-    resetSequelizeInstance(videoInstance, videoFieldsSave)
+    resetSequelizeInstance(videoFromReq, videoFieldsSave)
 
     throw err
   }
@@ -190,4 +190,27 @@ function updateSchedule (videoInstance: MVideoFullLight, videoInfoToUpdate: Vide
   } else if (videoInfoToUpdate.scheduleUpdate === null) {
     return ScheduleVideoUpdateModel.deleteByVideoId(videoInstance.id, transaction)
   }
+}
+
+async function updateTorrentsMetadataIfNeeded (video: MVideoFullLight, videoInfoToUpdate: VideoUpdate) {
+  if (video.isLive || !videoInfoToUpdate.name) return video
+
+  for (const file of (video.VideoFiles || [])) {
+    const payload: ManageVideoTorrentPayload = { action: 'update-metadata', videoId: video.id, videoFileId: file.id }
+
+    const job = await JobQueue.Instance.createJobWithPromise({ type: 'manage-video-torrent', payload })
+    await job.finished()
+  }
+
+  const hls = video.getHLSPlaylist()
+
+  for (const file of (hls?.VideoFiles || [])) {
+    const payload: ManageVideoTorrentPayload = { action: 'update-metadata', streamingPlaylistId: hls.id, videoFileId: file.id }
+
+    const job = await JobQueue.Instance.createJobWithPromise({ type: 'manage-video-torrent', payload })
+    await job.finished()
+  }
+
+  // Refresh video since files have changed
+  return VideoModel.loadAndPopulateAccountAndServerAndTags(video.id)
 }

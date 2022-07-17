@@ -17,10 +17,11 @@ import {
   RegisterServerHookOptions,
   RegisterServerSettingOptions,
   serverHookObject,
+  SettingsChangeCallback,
   VideoPlaylistPrivacy,
   VideoPrivacy
 } from '@shared/models'
-import { VideoTranscodingProfilesManager } from '../transcoding/video-transcoding-profiles'
+import { VideoTranscodingProfilesManager } from '../transcoding/default-transcoding-profiles'
 import { buildPluginHelpers } from './plugin-helpers-builder'
 
 export class RegisterHelpers {
@@ -46,7 +47,7 @@ export class RegisterHelpers {
   private idAndPassAuths: RegisterServerAuthPassOptions[] = []
   private externalAuths: RegisterServerAuthExternalOptions[] = []
 
-  private readonly onSettingsChangeCallbacks: ((settings: any) => Promise<any>)[] = []
+  private readonly onSettingsChangeCallbacks: SettingsChangeCallback[] = []
 
   private readonly router: express.Router
   private readonly videoConstantManagerFactory: VideoConstantManagerFactory
@@ -256,7 +257,7 @@ export class RegisterHelpers {
 
       setSetting: (name: string, value: string) => PluginModel.setSetting(this.plugin.name, this.plugin.type, name, value),
 
-      onSettingsChange: (cb: (settings: any) => Promise<any>) => this.onSettingsChangeCallbacks.push(cb)
+      onSettingsChange: (cb: SettingsChangeCallback) => this.onSettingsChangeCallbacks.push(cb)
     }
   }
 

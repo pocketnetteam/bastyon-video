@@ -4,12 +4,10 @@ import 'mocha'
 import * as chai from 'chai'
 import { omit } from 'lodash'
 import { join } from 'path'
-import { randomInt } from '@shared/core-utils'
+import { checkBadCountPagination, checkBadSortPagination, checkBadStartPagination, checkUploadVideoParam } from '@server/tests/shared'
+import { randomInt, root } from '@shared/core-utils'
+import { HttpStatusCode, PeerTubeProblemDocument, VideoCreateResult, VideoPrivacy } from '@shared/models'
 import {
-  checkBadCountPagination,
-  checkBadSortPagination,
-  checkBadStartPagination,
-  checkUploadVideoParam,
   cleanupTests,
   createSingleServer,
   makeDeleteRequest,
@@ -17,10 +15,8 @@ import {
   makePutBodyRequest,
   makeUploadRequest,
   PeerTubeServer,
-  root,
   setAccessTokensToServers
-} from '@shared/extra-utils'
-import { HttpStatusCode, PeerTubeProblemDocument, VideoCreateResult, VideoPrivacy } from '@shared/models'
+} from '@shared/server-commands'
 
 const expect = chai.expect
 
@@ -32,6 +28,7 @@ describe('Test videos API validator', function () {
   let channelId: number
   let channelName: string
   let video: VideoCreateResult
+  let privateVideo: VideoCreateResult
 
   // ---------------------------------------------------------------
 
@@ -52,6 +49,10 @@ describe('Test videos API validator', function () {
       channelId = body.videoChannels[0].id
       channelName = body.videoChannels[0].name
       accountName = body.account.name + '@' + body.account.host
+    }
+
+    {
+      privateVideo = await server.videos.quickUpload({ name: 'private video', privacy: VideoPrivacy.PRIVATE })
     }
   })
 
@@ -117,6 +118,20 @@ describe('Test videos API validator', function () {
 
     it('Should fail with an incorrect sort', async function () {
       await checkBadSortPagination(server.url, path, server.accessToken)
+    })
+
+    it('Should fail with an invalid channel', async function () {
+      await makeGetRequest({ url: server.url, token: server.accessToken, path, query: { channelId: 'toto' } })
+    })
+
+    it('Should fail with an unknown channel', async function () {
+      await makeGetRequest({
+        url: server.url,
+        token: server.accessToken,
+        path,
+        query: { channelId: 89898 },
+        expectedStatus: HttpStatusCode.NOT_FOUND_404
+      })
     })
 
     it('Should success with the correct parameters', async function () {
@@ -771,6 +786,19 @@ describe('Test videos API validator', function () {
         rating: 'likes'
       }
       await makePutBodyRequest({ url: server.url, path: path + videoId + '/rate', token: server.accessToken, fields })
+    })
+
+    it('Should fail with a private video of another user', async function () {
+      const fields = {
+        rating: 'like'
+      }
+      await makePutBodyRequest({
+        url: server.url,
+        path: path + privateVideo.uuid + '/rate',
+        token: userAccessToken,
+        fields,
+        expectedStatus: HttpStatusCode.FORBIDDEN_403
+      })
     })
 
     it('Should succeed with the correct parameters', async function () {

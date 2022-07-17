@@ -1,8 +1,7 @@
 import { isBlockedByServerOrAccount } from '@server/lib/blocklist'
 import { isRedundancyAccepted } from '@server/lib/redundancy'
-import { ActivityCreate, CacheFileObject, VideoObject } from '../../../../shared'
-import { PlaylistObject } from '../../../../shared/models/activitypub/objects/playlist-object'
-import { VideoCommentObject } from '../../../../shared/models/activitypub/objects/video-comment-object'
+import { VideoModel } from '@server/models/video/video'
+import { ActivityCreate, CacheFileObject, PlaylistObject, VideoCommentObject, VideoObject, WatchActionObject } from '@shared/models'
 import { retryTransactionWrapper } from '../../../helpers/database-utils'
 import { logger } from '../../../helpers/logger'
 import { sequelizeTypescript } from '../../../initializers/database'
@@ -10,8 +9,9 @@ import { APProcessorOptions } from '../../../types/activitypub-processor.model'
 import { MActorSignature, MCommentOwnerVideo, MVideoAccountLightBlacklistAllFiles } from '../../../types/models'
 import { Notifier } from '../../notifier'
 import { createOrUpdateCacheFile } from '../cache-file'
+import { createOrUpdateLocalVideoViewer } from '../local-video-viewer'
 import { createOrUpdateVideoPlaylist } from '../playlists'
-import { forwardVideoRelatedActivity } from '../send/utils'
+import { forwardVideoRelatedActivity } from '../send/shared/send-utils'
 import { resolveThread } from '../video-comments'
 import { getOrCreateAPVideo } from '../videos'
 
@@ -28,7 +28,14 @@ async function processCreateActivity (options: APProcessorOptions<ActivityCreate
   }
 
   if (activityType === 'Note') {
+    // Comments will be fetched from videos
+    if (options.fromFetch) return
+
     return retryTransactionWrapper(processCreateVideoComment, activity, byActor, notify)
+  }
+
+  if (activityType === 'WatchAction') {
+    return retryTransactionWrapper(processCreateWatchAction, activity)
   }
 
   if (activityType === 'CacheFile') {
@@ -54,7 +61,7 @@ export {
 async function processCreateVideo (activity: ActivityCreate, notify: boolean) {
   const videoToCreateData = activity.object as VideoObject
 
-  const syncParam = { likes: false, dislikes: false, shares: false, comments: false, thumbnail: true, refreshVideo: false }
+  const syncParam = { rates: false, shares: false, comments: false, thumbnail: true, refreshVideo: false }
   const { video, created } = await getOrCreateAPVideo({ videoObject: videoToCreateData, syncParam })
 
   if (created && notify) Notifier.Instance.notifyOnNewVideoIfNeeded(video)
@@ -78,6 +85,19 @@ async function processCreateCacheFile (activity: ActivityCreate, byActor: MActor
     const exceptions = [ byActor ]
     await forwardVideoRelatedActivity(activity, undefined, exceptions, video)
   }
+}
+
+async function processCreateWatchAction (activity: ActivityCreate) {
+  const watchAction = activity.object as WatchActionObject
+
+  if (watchAction.actionStatus !== 'CompletedActionStatus') return
+
+  const video = await VideoModel.loadByUrl(watchAction.object)
+  if (video.remote) return
+
+  await sequelizeTypescript.transaction(async t => {
+    return createOrUpdateLocalVideoViewer(watchAction, video, t)
+  })
 }
 
 async function processCreateVideoComment (activity: ActivityCreate, byActor: MActorSignature, notify: boolean) {

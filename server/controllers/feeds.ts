@@ -1,10 +1,13 @@
 import express from 'express'
-import Feed from 'pfeed'
+import { Feed } from '@peertube/feed'
+import { extname } from 'path'
+import { mdToOneLinePlainText, toSafeHtml } from '@server/helpers/markdown'
+import { getServerActor } from '@server/models/application/application'
 import { getCategoryLabel } from '@server/models/video/formatter/video-format-utils'
-import { VideoFilter } from '../../shared/models/videos/video-query.type'
+import { VideoInclude } from '@shared/models'
 import { buildNSFWFilter } from '../helpers/express-utils'
 import { CONFIG } from '../initializers/config'
-import { FEEDS, PREVIEWS_SIZE, ROUTE_CACHE_LIFETIME, WEBSERVER } from '../initializers/constants'
+import { FEEDS, MIMETYPES, PREVIEWS_SIZE, ROUTE_CACHE_LIFETIME, WEBSERVER } from '../initializers/constants'
 import {
   asyncMiddleware,
   commonVideosFiltersValidator,
@@ -101,7 +104,7 @@ async function generateVideoCommentsFeed (req: express.Request, res: express.Res
 
   // Adding video items to the feed, one at a time
   for (const comment of comments) {
-    const link = WEBSERVER.URL + comment.getCommentStaticPath()
+    const localLink = WEBSERVER.URL + comment.getCommentStaticPath()
 
     let title = comment.Video.name
     const author: { name: string, link: string }[] = []
@@ -116,9 +119,9 @@ async function generateVideoCommentsFeed (req: express.Request, res: express.Res
 
     feed.addItem({
       title,
-      id: comment.url,
-      link,
-      content: comment.text,
+      id: localLink,
+      link: localLink,
+      content: toSafeHtml(comment.text),
       author,
       date: comment.createdAt
     })
@@ -160,14 +163,19 @@ async function generateVideoFeed (req: express.Request, res: express.Response) {
     videoChannelId: videoChannel ? videoChannel.id : null
   }
 
+  const server = await getServerActor()
   const { data } = await VideoModel.listForApi({
     start,
     count: FEEDS.COUNT,
     sort: req.query.sort,
-    includeLocalVideos: true,
+    displayOnlyForFollower: {
+      actorId: server.id,
+      orLocalVideos: true
+    },
     nsfw,
-    filter: req.query.filter as VideoFilter,
-    withFiles: true,
+    isLocal: req.query.isLocal,
+    include: req.query.include | VideoInclude.FILES,
+    hasFiles: true,
     countVideos: false,
     ...options
   })
@@ -196,14 +204,19 @@ async function generateVideoFeedForSubscriptions (req: express.Request, res: exp
     start,
     count: FEEDS.COUNT,
     sort: req.query.sort,
-    includeLocalVideos: false,
     nsfw,
-    filter: req.query.filter as VideoFilter,
 
-    withFiles: true,
+    isLocal: req.query.isLocal,
+
+    hasFiles: true,
+    include: req.query.include | VideoInclude.FILES,
+
     countVideos: false,
 
-    followerActorId: res.locals.user.Account.Actor.id,
+    displayOnlyForFollower: {
+      actorId: res.locals.user.Account.Actor.id,
+      orLocalVideos: false
+    },
     user: res.locals.user
   })
 
@@ -224,7 +237,7 @@ function initFeed (parameters: {
 
   return new Feed({
     title: name,
-    description,
+    description: mdToOneLinePlainText(description),
     // updated: TODO: somehowGetLatestUpdate, // optional, default = today
     id: webserverUrl,
     link: webserverUrl,
@@ -246,10 +259,7 @@ function initFeed (parameters: {
   })
 }
 
-function addVideosToFeed (feed, videos: VideoModel[]) {
-  /**
-   * Adding video items to the feed object, one at a time
-   */
+function addVideosToFeed (feed: Feed, videos: VideoModel[]) {
   for (const video of videos) {
     const formattedVideoFiles = video.getFormattedVideoFilesJSON(false)
 
@@ -259,11 +269,11 @@ function addVideosToFeed (feed, videos: VideoModel[]) {
       size_in_bytes: videoFile.size
     }))
 
-    const videos = formattedVideoFiles.map(videoFile => {
+    const videoFiles = formattedVideoFiles.map(videoFile => {
       const result = {
-        type: 'video/mp4',
+        type: MIMETYPES.VIDEO.EXT_MIMETYPE[extname(videoFile.fileUrl)],
         medium: 'video',
-        height: videoFile.resolution.label.replace('p', ''),
+        height: videoFile.resolution.id,
         fileSize: videoFile.size,
         url: videoFile.fileUrl,
         framerate: videoFile.fps,
@@ -283,12 +293,14 @@ function addVideosToFeed (feed, videos: VideoModel[]) {
       })
     }
 
+    const localLink = WEBSERVER.URL + video.getWatchStaticPath()
+
     feed.addItem({
       title: video.name,
-      id: video.url,
-      link: WEBSERVER.URL + video.getWatchStaticPath(),
-      description: video.getTruncatedDescription(),
-      content: video.description,
+      id: localLink,
+      link: localLink,
+      description: mdToOneLinePlainText(video.getTruncatedDescription()),
+      content: toSafeHtml(video.description),
       author: [
         {
           name: video.VideoChannel.Account.getDisplayName(),
@@ -297,14 +309,26 @@ function addVideosToFeed (feed, videos: VideoModel[]) {
       ],
       date: video.publishedAt,
       nsfw: video.nsfw,
-      torrent: torrents,
-      videos,
+      torrents,
+
+      // Enclosure
+      video: videoFiles.length !== 0
+        ? {
+          url: videoFiles[0].url,
+          length: videoFiles[0].fileSize,
+          type: videoFiles[0].type
+        }
+        : undefined,
+
+      // Media RSS
+      videos: videoFiles,
+
       embed: {
-        url: video.getEmbedStaticPath(),
+        url: WEBSERVER.URL + video.getEmbedStaticPath(),
         allowFullscreen: true
       },
       player: {
-        url: video.getWatchStaticPath()
+        url: WEBSERVER.URL + video.getWatchStaticPath()
       },
       categories,
       community: {
@@ -312,7 +336,7 @@ function addVideosToFeed (feed, videos: VideoModel[]) {
           views: video.views
         }
       },
-      thumbnail: [
+      thumbnails: [
         {
           url: WEBSERVER.URL + video.getPreviewStaticPath(),
           height: PREVIEWS_SIZE.height,
@@ -323,7 +347,7 @@ function addVideosToFeed (feed, videos: VideoModel[]) {
   }
 }
 
-function sendFeed (feed, req: express.Request, res: express.Response) {
+function sendFeed (feed: Feed, req: express.Request, res: express.Response) {
   const format = req.params.format
 
   if (format === 'atom' || format === 'atom1') {

@@ -2,18 +2,20 @@ import express from 'express'
 import { readFile } from 'fs-extra'
 import { join } from 'path'
 import validator from 'validator'
+import { toCompleteUUID } from '@server/helpers/custom-validators/misc'
+import { mdToOneLinePlainText } from '@server/helpers/markdown'
+import { ActorImageModel } from '@server/models/actor/actor-image'
+import { root } from '@shared/core-utils'
 import { escapeHTML } from '@shared/core-utils/renderer'
+import { sha256 } from '@shared/extra-utils'
 import { HTMLServerConfig } from '@shared/models'
 import { buildFileLocale, getDefaultLocale, is18nLocale, POSSIBLE_LOCALES } from '../../shared/core-utils/i18n/i18n'
 import { HttpStatusCode } from '../../shared/models/http/http-error-codes'
 import { VideoPlaylistPrivacy, VideoPrivacy } from '../../shared/models/videos'
-import { isTestInstance, sha256 } from '../helpers/core-utils'
 import { logger } from '../helpers/logger'
-import { mdToPlainText } from '../helpers/markdown'
 import { CONFIG } from '../initializers/config'
 import {
   ACCEPT_HEADERS,
-  ACTOR_IMAGES_SIZE,
   CUSTOM_HTML_TAG_COMMENTS,
   EMBED_SIZE,
   FILES_CONTENT_HASH,
@@ -21,13 +23,13 @@ import {
   WEBSERVER
 } from '../initializers/constants'
 import { AccountModel } from '../models/account/account'
-import { getActivityStreamDuration } from '../models/video/formatter/video-format-utils'
 import { VideoModel } from '../models/video/video'
 import { VideoChannelModel } from '../models/video/video-channel'
 import { VideoPlaylistModel } from '../models/video/video-playlist'
 import { MAccountActor, MChannelActor } from '../types/models'
+import { getActivityStreamDuration } from './activitypub/activity'
+import { getBiggestActorImage } from './actor-image'
 import { ServerConfigManager } from './server-config-manager'
-import { toCompleteUUID } from '@server/helpers/custom-validators/misc'
 
 type Tags = {
   ogType: string
@@ -38,11 +40,12 @@ type Tags = {
     numberOfItems: number
   }
 
-  siteName: string
-  title: string
+  escapedSiteName: string
+  escapedTitle: string
+  escapedDescription: string
+
   url: string
   originUrl: string
-  description: string
 
   disallowIndexation?: boolean
 
@@ -100,15 +103,15 @@ class ClientHtml {
       res.status(HttpStatusCode.NOT_FOUND_404)
       return html
     }
+    const description = mdToOneLinePlainText(video.description)
 
-    let customHtml = ClientHtml.addTitleTag(html, escapeHTML(video.name))
-    customHtml = ClientHtml.addDescriptionTag(customHtml, mdToPlainText(video.description))
+    let customHtml = ClientHtml.addTitleTag(html, video.name)
+    customHtml = ClientHtml.addDescriptionTag(customHtml, description)
 
     const url = WEBSERVER.URL + video.getWatchStaticPath()
     const originUrl = video.url
-    const title = escapeHTML(video.name)
-    const siteName = escapeHTML(CONFIG.INSTANCE.NAME)
-    const description = mdToPlainText(video.description)
+    const title = video.name
+    const siteName = CONFIG.INSTANCE.NAME
 
     const image = {
       url: WEBSERVER.URL + video.getPreviewStaticPath()
@@ -128,9 +131,10 @@ class ClientHtml {
     customHtml = ClientHtml.addTags(customHtml, {
       url,
       originUrl,
-      siteName,
-      title,
-      description,
+      escapedSiteName: escapeHTML(siteName),
+      escapedTitle: escapeHTML(title),
+      escapedDescription: escapeHTML(description),
+      disallowIndexation: video.privacy !== VideoPrivacy.PUBLIC,
       image,
       embed,
       ogType,
@@ -161,14 +165,15 @@ class ClientHtml {
       return html
     }
 
-    let customHtml = ClientHtml.addTitleTag(html, escapeHTML(videoPlaylist.name))
-    customHtml = ClientHtml.addDescriptionTag(customHtml, mdToPlainText(videoPlaylist.description))
+    const description = mdToOneLinePlainText(videoPlaylist.description)
+
+    let customHtml = ClientHtml.addTitleTag(html, videoPlaylist.name)
+    customHtml = ClientHtml.addDescriptionTag(customHtml, description)
 
     const url = WEBSERVER.URL + videoPlaylist.getWatchStaticPath()
     const originUrl = videoPlaylist.url
-    const title = escapeHTML(videoPlaylist.name)
-    const siteName = escapeHTML(CONFIG.INSTANCE.NAME)
-    const description = mdToPlainText(videoPlaylist.description)
+    const title = videoPlaylist.name
+    const siteName = CONFIG.INSTANCE.NAME
 
     const image = {
       url: videoPlaylist.getThumbnailUrl()
@@ -190,10 +195,11 @@ class ClientHtml {
     customHtml = ClientHtml.addTags(customHtml, {
       url,
       originUrl,
-      siteName,
+      escapedSiteName: escapeHTML(siteName),
+      escapedTitle: escapeHTML(title),
+      escapedDescription: escapeHTML(description),
+      disallowIndexation: videoPlaylist.privacy !== VideoPlaylistPrivacy.PUBLIC,
       embed,
-      title,
-      description,
       image,
       list,
       ogType,
@@ -226,7 +232,7 @@ class ClientHtml {
   static async getEmbedHTML () {
     const path = ClientHtml.getEmbedPath()
 
-    if (!isTestInstance() && ClientHtml.htmlCache[path]) return ClientHtml.htmlCache[path]
+    if (ClientHtml.htmlCache[path]) return ClientHtml.htmlCache[path]
 
     const buffer = await readFile(path)
     const serverConfig = await ServerConfigManager.Instance.getHTMLServerConfig()
@@ -259,19 +265,21 @@ class ClientHtml {
       return ClientHtml.getIndexHTML(req, res)
     }
 
-    let customHtml = ClientHtml.addTitleTag(html, escapeHTML(entity.getDisplayName()))
-    customHtml = ClientHtml.addDescriptionTag(customHtml, mdToPlainText(entity.description))
+    const description = mdToOneLinePlainText(entity.description)
+
+    let customHtml = ClientHtml.addTitleTag(html, entity.getDisplayName())
+    customHtml = ClientHtml.addDescriptionTag(customHtml, description)
 
     const url = entity.getLocalUrl()
     const originUrl = entity.Actor.url
-    const siteName = escapeHTML(CONFIG.INSTANCE.NAME)
-    const title = escapeHTML(entity.getDisplayName())
-    const description = mdToPlainText(entity.description)
+    const siteName = CONFIG.INSTANCE.NAME
+    const title = entity.getDisplayName()
 
+    const avatar = getBiggestActorImage(entity.Actor.Avatars)
     const image = {
-      url: entity.Actor.getAvatarUrl(),
-      width: ACTOR_IMAGES_SIZE.AVATARS.width,
-      height: ACTOR_IMAGES_SIZE.AVATARS.height
+      url: ActorImageModel.getImageUrl(avatar),
+      width: avatar?.width,
+      height: avatar?.height
     }
 
     const ogType = 'website'
@@ -281,9 +289,9 @@ class ClientHtml {
     customHtml = ClientHtml.addTags(customHtml, {
       url,
       originUrl,
-      title,
-      siteName,
-      description,
+      escapedTitle: escapeHTML(title),
+      escapedSiteName: escapeHTML(siteName),
+      escapedDescription: escapeHTML(description),
       image,
       ogType,
       twitterCard,
@@ -296,14 +304,13 @@ class ClientHtml {
 
   private static async getIndexHTML (req: express.Request, res: express.Response, paramLang?: string) {
     const path = ClientHtml.getIndexPath(req, res, paramLang)
-    if (!isTestInstance() && ClientHtml.htmlCache[path]) return ClientHtml.htmlCache[path]
+    if (ClientHtml.htmlCache[path]) return ClientHtml.htmlCache[path]
 
     const buffer = await readFile(path)
     const serverConfig = await ServerConfigManager.Instance.getHTMLServerConfig()
 
     let html = buffer.toString()
 
-    if (paramLang) html = ClientHtml.addHtmlLang(html, paramLang)
     html = ClientHtml.addManifestContentHash(html)
     html = ClientHtml.addFaviconContentHash(html)
     html = ClientHtml.addLogoContentHash(html)
@@ -336,15 +343,16 @@ class ClientHtml {
       lang = req.acceptsLanguages(POSSIBLE_LOCALES) || getDefaultLocale()
     }
 
-    return join(__dirname, '../../../client/dist/' + buildFileLocale(lang) + '/index.html')
+    logger.debug(
+      'Serving %s HTML language', buildFileLocale(lang),
+      { cookie: req.cookies?.clientLanguage, paramLang, acceptLanguage: req.headers['accept-language'] }
+    )
+
+    return join(root(), 'client', 'dist', buildFileLocale(lang), 'index.html')
   }
 
   private static getEmbedPath () {
-    return join(__dirname, '../../../client/dist/standalone/videos/embed.html')
-  }
-
-  private static addHtmlLang (htmlStringPage: string, paramLang: string) {
-    return htmlStringPage.replace('<html>', `<html lang="${paramLang}">`)
+    return join(root(), 'client', 'dist', 'standalone', 'videos', 'embed.html')
   }
 
   private static addManifestContentHash (htmlStringPage: string) {
@@ -363,14 +371,14 @@ class ClientHtml {
     let text = title || CONFIG.INSTANCE.NAME
     if (title) text += ` - ${CONFIG.INSTANCE.NAME}`
 
-    const titleTag = `<title>${text}</title>`
+    const titleTag = `<title>${escapeHTML(text)}</title>`
 
     return htmlStringPage.replace(CUSTOM_HTML_TAG_COMMENTS.TITLE, titleTag)
   }
 
   private static addDescriptionTag (htmlStringPage: string, description?: string) {
     const content = description || CONFIG.INSTANCE.SHORT_DESCRIPTION
-    const descriptionTag = `<meta name="description" content="${content}" />`
+    const descriptionTag = `<meta name="description" content="${escapeHTML(content)}" />`
 
     return htmlStringPage.replace(CUSTOM_HTML_TAG_COMMENTS.DESCRIPTION, descriptionTag)
   }
@@ -402,8 +410,8 @@ class ClientHtml {
   private static generateOpenGraphMetaTags (tags: Tags) {
     const metaTags = {
       'og:type': tags.ogType,
-      'og:site_name': tags.siteName,
-      'og:title': tags.title,
+      'og:site_name': tags.escapedSiteName,
+      'og:title': tags.escapedTitle,
       'og:image': tags.image.url
     }
 
@@ -413,7 +421,7 @@ class ClientHtml {
     }
 
     metaTags['og:url'] = tags.url
-    metaTags['og:description'] = mdToPlainText(tags.description)
+    metaTags['og:description'] = tags.escapedDescription
 
     if (tags.embed) {
       metaTags['og:video:url'] = tags.embed.url
@@ -428,8 +436,8 @@ class ClientHtml {
 
   private static generateStandardMetaTags (tags: Tags) {
     return {
-      name: tags.title,
-      description: mdToPlainText(tags.description),
+      name: tags.escapedTitle,
+      description: tags.escapedDescription,
       image: tags.image.url
     }
   }
@@ -438,8 +446,8 @@ class ClientHtml {
     const metaTags = {
       'twitter:card': tags.twitterCard,
       'twitter:site': CONFIG.SERVICES.TWITTER.USERNAME,
-      'twitter:title': tags.title,
-      'twitter:description': tags.description,
+      'twitter:title': tags.escapedTitle,
+      'twitter:description': tags.escapedDescription,
       'twitter:image': tags.image.url
     }
 
@@ -461,8 +469,8 @@ class ClientHtml {
     const schema = {
       '@context': 'http://schema.org',
       '@type': tags.schemaType,
-      'name': tags.title,
-      'description': tags.description,
+      'name': tags.escapedTitle,
+      'description': tags.escapedDescription,
       'image': tags.image.url,
       'url': tags.url
     }
@@ -492,71 +500,74 @@ class ClientHtml {
     const twitterCardMetaTags = this.generateTwitterCardMetaTags(tagsValues)
     const schemaTags = this.generateSchemaTags(tagsValues)
 
-    const { url, title, embed, originUrl, disallowIndexation } = tagsValues
+    const { url, escapedTitle, embed, originUrl, disallowIndexation } = tagsValues
 
-    const oembedLinkTags: { type: string, href: string, title: string }[] = []
+    const oembedLinkTags: { type: string, href: string, escapedTitle: string }[] = []
 
     if (embed) {
       oembedLinkTags.push({
         type: 'application/json+oembed',
         href: WEBSERVER.URL + '/services/oembed?url=' + encodeURIComponent(url),
-        title
+        escapedTitle
       })
     }
 
-    let tagsString = ''
+    let tagsStr = ''
 
     // Opengraph
     Object.keys(openGraphMetaTags).forEach(tagName => {
       const tagValue = openGraphMetaTags[tagName]
 
-      tagsString += `<meta property="${tagName}" content="${tagValue}" />`
+      tagsStr += `<meta property="${tagName}" content="${tagValue}" />`
     })
 
     // Standard
     Object.keys(standardMetaTags).forEach(tagName => {
       const tagValue = standardMetaTags[tagName]
 
-      tagsString += `<meta property="${tagName}" content="${tagValue}" />`
+      tagsStr += `<meta property="${tagName}" content="${tagValue}" />`
     })
 
     // Twitter card
     Object.keys(twitterCardMetaTags).forEach(tagName => {
       const tagValue = twitterCardMetaTags[tagName]
 
-      tagsString += `<meta property="${tagName}" content="${tagValue}" />`
+      tagsStr += `<meta property="${tagName}" content="${tagValue}" />`
     })
 
     // OEmbed
     for (const oembedLinkTag of oembedLinkTags) {
-      tagsString += `<link rel="alternate" type="${oembedLinkTag.type}" href="${oembedLinkTag.href}" title="${oembedLinkTag.title}" />`
+      tagsStr += `<link rel="alternate" type="${oembedLinkTag.type}" href="${oembedLinkTag.href}" title="${oembedLinkTag.escapedTitle}" />`
     }
 
     // Schema.org
     if (schemaTags) {
-      tagsString += `<script type="application/ld+json">${JSON.stringify(schemaTags)}</script>`
+      tagsStr += `<script type="application/ld+json">${JSON.stringify(schemaTags)}</script>`
     }
 
     // SEO, use origin URL
-    tagsString += `<link rel="canonical" href="${originUrl}" />`
+    tagsStr += `<link rel="canonical" href="${originUrl}" />`
 
     if (disallowIndexation) {
-      tagsString += `<meta name="robots" content="noindex" />`
+      tagsStr += `<meta name="robots" content="noindex" />`
     }
 
-    return htmlStringPage.replace(CUSTOM_HTML_TAG_COMMENTS.META_TAGS, tagsString)
+    return htmlStringPage.replace(CUSTOM_HTML_TAG_COMMENTS.META_TAGS, tagsStr)
   }
 }
 
-function sendHTML (html: string, res: express.Response) {
+function sendHTML (html: string, res: express.Response, localizedHTML: boolean = false) {
   res.set('Content-Type', 'text/html; charset=UTF-8')
+
+  if (localizedHTML) {
+    res.set('Vary', 'Accept-Language')
+  }
 
   return res.send(html)
 }
 
 async function serveIndexHTML (req: express.Request, res: express.Response) {
-  if (req.accepts(ACCEPT_HEADERS) === 'html' ||
-      !req.headers.accept) {
+  if (req.accepts(ACCEPT_HEADERS) === 'html' || !req.headers.accept) {
     try {
       await generateHTMLPage(req, res, req.params.language)
       return
@@ -580,5 +591,5 @@ export {
 async function generateHTMLPage (req: express.Request, res: express.Response, paramLang?: string) {
   const html = await ClientHtml.getDefaultHTMLPage(req, res, paramLang)
 
-  return sendHTML(html, res)
+  return sendHTML(html, res, true)
 }

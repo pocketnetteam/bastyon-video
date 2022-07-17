@@ -23,10 +23,7 @@ import { getLocalVideoCacheFileActivityPubUrl, getLocalVideoCacheStreamingPlayli
 import { getOrCreateAPVideo } from '../activitypub/videos'
 import { downloadPlaylistSegments } from '../hls'
 import { removeVideoRedundancy } from '../redundancy'
-import {
-  generateHLSRedundancyUrl,
-  generateWebTorrentRedundancyUrl
-} from '../video-urls'
+import { generateHLSRedundancyUrl, generateWebTorrentRedundancyUrl } from '../video-urls'
 import { AbstractScheduler } from './abstract-scheduler'
 import { sequelizeTypescript } from '@server/initializers/database'
 
@@ -77,7 +74,6 @@ export class VideosRedundancyScheduler extends AbstractScheduler {
 
       try {
         const videoToDuplicate = await this.findVideoToDuplicate(redundancyConfig)
-
         if (!videoToDuplicate) continue
 
         const candidateToDuplicate = {
@@ -120,25 +116,16 @@ export class VideosRedundancyScheduler extends AbstractScheduler {
     for (const redundancyModel of expired) {
       try {
         // const redundancyConfig = CONFIG.REDUNDANCY.VIDEOS.STRATEGIES.find(s => s.strategy === redundancyModel.strategy)
-        // const candidate: CandidateToDuplicate = {
-        //   redundancy: redundancyConfig,
-        //   video: null,
-        //   files: [],
-        //   streamingPlaylists: []
-        // }
+        // const { totalUsed } = await VideoRedundancyModel.getStats(redundancyConfig.strategy)
 
-        // If the administrator disabled the redundancy or decreased the cache size, remove this redundancy instead of extending it
-        // if (!redundancyConfig || await this.isTooHeavy(candidate)) {
-        //   logger.info(
-        //     'Destroying redundancy %s because the cache size %s is too heavy.',
-        //     redundancyModel.url, redundancyModel.strategy, lTags(candidate.video.uuid)
-        //   )
+        // // If the administrator disabled the redundancy or decreased the cache size, remove this redundancy instead of extending it
+        // if (!redundancyConfig || totalUsed > redundancyConfig.size) {
+        //   logger.info('Destroying redundancy %s because the cache size %s is too heavy.', redundancyModel.url, redundancyModel.strategy)
 
         //   await removeVideoRedundancy(redundancyModel)
         // } else {
         //   await this.extendsRedundancy(redundancyModel)
         // }
-
         await this.extendsRedundancy(redundancyModel)
       } catch (err) {
         logger.error(
@@ -198,6 +185,7 @@ export class VideosRedundancyScheduler extends AbstractScheduler {
 
       return
     }
+
     // For clearing, if something went wrong
     const fileRedundancyModels = []
     const streamingPlaylistRedundancyModels = []
@@ -233,25 +221,6 @@ export class VideosRedundancyScheduler extends AbstractScheduler {
 
       throw new Error('Failed Request')
     }
-  }
-
-  private async clearVideoRedundancyModels (
-    fileRedundancyModels: MVideoRedundancyFileVideo[],
-    streamingPlaylistRedundancyModels: MVideoRedundancyStreamingPlaylistVideo[]
-  ) {
-    await sequelizeTypescript.transaction(async t => {
-      for (const fileModel of fileRedundancyModels) {
-        await fileModel.destroy({ transaction: t })
-
-        logger.warn('DESTROYED FILE MODEL')
-      }
-
-      for (const playlistModel of streamingPlaylistRedundancyModels) {
-        await playlistModel.destroy({ transaction: t })
-
-        logger.warn('DESTROYED PLAYLIST MODEL')
-      }
-    })
   }
 
   private async createVideoFileRedundancy (redundancy: VideosRedundancyStrategy | null, video: MVideoAccountLight, fileArg: MVideoFile) {
@@ -427,7 +396,7 @@ export class VideosRedundancyScheduler extends AbstractScheduler {
     // We need more attributes and check if the video still exists
     const getVideoOptions = {
       videoObject: videoUrl,
-      syncParam: { likes: false, dislikes: false, shares: false, comments: false, thumbnail: false, refreshVideo: true },
+      syncParam: { rates: false, shares: false, comments: false, thumbnail: false, refreshVideo: true },
       fetchType: 'all' as 'all'
     }
     const { video } = await getOrCreateAPVideo(getVideoOptions)

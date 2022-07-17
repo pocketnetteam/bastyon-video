@@ -2,17 +2,17 @@
 
 import 'mocha'
 import * as chai from 'chai'
+import { MockSmtpServer } from '@server/tests/shared'
+import { wait } from '@shared/core-utils'
+import { HttpStatusCode } from '@shared/models'
 import {
   cleanupTests,
   ContactFormCommand,
   createSingleServer,
-  MockSmtpServer,
   PeerTubeServer,
   setAccessTokensToServers,
-  wait,
   waitJobs
-} from '@shared/extra-utils'
-import { HttpStatusCode } from '@shared/models'
+} from '@shared/server-commands'
 
 const expect = chai.expect
 
@@ -59,6 +59,13 @@ describe('Test contact form', function () {
     expect(email['to'][0]['address']).equal('admin' + server.internalServerNumber + '@example.com')
     expect(email['subject']).contains('my subject')
     expect(email['text']).contains('my super message')
+  })
+
+  it('Should not have duplicated email adress in text message', async function () {
+    const text = emails[0]['text'] as string
+
+    const matches = text.match(/toto@example.com/g)
+    expect(matches).to.have.lengthOf(1)
   })
 
   it('Should not be able to send another contact form because of the anti spam checker', async function () {

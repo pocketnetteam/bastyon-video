@@ -25,19 +25,6 @@ export class PluginApiService {
     private pluginService: PluginService
   ) { }
 
-  getPluginTypeOptions () {
-    return [
-      {
-        label: $localize`Plugins`,
-        value: PluginType.PLUGIN
-      },
-      {
-        label: $localize`Themes`,
-        value: PluginType.THEME
-      }
-    ]
-  }
-
   getPluginTypeLabel (type: PluginType) {
     if (type === PluginType.PLUGIN) {
       return $localize`plugin`
@@ -51,7 +38,7 @@ export class PluginApiService {
     componentPagination: ComponentPagination,
     sort: string
   ) {
-    const pagination = this.restService.componentPaginationToRestPagination(componentPagination)
+    const pagination = this.restService.componentToRestPagination(componentPagination)
 
     let params = new HttpParams()
     params = this.restService.addRestGetParams(params, pagination, sort)
@@ -67,7 +54,7 @@ export class PluginApiService {
     sort: string,
     search?: string
   ) {
-    const pagination = this.restService.componentPaginationToRestPagination(componentPagination)
+    const pagination = this.restService.componentToRestPagination(componentPagination)
 
     let params = new HttpParams()
     params = this.restService.addRestGetParams(params, pagination, sort)

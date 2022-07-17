@@ -1,10 +1,11 @@
 import validator from 'validator'
 import { logger } from '@server/helpers/logger'
 import { ActivityTrackerUrlObject, ActivityVideoFileMetadataUrlObject } from '@shared/models'
-import { VideoState } from '../../../../shared/models/videos'
+import { LiveVideoLatencyMode, VideoState } from '../../../../shared/models/videos'
 import { ACTIVITY_PUB, CONSTRAINTS_FIELDS } from '../../../initializers/constants'
 import { peertubeTruncate } from '../../core-utils'
-import { exists, isArray, isBooleanValid, isDateValid, isUUIDValid } from '../misc'
+import { isArray, isBooleanValid, isDateValid, isUUIDValid } from '../misc'
+import { isLiveLatencyModeValid } from '../video-lives'
 import {
   isVideoDurationValid,
   isVideoNameValid,
@@ -13,20 +14,11 @@ import {
   isVideoTruncatedDescriptionValid,
   isVideoViewsValid
 } from '../videos'
-import { isActivityPubUrlValid, isBaseActivityValid, setValidAttributedTo } from './misc'
+import { isActivityPubUrlValid, isActivityPubVideoDurationValid, isBaseActivityValid, setValidAttributedTo } from './misc'
 
 function sanitizeAndCheckVideoTorrentUpdateActivity (activity: any) {
   return isBaseActivityValid(activity, 'Update') &&
     sanitizeAndCheckVideoTorrentObject(activity.object)
-}
-
-function isActivityPubVideoDurationValid (value: string) {
-  // https://www.w3.org/TR/activitystreams-vocabulary/#dfn-duration
-  return exists(value) &&
-    typeof value === 'string' &&
-    value.startsWith('PT') &&
-    value.endsWith('S') &&
-    isVideoDurationValid(value.replace(/[^0-9]+/g, ''))
 }
 
 function sanitizeAndCheckVideoTorrentObject (video: any) {
@@ -65,10 +57,12 @@ function sanitizeAndCheckVideoTorrentObject (video: any) {
   if (!isBooleanValid(video.isLiveBroadcast)) video.isLiveBroadcast = false
   if (!isBooleanValid(video.liveSaveReplay)) video.liveSaveReplay = false
   if (!isBooleanValid(video.permanentLive)) video.permanentLive = false
+  if (!isLiveLatencyModeValid(video.latencyMode)) video.latencyMode = LiveVideoLatencyMode.DEFAULT
 
   return isActivityPubUrlValid(video.id) &&
     isVideoNameValid(video.name) &&
     isActivityPubVideoDurationValid(video.duration) &&
+    isVideoDurationValid(video.duration.replace(/[^0-9]+/g, '')) &&
     isUUIDValid(video.uuid) &&
     (!video.category || isRemoteNumberIdentifierValid(video.category)) &&
     (!video.licence || isRemoteNumberIdentifierValid(video.licence)) &&

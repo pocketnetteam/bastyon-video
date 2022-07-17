@@ -1,10 +1,10 @@
 import express from 'express'
 import { join } from 'path'
-import { uuidToShort } from '@server/helpers/uuid'
 import { scheduleRefreshIfNeeded } from '@server/lib/activitypub/playlists'
 import { Hooks } from '@server/lib/plugins/hooks'
 import { getServerActor } from '@server/models/application/application'
 import { MVideoPlaylistFull, MVideoPlaylistThumbnail, MVideoThumbnail } from '@server/types/models'
+import { uuidToShort } from '@shared/extra-utils'
 import { VideoPlaylistCreateResult, VideoPlaylistElementCreateResult } from '@shared/models'
 import { HttpStatusCode } from '../../../shared/models/http/http-error-codes'
 import { VideoPlaylistCreate } from '../../../shared/models/videos/playlist/video-playlist-create.model'
@@ -47,7 +47,7 @@ import { AccountModel } from '../../models/account/account'
 import { VideoPlaylistModel } from '../../models/video/video-playlist'
 import { VideoPlaylistElementModel } from '../../models/video/video-playlist-element'
 
-const reqThumbnailFile = createReqFiles([ 'thumbnailfile' ], MIMETYPES.IMAGE.MIMETYPE_EXT, { thumbnailfile: CONFIG.STORAGE.TMP_DIR })
+const reqThumbnailFile = createReqFiles([ 'thumbnailfile' ], MIMETYPES.IMAGE.MIMETYPE_EXT)
 
 const videoPlaylistRouter = express.Router()
 
@@ -334,7 +334,7 @@ async function addVideoInPlaylist (req: express.Request, res: express.Response) 
 
   logger.info('Video added in playlist %s at position %d.', videoPlaylist.uuid, playlistElement.position)
 
-  Hooks.runAction('action:api.video-playlist-element.created', { playlistElement })
+  Hooks.runAction('action:api.video-playlist-element.created', { playlistElement, req, res })
 
   return res.json({
     videoPlaylistElement: {
@@ -376,7 +376,7 @@ async function removeVideoFromPlaylist (req: express.Request, res: express.Respo
     await videoPlaylistElement.destroy({ transaction: t })
 
     // Decrease position of the next elements
-    await VideoPlaylistElementModel.increasePositionOf(videoPlaylist.id, positionToDelete, null, -1, t)
+    await VideoPlaylistElementModel.increasePositionOf(videoPlaylist.id, positionToDelete, -1, t)
 
     videoPlaylist.changed('updatedAt', true)
     await videoPlaylist.save({ transaction: t })
@@ -415,7 +415,7 @@ async function reorderVideosPlaylist (req: express.Request, res: express.Respons
     const newPosition = insertAfter + 1
 
     // Add space after the position when we want to insert our reordered elements (increase)
-    await VideoPlaylistElementModel.increasePositionOf(videoPlaylist.id, newPosition, null, reorderLength, t)
+    await VideoPlaylistElementModel.increasePositionOf(videoPlaylist.id, newPosition, reorderLength, t)
 
     let oldPosition = start
 
@@ -427,7 +427,7 @@ async function reorderVideosPlaylist (req: express.Request, res: express.Respons
     await VideoPlaylistElementModel.reassignPositionOf(videoPlaylist.id, oldPosition, endOldPosition, newPosition, t)
 
     // Decrease positions of elements after the old position of our ordered elements (decrease)
-    await VideoPlaylistElementModel.increasePositionOf(videoPlaylist.id, oldPosition, null, -reorderLength, t)
+    await VideoPlaylistElementModel.increasePositionOf(videoPlaylist.id, oldPosition, -reorderLength, t)
 
     videoPlaylist.changed('updatedAt', true)
     await videoPlaylist.save({ transaction: t })
@@ -453,13 +453,19 @@ async function getVideoPlaylistVideos (req: express.Request, res: express.Respon
   const user = res.locals.oauth ? res.locals.oauth.token.User : undefined
   const server = await getServerActor()
 
-  const resultList = await VideoPlaylistElementModel.listForApi({
+  const apiOptions = await Hooks.wrapObject({
     start: req.query.start,
     count: req.query.count,
     videoPlaylistId: videoPlaylistInstance.id,
     serverAccount: server.Account,
     user
-  })
+  }, 'filter:api.video-playlist.videos.list.params')
+
+  const resultList = await Hooks.wrapPromiseFun(
+    VideoPlaylistElementModel.listForApi,
+    apiOptions,
+    'filter:api.video-playlist.videos.list.result'
+  )
 
   const options = {
     displayNSFW: buildNSFWFilter(res, req.query.nsfw),

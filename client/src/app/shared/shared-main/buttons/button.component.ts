@@ -16,14 +16,11 @@ export class ButtonComponent {
   @Input() disabled = false
   @Input() responsiveLabel = false
 
-  getTitle () {
-    return this.title || this.label
-  }
-
   getClasses () {
     return {
       [this.className]: true,
       disabled: this.disabled,
+      'icon-only': !this.label,
       'responsive-label': this.responsiveLabel
     }
   }

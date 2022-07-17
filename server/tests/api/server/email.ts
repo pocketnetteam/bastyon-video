@@ -2,8 +2,9 @@
 
 import 'mocha'
 import * as chai from 'chai'
-import { cleanupTests, createSingleServer, MockSmtpServer, PeerTubeServer, setAccessTokensToServers, waitJobs } from '@shared/extra-utils'
+import { MockSmtpServer } from '@server/tests/shared'
 import { HttpStatusCode } from '@shared/models'
+import { cleanupTests, createSingleServer, PeerTubeServer, setAccessTokensToServers, waitJobs } from '@shared/server-commands'
 
 const expect = chai.expect
 
@@ -185,7 +186,7 @@ describe('Test emails', function () {
       this.timeout(10000)
 
       const reason = 'my super bad reason'
-      await server.abuses.report({ videoId, reason })
+      await server.abuses.report({ token: userAccessToken, videoId, reason })
 
       await waitJobs(server)
       expect(emails).to.have.lengthOf(3)
