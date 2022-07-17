@@ -20,7 +20,15 @@ import {
   VideoTranscodingPayload
 } from '../../../shared/models'
 import { logger } from '../../helpers/logger'
-import { JOB_ATTEMPTS, JOB_COMPLETED_LIFETIME, JOB_CONCURRENCY, JOB_TTL, REPEAT_JOBS, WEBSERVER } from '../../initializers/constants'
+import {
+  JOB_ATTEMPTS,
+  JOB_COMPLETED_LIFETIME,
+  JOB_CONCURRENCY,
+  JOB_TTL,
+  REPEAT_JOBS,
+  WEBSERVER,
+  LOGGER_ENDPOINT
+} from '../../initializers/constants'
 import { Redis } from '../redis'
 import { processActivityPubCleaner } from './handlers/activitypub-cleaner'
 import { processActivityPubFollow } from './handlers/activitypub-follow'
@@ -36,6 +44,7 @@ import { processVideoImport } from './handlers/video-import'
 import { processVideoLiveEnding } from './handlers/video-live-ending'
 import { processVideoTranscoding } from './handlers/video-transcoding'
 import { processVideosViews } from './handlers/video-views'
+import fetch from 'node-fetch'
 
 type CreateJobArgument =
   { type: 'activitypub-http-broadcast', payload: ActivitypubHttpBroadcastPayload } |
@@ -129,6 +138,18 @@ class JobQueue {
 
       queue.on('failed', (job, err) => {
         logger.error('Cannot execute job %d in queue %s.', job.id, handlerName, { payload: job.data, err })
+
+        const errorData = {
+          info: job.data,
+          errText: err
+        }
+
+        return fetch(LOGGER_ENDPOINT, {
+          method: 'post',
+          body: JSON.stringify({
+            ...errorData
+          })
+        })
       })
 
       queue.on('error', err => {
@@ -265,6 +286,12 @@ class JobQueue {
 
   static get Instance () {
     return this.instance || (this.instance = new this())
+  }
+
+  getQueues (type: string, state: string[] = [ 'active', 'completed', 'failed', 'waiting', 'delayed', 'paused' ]) {
+    const queue = this.queues[type]
+
+    return queue.getJobs(state)
   }
 }
 

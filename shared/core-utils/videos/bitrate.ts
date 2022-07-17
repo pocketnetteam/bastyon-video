@@ -6,6 +6,7 @@ type BitPerPixel = { [ id in VideoResolution ]: number }
 
 const averageBitPerPixel: BitPerPixel = {
   [VideoResolution.H_NOVIDEO]: 0,
+  [VideoResolution.H_144P]: 0.20,
   [VideoResolution.H_240P]: 0.17,
   [VideoResolution.H_360P]: 0.15,
   [VideoResolution.H_480P]: 0.12,
@@ -17,6 +18,7 @@ const averageBitPerPixel: BitPerPixel = {
 
 const maxBitPerPixel: BitPerPixel = {
   [VideoResolution.H_NOVIDEO]: 0,
+  [VideoResolution.H_144P]: 0.33,
   [VideoResolution.H_240P]: 0.29,
   [VideoResolution.H_360P]: 0.26,
   [VideoResolution.H_480P]: 0.22,

@@ -86,6 +86,8 @@ function videoModelToFormattedJSON (video: MVideoFormattable, options?: VideoFor
     publishedAt: video.publishedAt,
     originallyPublishedAt: video.originallyPublishedAt,
 
+    aspectRatio: video.aspectRatio,
+
     isLive: video.isLive,
 
     account: video.VideoChannel.Account.toFormattedSummaryJSON(),
@@ -139,6 +141,14 @@ function videoModelToFormattedDetailsJSON (video: MVideoFormattableDetails): Vid
 
   const streamingPlaylists = streamingPlaylistsModelToFormattedJSON(video, video.VideoStreamingPlaylists)
 
+  const redundancies = isArray(
+    video.VideoStreamingPlaylists?.[0]?.RedundancyVideos
+  )
+    ? video.VideoStreamingPlaylists?.[0]?.RedundancyVideos
+    : []
+
+  const videoIsMirrored = !!redundancies.length
+
   const detailsJson = {
     support: video.support,
     descriptionPath: video.getDescriptionAPIPath(),
@@ -153,10 +163,12 @@ function videoModelToFormattedDetailsJSON (video: MVideoFormattableDetails): Vid
       label: getStateLabel(video.state)
     },
 
-    trackerUrls: video.getTrackerUrls(),
+    trackerUrls: video.getTrackerUrls(videoIsMirrored),
 
     files: [],
-    streamingPlaylists
+    streamingPlaylists,
+
+    aspectRatio: video.aspectRatio
   }
 
   // Format and sort video files
@@ -177,13 +189,15 @@ function streamingPlaylistsModelToFormattedJSON (
         ? playlist.RedundancyVideos.map(r => ({ baseUrl: r.fileUrl }))
         : []
 
+      const isDuplicated = !!redundancies.length
+
       const files = videoFilesModelToFormattedJSON(video, playlist.VideoFiles)
 
       return {
         id: playlist.id,
         type: playlist.type,
-        playlistUrl: playlist.getMasterPlaylistUrl(video),
-        segmentsSha256Url: playlist.getSha256SegmentsUrl(video),
+        playlistUrl: playlist.getMasterPlaylistUrl(video, isDuplicated),
+        segmentsSha256Url: playlist.getSha256SegmentsUrl(video, isDuplicated),
         redundancies,
         files
       }
@@ -382,6 +396,8 @@ function videoModelToActivityPubObject (video: MVideoAP): VideoObject {
     sensitive: video.nsfw,
     waitTranscoding: video.waitTranscoding,
     isLiveBroadcast: video.isLive,
+
+    aspectRatio: video.aspectRatio,
 
     liveSaveReplay: video.isLive
       ? video.VideoLive.saveReplay

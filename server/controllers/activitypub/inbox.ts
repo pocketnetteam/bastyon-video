@@ -58,7 +58,7 @@ function inboxController (req: express.Request, res: express.Response) {
 
   const accountOrChannel = res.locals.account || res.locals.videoChannel
 
-  logger.info('Receiving inbox requests for %d activities by %s.', activities.length, res.locals.signature.actor.url)
+  // logger.info('Receiving inbox requests for %d activities by %s.', activities.length, res.locals.signature.actor.url)
 
   InboxManager.Instance.addInboxMessage({
     activities,

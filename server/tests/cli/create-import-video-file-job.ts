@@ -106,7 +106,7 @@ function runTests (objectStorage: boolean) {
       const video = videos.find(({ uuid }) => uuid === video2UUID)
       const videoDetails = await server.videos.get({ id: video.uuid })
 
-      expect(videoDetails.files).to.have.lengthOf(4)
+      expect(videoDetails.files).to.have.lengthOf(5)
       const [ originalVideo, transcodedVideo420, transcodedVideo320, transcodedVideo240 ] = videoDetails.files
       assertVideoProperties(originalVideo, 720, 'ogv', 140849)
       assertVideoProperties(transcodedVideo420, 480, 'mp4')

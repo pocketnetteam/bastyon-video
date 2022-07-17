@@ -46,6 +46,8 @@ import { VideoViewModel } from '../models/video/video-view'
 import { CONFIG } from './config'
 import { ActorCustomPageModel } from '@server/models/account/actor-custom-page'
 import { VideoJobInfoModel } from '@server/models/video/video-job-info'
+import { ImageModel } from '@server/models/image/image'
+import { ImageRedundancyModel } from '@server/models/image/image-redundancy'
 
 require('pg').defaults.parseInt8 = true // Avoid BIGINT to be converted to string
 
@@ -80,14 +82,14 @@ const sequelizeTypescript = new SequelizeTypescript({
   benchmark: isTestInstance(),
   isolationLevel: Transaction.ISOLATION_LEVELS.SERIALIZABLE,
   logging: (message: string, benchmark: number) => {
-    if (process.env.NODE_DB_LOG === 'false') return
+    // if (process.env.NODE_DB_LOG === 'false') return
 
-    let newMessage = 'Executed SQL request'
-    if (isTestInstance() === true && benchmark !== undefined) {
-      newMessage += ' in ' + benchmark + 'ms'
-    }
+    // let newMessage = 'Executed SQL request'
+    // if (isTestInstance() === true && benchmark !== undefined) {
+    //   newMessage += ' in ' + benchmark + 'ms'
+    // }
 
-    logger.debug(newMessage, { sql: message, tags: [ 'sql' ] })
+    // logger.debug(newMessage, { sql: message, tags: [ 'sql' ] })
   }
 })
 
@@ -145,7 +147,9 @@ async function initDatabaseModels (silent: boolean) {
     VideoTrackerModel,
     PluginModel,
     ActorCustomPageModel,
-    VideoJobInfoModel
+    VideoJobInfoModel,
+    ImageModel,
+    ImageRedundancyModel
   ])
 
   // Check extensions exist in the database

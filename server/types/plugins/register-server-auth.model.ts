@@ -9,6 +9,7 @@ export interface RegisterServerAuthenticatedResult {
   email: string
   role?: UserRole
   displayName?: string
+  userQuota?: number
 }
 
 export interface RegisterServerExternalAuthenticatedResult extends RegisterServerAuthenticatedResult {

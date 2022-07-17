@@ -71,7 +71,8 @@ function checkConfig () {
 
       // Lifetime should not be < 10 hours
       if (!isTestInstance() && r.minLifetime < 1000 * 3600 * 10) {
-        return 'Video redundancy minimum lifetime should be >= 10 hours for strategy ' + r.strategy
+        r.minLifetime = 1000 * 3600 * 10
+        // return 'Video redundancy minimum lifetime should be >= 10 hours for strategy ' + r.strategy
       }
     }
 

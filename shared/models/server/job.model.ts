@@ -132,6 +132,7 @@ export type VideoTranscodingPayload =
 
 export interface VideoLiveEndingPayload {
   videoId: number
+  name?: string
 }
 
 export interface ActorKeysPayload {

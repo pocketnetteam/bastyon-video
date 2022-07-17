@@ -9,6 +9,7 @@ import { CONFIG } from '../initializers/config'
 import { TRACKER_RATE_LIMITS } from '../initializers/constants'
 import { VideoFileModel } from '../models/video/video-file'
 import { VideoStreamingPlaylistModel } from '../models/video/video-streaming-playlist'
+import { ImageModel } from '@server/models/image/image'
 
 const trackerRouter = express.Router()
 
@@ -51,6 +52,9 @@ const trackerServer = new TrackerServer({
       const playlistExists = await VideoStreamingPlaylistModel.doesInfohashExistCached(infoHash)
       if (playlistExists === true) return cb()
 
+      const imageExists = await ImageModel.doesInfohashExistCached(infoHash)
+      if (imageExists === true) return cb()
+
       cb(new Error(`Unknown infoHash ${infoHash} requested by ip ${ip}`))
 
       // Close socket connection and block IP for a few time
@@ -74,9 +78,9 @@ if (CONFIG.TRACKER.ENABLED !== false) {
     logger.error('Error in tracker.', { err })
   })
 
-  trackerServer.on('warning', function (err) {
-    logger.warn('Warning in tracker.', { err })
-  })
+  // trackerServer.on('warning', function (err) {
+  //   logger.warn('Warning in tracker.', { err })
+  // })
 }
 
 const onHttpRequest = trackerServer.onHttpRequest.bind(trackerServer)
@@ -95,22 +99,24 @@ function createWebsocketTrackerServer (app: express.Application) {
 
   server.on('upgrade', (request: express.Request, socket, head) => {
     if (request.url === '/tracker/socket') {
-      const ip = proxyAddr(request, CONFIG.TRUST_PROXY)
+      // const ip = proxyAddr(request, CONFIG.TRUST_PROXY)
 
-      Redis.Instance.doesTrackerBlockIPExist(ip)
-        .then(result => {
-          if (result === true) {
-            logger.debug('Blocking IP %s from tracker.', ip)
+      // Redis.Instance.doesTrackerBlockIPExist(ip)
+      //   .then(result => {
+      //     if (result === true) {
+      //       logger.debug('Blocking IP %s from tracker.', ip)
 
-            socket.write('HTTP/1.1 403 Forbidden\r\n\r\n')
-            socket.destroy()
-            return
-          }
+      //       socket.write('HTTP/1.1 403 Forbidden\r\n\r\n')
+      //       socket.destroy()
+      //       return
+      //     }
 
-          // FIXME: typings
-          return wss.handleUpgrade(request, socket as any, head, ws => wss.emit('connection', ws, request))
-        })
-        .catch(err => logger.error('Cannot check if tracker block ip exists.', { err }))
+      //     // FIXME: typings
+      //     return wss.handleUpgrade(request, socket as any, head, ws => wss.emit('connection', ws, request))
+      //   })
+      //   .catch(err => logger.error('Cannot check if tracker block ip exists.', { err }))
+
+      return wss.handleUpgrade(request, socket as any, head, ws => wss.emit('connection', ws, request))
     }
 
     // Don't destroy socket, we have Socket.IO too

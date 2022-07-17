@@ -59,6 +59,8 @@ export interface Video {
   }
 
   pluginData?: any
+
+  aspectRatio?: number
 }
 
 export interface VideoDetails extends Video {
@@ -78,4 +80,6 @@ export interface VideoDetails extends Video {
   trackerUrls: string[]
 
   streamingPlaylists: VideoStreamingPlaylist[]
+
+  aspectRatio?: number
 }

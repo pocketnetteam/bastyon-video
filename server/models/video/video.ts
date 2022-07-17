@@ -2,7 +2,7 @@ import Bluebird from 'bluebird'
 import { remove } from 'fs-extra'
 import { maxBy, minBy } from 'lodash'
 import { join } from 'path'
-import { FindOptions, Includeable, IncludeOptions, Op, QueryTypes, ScopeOptions, Sequelize, Transaction, WhereOptions } from 'sequelize'
+import { DataTypes, FindOptions, Includeable, IncludeOptions, Op, QueryTypes, ScopeOptions, Sequelize, Transaction, WhereOptions } from 'sequelize'
 import {
   AllowNull,
   BeforeDestroy,
@@ -568,6 +568,11 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
   @Column
   originallyPublishedAt: Date
 
+  @AllowNull(false)
+  @Default(1.0)
+  @Column(DataType.DECIMAL)
+  aspectRatio: number
+
   @ForeignKey(() => VideoChannelModel)
   @Column
   channelId: number
@@ -973,7 +978,20 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     return result.map(v => v.uuid)
   }
 
+  static async meVideoViews (username: string, startDate: string) {
+    const startDateWhere = startDate ? `AND "video"."createdAt" > '${startDate}'` : null
+    const videoViewsQuery: string = `SELECT SUM("video"."views")
+                                  FROM "account"
+                                  JOIN "videoChannel" on "videoChannel"."accountId" = "account"."id"
+                                  JOIN "video" on "video"."channelId" = "videoChannel"."id"
+                                  WHERE "account"."name" = '${username}' ${startDateWhere || ''};
+                                `
+    return await VideoModel.sequelize.query<any>(videoViewsQuery, { type: QueryTypes.SELECT, nest: true })
+            .then(rows => rows[0]?.sum as number)
+  }
+
   static listUserVideosForApi (options: {
+    user: any
     accountId: number
     start: number
     count: number
@@ -981,7 +999,7 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     isLive?: boolean
     search?: string
   }) {
-    const { accountId, start, count, sort, search, isLive } = options
+    const { start, count, sort, search, isLive } = options
 
     function buildBaseQuery (): FindOptions {
       const where: WhereOptions = {}
@@ -1009,7 +1027,7 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
               {
                 model: AccountModel,
                 where: {
-                  id: accountId
+                  name: options.user.username
                 },
                 required: true
               }
@@ -1782,8 +1800,8 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     return Math.ceil((videoFile.size * 8) / this.duration)
   }
 
-  getTrackerUrls () {
-    if (this.isOwned()) {
+  getTrackerUrls (isMirrored?: boolean) {
+    if (this.isOwned() || isMirrored) {
       return [
         WEBSERVER.URL + '/tracker/announce',
         WEBSERVER.WS + '://' + WEBSERVER.HOSTNAME + ':' + WEBSERVER.PORT + '/tracker/socket'

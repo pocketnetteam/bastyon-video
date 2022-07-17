@@ -1,4 +1,4 @@
-FROM node:12-buster-slim
+FROM node:14-buster-slim
 
 # Allow to pass extra options to the npm run build
 # eg: --light --light-fr to not build all client languages
@@ -38,6 +38,8 @@ ENV NODE_CONFIG_DIR /config
 VOLUME /data
 VOLUME /config
 
+COPY ./support/docker/production/peertubeStart.sh /usr/local/bin/peertubeStart.sh
+
 COPY ./support/docker/production/entrypoint.sh /usr/local/bin/entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
@@ -45,4 +47,4 @@ ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 EXPOSE 9000 1935
 
 # Run the application
-CMD ["npm", "start"]
+CMD ["/bin/bash", "/usr/local/bin/peertubeStart.sh"]

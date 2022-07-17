@@ -215,7 +215,8 @@ function getVideoAttributesFromObject (videoChannel: MChannelId, videoObject: Vi
     likes: 0,
     dislikes: 0,
     remote: true,
-    privacy
+    privacy,
+    aspectRatio: videoObject.aspectRatio
   }
 }
 

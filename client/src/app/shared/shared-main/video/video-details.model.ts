@@ -30,6 +30,8 @@ export class VideoDetails extends Video implements VideoDetailsServerModel {
 
   streamingPlaylists: VideoStreamingPlaylist[]
 
+  aspectRatio?: number
+
   constructor (hash: VideoDetailsServerModel, translations = {}) {
     super(hash, translations)
 

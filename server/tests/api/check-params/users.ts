@@ -139,11 +139,12 @@ describe('Test users API validators', function () {
       await makePostBodyRequest({ url: server.url, path, token: server.accessToken, fields })
     })
 
-    it('Should fail with a not lowercase username', async function () {
+    // Obsolete because usernames can now contain uppercase characters
+    /*it('Should fail with a not lowercase username', async function () {
       const fields = { ...baseCorrectParams, username: 'Toto' }
 
       await makePostBodyRequest({ url: server.url, path, token: server.accessToken, fields })
-    })
+    })*/
 
     it('Should fail with an incorrect username', async function () {
       const fields = { ...baseCorrectParams, username: 'my username' }

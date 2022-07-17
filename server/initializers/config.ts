@@ -63,6 +63,7 @@ const CONFIG = {
     ACTOR_IMAGES: buildPath(config.get<string>('storage.avatars')),
     LOG_DIR: buildPath(config.get<string>('storage.logs')),
     VIDEOS_DIR: buildPath(config.get<string>('storage.videos')),
+    IMAGES_DIR: buildPath(config.get<string>('storage.images')),
     STREAMING_PLAYLISTS_DIR: buildPath(config.get<string>('storage.streaming_playlists')),
     REDUNDANCY_DIR: buildPath(config.get<string>('storage.redundancy')),
     THUMBNAILS_DIR: buildPath(config.get<string>('storage.thumbnails')),
@@ -142,6 +143,10 @@ const CONFIG = {
     VIDEOS: {
       CHECK_INTERVAL: parseDurationToMs(config.get<string>('redundancy.videos.check_interval')),
       STRATEGIES: buildVideosRedundancy(config.get<any[]>('redundancy.videos.strategies'))
+    },
+    IMAGES: {
+      CHECK_INTERVAL: parseDurationToMs(config.get<string>('redundancy.images.check_interval')),
+      NB_IMAGES_PER_REQ: config.get<number>('redundancy.images.nb_images_per_req')
     }
   },
   REMOTE_REDUNDANCY: {
@@ -232,7 +237,9 @@ const CONFIG = {
       get '720p' () { return config.get<boolean>('transcoding.resolutions.720p') },
       get '1080p' () { return config.get<boolean>('transcoding.resolutions.1080p') },
       get '1440p' () { return config.get<boolean>('transcoding.resolutions.1440p') },
-      get '2160p' () { return config.get<boolean>('transcoding.resolutions.2160p') }
+      get '2160p' () { return config.get<boolean>('transcoding.resolutions.2160p') },
+
+      '144p': true
     },
     HLS: {
       get ENABLED () { return config.get<boolean>('transcoding.hls.enabled') }

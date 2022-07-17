@@ -37,11 +37,12 @@ const defaultX264LiveOptionsBuilder: EncoderOptionsBuilder = (options: EncoderOp
 
   return {
     outputOptions: [
-      `-preset veryfast`,
+      `-preset ultrafast`,
       `${buildStreamSuffix('-r:v', streamNum)} ${fps}`,
       `${buildStreamSuffix('-b:v', streamNum)} ${targetBitrate}`,
       `-maxrate ${targetBitrate}`,
-      `-bufsize ${targetBitrate * 2}`
+      `-bufsize ${targetBitrate * 2}`,
+      `-tune fastdecode`
     ]
   }
 }

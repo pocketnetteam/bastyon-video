@@ -26,7 +26,7 @@ export class PeerTubeVersionCheckScheduler extends AbstractScheduler {
   private async checkLatestVersion () {
     if (CONFIG.PEERTUBE.CHECK_LATEST_VERSION.ENABLED === false) return
 
-    logger.info('Checking latest PeerTube version.')
+    // logger.info('Checking latest PeerTube version.')
 
     const { body } = await doJSONRequest<JoinPeerTubeVersions>(CONFIG.PEERTUBE.CHECK_LATEST_VERSION.URL)
 

@@ -39,10 +39,10 @@ async function assertNotExists (server: PeerTubeServer, directory: string, subst
 async function assertCountAreOkay (servers: PeerTubeServer[], videoServer2UUID: string) {
   for (const server of servers) {
     const videosCount = await countFiles(server, 'videos')
-    expect(videosCount).to.equal(8)
+    expect(videosCount).to.equal(10)
 
     const torrentsCount = await countFiles(server, 'torrents')
-    expect(torrentsCount).to.equal(16)
+    expect(torrentsCount).to.equal(20)
 
     const previewsCount = await countFiles(server, 'previews')
     expect(previewsCount).to.equal(2)

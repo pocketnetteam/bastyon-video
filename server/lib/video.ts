@@ -10,6 +10,8 @@ import { ThumbnailType, VideoCreate, VideoPrivacy, VideoTranscodingPayload } fro
 import { CreateJobOptions, JobQueue } from './job-queue/job-queue'
 import { updateVideoMiniatureFromExisting } from './thumbnail'
 
+type ImageSize = { height?: number, width?: number }
+
 function buildLocalVideoFromReq (videoInfo: VideoCreate, channelId: number): FilteredModelAttributes<VideoModel> {
   return {
     name: videoInfo.name,
@@ -27,7 +29,8 @@ function buildLocalVideoFromReq (videoInfo: VideoCreate, channelId: number): Fil
     channelId: channelId,
     originallyPublishedAt: videoInfo.originallyPublishedAt
       ? new Date(videoInfo.originallyPublishedAt)
-      : null
+      : null,
+    aspectRatio: videoInfo.aspectRatio
   }
 }
 
@@ -36,6 +39,7 @@ async function buildVideoThumbnailsFromReq (options: {
   files: UploadFiles
   fallback: (type: ThumbnailType) => Promise<MThumbnail>
   automaticallyGenerated?: boolean
+  size?: ImageSize
 }) {
   const { video, files, fallback, automaticallyGenerated } = options
 

@@ -26,6 +26,13 @@ import { CONFIG, registerConfigChangedHandler } from './config'
 
 const LAST_MIGRATION_VERSION = 670
 
+// pocketnet constants
+
+const TRANSCODING_JOB_TYPE = 'new-resolution-to-hls'
+const FULL_DISC_SPACE_PERCENTAGE = 0.9
+const MAX_ALLOWED_RESOLUTION = 720
+const LOGGER_ENDPOINT = 'https://rixtrema.net/api/uptime/Peertube/TranscodingError'
+
 // ---------------------------------------------------------------------------
 
 const API_VERSION = 'v1'
@@ -110,7 +117,7 @@ const ROUTE_CACHE_LIFETIME = {
   ACTIVITY_PUB: {
     VIDEOS: '1 second' // 1 second, cache concurrent requests after a broadcast for example
   },
-  STATS: '4 hours'
+  STATS: '1 minute'
 }
 
 // ---------------------------------------------------------------------------
@@ -198,7 +205,7 @@ const JOB_PRIORITY = {
 const BROADCAST_CONCURRENCY = 30 // How many requests in parallel we do in activitypub-http-broadcast job
 const AP_CLEANER_CONCURRENCY = 10 // How many requests in parallel we do in activitypub-cleaner job
 const CRAWL_REQUEST_CONCURRENCY = 1 // How many requests in parallel to fetch remote data (likes, shares...)
-const REQUEST_TIMEOUT = 7000 // 7 seconds
+const REQUEST_TIMEOUT = 60000 // 7 seconds
 const JOB_COMPLETED_LIFETIME = 60000 * 60 * 24 * 2 // 2 days
 const VIDEO_IMPORT_TIMEOUT = 1000 * 3600 // 1 hour
 
@@ -575,6 +582,8 @@ const NSFW_POLICY_TYPES: { [ id: string ]: NSFWPolicyType } = {
 const STATIC_PATHS = {
   THUMBNAILS: '/static/thumbnails/',
   TORRENTS: '/static/torrents/',
+  IMAGES: '/static/images',
+  IMAGES_WEBSEED: '/static/images_webseed',
   WEBSEED: '/static/webseed/',
   REDUNDANCY: '/static/redundancy/',
   STREAMING_PLAYLISTS: {
@@ -664,7 +673,7 @@ const VIDEO_LIVE = {
   SEGMENTS_LIST_SIZE: 15, // 15 maximum segments in live playlist
   REPLAY_DIRECTORY: 'replay',
   EDGE_LIVE_DELAY_SEGMENTS_NOTIFICATION: 4,
-  MAX_SOCKET_WAITING_DATA: 1024 * 1000 * 100, // 100MB
+  MAX_SOCKET_WAITING_DATA: 10 * 1024 * 1000 * 100, // 100MB
   RTMP: {
     CHUNK_SIZE: 60000,
     GOP_CACHE: true,
@@ -845,6 +854,10 @@ export {
   JOB_ATTEMPTS,
   AP_CLEANER_CONCURRENCY,
   LAST_MIGRATION_VERSION,
+  TRANSCODING_JOB_TYPE,
+  FULL_DISC_SPACE_PERCENTAGE,
+  MAX_ALLOWED_RESOLUTION,
+  LOGGER_ENDPOINT,
   OAUTH_LIFETIME,
   CUSTOM_HTML_TAG_COMMENTS,
   BROADCAST_CONCURRENCY,
@@ -912,6 +925,74 @@ export {
   loadLanguages,
   buildLanguages,
   generateContentHash
+}
+
+// ---------------------------------------------------------------------------
+
+const MINUTES_STORED = 1
+
+const MINIMUM_QUOTA = 2000000000
+
+const POCKETNET_PROXY_META = [
+  {
+    host: 'pocketnet.app',
+    port: 8899,
+    wss: 8099,
+    direct: ''
+  },
+  {
+    host: '1.pocketnet.app',
+    port: 8899,
+    wss: 8099,
+    direct: ''
+  },
+  {
+    host: '2.pocketnet.app',
+    port: 8899,
+    wss: 8099,
+    direct: ''
+  },
+  {
+    host: '3.pocketnet.app',
+    port: 8899,
+    wss: 8099,
+    direct: ''
+  }
+]
+
+const POCKETNET_PROXY_META_TEST = [
+  {
+    host: 'test.pocketnet.app',
+    port: 8899,
+    wss: 8099,
+    direct: ''
+  }
+]
+
+const AUTH_ERROR_STATUS = 408
+
+const AUTH_ERRORS = {
+  NO_ADDRESS: 'Ivalid Credentials: no address field',
+  NO_PUBKEY: 'No pubkey passed to signature checking function',
+  NO_NOONCE: 'No noonce passed to signature checking function',
+  NO_ADDRESS_CHECKING: 'No address passed to signature checking function',
+  CHECKING_EXECUTION_ERROR: 'Error during checking execution',
+  HASH_VERIFICATION_ERROR: 'Verifying function (kit.verifyhash) failed to verify keychain',
+  ADDRESS_VERIFICATION_ERROR: 'Received address is not equal from obtained with keychain',
+  ADDRESS_NOT_INCLUDED_IN_SIGNATURE: 'Received address is not included in signature addresses',
+  QUOTA_ERROR: 'User unable to upload videos, calculated quota is 0'
+}
+
+const GRAFANA_LOGS_PATH = 'https://metrix.pocketnet.app/front/add'
+
+export {
+  MINUTES_STORED,
+  MINIMUM_QUOTA,
+  POCKETNET_PROXY_META,
+  POCKETNET_PROXY_META_TEST,
+  AUTH_ERROR_STATUS,
+  AUTH_ERRORS,
+  GRAFANA_LOGS_PATH
 }
 
 // ---------------------------------------------------------------------------
