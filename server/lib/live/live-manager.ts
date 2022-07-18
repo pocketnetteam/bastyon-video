@@ -357,7 +357,8 @@ class LiveManager {
 
       muxingSession.destroy()
 
-      return this.onAfterMuxingCleanup({ videoId, liveSession, videoLive.streamKey })
+
+      return this.onAfterMuxingCleanup({ videoId, liveSession, streamKey: videoLive.streamKey })
         .catch(err => logger.error('Error in end transmuxing.', { err, ...localLTags }))
     })
 
