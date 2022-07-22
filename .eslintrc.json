@@ -100,8 +100,12 @@
     "node_modules/"
   ],
   "parserOptions": {
+    "EXPERIMENTAL_useSourceOfProjectReferenceRedirect": true,
     "project": [
       "./tsconfig.json",
+      "./shared/tsconfig.json",
+      "./scripts/tsconfig.json",
+      "./server/tsconfig.json",
       "./server/tools/tsconfig.json"
     ]
   }

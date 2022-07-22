@@ -12,7 +12,7 @@ import {
   VideoChannelService,
   VideoService
 } from '@app/shared/shared-main'
-import { AccountReportComponent } from '@app/shared/shared-moderation'
+import { AccountReportComponent, BlocklistService } from '@app/shared/shared-moderation'
 import { HttpStatusCode, User, UserRight } from '@shared/models'
 
 @Component({
@@ -36,7 +36,7 @@ export class AccountsComponent implements OnInit, OnDestroy {
   accountDescriptionHTML = ''
   accountDescriptionExpanded = false
 
-  prependModerationActions: DropdownAction<any>[]
+  prependModerationActions: DropdownAction<any>[] = []
 
   private routeSub: Subscription
 
@@ -52,6 +52,7 @@ export class AccountsComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private videoService: VideoService,
     private markdown: MarkdownService,
+    private blocklist: BlocklistService,
     private screenService: ScreenService
   ) {
   }
@@ -151,8 +152,6 @@ export class AccountsComponent implements OnInit, OnDestroy {
   private async onAccount (account: Account) {
     this.accountFollowerTitle = $localize`${account.followersCount} direct account followers`
 
-    this.prependModerationActions = undefined
-
     this.accountDescriptionHTML = await this.markdown.textMarkdownToHTML(account.description)
 
     // After the markdown renderer to avoid layout changes
@@ -161,10 +160,11 @@ export class AccountsComponent implements OnInit, OnDestroy {
     this.updateModerationActions()
     this.loadUserIfNeeded(account)
     this.loadAccountVideosCount()
+    this.loadAccountBlockStatus()
   }
 
   private showReportModal () {
-    this.accountReportModal.show()
+    this.accountReportModal.show(this.account)
   }
 
   private loadUserIfNeeded (account: Account) {
@@ -184,6 +184,8 @@ export class AccountsComponent implements OnInit, OnDestroy {
   }
 
   private updateModerationActions () {
+    this.prependModerationActions = []
+
     if (!this.authService.isLoggedIn()) return
 
     this.authService.userInformationLoaded.subscribe(
@@ -192,6 +194,10 @@ export class AccountsComponent implements OnInit, OnDestroy {
 
         // It's not our account, we can report it
         this.prependModerationActions = [
+          {
+            label: $localize`Report`,
+            isHeader: true
+          },
           {
             label: $localize`Report this account`,
             handler: () => this.showReportModal()
@@ -212,5 +218,10 @@ export class AccountsComponent implements OnInit, OnDestroy {
     }).subscribe(res => {
       this.accountVideosCount = res.total
     })
+  }
+
+  private loadAccountBlockStatus () {
+    this.blocklist.getStatus({ accounts: [ this.account.nameWithHostForced ], hosts: [ this.account.host ] })
+      .subscribe(status => this.account.updateBlockStatus(status))
   }
 }

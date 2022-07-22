@@ -49,7 +49,20 @@ export class VideoMiniatureComponent implements OnInit {
     state: false,
     blacklistInfo: false
   }
+
   @Input() displayVideoActions = true
+  @Input() videoActionsDisplayOptions: VideoActionsDisplayType = {
+    playlist: true,
+    download: false,
+    update: true,
+    blacklist: true,
+    delete: true,
+    report: true,
+    duplicate: true,
+    mute: true,
+    studio: false,
+    stats: false
+  }
 
   @Input() actorImageSize: ActorAvatarSize = '40'
 
@@ -62,16 +75,6 @@ export class VideoMiniatureComponent implements OnInit {
   @Output() videoRemoved = new EventEmitter()
   @Output() videoAccountMuted = new EventEmitter()
 
-  videoActionsDisplayOptions: VideoActionsDisplayType = {
-    playlist: true,
-    download: false,
-    update: true,
-    blacklist: true,
-    delete: true,
-    report: true,
-    duplicate: true,
-    mute: true
-  }
   showActions = false
   serverConfig: HTMLServerConfig
 
@@ -99,6 +102,18 @@ export class VideoMiniatureComponent implements OnInit {
     private cd: ChangeDetectorRef,
     @Inject(LOCALE_ID) private localeId: string
   ) {}
+
+  get authorAccount () {
+    return this.serverConfig.client.videos.miniature.preferAuthorDisplayName
+      ? this.video.account.displayName
+      : this.video.byAccount
+  }
+
+  get authorChannel () {
+    return this.serverConfig.client.videos.miniature.preferAuthorDisplayName
+      ? this.video.channel.displayName
+      : this.video.byVideoChannel
+  }
 
   get isVideoBlur () {
     return this.video.isVideoNSFWForUser(this.user, this.serverConfig)
@@ -163,6 +178,14 @@ export class VideoMiniatureComponent implements OnInit {
       return $localize`Publication scheduled on ` + updateAt
     }
 
+    if (video.state.id === VideoState.TRANSCODING_FAILED) {
+      return $localize`Transcoding failed`
+    }
+
+    if (video.state.id === VideoState.TO_MOVE_TO_EXTERNAL_STORAGE_FAILED) {
+      return $localize`Move to external storage failed`
+    }
+
     if (video.state.id === VideoState.TO_TRANSCODE && video.waitTranscoding === true) {
       return $localize`Waiting transcoding`
     }
@@ -173,6 +196,10 @@ export class VideoMiniatureComponent implements OnInit {
 
     if (video.state.id === VideoState.TO_IMPORT) {
       return $localize`To import`
+    }
+
+    if (video.state.id === VideoState.TO_EDIT) {
+      return $localize`To edit`
     }
 
     return ''

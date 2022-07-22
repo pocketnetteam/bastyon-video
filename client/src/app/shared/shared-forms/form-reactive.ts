@@ -1,4 +1,6 @@
+
 import { FormGroup } from '@angular/forms'
+import { wait } from '@root-helpers/utils'
 import { BuildFormArgument, BuildFormDefaultValues } from '../form-validators/form-validator.model'
 import { FormValidatorService } from './form-validator.service'
 
@@ -22,30 +24,42 @@ export abstract class FormReactive {
     this.formErrors = formErrors
     this.validationMessages = validationMessages
 
-    this.form.valueChanges.subscribe(() => this.onValueChanged(this.form, this.formErrors, this.validationMessages, false))
+    this.form.statusChanges.subscribe(async () => {
+      // FIXME: remove when https://github.com/angular/angular/issues/41519 is fixed
+      await this.waitPendingCheck()
+
+      this.onStatusChanged(this.form, this.formErrors, this.validationMessages)
+    })
+  }
+
+  protected async waitPendingCheck () {
+    if (this.form.status !== 'PENDING') return
+
+    // FIXME: the following line does not work: https://github.com/angular/angular/issues/41519
+    // return firstValueFrom(this.form.statusChanges.pipe(filter(status => status !== 'PENDING')))
+    // So we have to fallback to active wait :/
+
+    do {
+      await wait(10)
+    } while (this.form.status === 'PENDING')
   }
 
   protected forceCheck () {
-    return this.onValueChanged(this.form, this.formErrors, this.validationMessages, true)
+    this.onStatusChanged(this.form, this.formErrors, this.validationMessages, false)
   }
 
-  protected check () {
-    return this.onValueChanged(this.form, this.formErrors, this.validationMessages, false)
-  }
-
-  private onValueChanged (
+  private onStatusChanged (
     form: FormGroup,
     formErrors: FormReactiveErrors,
     validationMessages: FormReactiveValidationMessages,
-    forceCheck = false
+    onlyDirty = true
   ) {
     for (const field of Object.keys(formErrors)) {
       if (formErrors[field] && typeof formErrors[field] === 'object') {
-        this.onValueChanged(
+        this.onStatusChanged(
           form.controls[field] as FormGroup,
           formErrors[field] as FormReactiveErrors,
-          validationMessages[field] as FormReactiveValidationMessages,
-          forceCheck
+          validationMessages[field] as FormReactiveValidationMessages
         )
         continue
       }
@@ -56,15 +70,18 @@ export abstract class FormReactive {
 
       if (control.dirty) this.formChanged = true
 
-      // Don't care if dirty on force check
-      const isDirty = control.dirty || forceCheck === true
-      if (control && isDirty && control.enabled && !control.valid) {
-        const messages = validationMessages[field]
-        for (const key of Object.keys(control.errors)) {
-          formErrors[field] += messages[key] + ' '
-        }
+      if (!control || (onlyDirty && !control.dirty) || !control.enabled || !control.errors) continue
+
+      const staticMessages = validationMessages[field]
+      for (const key of Object.keys(control.errors)) {
+        const formErrorValue = control.errors[key]
+
+        // Try to find error message in static validation messages first
+        // Then check if the validator returns a string that is the error
+        if (staticMessages[key]) formErrors[field] += staticMessages[key] + ' '
+        else if (typeof formErrorValue === 'string') formErrors[field] += control.errors[key]
+        else throw new Error('Form error value of ' + field + ' is invalid')
       }
     }
   }
-
 }

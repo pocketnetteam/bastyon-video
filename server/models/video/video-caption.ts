@@ -15,9 +15,9 @@ import {
   Table,
   UpdatedAt
 } from 'sequelize-typescript'
-import { buildUUID } from '@server/helpers/uuid'
 import { MVideo, MVideoCaption, MVideoCaptionFormattable, MVideoCaptionVideo } from '@server/types/models'
-import { AttributesOnly } from '@shared/core-utils'
+import { buildUUID } from '@shared/extra-utils'
+import { AttributesOnly } from '@shared/typescript-utils'
 import { VideoCaption } from '../../../shared/models/videos/caption/video-caption.model'
 import { isVideoCaptionLanguageValid } from '../../helpers/custom-validators/video-captions'
 import { logger } from '../../helpers/logger'

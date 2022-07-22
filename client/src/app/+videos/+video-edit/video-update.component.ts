@@ -1,5 +1,5 @@
 import { of } from 'rxjs'
-import { map, switchMap } from 'rxjs/operators'
+import { switchMap } from 'rxjs/operators'
 import { SelectChannelItem } from 'src/types/select-options-item.model'
 import { Component, HostListener, OnInit } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
@@ -24,7 +24,7 @@ export class VideoUpdateComponent extends FormReactive implements OnInit {
   liveVideo: LiveVideo
 
   isUpdatingVideo = false
-  schedulePublicationPossible = false
+  forbidScheduledPublication = false
   waitTranscodingEnabled = true
 
   private updateDone = false
@@ -45,37 +45,29 @@ export class VideoUpdateComponent extends FormReactive implements OnInit {
   ngOnInit () {
     this.buildForm({})
 
-    this.route.data
-        .pipe(map(data => data.videoData))
-        .subscribe({
-          next: ({ video, videoChannels, videoCaptions, liveVideo }) => {
-            this.video = new VideoEdit(video)
-            this.videoDetails = video
+    const { videoData } = this.route.snapshot.data
+    const { video, videoChannels, videoCaptions, liveVideo } = videoData
 
-            this.userVideoChannels = videoChannels
-            this.videoCaptions = videoCaptions
-            this.liveVideo = liveVideo
+    this.video = new VideoEdit(video)
+    this.videoDetails = video
 
-            this.schedulePublicationPossible = this.video.privacy === VideoPrivacy.PRIVATE
+    this.userVideoChannels = videoChannels
+    this.videoCaptions = videoCaptions
+    this.liveVideo = liveVideo
 
-            // FIXME: Angular does not detect the change inside this subscription, so use the patched setTimeout
-            setTimeout(() => {
-              hydrateFormFromVideo(this.form, this.video, true)
+    this.forbidScheduledPublication = this.video.privacy !== VideoPrivacy.PRIVATE
+  }
 
-              if (this.liveVideo) {
-                this.form.patchValue({
-                  saveReplay: this.liveVideo.saveReplay,
-                  permanentLive: this.liveVideo.permanentLive
-                })
-              }
-            })
-          },
+  onFormBuilt () {
+    hydrateFormFromVideo(this.form, this.video, true)
 
-          error: err => {
-            console.error(err)
-            this.notifier.error(err.message)
-          }
-        })
+    if (this.liveVideo) {
+      this.form.patchValue({
+        saveReplay: this.liveVideo.saveReplay,
+        latencyMode: this.liveVideo.latencyMode,
+        permanentLive: this.liveVideo.permanentLive
+      })
+    }
   }
 
   @HostListener('window:beforeunload', [ '$event' ])
@@ -100,12 +92,6 @@ export class VideoUpdateComponent extends FormReactive implements OnInit {
     return { canDeactivate: this.formChanged === false, text }
   }
 
-  checkForm () {
-    this.forceCheck()
-
-    return this.form.valid
-  }
-
   isWaitTranscodingEnabled () {
     if (this.videoDetails.getFiles().length > 1) { // Already transcoded
       return false
@@ -118,8 +104,11 @@ export class VideoUpdateComponent extends FormReactive implements OnInit {
     return true
   }
 
-  update () {
-    if (this.checkForm() === false || this.isUpdatingVideo === true) {
+  async update () {
+    await this.waitPendingCheck()
+    this.forceCheck()
+
+    if (!this.form.valid || this.isUpdatingVideo === true) {
       return
     }
 
@@ -139,7 +128,8 @@ export class VideoUpdateComponent extends FormReactive implements OnInit {
 
             const liveVideoUpdate: LiveVideoUpdate = {
               saveReplay: !!this.form.value.saveReplay,
-              permanentLive: !!this.form.value.permanentLive
+              permanentLive: !!this.form.value.permanentLive,
+              latencyMode: this.form.value.latencyMode
             }
 
             // Don't update live attributes if they did not change

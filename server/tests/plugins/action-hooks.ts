@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions,@typescript-eslint/require-await */
 
 import 'mocha'
+import { ServerHookName, VideoPlaylistPrivacy, VideoPrivacy } from '@shared/models'
 import {
   cleanupTests,
   createMultipleServers,
@@ -9,8 +10,7 @@ import {
   PluginsCommand,
   setAccessTokensToServers,
   setDefaultVideoChannel
-} from '@shared/extra-utils'
-import { ServerHookName, VideoPlaylistPrivacy, VideoPrivacy } from '@shared/models'
+} from '@shared/server-commands'
 
 describe('Test plugin action hooks', function () {
   let servers: PeerTubeServer[]
@@ -61,7 +61,7 @@ describe('Test plugin action hooks', function () {
     })
 
     it('Should run action:api.video.viewed', async function () {
-      await servers[0].videos.view({ id: videoUUID })
+      await servers[0].views.simulateView({ id: videoUUID })
 
       await checkHook('action:api.video.viewed')
     })
@@ -100,6 +100,20 @@ describe('Test plugin action hooks', function () {
       await servers[0].comments.delete({ videoId: videoUUID, commentId: threadId })
 
       await checkHook('action:api.video-comment.deleted')
+    })
+  })
+
+  describe('Captions hooks', function () {
+    it('Should run action:api.video-caption.created', async function () {
+      await servers[0].captions.add({ videoId: videoUUID, language: 'en', fixture: 'subtitle-good.srt' })
+
+      await checkHook('action:api.video-caption.created')
+    })
+
+    it('Should run action:api.video-caption.deleted', async function () {
+      await servers[0].captions.delete({ videoId: videoUUID, language: 'en' })
+
+      await checkHook('action:api.video-caption.deleted')
     })
   })
 

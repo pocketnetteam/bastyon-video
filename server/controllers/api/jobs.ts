@@ -1,7 +1,5 @@
 import express from 'express'
-import { ResultList } from '../../../shared'
-import { Job, JobState, JobType } from '../../../shared/models'
-import { UserRight } from '../../../shared/models/users'
+import { HttpStatusCode, Job, JobState, JobType, ResultList, UserRight } from '@shared/models'
 import { isArray } from '../../helpers/custom-validators/misc'
 import { JobQueue } from '../../lib/job-queue'
 import {
@@ -17,6 +15,18 @@ import {
 import { listJobsValidator } from '../../middlewares/validators/jobs'
 
 const jobsRouter = express.Router()
+
+jobsRouter.post('/pause',
+  authenticate,
+  ensureUserHasRight(UserRight.MANAGE_JOBS),
+  asyncMiddleware(pauseJobQueue)
+)
+
+jobsRouter.post('/resume',
+  authenticate,
+  ensureUserHasRight(UserRight.MANAGE_JOBS),
+  asyncMiddleware(resumeJobQueue)
+)
 
 jobsRouter.get('/:state?',
   openapiOperationDoc({ operationId: 'getJobs' }),
@@ -37,6 +47,18 @@ export {
 }
 
 // ---------------------------------------------------------------------------
+
+async function pauseJobQueue (req: express.Request, res: express.Response) {
+  await JobQueue.Instance.pause()
+
+  return res.sendStatus(HttpStatusCode.NO_CONTENT_204)
+}
+
+async function resumeJobQueue (req: express.Request, res: express.Response) {
+  await JobQueue.Instance.resume()
+
+  return res.sendStatus(HttpStatusCode.NO_CONTENT_204)
+}
 
 async function listJobs (req: express.Request, res: express.Response) {
   const state = req.params.state as JobState

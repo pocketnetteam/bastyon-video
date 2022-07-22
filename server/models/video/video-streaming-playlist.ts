@@ -18,10 +18,10 @@ import {
 import { getHLSPublicFileUrl } from '@server/lib/object-storage'
 import { VideoFileModel } from '@server/models/video/video-file'
 import { MStreamingPlaylist, MVideo } from '@server/types/models'
-import { AttributesOnly } from '@shared/core-utils'
+import { sha1 } from '@shared/extra-utils'
 import { VideoStorage } from '@shared/models'
+import { AttributesOnly } from '@shared/typescript-utils'
 import { VideoStreamingPlaylistType } from '../../../shared/models/videos/video-streaming-playlist.type'
-import { sha1 } from '../../helpers/core-utils'
 import { isActivityPubUrlValid } from '../../helpers/custom-validators/activitypub/misc'
 import { isArrayOf } from '../../helpers/custom-validators/misc'
 import { isVideoFileInfoHashValid } from '../../helpers/custom-validators/videos'
@@ -199,6 +199,15 @@ export class VideoStreamingPlaylistModel extends Model<Partial<AttributesOnly<Vi
     return Object.assign(playlist, { videoId: video.id, Video: video })
   }
 
+  static doesOwnedHLSPlaylistExist (videoUUID: string) {
+    const query = `SELECT 1 FROM "videoStreamingPlaylist" ` +
+      `INNER JOIN "video" ON "video"."id" = "videoStreamingPlaylist"."videoId" ` +
+      `AND "video"."remote" IS FALSE AND "video"."uuid" = $videoUUID ` +
+      `AND "storage" = ${VideoStorage.FILE_SYSTEM} LIMIT 1`
+
+    return doesExist(query, { videoUUID })
+  }
+
   assignP2PMediaLoaderInfoHashes (video: MVideo, files: unknown[]) {
     const masterPlaylistUrl = this.getMasterPlaylistUrl(video)
 
@@ -238,6 +247,10 @@ export class VideoStreamingPlaylistModel extends Model<Partial<AttributesOnly<Vi
   hasSameUniqueKeysThan (other: MStreamingPlaylist) {
     return this.type === other.type &&
       this.videoId === other.videoId
+  }
+
+  withVideo (video: MVideo) {
+    return Object.assign(this, { Video: video })
   }
 
   private getMasterPlaylistStaticPath (videoUUID: string) {

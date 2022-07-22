@@ -48,12 +48,16 @@ function decorateVideoLink (options: {
   // Embed options
   title?: boolean
   warningTitle?: boolean
+
   controls?: boolean
+  controlBar?: boolean
+
   peertubeLink?: boolean
+  p2p?: boolean
 }) {
   const { url } = options
 
-  const params = generateParams(window.location.search)
+  const params = new URLSearchParams()
 
   if (options.startTime !== undefined && options.startTime !== null) {
     const startTimeInt = Math.floor(options.startTime)
@@ -72,8 +76,12 @@ function decorateVideoLink (options: {
   if (options.muted === true) params.set('muted', '1')
   if (options.title === false) params.set('title', '0')
   if (options.warningTitle === false) params.set('warningTitle', '0')
+
   if (options.controls === false) params.set('controls', '0')
+  if (options.controlBar === false) params.set('controlBar', '0')
+
   if (options.peertubeLink === false) params.set('peertubeLink', '0')
+  if (options.p2p !== undefined) params.set('p2p', options.p2p ? '1' : '0')
 
   return buildUrl(url, params)
 }
@@ -85,7 +93,7 @@ function decoratePlaylistLink (options: {
 }) {
   const { url } = options
 
-  const params = generateParams(window.location.search)
+  const params = new URLSearchParams()
 
   if (options.playlistPosition) params.set('playlistPosition', '' + options.playlistPosition)
 
@@ -118,13 +126,4 @@ function buildUrl (url: string, params: URLSearchParams) {
   if (hasParams) return url + '?' + params.toString()
 
   return url
-}
-
-function generateParams (url: string) {
-  const params = new URLSearchParams(window.location.search)
-  // Unused parameters in embed
-  params.delete('videoId')
-  params.delete('resume')
-
-  return params
 }

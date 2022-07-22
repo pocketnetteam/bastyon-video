@@ -13,6 +13,9 @@ async function register ({ registerHook, registerSetting, settingsManager, stora
     'action:api.video-comment-reply.created',
     'action:api.video-comment.deleted',
 
+    'action:api.video-caption.created',
+    'action:api.video-caption.deleted',
+
     'action:api.user.blocked',
     'action:api.user.unblocked',
     'action:api.user.registered',
@@ -38,6 +41,16 @@ async function register ({ registerHook, registerSetting, settingsManager, stora
 
   registerHook({
     target: 'filter:api.videos.list.result',
+    handler: obj => addToTotal(obj)
+  })
+
+  registerHook({
+    target: 'filter:api.video-playlist.videos.list.params',
+    handler: obj => addToCount(obj)
+  })
+
+  registerHook({
+    target: 'filter:api.video-playlist.videos.list.result',
     handler: obj => addToTotal(obj)
   })
 
@@ -232,6 +245,28 @@ async function register ({ registerHook, registerSetting, settingsManager, stora
       }
     }
   })
+
+  registerHook({
+    target: 'filter:api.server.stats.get.result',
+    handler: (result) => {
+      return { ...result, customStats: 14 }
+    }
+  })
+
+  // Upload/import/live attributes
+  for (const target of [
+    'filter:api.video.upload.video-attribute.result',
+    'filter:api.video.import-url.video-attribute.result',
+    'filter:api.video.import-torrent.video-attribute.result',
+    'filter:api.video.live.video-attribute.result'
+  ]) {
+    registerHook({
+      target,
+      handler: (result) => {
+        return { ...result, description: result.description + ' - ' + target }
+      }
+    })
+  }
 
   {
     const filterHooks = [

@@ -3,11 +3,20 @@
 import 'mocha'
 import * as chai from 'chai'
 import { basename, join } from 'path'
-import { ffprobePromise, getVideoStreamFromFile } from '@server/helpers/ffprobe-utils'
+import { ffprobePromise, getVideoStream } from '@server/helpers/ffmpeg'
+import { checkLiveCleanup, checkLiveSegmentHash, checkResolutionsInMasterPlaylist, testImage } from '@server/tests/shared'
+import { wait } from '@shared/core-utils'
 import {
-  checkLiveCleanupAfterSave,
-  checkLiveSegmentHash,
-  checkResolutionsInMasterPlaylist,
+  HttpStatusCode,
+  LiveVideo,
+  LiveVideoCreate,
+  LiveVideoLatencyMode,
+  VideoDetails,
+  VideoPrivacy,
+  VideoState,
+  VideoStreamingPlaylistType
+} from '@shared/models'
+import {
   cleanupTests,
   createMultipleServers,
   doubleFollow,
@@ -20,20 +29,9 @@ import {
   setDefaultVideoChannel,
   stopFfmpeg,
   testFfmpegStreamError,
-  testImage,
-  wait,
   waitJobs,
   waitUntilLivePublishedOnAllServers
-} from '@shared/extra-utils'
-import {
-  HttpStatusCode,
-  LiveVideo,
-  LiveVideoCreate,
-  VideoDetails,
-  VideoPrivacy,
-  VideoState,
-  VideoStreamingPlaylistType
-} from '@shared/models'
+} from '@shared/server-commands'
 
 const expect = chai.expect
 
@@ -55,6 +53,9 @@ describe('Test live', function () {
         live: {
           enabled: true,
           allowReplay: true,
+          latencySetting: {
+            enabled: true
+          },
           transcoding: {
             enabled: false
           }
@@ -88,6 +89,7 @@ describe('Test live', function () {
         commentsEnabled: false,
         downloadEnabled: false,
         saveReplay: true,
+        latencyMode: LiveVideoLatencyMode.SMALL_LATENCY,
         privacy: VideoPrivacy.PUBLIC,
         previewfile: 'video_short1-preview.webm.jpg',
         thumbnailfile: 'video_short1.webm.jpg'
@@ -129,11 +131,12 @@ describe('Test live', function () {
           expect(live.rtmpUrl).to.equal('rtmp://' + server.hostname + ':' + servers[0].rtmpPort + '/live')
           expect(live.streamKey).to.not.be.empty
         } else {
-          expect(live.rtmpUrl).to.be.null
-          expect(live.streamKey).to.be.null
+          expect(live.rtmpUrl).to.not.exist
+          expect(live.streamKey).to.not.exist
         }
 
         expect(live.saveReplay).to.be.true
+        expect(live.latencyMode).to.equal(LiveVideoLatencyMode.SMALL_LATENCY)
       }
     })
 
@@ -178,7 +181,7 @@ describe('Test live', function () {
     it('Should update the live', async function () {
       this.timeout(10000)
 
-      await commands[0].update({ videoId: liveVideoUUID, fields: { saveReplay: false } })
+      await commands[0].update({ videoId: liveVideoUUID, fields: { saveReplay: false, latencyMode: LiveVideoLatencyMode.DEFAULT } })
       await waitJobs(servers)
     })
 
@@ -190,11 +193,12 @@ describe('Test live', function () {
           expect(live.rtmpUrl).to.equal('rtmp://' + server.hostname + ':' + servers[0].rtmpPort + '/live')
           expect(live.streamKey).to.not.be.empty
         } else {
-          expect(live.rtmpUrl).to.be.null
-          expect(live.streamKey).to.be.null
+          expect(live.rtmpUrl).to.not.exist
+          expect(live.streamKey).to.not.exist
         }
 
         expect(live.saveReplay).to.be.false
+        expect(live.latencyMode).to.equal(LiveVideoLatencyMode.DEFAULT)
       }
     })
 
@@ -391,7 +395,7 @@ describe('Test live', function () {
         for (let i = 0; i < resolutions.length; i++) {
           const segmentNum = 3
           const segmentName = `${i}-00000${segmentNum}.ts`
-          await commands[0].waitUntilSegmentGeneration({ videoUUID: video.uuid, resolution: i, segment: segmentNum })
+          await commands[0].waitUntilSegmentGeneration({ videoUUID: video.uuid, playlistNumber: i, segment: segmentNum })
 
           const subPlaylist = await servers[0].streamingPlaylists.get({
             url: `${servers[0].url}/static/streaming-playlists/hls/${video.uuid}/${i}.m3u8`
@@ -421,6 +425,7 @@ describe('Test live', function () {
             transcoding: {
               enabled: true,
               resolutions: {
+                '144p': resolutions.includes(144),
                 '240p': resolutions.includes(240),
                 '360p': resolutions.includes(360),
                 '480p': resolutions.includes(480),
@@ -497,7 +502,7 @@ describe('Test live', function () {
     })
 
     it('Should enable transcoding with some resolutions and correctly save them', async function () {
-      this.timeout(200000)
+      this.timeout(400_000)
 
       const resolutions = [ 240, 360, 720 ]
 
@@ -564,7 +569,7 @@ describe('Test live', function () {
           const segmentPath = servers[0].servers.buildDirectory(join('streaming-playlists', 'hls', video.uuid, filename))
 
           const probe = await ffprobePromise(segmentPath)
-          const videoStream = await getVideoStreamFromFile(segmentPath, probe)
+          const videoStream = await getVideoStream(segmentPath, probe)
 
           expect(probe.format.bit_rate).to.be.below(maxBitrateLimits[videoStream.height])
           expect(probe.format.bit_rate).to.be.at.least(minBitrateLimits[videoStream.height])
@@ -578,20 +583,26 @@ describe('Test live', function () {
     it('Should correctly have cleaned up the live files', async function () {
       this.timeout(30000)
 
-      await checkLiveCleanupAfterSave(servers[0], liveVideoId, [ 240, 360, 720 ])
+      await checkLiveCleanup(servers[0], liveVideoId, [ 240, 360, 720 ])
     })
   })
 
   describe('After a server restart', function () {
     let liveVideoId: string
     let liveVideoReplayId: string
+    let permanentLiveVideoReplayId: string
 
-    async function createLiveWrapper (saveReplay: boolean) {
-      const liveAttributes = {
+    let permanentLiveReplayName: string
+
+    let beforeServerRestart: Date
+
+    async function createLiveWrapper (options: { saveReplay: boolean, permanent: boolean }) {
+      const liveAttributes: LiveVideoCreate = {
         name: 'live video',
         channelId: servers[0].store.channel.id,
         privacy: VideoPrivacy.PUBLIC,
-        saveReplay
+        saveReplay: options.saveReplay,
+        permanentLive: options.permanent
       }
 
       const { uuid } = await commands[0].create({ fields: liveAttributes })
@@ -599,40 +610,64 @@ describe('Test live', function () {
     }
 
     before(async function () {
-      this.timeout(120000)
+      this.timeout(160000)
 
-      liveVideoId = await createLiveWrapper(false)
-      liveVideoReplayId = await createLiveWrapper(true)
+      liveVideoId = await createLiveWrapper({ saveReplay: false, permanent: false })
+      liveVideoReplayId = await createLiveWrapper({ saveReplay: true, permanent: false })
+      permanentLiveVideoReplayId = await createLiveWrapper({ saveReplay: true, permanent: true })
 
       await Promise.all([
         commands[0].sendRTMPStreamInVideo({ videoId: liveVideoId }),
+        commands[0].sendRTMPStreamInVideo({ videoId: permanentLiveVideoReplayId }),
         commands[0].sendRTMPStreamInVideo({ videoId: liveVideoReplayId })
       ])
 
       await Promise.all([
         commands[0].waitUntilPublished({ videoId: liveVideoId }),
+        commands[0].waitUntilPublished({ videoId: permanentLiveVideoReplayId }),
         commands[0].waitUntilPublished({ videoId: liveVideoReplayId })
       ])
 
-      await commands[0].waitUntilSegmentGeneration({ videoUUID: liveVideoId, resolution: 0, segment: 2 })
-      await commands[0].waitUntilSegmentGeneration({ videoUUID: liveVideoReplayId, resolution: 0, segment: 2 })
+      await commands[0].waitUntilSegmentGeneration({ videoUUID: liveVideoId, playlistNumber: 0, segment: 2 })
+      await commands[0].waitUntilSegmentGeneration({ videoUUID: liveVideoReplayId, playlistNumber: 0, segment: 2 })
+      await commands[0].waitUntilSegmentGeneration({ videoUUID: permanentLiveVideoReplayId, playlistNumber: 0, segment: 2 })
+
+      {
+        const video = await servers[0].videos.get({ id: permanentLiveVideoReplayId })
+        permanentLiveReplayName = video.name + ' - ' + new Date(video.publishedAt).toLocaleString()
+      }
 
       await killallServers([ servers[0] ])
+
+      beforeServerRestart = new Date()
       await servers[0].run()
 
       await wait(5000)
+      await waitJobs(servers)
     })
 
     it('Should cleanup lives', async function () {
       this.timeout(60000)
 
       await commands[0].waitUntilEnded({ videoId: liveVideoId })
+      await commands[0].waitUntilWaiting({ videoId: permanentLiveVideoReplayId })
     })
 
-    it('Should save a live replay', async function () {
+    it('Should save a non permanent live replay', async function () {
       this.timeout(120000)
 
       await commands[0].waitUntilPublished({ videoId: liveVideoReplayId })
+
+      const session = await commands[0].getReplaySession({ videoId: liveVideoReplayId })
+      expect(session.endDate).to.exist
+      expect(new Date(session.endDate)).to.be.above(beforeServerRestart)
+    })
+
+    it('Should have saved a permanent live replay', async function () {
+      this.timeout(120000)
+
+      const { data } = await servers[0].videos.listMyVideos({ sort: '-publishedAt' })
+      expect(data.find(v => v.name === permanentLiveReplayName)).to.exist
     })
   })
 

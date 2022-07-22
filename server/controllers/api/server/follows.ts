@@ -21,8 +21,8 @@ import {
 } from '../../../middlewares'
 import {
   acceptOrRejectFollowerValidator,
-  followersSortValidator,
-  followingSortValidator,
+  instanceFollowersSortValidator,
+  instanceFollowingSortValidator,
   followValidator,
   getFollowerValidator,
   listFollowsValidator,
@@ -35,7 +35,7 @@ const serverFollowsRouter = express.Router()
 serverFollowsRouter.get('/following',
   listFollowsValidator,
   paginationValidator,
-  followingSortValidator,
+  instanceFollowingSortValidator,
   setDefaultSort,
   setDefaultPagination,
   asyncMiddleware(listFollowing)
@@ -59,7 +59,7 @@ serverFollowsRouter.delete('/following/:hostOrHandle',
 serverFollowsRouter.get('/followers',
   listFollowsValidator,
   paginationValidator,
-  followersSortValidator,
+  instanceFollowersSortValidator,
   setDefaultSort,
   setDefaultPagination,
   asyncMiddleware(listFollowers)
@@ -98,8 +98,8 @@ export {
 
 async function listFollowing (req: express.Request, res: express.Response) {
   const serverActor = await getServerActor()
-  const resultList = await ActorFollowModel.listFollowingForApi({
-    id: serverActor.id,
+  const resultList = await ActorFollowModel.listInstanceFollowingForApi({
+    followerId: serverActor.id,
     start: req.query.start,
     count: req.query.count,
     sort: req.query.sort,
@@ -114,7 +114,7 @@ async function listFollowing (req: express.Request, res: express.Response) {
 async function listFollowers (req: express.Request, res: express.Response) {
   const serverActor = await getServerActor()
   const resultList = await ActorFollowModel.listFollowersForApi({
-    actorId: serverActor.id,
+    actorIds: [ serverActor.id ],
     start: req.query.start,
     count: req.query.count,
     sort: req.query.sort,
@@ -159,7 +159,7 @@ async function removeFollowing (req: express.Request, res: express.Response) {
   const follow = res.locals.follow
 
   await sequelizeTypescript.transaction(async t => {
-    if (follow.state === 'accepted') await sendUndoFollow(follow, t)
+    if (follow.state === 'accepted') sendUndoFollow(follow, t)
 
     // Disable redundancy on unfollowed instances
     const server = follow.ActorFollowing.Server

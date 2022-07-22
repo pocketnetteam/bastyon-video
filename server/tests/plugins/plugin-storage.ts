@@ -11,7 +11,7 @@ import {
   PeerTubeServer,
   PluginsCommand,
   setAccessTokensToServers
-} from '@shared/extra-utils'
+} from '@shared/server-commands'
 import { HttpStatusCode } from '@shared/models'
 
 describe('Test plugin storage', function () {
@@ -27,9 +27,13 @@ describe('Test plugin storage', function () {
   })
 
   describe('DB storage', function () {
-
     it('Should correctly store a subkey', async function () {
       await server.servers.waitUntilLog('superkey stored value is toto')
+    })
+
+    it('Should correctly retrieve an array as array from the storage.', async function () {
+      await server.servers.waitUntilLog('storedArrayKey isArray is true')
+      await server.servers.waitUntilLog('storedArrayKey stored value is toto, toto2')
     })
   })
 

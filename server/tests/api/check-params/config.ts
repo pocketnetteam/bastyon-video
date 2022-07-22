@@ -10,7 +10,7 @@ import {
   makePutBodyRequest,
   PeerTubeServer,
   setAccessTokensToServers
-} from '@shared/extra-utils'
+} from '@shared/server-commands'
 import { CustomConfig, HttpStatusCode } from '@shared/models'
 
 describe('Test config API validators', function () {
@@ -54,6 +54,18 @@ describe('Test config API validators', function () {
         whitelisted: true
       }
     },
+    client: {
+      videos: {
+        miniature: {
+          preferAuthorDisplayName: false
+        }
+      },
+      menu: {
+        login: {
+          redirectOnSingleExternalAuth: false
+        }
+      }
+    },
     cache: {
       previews: {
         size: 2
@@ -81,6 +93,9 @@ describe('Test config API validators', function () {
       videoQuota: 5242881,
       videoQuotaDaily: 318742
     },
+    videoChannels: {
+      maxPerUser: 20
+    },
     transcoding: {
       enabled: true,
       allowAdditionalExtensions: true,
@@ -90,6 +105,7 @@ describe('Test config API validators', function () {
       profile: 'vod_profile',
       resolutions: {
         '0p': false,
+        '144p': false,
         '240p': false,
         '360p': true,
         '480p': true,
@@ -109,6 +125,9 @@ describe('Test config API validators', function () {
       enabled: true,
 
       allowReplay: false,
+      latencySetting: {
+        enabled: false
+      },
       maxDuration: 30,
       maxInstanceLives: -1,
       maxUserLives: 50,
@@ -118,6 +137,7 @@ describe('Test config API validators', function () {
         threads: 4,
         profile: 'live_profile',
         resolutions: {
+          '144p': true,
           '240p': true,
           '360p': true,
           '480p': true,
@@ -127,6 +147,9 @@ describe('Test config API validators', function () {
           '2160p': true
         }
       }
+    },
+    videoStudio: {
+      enabled: true
     },
     import: {
       videos: {
@@ -142,7 +165,7 @@ describe('Test config API validators', function () {
     trending: {
       videos: {
         algorithms: {
-          enabled: [ 'best', 'hot', 'most-viewed', 'most-liked' ],
+          enabled: [ 'hot', 'most-viewed', 'most-liked' ],
           default: 'most-viewed'
         }
       }

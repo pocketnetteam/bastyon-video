@@ -1,7 +1,7 @@
 import { writeJSON } from 'fs-extra'
 import { values } from 'lodash'
 import { join } from 'path'
-import { registerTSPaths } from '../../server/helpers/register-ts-paths'
+import { root } from '@shared/core-utils'
 import {
   buildLanguages,
   VIDEO_CATEGORIES,
@@ -14,9 +14,7 @@ import {
 } from '../../server/initializers/constants'
 import { I18N_LOCALES } from '../../shared/core-utils/i18n'
 
-registerTSPaths()
-
-const videojs = require(join(__dirname, '../../../client/src/locale/videojs.en-US.json'))
+const videojs = require(join(root(), 'client', 'src', 'locale', 'videojs.en-US.json'))
 const playerKeys = {
   'Quality': 'Quality',
   'Auto': 'Auto',
@@ -51,7 +49,15 @@ const playerKeys = {
   'Buffer Progress': 'Buffer Progress',
   'Buffer State': 'Buffer State',
   'Live Latency': 'Live Latency',
-  'Player mode': 'Player mode'
+  'P2P': 'P2P',
+  '{1} seconds': '{1} seconds',
+  'enabled': 'enabled',
+  'Playlist: {1}': 'Playlist: {1}',
+  'disabled': 'disabled',
+  '  off': '  off',
+  'Player mode': 'Player mode',
+  'Play in loop': 'Play in loop',
+  'The video failed to play, will try to fast forward.': 'The video failed to play, will try to fast forward.'
 }
 Object.assign(playerKeys, videojs)
 
@@ -96,7 +102,7 @@ writeAll().catch(err => {
 })
 
 async function writeAll () {
-  const localePath = join(__dirname, '../../../client/src/locale')
+  const localePath = join(root(), 'client', 'src', 'locale')
 
   await writeJSON(join(localePath, 'player.en-US.json'), playerKeys, { spaces: 4 })
   await writeJSON(join(localePath, 'server.en-US.json'), serverKeys, { spaces: 4 })

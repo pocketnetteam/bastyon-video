@@ -1,14 +1,14 @@
+import { VideoViewModel } from '@server/models/view/video-view'
 import { logger } from '../../helpers/logger'
-import { AbstractScheduler } from './abstract-scheduler'
-import { SCHEDULER_INTERVALS_MS } from '../../initializers/constants'
 import { CONFIG } from '../../initializers/config'
-import { VideoViewModel } from '../../models/video/video-view'
+import { SCHEDULER_INTERVALS_MS } from '../../initializers/constants'
+import { AbstractScheduler } from './abstract-scheduler'
 
 export class RemoveOldViewsScheduler extends AbstractScheduler {
 
   private static instance: AbstractScheduler
 
-  protected schedulerIntervalMs = SCHEDULER_INTERVALS_MS.removeOldViews
+  protected schedulerIntervalMs = SCHEDULER_INTERVALS_MS.REMOVE_OLD_VIEWS
 
   private constructor () {
     super()

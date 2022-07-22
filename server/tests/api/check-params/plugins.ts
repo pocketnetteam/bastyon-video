@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions,@typescript-eslint/require-await */
 
 import 'mocha'
+import { checkBadCountPagination, checkBadSortPagination, checkBadStartPagination } from '@server/tests/shared'
+import { HttpStatusCode, PeerTubePlugin, PluginType } from '@shared/models'
 import {
-  checkBadCountPagination,
-  checkBadSortPagination,
-  checkBadStartPagination,
   cleanupTests,
   createSingleServer,
   makeGetRequest,
@@ -12,8 +11,7 @@ import {
   makePutBodyRequest,
   PeerTubeServer,
   setAccessTokensToServers
-} from '@shared/extra-utils'
-import { HttpStatusCode, PeerTubePlugin, PluginType } from '@shared/models'
+} from '@shared/server-commands'
 
 describe('Test server plugins API validators', function () {
   let server: PeerTubeServer
@@ -30,7 +28,7 @@ describe('Test server plugins API validators', function () {
   // ---------------------------------------------------------------
 
   before(async function () {
-    this.timeout(30000)
+    this.timeout(60000)
 
     server = await createSingleServer(1)
 

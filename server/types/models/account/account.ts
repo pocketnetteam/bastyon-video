@@ -1,4 +1,4 @@
-import { FunctionProperties, PickWith } from '@shared/core-utils'
+import { FunctionProperties, PickWith } from '@shared/typescript-utils'
 import { AccountModel } from '../../../models/account/account'
 import {
   MActor,
@@ -23,7 +23,7 @@ type Use<K extends keyof AccountModel, M> = PickWith<AccountModel, K, M>
 
 export type MAccount =
   Omit<AccountModel, 'Actor' | 'User' | 'Application' | 'VideoChannels' | 'VideoPlaylists' |
-  'VideoComments' | 'BlockedAccounts'>
+  'VideoComments' | 'BlockedBy'>
 
 // ############################################################################
 
@@ -84,7 +84,7 @@ export type MAccountSummary =
 
 export type MAccountSummaryBlocks =
   MAccountSummary &
-  Use<'BlockedAccounts', MAccountBlocklistId[]>
+  Use<'BlockedBy', MAccountBlocklistId[]>
 
 export type MAccountAPI =
   MAccount &

@@ -1,6 +1,12 @@
 <div class="video-edit" [formGroup]="form">
   <div ngbNav #nav="ngbNav" class="nav-tabs">
 
+    <ng-template #pluginSettingTemplate let-pluginSetting>
+      <div class="form-group" [hidden]="isPluginFieldHidden(pluginSetting)">
+        <my-dynamic-form-field [form]="pluginDataFormGroup" [formErrors]="formErrors['pluginData']" [setting]="pluginSetting.commonOptions"></my-dynamic-form-field>
+      </div>
+    </ng-template>
+
     <ng-container ngbNavItem>
       <a ngbNavLink i18n>Basic info</a>
 
@@ -146,6 +152,11 @@
               </ng-template>
             </my-peertube-checkbox>
 
+            <ng-container
+              *ngFor="let pluginSetting of getPluginsFields('main')"
+              [ngTemplateOutlet]="pluginSettingTemplate" [ngTemplateOutletContext]="{ $implicit: pluginSetting }"
+            >
+            </ng-container>
           </div>
         </div>
       </ng-template>
@@ -175,6 +186,7 @@
 
                 <div i18n class="caption-entry-state">Already uploaded	&#10004;</div>
 
+                <span i18n class="caption-entry-edit" (click)="videoCaptionEditModal.show()">Edit</span>
                 <span i18n class="caption-entry-delete" (click)="deleteCaption(videoCaption)">Delete</span>
               </ng-container>
 
@@ -186,6 +198,14 @@
                 <span i18n class="caption-entry-delete" (click)="deleteCaption(videoCaption)">Cancel create</span>
               </ng-container>
 
+              <ng-container *ngIf="videoCaption.action === 'UPDATE'">
+                <span class="caption-entry-label">{{ videoCaption.language.label }}</span>
+
+                <div i18n class="caption-entry-state caption-entry-state-create">Will be edited on update</div>
+
+                <span i18n class="caption-entry-delete" (click)="deleteCaption(videoCaption)">Cancel edition</span>
+              </ng-container>
+
               <ng-container *ngIf="videoCaption.action === 'REMOVE'">
                 <span class="caption-entry-label">{{ videoCaption.language.label }}</span>
 
@@ -193,6 +213,13 @@
 
                 <span i18n class="caption-entry-delete" (click)="deleteCaption(videoCaption)">Cancel deletion</span>
               </ng-container>
+
+              <my-video-caption-edit-modal
+                #videoCaptionEditModal
+                [videoCaption]="videoCaption"
+                [serverConfig]="serverConfig"
+                (captionEdited)="onCaptionEdited($event)"
+              ></my-video-caption-edit-modal>
             </div>
           </div>
 
@@ -214,9 +241,14 @@
               <my-live-documentation-link></my-live-documentation-link>
             </div>
 
-            <div class="form-group">
+            <div *ngIf="liveVideo.rtmpUrl" class="form-group">
               <label for="liveVideoRTMPUrl" i18n>Live RTMP Url</label>
               <my-input-toggle-hidden inputId="liveVideoRTMPUrl" [value]="liveVideo.rtmpUrl" [withToggle]="false" [withCopy]="true" [show]="true" [readonly]="true"></my-input-toggle-hidden>
+            </div>
+
+            <div *ngIf="liveVideo.rtmpsUrl" class="form-group">
+              <label for="liveVideoRTMPSUrl" i18n>Live RTMPS Url</label>
+              <my-input-toggle-hidden inputId="liveVideoRTMPSUrl" [value]="liveVideo.rtmpsUrl" [withToggle]="false" [withCopy]="true" [show]="true" [readonly]="true"></my-input-toggle-hidden>
             </div>
 
             <div class="form-group">
@@ -227,15 +259,23 @@
             </div>
 
             <div class="form-group">
-              <my-peertube-checkbox inputName="liveVideoPermanentLive" formControlName="permanentLive">
-                <ng-template ptTemplate="label">
-                  <ng-container i18n>This is a permanent live</ng-container>
-                </ng-template>
+              <div class="peertube-radio-container">
+                <input type="radio" formControlName="permanentLive" id="permanentLiveFalse" [value]="false">
+                <label i18n for="permanentLiveFalse" class="radio">This is a normal live</label>
 
-                <ng-container ngProjectAs="description">
-                  <span i18n>You can stream multiple times in a permanent live. The URL for your viewers won't change but you cannot save replays of your lives</span>
-                </ng-container>
-              </my-peertube-checkbox>
+                <span class="form-group-description" i18n>
+                  You can stream only once in a normal live. If you enable replay, it will be saved under the same URL as your live
+                </span>
+              </div>
+
+              <div class="peertube-radio-container">
+                <input type="radio" formControlName="permanentLive" id="permanentLiveTrue" [value]="true">
+                <label i18n for="permanentLiveTrue" class="radio">This is a permanent/recurring live</label>
+
+                <span class="form-group-description" i18n>
+                  You can stream multiple times in a permanent/recurring live. If you enable replays, they will be saved as separate videos
+                </span>
+              </div>
             </div>
 
             <div class="form-group" *ngIf="isSaveReplayEnabled()">
@@ -248,6 +288,17 @@
                   <span i18n>⚠️ If you enable this option, your live will be terminated if you exceed your video quota</span>
                 </ng-container>
               </my-peertube-checkbox>
+            </div>
+
+            <div class="form-group" *ngIf="isLatencyModeEnabled()">
+              <label i18n for="latencyMode">Latency mode</label>
+              <my-select-options
+                labelForId="latencyMode" [items]="latencyModes" formControlName="latencyMode" [clearable]="true"
+              ></my-select-options>
+
+              <div *ngIf="formErrors.latencyMode" class="form-error">
+                {{ formErrors.latencyMode }}
+              </div>
             </div>
           </div>
         </div>
@@ -326,16 +377,18 @@
       </ng-template>
     </ng-container>
 
-    <ng-container ngbNavItem *ngIf="pluginFields.length !== 0">
+    <ng-container ngbNavItem *ngIf="getPluginsFields('plugin-settings').length !== 0">
       <a ngbNavLink i18n>Plugin settings</a>
 
       <ng-template ngbNavContent>
         <div class="row plugin-settings">
 
           <div class="col-md-12 col-xl-8">
-            <div *ngFor="let pluginSetting of pluginFields" class="form-group" [hidden]="isPluginFieldHidden(pluginSetting)">
-              <my-dynamic-form-field [form]="pluginDataFormGroup" [formErrors]="formErrors" [setting]="pluginSetting.commonOptions"></my-dynamic-form-field>
-            </div>
+            <ng-container
+              *ngFor="let pluginSetting of getPluginsFields('plugin-settings')"
+              [ngTemplateOutlet]="pluginSettingTemplate" [ngTemplateOutletContext]="{ $implicit: pluginSetting }"
+            >
+            </ng-container>
           </div>
 
         </div>
@@ -347,5 +400,5 @@
 </div>
 
 <my-video-caption-add-modal
-  #videoCaptionAddModal [existingCaptions]="getExistingCaptions()" [serverConfig]="serverConfig" (captionAdded)="onCaptionAdded($event)"
+  #videoCaptionAddModal [existingCaptions]="getExistingCaptions()" [serverConfig]="serverConfig" (captionAdded)="onCaptionEdited($event)"
 ></my-video-caption-add-modal>

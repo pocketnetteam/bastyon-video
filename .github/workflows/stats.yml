@@ -1,0 +1,69 @@
+name: Stats
+
+on:
+  push:
+    branches:
+    - develop
+    - ci
+    - next
+  pull_request:
+    types: [synchronize, opened]
+
+jobs:
+
+  stats:
+    runs-on: ubuntu-latest
+
+    env:
+      CI_BRANCH_BASE: develop
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: './.github/actions/reusable-prepare-peertube-build'
+        with:
+          node-version: '14.x'
+
+      - name: Angular bundlewatch
+        uses: jackyef/bundlewatch-gh-action@master
+        with:
+          build-script: npm run build -- --analyze-bundle
+          branch-base: develop
+          bundlewatch-github-token: ${{ secrets.BUNDLEWATCH_GITHUB_TOKEN }}
+
+      - name: PeerTube code stats
+        if: github.event_name != 'pull_request'
+        run: |
+          wget "https://github.com/boyter/scc/releases/download/v3.0.0/scc-3.0.0-x86_64-unknown-linux.zip"
+          unzip "scc-3.0.0-x86_64-unknown-linux.zip"
+          ./scc --format=json --exclude-dir .git,node_modules,client/node_modules,client/dist,dist,yarn.lock,client/yarn.lock,client/src/locale,test1,test2,test3,client/src/assets/images,config,storage,server/tests/fixtures,support/openapi,.idea,.vscode,docker-volume,ffmpeg-3,ffmpeg-4 > ./scc.json
+
+      - name: PeerTube client stats
+        if: github.event_name != 'pull_request'
+        run: |
+          node dist/scripts/client-build-stats.js > client-build-stats.json
+
+      - name: PeerTube client lighthouse report
+        if: github.event_name != 'pull_request'
+        run: |
+          sudo apt-get install chromium-browser
+          sudo npm install -g lighthouse
+          lighthouse --chrome-flags="--headless" https://peertube2.cpy.re --output=json --output-path=./lighthouse.json
+
+      - name: Display stats
+        if: github.event_name != 'pull_request'
+        run: |
+          cat client-build-stats.json
+          cat scc.json
+          cat lighthouse.json
+
+      - name: Upload stats
+        if: github.event_name != 'pull_request'
+        uses: './.github/actions/reusable-deploy'
+        with:
+          source: lighthouse.json client-build-stats.json scc.json
+          destination: peertube-stats
+          knownHosts: ${{ secrets.STATS_DEPLOYEMENT_KNOWN_HOSTS }}
+          deployKey: ${{ secrets.STATS_DEPLOYEMENT_KEY }}
+          deployUser: ${{ secrets.STATS_DEPLOYEMENT_USER }}
+          deployHost: ${{ secrets.STATS_DEPLOYEMENT_HOST }}

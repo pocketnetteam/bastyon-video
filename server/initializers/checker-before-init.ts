@@ -19,6 +19,7 @@ function checkMissedConfig () {
     'storage.redundancy', 'storage.tmp', 'storage.streaming_playlists', 'storage.plugins',
     'log.level',
     'user.video_quota', 'user.video_quota_daily',
+    'video_channels.max_per_user',
     'csp.enabled', 'csp.report_only', 'csp.report_uri',
     'security.frameguard.enabled',
     'cache.previews.size', 'cache.captions.size', 'cache.torrents.size', 'admin.email', 'contact_form.enabled',
@@ -27,28 +28,37 @@ function checkMissedConfig () {
     'redundancy.videos.strategies', 'redundancy.videos.check_interval',
     'transcoding.enabled', 'transcoding.threads', 'transcoding.allow_additional_extensions', 'transcoding.hls.enabled',
     'transcoding.profile', 'transcoding.concurrency',
-    'transcoding.resolutions.0p', 'transcoding.resolutions.240p', 'transcoding.resolutions.360p', 'transcoding.resolutions.480p',
-    'transcoding.resolutions.720p', 'transcoding.resolutions.1080p', 'transcoding.resolutions.1440p', 'transcoding.resolutions.2160p',
+    'transcoding.resolutions.0p', 'transcoding.resolutions.144p', 'transcoding.resolutions.240p', 'transcoding.resolutions.360p',
+    'transcoding.resolutions.480p', 'transcoding.resolutions.720p', 'transcoding.resolutions.1080p', 'transcoding.resolutions.1440p',
+    'transcoding.resolutions.2160p', 'video_studio.enabled',
     'import.videos.http.enabled', 'import.videos.torrent.enabled', 'import.videos.concurrency', 'auto_blacklist.videos.of_users.enabled',
     'trending.videos.interval_days',
+    'client.videos.miniature.display_author_avatar',
+    'client.videos.miniature.prefer_author_display_name', 'client.menu.login.redirect_on_single_external_auth',
+    'defaults.publish.download_enabled', 'defaults.publish.comments_enabled', 'defaults.publish.privacy', 'defaults.publish.licence',
     'instance.name', 'instance.short_description', 'instance.description', 'instance.terms', 'instance.default_client_route',
     'instance.is_nsfw', 'instance.default_nsfw_policy', 'instance.robots', 'instance.securitytxt',
     'services.twitter.username', 'services.twitter.whitelisted',
     'followers.instance.enabled', 'followers.instance.manual_approval',
     'tracker.enabled', 'tracker.private', 'tracker.reject_too_many_announces',
-    'history.videos.max_age', 'views.videos.remote.max_age',
+    'history.videos.max_age', 'views.videos.remote.max_age', 'views.videos.local_buffer_update_interval', 'views.videos.ip_view_expiration',
     'rates_limit.login.window', 'rates_limit.login.max', 'rates_limit.ask_send_email.window', 'rates_limit.ask_send_email.max',
     'theme.default',
+    'geo_ip.enabled', 'geo_ip.country.database_url',
     'remote_redundancy.videos.accept_from',
     'federation.videos.federate_unlisted', 'federation.videos.cleanup_remote_interactions',
     'peertube.check_latest_version.enabled', 'peertube.check_latest_version.url',
     'search.remote_uri.users', 'search.remote_uri.anonymous', 'search.search_index.enabled', 'search.search_index.url',
     'search.search_index.disable_local_search', 'search.search_index.is_default_search',
-    'live.enabled', 'live.allow_replay', 'live.max_duration', 'live.max_user_lives', 'live.max_instance_lives',
+    'live.enabled', 'live.allow_replay', 'live.latency_setting.enabled', 'live.max_duration',
+    'live.max_user_lives', 'live.max_instance_lives',
+    'live.rtmp.enabled', 'live.rtmp.port', 'live.rtmp.hostname', 'live.rtmp.public_hostname',
+    'live.rtmps.enabled', 'live.rtmps.port', 'live.rtmps.hostname', 'live.rtmps.public_hostname',
+    'live.rtmps.key_file', 'live.rtmps.cert_file',
     'live.transcoding.enabled', 'live.transcoding.threads', 'live.transcoding.profile',
-    'live.transcoding.resolutions.240p', 'live.transcoding.resolutions.360p', 'live.transcoding.resolutions.480p',
-    'live.transcoding.resolutions.720p', 'live.transcoding.resolutions.1080p', 'live.transcoding.resolutions.1440p',
-    'live.transcoding.resolutions.2160p'
+    'live.transcoding.resolutions.144p', 'live.transcoding.resolutions.240p', 'live.transcoding.resolutions.360p',
+    'live.transcoding.resolutions.480p', 'live.transcoding.resolutions.720p', 'live.transcoding.resolutions.1080p',
+    'live.transcoding.resolutions.1440p', 'live.transcoding.resolutions.2160p'
   ]
 
   const requiredAlternatives = [
@@ -111,8 +121,8 @@ function checkNodeVersion () {
 
   logger.debug('Checking NodeJS version %s.', v)
 
-  if (major <= 10) {
-    logger.warn('Your NodeJS version %s is deprecated. Please upgrade.', v)
+  if (major <= 12) {
+    throw new Error('Your NodeJS version ' + v + ' is not supported. Please upgrade.')
   }
 }
 

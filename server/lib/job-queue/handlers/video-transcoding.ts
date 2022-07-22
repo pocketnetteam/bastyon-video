@@ -1,20 +1,22 @@
 import { Job } from 'bull'
-import { TranscodeOptionsType } from '@server/helpers/ffmpeg-utils'
+import { TranscodeVODOptionsType } from '@server/helpers/ffmpeg'
 import { addTranscodingJob, getTranscodingJobPriority } from '@server/lib/video'
 import { VideoPathManager } from '@server/lib/video-path-manager'
-import { moveToNextState } from '@server/lib/video-state'
+import { moveToFailedTranscodingState, moveToNextState } from '@server/lib/video-state'
 import { UserModel } from '@server/models/user/user'
 import { VideoJobInfoModel } from '@server/models/video/video-job-info'
 import { MUser, MUserId, MVideo, MVideoFullLight, MVideoWithFile } from '@server/types/models'
+import { pick } from '@shared/core-utils'
 import {
   HLSTranscodingPayload,
   MergeAudioTranscodingPayload,
-  NewResolutionTranscodingPayload,
+  NewWebTorrentResolutionTranscodingPayload,
   OptimizeTranscodingPayload,
+  VideoResolution,
   VideoTranscodingPayload
-} from '../../../../shared'
+} from '@shared/models'
 import { retryTransactionWrapper } from '../../../helpers/database-utils'
-import { computeResolutionsToTranscode } from '../../../helpers/ffprobe-utils'
+import { computeLowerResolutionsToTranscode } from '../../../helpers/ffmpeg'
 import { logger, loggerTagsFactory } from '../../../helpers/logger'
 import { CONFIG } from '../../../initializers/config'
 import { VideoModel } from '../../../models/video/video'
@@ -23,7 +25,7 @@ import {
   mergeAudioVideofile,
   optimizeOriginalVideofile,
   transcodeNewWebTorrentResolution
-} from '../../transcoding/video-transcoding'
+} from '../../transcoding/transcoding'
 import { MAX_ALLOWED_RESOLUTION } from '../../../initializers/constants'
 
 type HandlerFunction = (job: Job, payload: VideoTranscodingPayload, video: MVideoFullLight, user: MUser) => Promise<void>
@@ -53,12 +55,29 @@ async function processVideoTranscoding (job: Job) {
   const handler = handlers[payload.type]
 
   if (!handler) {
+    await moveToFailedTranscodingState(video)
+    await VideoJobInfoModel.decrease(video.uuid, 'pendingTranscode')
+
     throw new Error('Cannot find transcoding handler for ' + payload.type)
   }
 
-  await handler(job, payload, video, user)
+  try {
+    await handler(job, payload, video, user)
+  } catch (error) {
+    await moveToFailedTranscodingState(video)
+
+    await VideoJobInfoModel.decrease(video.uuid, 'pendingTranscode')
+
+    throw error
+  }
 
   return video
+}
+
+// ---------------------------------------------------------------------------
+
+export {
+  processVideoTranscoding
 }
 
 // ---------------------------------------------------------------------------
@@ -74,7 +93,7 @@ async function handleHLSJob (job: Job, payload: HLSTranscodingPayload, video: MV
 
   const videoOrStreamingPlaylist = videoFileInput.getVideoOrStreamingPlaylist()
 
-  await VideoPathManager.Instance.makeAvailableVideoFile(videoOrStreamingPlaylist, videoFileInput, videoInputPath => {
+  await VideoPathManager.Instance.makeAvailableVideoFile(videoFileInput.withVideoOrPlaylist(videoOrStreamingPlaylist), videoInputPath => {
     return generateHlsPlaylistResolution({
       video,
       videoInputPath,
@@ -87,12 +106,12 @@ async function handleHLSJob (job: Job, payload: HLSTranscodingPayload, video: MV
 
   logger.info('HLS transcoding job for %s ended.', video.uuid, lTags(video.uuid))
 
-  await retryTransactionWrapper(onHlsPlaylistGeneration, video, user, payload)
+  await onHlsPlaylistGeneration(video, user, payload)
 }
 
 async function handleNewWebTorrentResolutionJob (
   job: Job,
-  payload: NewResolutionTranscodingPayload,
+  payload: NewWebTorrentResolutionTranscodingPayload,
   video: MVideoFullLight,
   user: MUserId
 ) {
@@ -102,7 +121,7 @@ async function handleNewWebTorrentResolutionJob (
 
   logger.info('WebTorrent transcoding job for %s ended.', video.uuid, lTags(video.uuid))
 
-  await retryTransactionWrapper(onNewWebTorrentFileResolution, video, user, payload)
+  await onNewWebTorrentFileResolution(video, user, payload)
 }
 
 async function handleWebTorrentMergeAudioJob (job: Job, payload: MergeAudioTranscodingPayload, video: MVideoFullLight, user: MUserId) {
@@ -112,7 +131,7 @@ async function handleWebTorrentMergeAudioJob (job: Job, payload: MergeAudioTrans
 
   logger.info('Merge audio transcoding job for %s ended.', video.uuid, lTags(video.uuid))
 
-  await retryTransactionWrapper(onVideoFileOptimizer, video, payload, 'video', user)
+  await onVideoFirstWebTorrentTranscoding(video, payload, 'video', user)
 }
 
 async function handleWebTorrentOptimizeJob (job: Job, payload: OptimizeTranscodingPayload, video: MVideoFullLight, user: MUserId) {
@@ -122,16 +141,16 @@ async function handleWebTorrentOptimizeJob (job: Job, payload: OptimizeTranscodi
 
   logger.info('Optimize transcoding job for %s ended.', video.uuid, lTags(video.uuid))
 
-  await retryTransactionWrapper(onVideoFileOptimizer, video, payload, transcodeType, user)
+  await onVideoFirstWebTorrentTranscoding(video, payload, transcodeType, user)
 }
 
 // ---------------------------------------------------------------------------
 
 async function onHlsPlaylistGeneration (video: MVideoFullLight, user: MUser, payload: HLSTranscodingPayload) {
-  if (payload.isMaxQuality && CONFIG.TRANSCODING.WEBTORRENT.ENABLED === false) {
+  if (payload.isMaxQuality && payload.autoDeleteWebTorrentIfNeeded && CONFIG.TRANSCODING.WEBTORRENT.ENABLED === false) {
     // Remove webtorrent files if not enabled
     for (const file of video.VideoFiles) {
-      await video.removeFileAndTorrent(file)
+      await video.removeWebTorrentFileAndTorrent(file)
       await file.destroy()
     }
 
@@ -143,22 +162,23 @@ async function onHlsPlaylistGeneration (video: MVideoFullLight, user: MUser, pay
       user,
       videoFileResolution: payload.resolution,
       isPortraitMode: payload.isPortraitMode,
+      hasAudio: payload.hasAudio,
       isNewVideo: payload.isNewVideo ?? true,
       type: 'hls'
     })
   }
 
   await VideoJobInfoModel.decrease(video.uuid, 'pendingTranscode')
-  await moveToNextState(video, payload.isNewVideo)
+  await retryTransactionWrapper(moveToNextState, { video, isNewVideo: payload.isNewVideo })
 }
 
-async function onVideoFileOptimizer (
+async function onVideoFirstWebTorrentTranscoding (
   videoArg: MVideoWithFile,
   payload: OptimizeTranscodingPayload | MergeAudioTranscodingPayload,
-  transcodeType: TranscodeOptionsType,
+  transcodeType: TranscodeVODOptionsType,
   user: MUserId
 ) {
-  const { resolution, isPortraitMode } = await videoArg.getMaxQualityResolution()
+  const { resolution, isPortraitMode, audioStream } = await videoArg.probeMaxQualityFile()
 
   // Maybe the video changed in database, refresh it
   const videoDatabase = await VideoModel.loadAndPopulateAccountAndServerAndTags(videoArg.uuid)
@@ -170,6 +190,7 @@ async function onVideoFileOptimizer (
     ...payload,
 
     isPortraitMode,
+    hasAudio: !!audioStream,
     resolution:
         videoDatabase.getMaxQualityFile().resolution > MAX_ALLOWED_RESOLUTION
           ? MAX_ALLOWED_RESOLUTION
@@ -183,6 +204,7 @@ async function onVideoFileOptimizer (
     video: videoDatabase,
     user,
     videoFileResolution: resolution,
+    hasAudio: !!audioStream,
     isPortraitMode,
     type: 'webtorrent',
     isNewVideo: payload.isNewVideo ?? true
@@ -192,24 +214,30 @@ async function onVideoFileOptimizer (
 
   // Move to next state if there are no other resolutions to generate
   if (!hasHls && !hasNewResolutions) {
-    await moveToNextState(videoDatabase, payload.isNewVideo)
+    await retryTransactionWrapper(moveToNextState, { video: videoDatabase, isNewVideo: payload.isNewVideo })
   }
 }
 
 async function onNewWebTorrentFileResolution (
   video: MVideo,
   user: MUserId,
-  payload: NewResolutionTranscodingPayload | MergeAudioTranscodingPayload
+  payload: NewWebTorrentResolutionTranscodingPayload | MergeAudioTranscodingPayload
 ) {
-  await createHlsJobIfEnabled(user, { ...payload, copyCodecs: true, isMaxQuality: false })
+  if (payload.createHLSIfNeeded) {
+    await createHlsJobIfEnabled(user, { hasAudio: true, copyCodecs: true, isMaxQuality: false, ...payload })
+  }
+
   await VideoJobInfoModel.decrease(video.uuid, 'pendingTranscode')
 
-  await moveToNextState(video, payload.isNewVideo)
+  await retryTransactionWrapper(moveToNextState, { video, isNewVideo: payload.isNewVideo })
 }
+
+// ---------------------------------------------------------------------------
 
 async function createHlsJobIfEnabled (user: MUserId, payload: {
   videoUUID: string
   resolution: number
+  hasAudio: boolean
   isPortraitMode?: boolean
   copyCodecs: boolean
   isMaxQuality: boolean
@@ -223,12 +251,9 @@ async function createHlsJobIfEnabled (user: MUserId, payload: {
 
   const hlsTranscodingPayload: HLSTranscodingPayload = {
     type: 'new-resolution-to-hls',
-    videoUUID: payload.videoUUID,
-    resolution: payload.resolution,
-    isPortraitMode: payload.isPortraitMode,
-    copyCodecs: payload.copyCodecs,
-    isMaxQuality: payload.isMaxQuality,
-    isNewVideo: payload.isNewVideo
+    autoDeleteWebTorrentIfNeeded: true,
+
+    ...pick(payload, [ 'videoUUID', 'resolution', 'isPortraitMode', 'copyCodecs', 'isMaxQuality', 'isNewVideo', 'hasAudio' ])
   }
 
   await addTranscodingJob(hlsTranscodingPayload, jobOptions)
@@ -236,31 +261,24 @@ async function createHlsJobIfEnabled (user: MUserId, payload: {
   return true
 }
 
-// ---------------------------------------------------------------------------
-
-export {
-  processVideoTranscoding,
-  createHlsJobIfEnabled,
-  onNewWebTorrentFileResolution
-}
-
-// ---------------------------------------------------------------------------
-
 async function createLowerResolutionsJobs (options: {
   video: MVideoFullLight
   user: MUserId
   videoFileResolution: number
   isPortraitMode: boolean
+  hasAudio: boolean
   isNewVideo: boolean
   type: 'hls' | 'webtorrent'
 }) {
-  const { video, user, videoFileResolution, isPortraitMode, isNewVideo, type } = options
+  const { video, user, videoFileResolution, isPortraitMode, isNewVideo, hasAudio, type } = options
 
   // Create transcoding jobs if there are enabled resolutions
-  const resolutionsEnabled = computeResolutionsToTranscode(videoFileResolution, 'vod')
+  const resolutionsEnabled = computeLowerResolutionsToTranscode(videoFileResolution, 'vod')
   const resolutionCreated: string[] = []
 
   for (const resolution of resolutionsEnabled) {
+    if (resolution === VideoResolution.H_NOVIDEO && hasAudio === false) continue
+
     let dataInput: VideoTranscodingPayload
 
     if (CONFIG.TRANSCODING.WEBTORRENT.ENABLED && type === 'webtorrent') {
@@ -270,6 +288,8 @@ async function createLowerResolutionsJobs (options: {
         videoUUID: video.uuid,
         resolution,
         isPortraitMode,
+        hasAudio,
+        createHLSIfNeeded: true,
         isNewVideo
       }
 
@@ -282,8 +302,10 @@ async function createLowerResolutionsJobs (options: {
         videoUUID: video.uuid,
         resolution,
         isPortraitMode,
+        hasAudio,
         copyCodecs: false,
         isMaxQuality: false,
+        autoDeleteWebTorrentIfNeeded: true,
         isNewVideo
       }
 

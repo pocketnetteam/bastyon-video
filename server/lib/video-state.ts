@@ -4,7 +4,7 @@ import { CONFIG } from '@server/initializers/config'
 import { sequelizeTypescript } from '@server/initializers/database'
 import { VideoModel } from '@server/models/video/video'
 import { VideoJobInfoModel } from '@server/models/video/video-job-info'
-import { MVideoFullLight, MVideoUUID } from '@server/types/models'
+import { MVideo, MVideoFullLight, MVideoUUID } from '@server/types/models'
 import { VideoState } from '@shared/models'
 import { federateVideoIfNeeded } from './activitypub/videos'
 import { Notifier } from './notifier'
@@ -16,6 +16,7 @@ function buildNextVideoState (currentState?: VideoState) {
   }
 
   if (
+    currentState !== VideoState.TO_EDIT &&
     currentState !== VideoState.TO_TRANSCODE &&
     currentState !== VideoState.TO_MOVE_TO_EXTERNAL_STORAGE &&
     CONFIG.TRANSCODING.ENABLED
@@ -33,7 +34,13 @@ function buildNextVideoState (currentState?: VideoState) {
   return VideoState.PUBLISHED
 }
 
-function moveToNextState (video: MVideoUUID, isNewVideo = true) {
+function moveToNextState (options: {
+  video: MVideoUUID
+  previousVideoState?: VideoState
+  isNewVideo?: boolean // Default true
+}) {
+  const { video, previousVideoState, isNewVideo = true } = options
+
   return sequelizeTypescript.transaction(async t => {
     // Maybe the video changed in database, refresh it
     const videoDatabase = await VideoModel.loadAndPopulateAccountAndServerAndTags(video.uuid, t)
@@ -48,52 +55,93 @@ function moveToNextState (video: MVideoUUID, isNewVideo = true) {
     const newState = buildNextVideoState(videoDatabase.state)
 
     if (newState === VideoState.PUBLISHED) {
-      return moveToPublishedState(videoDatabase, isNewVideo, t)
+      return moveToPublishedState({ video: videoDatabase, previousVideoState, isNewVideo, transaction: t })
     }
 
     if (newState === VideoState.TO_MOVE_TO_EXTERNAL_STORAGE) {
-      return moveToExternalStorageState(videoDatabase, isNewVideo, t)
+      return moveToExternalStorageState({ video: videoDatabase, isNewVideo, transaction: t })
     }
   })
+}
+
+async function moveToExternalStorageState (options: {
+  video: MVideoFullLight
+  isNewVideo: boolean
+  transaction: Transaction
+}) {
+  const { video, isNewVideo, transaction } = options
+
+  const videoJobInfo = await VideoJobInfoModel.load(video.id, transaction)
+  const pendingTranscode = videoJobInfo?.pendingTranscode || 0
+
+  // We want to wait all transcoding jobs before moving the video on an external storage
+  if (pendingTranscode !== 0) return false
+
+  const previousVideoState = video.state
+  await video.setNewState(VideoState.TO_MOVE_TO_EXTERNAL_STORAGE, isNewVideo, transaction)
+
+  logger.info('Creating external storage move job for video %s.', video.uuid, { tags: [ video.uuid ] })
+
+  try {
+    await addMoveToObjectStorageJob({ video, previousVideoState, isNewVideo })
+
+    return true
+  } catch (err) {
+    logger.error('Cannot add move to object storage job', { err })
+
+    return false
+  }
+}
+
+function moveToFailedTranscodingState (video: MVideo) {
+  if (video.state === VideoState.TRANSCODING_FAILED) return
+
+  return video.setNewState(VideoState.TRANSCODING_FAILED, false, undefined)
+}
+
+function moveToFailedMoveToObjectStorageState (video: MVideo) {
+  if (video.state === VideoState.TO_MOVE_TO_EXTERNAL_STORAGE_FAILED) return
+
+  return video.setNewState(VideoState.TO_MOVE_TO_EXTERNAL_STORAGE_FAILED, false, undefined)
 }
 
 // ---------------------------------------------------------------------------
 
 export {
   buildNextVideoState,
+  moveToExternalStorageState,
+  moveToFailedTranscodingState,
+  moveToFailedMoveToObjectStorageState,
   moveToNextState
 }
 
 // ---------------------------------------------------------------------------
 
-async function moveToPublishedState (video: MVideoFullLight, isNewVideo: boolean, transaction: Transaction) {
-  logger.info('Publishing video %s.', video.uuid, { tags: [ video.uuid ] })
+async function moveToPublishedState (options: {
+  video: MVideoFullLight
+  isNewVideo: boolean
+  transaction: Transaction
+  previousVideoState?: VideoState
+}) {
+  const { video, isNewVideo, transaction, previousVideoState } = options
+  const previousState = previousVideoState ?? video.state
 
-  const previousState = video.state
+  logger.info('Publishing video %s.', video.uuid, { isNewVideo, previousState, tags: [ video.uuid ] })
+
   await video.setNewState(VideoState.PUBLISHED, isNewVideo, transaction)
 
-  // If the video was not published, we consider it is a new one for other instances
-  // Live videos are always federated, so it's not a new video
   await federateVideoIfNeeded(video, isNewVideo, transaction)
 
-  if (isNewVideo) Notifier.Instance.notifyOnNewVideoIfNeeded(video)
-
-  if (previousState === VideoState.TO_TRANSCODE) {
-    Notifier.Instance.notifyOnVideoPublishedAfterTranscoding(video)
+  if (previousState === VideoState.TO_EDIT) {
+    Notifier.Instance.notifyOfFinishedVideoStudioEdition(video)
+    return
   }
-}
 
-async function moveToExternalStorageState (video: MVideoFullLight, isNewVideo: boolean, transaction: Transaction) {
-  const videoJobInfo = await VideoJobInfoModel.load(video.id, transaction)
-  const pendingTranscode = videoJobInfo?.pendingTranscode || 0
+  if (isNewVideo) {
+    Notifier.Instance.notifyOnNewVideoIfNeeded(video)
 
-  // We want to wait all transcoding jobs before moving the video on an external storage
-  if (pendingTranscode !== 0) return
-
-  await video.setNewState(VideoState.TO_MOVE_TO_EXTERNAL_STORAGE, isNewVideo, transaction)
-
-  logger.info('Creating external storage move job for video %s.', video.uuid, { tags: [ video.uuid ] })
-
-  addMoveToObjectStorageJob(video, isNewVideo)
-    .catch(err => logger.error('Cannot add move to object storage job', { err }))
+    if (previousState === VideoState.TO_TRANSCODE) {
+      Notifier.Instance.notifyOnVideoPublishedAfterTranscoding(video)
+    }
+  }
 }

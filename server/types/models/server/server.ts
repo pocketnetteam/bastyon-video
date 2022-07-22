@@ -1,5 +1,5 @@
+import { FunctionProperties, PickWith } from '@shared/typescript-utils'
 import { ServerModel } from '../../../models/server/server'
-import { FunctionProperties, PickWith } from '@shared/core-utils'
 import { MAccountBlocklistId } from '../account'
 
 type Use<K extends keyof ServerModel, M> = PickWith<ServerModel, K, M>
@@ -15,7 +15,7 @@ export type MServerRedundancyAllowed = Pick<MServer, 'redundancyAllowed'>
 
 export type MServerHostBlocks =
   MServerHost &
-  Use<'BlockedByAccounts', MAccountBlocklistId[]>
+  Use<'BlockedBy', MAccountBlocklistId[]>
 
 // ############################################################################
 

@@ -1,10 +1,10 @@
 import { getServerActor } from '@server/models/application/application'
 import { ActivityFollow } from '../../../../shared/models/activitypub'
-import { getAPId } from '../../../helpers/activitypub'
 import { retryTransactionWrapper } from '../../../helpers/database-utils'
 import { logger } from '../../../helpers/logger'
 import { CONFIG } from '../../../initializers/config'
 import { sequelizeTypescript } from '../../../initializers/database'
+import { getAPId } from '../../../lib/activitypub/activity'
 import { ActorModel } from '../../../models/actor/actor'
 import { ActorFollowModel } from '../../../models/actor/actor-follow'
 import { APProcessorOptions } from '../../../types/activitypub-processor.model'
@@ -48,20 +48,13 @@ async function processFollow (byActor: MActorSignature, activityId: string, targ
       return { actorFollow: undefined as MActorFollowActors }
     }
 
-    const [ actorFollow, created ] = await ActorFollowModel.findOrCreate<MActorFollowActors>({
-      where: {
-        actorId: byActor.id,
-        targetActorId: targetActor.id
-      },
-      defaults: {
-        actorId: byActor.id,
-        targetActorId: targetActor.id,
-        url: activityId,
-
-        state: CONFIG.FOLLOWERS.INSTANCE.MANUAL_APPROVAL
-          ? 'pending'
-          : 'accepted'
-      },
+    const [ actorFollow, created ] = await ActorFollowModel.findOrCreateCustom({
+      byActor,
+      targetActor,
+      activityId,
+      state: CONFIG.FOLLOWERS.INSTANCE.MANUAL_APPROVAL
+        ? 'pending'
+        : 'accepted',
       transaction: t
     })
 

@@ -1,9 +1,12 @@
 import express from 'express'
-import { move, readFile } from 'fs-extra'
+import { move, readFile, remove } from 'fs-extra'
 import { decode } from 'magnet-uri'
 import parseTorrent, { Instance } from 'parse-torrent'
 import { join } from 'path'
+import { isVTTFileValid } from '@server/helpers/custom-validators/video-captions'
 import { isVideoFileExtnameValid } from '@server/helpers/custom-validators/videos'
+import { isResolvingToUnicastOnly } from '@server/helpers/dns'
+import { Hooks } from '@server/lib/plugins/hooks'
 import { ServerConfigManager } from '@server/lib/server-config-manager'
 import { setVideoTags } from '@server/lib/video'
 import { FilteredModelAttributes } from '@server/types'
@@ -18,15 +21,22 @@ import {
   MVideoWithBlacklistLight
 } from '@server/types/models'
 import { MVideoImportFormattable } from '@server/types/models/video/video-import'
-import { ServerErrorCode, VideoImportCreate, VideoImportState, VideoPrivacy, VideoState } from '../../../../shared'
-import { ThumbnailType } from '../../../../shared/models/videos/thumbnail.type'
+import {
+  HttpStatusCode,
+  ServerErrorCode,
+  ThumbnailType,
+  VideoImportCreate,
+  VideoImportState,
+  VideoPrivacy,
+  VideoState
+} from '@shared/models'
 import { auditLoggerFactory, getAuditIdFromRes, VideoImportAuditView } from '../../../helpers/audit-logger'
 import { moveAndProcessCaptionFile } from '../../../helpers/captions-utils'
 import { isArray } from '../../../helpers/custom-validators/misc'
 import { cleanUpReqFiles, createReqFiles } from '../../../helpers/express-utils'
 import { logger } from '../../../helpers/logger'
 import { getSecureTorrentName } from '../../../helpers/utils'
-import { YoutubeDL, YoutubeDLInfo } from '../../../helpers/youtube-dl'
+import { YoutubeDLInfo, YoutubeDLWrapper } from '../../../helpers/youtube-dl'
 import { CONFIG } from '../../../initializers/config'
 import { MIMETYPES } from '../../../initializers/constants'
 import { sequelizeTypescript } from '../../../initializers/database'
@@ -34,7 +44,14 @@ import { getLocalVideoActivityPubUrl } from '../../../lib/activitypub/url'
 import { JobQueue } from '../../../lib/job-queue/job-queue'
 import { updateVideoMiniatureFromExisting, updateVideoMiniatureFromUrl } from '../../../lib/thumbnail'
 import { autoBlacklistVideoIfNeeded } from '../../../lib/video-blacklist'
-import { asyncMiddleware, asyncRetryTransactionMiddleware, authenticate, videoImportAddValidator } from '../../../middlewares'
+import {
+  asyncMiddleware,
+  asyncRetryTransactionMiddleware,
+  authenticate,
+  videoImportAddValidator,
+  videoImportCancelValidator,
+  videoImportDeleteValidator
+} from '../../../middlewares'
 import { VideoModel } from '../../../models/video/video'
 import { VideoCaptionModel } from '../../../models/video/video-caption'
 import { VideoImportModel } from '../../../models/video/video-import'
@@ -44,12 +61,7 @@ const videoImportsRouter = express.Router()
 
 const reqVideoFileImport = createReqFiles(
   [ 'thumbnailfile', 'previewfile', 'torrentfile' ],
-  Object.assign({}, MIMETYPES.TORRENT.MIMETYPE_EXT, MIMETYPES.IMAGE.MIMETYPE_EXT),
-  {
-    thumbnailfile: CONFIG.STORAGE.TMP_DIR,
-    previewfile: CONFIG.STORAGE.TMP_DIR,
-    torrentfile: CONFIG.STORAGE.TMP_DIR
-  }
+  { ...MIMETYPES.TORRENT.MIMETYPE_EXT, ...MIMETYPES.IMAGE.MIMETYPE_EXT }
 )
 
 videoImportsRouter.post('/imports',
@@ -59,6 +71,18 @@ videoImportsRouter.post('/imports',
   asyncRetryTransactionMiddleware(addVideoImport)
 )
 
+videoImportsRouter.post('/imports/:id/cancel',
+  authenticate,
+  asyncMiddleware(videoImportCancelValidator),
+  asyncRetryTransactionMiddleware(cancelVideoImport)
+)
+
+videoImportsRouter.delete('/imports/:id',
+  authenticate,
+  asyncMiddleware(videoImportDeleteValidator),
+  asyncRetryTransactionMiddleware(deleteVideoImport)
+)
+
 // ---------------------------------------------------------------------------
 
 export {
@@ -66,6 +90,23 @@ export {
 }
 
 // ---------------------------------------------------------------------------
+
+async function deleteVideoImport (req: express.Request, res: express.Response) {
+  const videoImport = res.locals.videoImport
+
+  await videoImport.destroy()
+
+  return res.sendStatus(HttpStatusCode.NO_CONTENT_204)
+}
+
+async function cancelVideoImport (req: express.Request, res: express.Response) {
+  const videoImport = res.locals.videoImport
+
+  videoImport.state = VideoImportState.CANCELLED
+  await videoImport.save()
+
+  return res.sendStatus(HttpStatusCode.NO_CONTENT_204)
+}
 
 function addVideoImport (req: express.Request, res: express.Response) {
   if (req.body.targetUrl) return addYoutubeDLImport(req, res)
@@ -94,7 +135,7 @@ async function addTorrentImport (req: express.Request, res: express.Response, to
     videoName = result.name
   }
 
-  const video = buildVideo(res.locals.videoChannel.id, body, { name: videoName })
+  const video = await buildVideo(res.locals.videoChannel.id, body, { name: videoName })
 
   const thumbnailModel = await processThumbnail(req, video)
   const previewModel = await processPreview(req, video)
@@ -134,12 +175,12 @@ async function addYoutubeDLImport (req: express.Request, res: express.Response) 
   const targetUrl = body.targetUrl
   const user = res.locals.oauth.token.User
 
-  const youtubeDL = new YoutubeDL(targetUrl, ServerConfigManager.Instance.getEnabledResolutions('vod'))
+  const youtubeDL = new YoutubeDLWrapper(targetUrl, ServerConfigManager.Instance.getEnabledResolutions('vod'))
 
   // Get video infos
   let youtubeDLInfo: YoutubeDLInfo
   try {
-    youtubeDLInfo = await youtubeDL.getYoutubeDLInfo()
+    youtubeDLInfo = await youtubeDL.getInfoForDownload()
   } catch (err) {
     logger.info('Cannot fetch information from import for URL %s.', targetUrl, { err })
 
@@ -151,7 +192,14 @@ async function addYoutubeDLImport (req: express.Request, res: express.Response) 
     })
   }
 
-  const video = buildVideo(res.locals.videoChannel.id, body, youtubeDLInfo)
+  if (!await hasUnicastURLsOnly(youtubeDLInfo)) {
+    return res.fail({
+      status: HttpStatusCode.FORBIDDEN_403,
+      message: 'Cannot use non unicast IP as targetUrl.'
+    })
+  }
+
+  const video = await buildVideo(res.locals.videoChannel.id, body, youtubeDLInfo)
 
   // Process video thumbnail from request.files
   let thumbnailModel = await processThumbnail(req, video)
@@ -210,15 +258,15 @@ async function addYoutubeDLImport (req: express.Request, res: express.Response) 
   return res.json(videoImport.toFormattedJSON()).end()
 }
 
-function buildVideo (channelId: number, body: VideoImportCreate, importData: YoutubeDLInfo): MVideoThumbnail {
-  const videoData = {
+async function buildVideo (channelId: number, body: VideoImportCreate, importData: YoutubeDLInfo): Promise<MVideoThumbnail> {
+  let videoData = {
     name: body.name || importData.name || 'Unknown name',
     remote: false,
     category: body.category || importData.category,
-    licence: body.licence || importData.licence,
+    licence: body.licence ?? importData.licence ?? CONFIG.DEFAULTS.PUBLISH.LICENCE,
     language: body.language || importData.language,
-    commentsEnabled: body.commentsEnabled !== false, // If the value is not "false", the default is "true"
-    downloadEnabled: body.downloadEnabled !== false,
+    commentsEnabled: body.commentsEnabled ?? CONFIG.DEFAULTS.PUBLISH.COMMENTS_ENABLED,
+    downloadEnabled: body.downloadEnabled ?? CONFIG.DEFAULTS.PUBLISH.DOWNLOAD_ENABLED,
     waitTranscoding: true,
     state: VideoState.TO_IMPORT,
     nsfw: body.nsfw || importData.nsfw || false,
@@ -231,6 +279,14 @@ function buildVideo (channelId: number, body: VideoImportCreate, importData: You
       ? new Date(body.originallyPublishedAt)
       : importData.originallyPublishedAt
   }
+
+  videoData = await Hooks.wrapObject(
+    videoData,
+    body.targetUrl
+      ? 'filter:api.video.import-url.video-attribute.result'
+      : 'filter:api.video.import-torrent.video-attribute.result'
+  )
+
   const video = new VideoModel(videoData)
   video.url = getLocalVideoActivityPubUrl(video)
 
@@ -373,13 +429,18 @@ function extractNameFromArray (name: string | string[]) {
   return isArray(name) ? name[0] : name
 }
 
-async function processYoutubeSubtitles (youtubeDL: YoutubeDL, targetUrl: string, videoId: number) {
+async function processYoutubeSubtitles (youtubeDL: YoutubeDLWrapper, targetUrl: string, videoId: number) {
   try {
-    const subtitles = await youtubeDL.getYoutubeDLSubs()
+    const subtitles = await youtubeDL.getSubtitles()
 
     logger.info('Will create %s subtitles from youtube import %s.', subtitles.length, targetUrl)
 
     for (const subtitle of subtitles) {
+      if (!await isVTTFileValid(subtitle.path)) {
+        await remove(subtitle.path)
+        continue
+      }
+
       const videoCaption = new VideoCaptionModel({
         videoId,
         language: subtitle.language,
@@ -396,4 +457,17 @@ async function processYoutubeSubtitles (youtubeDL: YoutubeDL, targetUrl: string,
   } catch (err) {
     logger.warn('Cannot get video subtitles.', { err })
   }
+}
+
+async function hasUnicastURLsOnly (youtubeDLInfo: YoutubeDLInfo) {
+  const hosts = youtubeDLInfo.urls.map(u => new URL(u).hostname)
+  const uniqHosts = new Set(hosts)
+
+  for (const h of uniqHosts) {
+    if (await isResolvingToUnicastOnly(h) !== true) {
+      return false
+    }
+  }
+
+  return true
 }

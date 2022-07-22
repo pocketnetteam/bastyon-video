@@ -5,14 +5,14 @@ import { ActorModel } from '@server/models/actor/actor'
 import { MOAuthClient } from '@server/types/models'
 import { MOAuthTokenUser } from '@server/types/models/oauth/oauth-token'
 import { MUser } from '@server/types/models/user/user'
-import { UserAdminFlag } from '@shared/models/users/user-flag.model'
+import { pick } from '@shared/core-utils'
 import { UserRole } from '@shared/models/users/user-role'
 import { logger } from '../../helpers/logger'
 import { CONFIG } from '../../initializers/config'
-import { UserModel } from '../../models/user/user'
 import { OAuthClientModel } from '../../models/oauth/oauth-client'
 import { OAuthTokenModel } from '../../models/oauth/oauth-token'
-import { createUserAccountAndChannelAndPlaylist } from '../user'
+import { UserModel } from '../../models/user/user'
+import { buildUser, createUserAccountAndChannelAndPlaylist } from '../user'
 import { TokensCache } from './tokens-cache'
 
 type TokenInfo = {
@@ -105,7 +105,14 @@ async function getUser (usernameOrEmail?: string, password?: string, bypassLogin
     // Then we just go through a regular login process
     if (user.pluginAuth !== null) {
       // This user does not belong to this plugin, skip it
-      if (user.pluginAuth !== bypassLogin.pluginName) return null
+      // if (user.pluginAuth !== bypassLogin.pluginName) {
+      //   logger.info(
+      //     'Cannot bypass oauth login by plugin %s because %s has another plugin auth method (%s).',
+      //     bypassLogin.pluginName, bypassLogin.user.email, user.pluginAuth
+      //   )
+
+      //   return null
+      // }
 
       checkUserValidityOrThrow(user)
 
@@ -229,18 +236,16 @@ async function createUserFromExternal (pluginAuth: string, options: {
   const actor = await ActorModel.loadLocalByName(options.username)
   if (actor) return null
 
-  const userToCreate = new UserModel({
-    username: options.username,
+  const userToCreate = buildUser({
+    ...pick(options, [ 'username', 'email', 'role' ]),
+
+    emailVerified: null,
     password: null,
-    email: options.email,
-    nsfwPolicy: CONFIG.INSTANCE.DEFAULT_NSFW_POLICY,
-    autoPlayVideo: true,
-    role: options.role,
-    videoQuota: CONFIG.USER.VIDEO_QUOTA,
-    videoQuotaDaily: options.userQuota || CONFIG.USER.VIDEO_QUOTA_DAILY,
-    adminFlags: UserAdminFlag.NONE,
     pluginAuth
-  }) as MUser
+  })
+
+  if (options.userQuota != undefined)
+    userToCreate.videoQuotaDaily = options.userQuota;
 
   const { user } = await createUserAccountAndChannelAndPlaylist({
     userToCreate,

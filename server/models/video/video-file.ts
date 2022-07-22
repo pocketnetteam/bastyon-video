@@ -1,7 +1,7 @@
 import { remove } from 'fs-extra'
 import memoizee from 'memoizee'
 import { join } from 'path'
-import { FindOptions, Op, Transaction } from 'sequelize'
+import { FindOptions, Op, Transaction, WhereOptions } from 'sequelize'
 import {
   AllowNull,
   BelongsTo,
@@ -18,16 +18,15 @@ import {
   Table,
   UpdatedAt
 } from 'sequelize-typescript'
-import { Where } from 'sequelize/types/lib/utils'
 import validator from 'validator'
-import { buildRemoteVideoBaseUrl } from '@server/helpers/activitypub'
 import { logger } from '@server/helpers/logger'
 import { extractVideo } from '@server/helpers/video'
+import { buildRemoteVideoBaseUrl } from '@server/lib/activitypub/url'
 import { getHLSPublicFileUrl, getWebTorrentPublicFileUrl } from '@server/lib/object-storage'
 import { getFSTorrentFilePath } from '@server/lib/paths'
-import { MStreamingPlaylistVideo, MVideo, MVideoWithHost } from '@server/types/models'
-import { AttributesOnly } from '@shared/core-utils'
-import { VideoStorage } from '@shared/models'
+import { isStreamingPlaylist, MStreamingPlaylistVideo, MVideo, MVideoWithHost } from '@server/types/models'
+import { VideoResolution, VideoStorage } from '@shared/models'
+import { AttributesOnly } from '@shared/typescript-utils'
 import {
   isVideoFileExtnameValid,
   isVideoFileInfoHashValid,
@@ -39,7 +38,6 @@ import {
   LAZY_STATIC_PATHS,
   MEMOIZE_LENGTH,
   MEMOIZE_TTL,
-  MIMETYPES,
   STATIC_DOWNLOAD_PATHS,
   STATIC_PATHS,
   WEBSERVER
@@ -71,7 +69,7 @@ export enum ScopeNames {
       }
     ]
   },
-  [ScopeNames.WITH_VIDEO_OR_PLAYLIST]: (options: { whereVideo?: Where } = {}) => {
+  [ScopeNames.WITH_VIDEO_OR_PLAYLIST]: (options: { whereVideo?: WhereOptions } = {}) => {
     return {
       include: [
         {
@@ -448,7 +446,7 @@ export class VideoFileModel extends Model<Partial<AttributesOnly<VideoFileModel>
   }
 
   isAudio () {
-    return !!MIMETYPES.AUDIO.EXT_MIMETYPE[this.extname]
+    return this.resolution === VideoResolution.H_NOVIDEO
   }
 
   isLive () {
@@ -535,6 +533,12 @@ export class VideoFileModel extends Model<Partial<AttributesOnly<VideoFileModel>
         (this.videoId !== null && this.videoId === other.videoId) ||
         (this.videoStreamingPlaylistId !== null && this.videoStreamingPlaylistId === other.videoStreamingPlaylistId)
       )
+  }
+
+  withVideoOrPlaylist (videoOrPlaylist: MVideo | MStreamingPlaylistVideo) {
+    if (isStreamingPlaylist(videoOrPlaylist)) return Object.assign(this, { VideoStreamingPlaylist: videoOrPlaylist })
+
+    return Object.assign(this, { Video: videoOrPlaylist })
   }
 
   static loadByPlaylistId (playlistId: number, resolution: number) {

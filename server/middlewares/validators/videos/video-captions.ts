@@ -1,11 +1,18 @@
 import express from 'express'
 import { body, param } from 'express-validator'
-import { UserRight } from '../../../../shared'
+import { UserRight } from '@shared/models'
 import { isVideoCaptionFile, isVideoCaptionLanguageValid } from '../../../helpers/custom-validators/video-captions'
 import { cleanUpReqFiles } from '../../../helpers/express-utils'
 import { logger } from '../../../helpers/logger'
 import { CONSTRAINTS_FIELDS, MIMETYPES } from '../../../initializers/constants'
-import { areValidationErrors, checkUserCanManageVideo, doesVideoCaptionExist, doesVideoExist, isValidVideoIdParam } from '../shared'
+import {
+  areValidationErrors,
+  checkCanSeeVideoIfPrivate,
+  checkUserCanManageVideo,
+  doesVideoCaptionExist,
+  doesVideoExist,
+  isValidVideoIdParam
+} from '../shared'
 
 const addVideoCaptionValidator = [
   isValidVideoIdParam('videoId'),
@@ -64,7 +71,10 @@ const listVideoCaptionsValidator = [
     logger.debug('Checking listVideoCaptions parameters', { parameters: req.params })
 
     if (areValidationErrors(req, res)) return
-    if (!await doesVideoExist(req.params.videoId, res, 'id')) return
+    if (!await doesVideoExist(req.params.videoId, res, 'only-video')) return
+
+    const video = res.locals.onlyVideo
+    if (!await checkCanSeeVideoIfPrivate(req, res, video)) return
 
     return next()
   }

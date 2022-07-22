@@ -2,6 +2,7 @@
 
 import 'mocha'
 import * as chai from 'chai'
+import { VideoPlaylistPrivacy } from '@shared/models'
 import {
   cleanupTests,
   createSingleServer,
@@ -9,9 +10,10 @@ import {
   PeerTubeServer,
   SearchCommand,
   setAccessTokensToServers,
+  setDefaultAccountAvatar,
+  setDefaultChannelAvatar,
   setDefaultVideoChannel
-} from '@shared/extra-utils'
-import { VideoPlaylistPrivacy } from '@shared/models'
+} from '@shared/server-commands'
 
 const expect = chai.expect
 
@@ -27,13 +29,17 @@ describe('Test playlists search', function () {
 
     const servers = await Promise.all([
       createSingleServer(1),
-      createSingleServer(2, { transcoding: { enabled: false } })
+      createSingleServer(2)
     ])
     server = servers[0]
     remoteServer = servers[1]
 
     await setAccessTokensToServers([ remoteServer, server ])
     await setDefaultVideoChannel([ remoteServer, server ])
+    await setDefaultChannelAvatar([ remoteServer, server ])
+    await setDefaultAccountAvatar([ remoteServer, server ])
+
+    await servers[1].config.disableTranscoding()
 
     {
       const videoId = (await server.videos.upload()).uuid

@@ -1,9 +1,10 @@
 import { remove } from 'fs-extra'
 import { Instance as ParseTorrent } from 'parse-torrent'
 import { join } from 'path'
-import { ResultList } from '../../shared'
+import { sha256 } from '@shared/extra-utils'
+import { ResultList } from '@shared/models'
 import { CONFIG } from '../initializers/config'
-import { execPromise, execPromise2, randomBytesPromise, sha256 } from './core-utils'
+import { execPromise, execPromise2, randomBytesPromise } from './core-utils'
 import { logger } from './logger'
 
 function deleteFileAndCatch (path: string) {

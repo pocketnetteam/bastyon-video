@@ -1,11 +1,3 @@
-import { registerTSPaths } from './server/helpers/register-ts-paths'
-registerTSPaths()
-
-import { isTestInstance } from './server/helpers/core-utils'
-if (isTestInstance()) {
-  require('source-map-support').install()
-}
-
 // ----------- Node modules -----------
 import express from 'express'
 import morgan, { token } from 'morgan'
@@ -19,7 +11,7 @@ import { program as cli } from 'commander'
 process.title = 'peertube'
 
 // Create our main app
-const app = express().disable("x-powered-by")
+const app = express().disable('x-powered-by')
 
 // ----------- Core checker -----------
 import { checkMissedConfig, checkFFmpeg, checkNodeVersion } from './server/initializers/checker-before-init'
@@ -41,14 +33,16 @@ checkFFmpeg(CONFIG)
     process.exit(-1)
   })
 
-checkNodeVersion()
+try {
+  checkNodeVersion()
+} catch (err) {
+  logger.error('Error in NodeJS check.', { err })
+  process.exit(-1)
+}
 
 import { checkConfig, checkActivityPubUrls, checkFFmpegVersion } from './server/initializers/checker-after-init'
 
-const errorMessage = checkConfig()
-if (errorMessage !== null) {
-  throw new Error(errorMessage)
-}
+checkConfig()
 
 // Trust our proxy (IP forwarding...)
 app.set('trust proxy', CONFIG.TRUST_PROXY)
@@ -118,6 +112,8 @@ import { ImagesRedundancyScheduler } from './server/lib/schedulers/images-redund
 import { RemoveOldHistoryScheduler } from './server/lib/schedulers/remove-old-history-scheduler'
 import { AutoFollowIndexInstances } from './server/lib/schedulers/auto-follow-index-instances'
 import { RemoveDanglingResumableUploadsScheduler } from './server/lib/schedulers/remove-dangling-resumable-uploads-scheduler'
+import { VideoViewsBufferScheduler } from './server/lib/schedulers/video-views-buffer-scheduler'
+import { GeoIPUpdateScheduler } from './server/lib/schedulers/geo-ip-update-scheduler'
 import { isHTTPSignatureDigestValid } from './server/helpers/peertube-crypto'
 import { PeerTubeSocket } from './server/lib/peertube-socket'
 import { updateStreamingPlaylistsInfohashesIfNeeded } from './server/lib/hls'
@@ -129,12 +125,15 @@ import { LiveManager } from './server/lib/live'
 import { HttpStatusCode } from './shared/models/http/http-error-codes'
 import { VideosTorrentCache } from '@server/lib/files-cache/videos-torrent-cache'
 import { ServerConfigManager } from '@server/lib/server-config-manager'
+import { VideoViewsManager } from '@server/lib/views/video-views-manager'
+import { isTestInstance } from './server/helpers/core-utils'
 
 // ----------- Command line -----------
 
 cli
   .option('--no-client', 'Start PeerTube without client interface')
   .option('--no-plugins', 'Start PeerTube without plugins/themes enabled')
+  .option('--benchmark-startup', 'Automatically stop server when initialized')
   .parse(process.argv)
 
 // ----------- App -----------
@@ -300,17 +299,18 @@ async function startApplication () {
   PeerTubeVersionCheckScheduler.Instance.enable()
   AutoFollowIndexInstances.Instance.enable()
   RemoveDanglingResumableUploadsScheduler.Instance.enable()
+  VideoViewsBufferScheduler.Instance.enable()
+  GeoIPUpdateScheduler.Instance.enable()
 
-  // Redis initialization
   Redis.Instance.init()
-
   PeerTubeSocket.Instance.init(server)
+  VideoViewsManager.Instance.init()
 
   updateStreamingPlaylistsInfohashesIfNeeded()
     .catch(err => logger.error('Cannot update streaming playlist infohashes.', { err }))
 
   LiveManager.Instance.init()
-  if (CONFIG.LIVE.ENABLED) LiveManager.Instance.run()
+  if (CONFIG.LIVE.ENABLED) await LiveManager.Instance.run()
 
   // Make server listening
   server.listen(port, hostname, async () => {
@@ -326,6 +326,8 @@ async function startApplication () {
     logger.info('Web server: %s', WEBSERVER.URL)
 
     Hooks.runAction('action:application.listening')
+
+    if (cliOptions['benchmarkStartup']) process.exit(0)
   })
 
   process.on('exit', () => {

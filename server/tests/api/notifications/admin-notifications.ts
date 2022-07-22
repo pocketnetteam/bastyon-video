@@ -6,14 +6,13 @@ import {
   CheckerBaseParams,
   checkNewPeerTubeVersion,
   checkNewPluginVersion,
-  cleanupTests,
   MockJoinPeerTubeVersions,
   MockSmtpServer,
-  PeerTubeServer,
-  prepareNotificationsTest,
-  wait
-} from '@shared/extra-utils'
+  prepareNotificationsTest
+} from '@server/tests/shared'
+import { wait } from '@shared/core-utils'
 import { PluginType, UserNotification, UserNotificationType } from '@shared/models'
+import { cleanupTests, PeerTubeServer } from '@shared/server-commands'
 
 describe('Test admin notifications', function () {
   let server: PeerTubeServer

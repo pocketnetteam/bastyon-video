@@ -50,7 +50,7 @@ export class VideoChannelService {
     const { account, componentPagination, withStats = false, sort, search } = options
 
     const pagination = componentPagination
-      ? this.restService.componentPaginationToRestPagination(componentPagination)
+      ? this.restService.componentToRestPagination(componentPagination)
       : { start: 0, count: 20 }
 
     let params = new HttpParams()
@@ -69,24 +69,18 @@ export class VideoChannelService {
 
   createVideoChannel (videoChannel: VideoChannelCreate) {
     return this.authHttp.post(VideoChannelService.BASE_VIDEO_CHANNEL_URL, videoChannel)
-               .pipe(
-                 map(this.restExtractor.extractDataBool),
-                 catchError(err => this.restExtractor.handleError(err))
-               )
+               .pipe(catchError(err => this.restExtractor.handleError(err)))
   }
 
   updateVideoChannel (videoChannelName: string, videoChannel: VideoChannelUpdate) {
     return this.authHttp.put(VideoChannelService.BASE_VIDEO_CHANNEL_URL + videoChannelName, videoChannel)
-               .pipe(
-                 map(this.restExtractor.extractDataBool),
-                 catchError(err => this.restExtractor.handleError(err))
-               )
+               .pipe(catchError(err => this.restExtractor.handleError(err)))
   }
 
   changeVideoChannelImage (videoChannelName: string, avatarForm: FormData, type: 'avatar' | 'banner') {
     const url = VideoChannelService.BASE_VIDEO_CHANNEL_URL + videoChannelName + '/' + type + '/pick'
 
-    return this.authHttp.post<{ avatar?: ActorImage, banner?: ActorImage }>(url, avatarForm)
+    return this.authHttp.post<{ avatars?: ActorImage[], banners?: ActorImage[] }>(url, avatarForm)
                .pipe(catchError(err => this.restExtractor.handleError(err)))
   }
 
@@ -94,17 +88,11 @@ export class VideoChannelService {
     const url = VideoChannelService.BASE_VIDEO_CHANNEL_URL + videoChannelName + '/' + type
 
     return this.authHttp.delete(url)
-               .pipe(
-                 map(this.restExtractor.extractDataBool),
-                 catchError(err => this.restExtractor.handleError(err))
-               )
+               .pipe(catchError(err => this.restExtractor.handleError(err)))
   }
 
   removeVideoChannel (videoChannel: VideoChannel) {
     return this.authHttp.delete(VideoChannelService.BASE_VIDEO_CHANNEL_URL + videoChannel.nameWithHost)
-               .pipe(
-                 map(this.restExtractor.extractDataBool),
-                 catchError(err => this.restExtractor.handleError(err))
-               )
+               .pipe(catchError(err => this.restExtractor.handleError(err)))
   }
 }

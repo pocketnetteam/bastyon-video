@@ -85,7 +85,7 @@ export class VideosListCommonPageComponent implements OnInit, OnDestroy, Disable
   getSyndicationItems (filters: VideoFilters) {
     const result = filters.toVideosAPIObject()
 
-    return this.videoService.getVideoFeedUrls(result.sort, result.filter)
+    return this.videoService.getVideoFeedUrls(result.sort, result.isLocal)
   }
 
   onFiltersChanged (filters: VideoFilters) {
@@ -173,6 +173,10 @@ export class VideosListCommonPageComponent implements OnInit, OnDestroy, Disable
       case 'most-liked':
         return '-likes'
 
+      // We'll automatically apply "best" sort if using "hot" sort with a logged user
+      case 'best':
+        return '-hot'
+
       default:
         return '-' + algorithm as VideoSortField
     }
@@ -197,12 +201,12 @@ export class VideosListCommonPageComponent implements OnInit, OnDestroy, Disable
       return
     }
 
-    if ([ 'best', 'hot', 'trending', 'likes' ].includes(sanitizedSort)) {
+    if ([ 'hot', 'trending', 'likes', 'views' ].includes(sanitizedSort)) {
       this.title = $localize`Trending`
 
-      if (sanitizedSort === 'best') this.titleTooltip = $localize`Videos with the most interactions for recent videos, minus user history`
       if (sanitizedSort === 'hot') this.titleTooltip = $localize`Videos with the most interactions for recent videos`
       if (sanitizedSort === 'likes') this.titleTooltip = $localize`Videos that have the most likes`
+      if (sanitizedSort === 'views') this.titleTooltip = undefined
 
       if (sanitizedSort === 'trending') {
         if (this.trendingDays === 1) this.titleTooltip = $localize`Videos with the most views during the last 24 hours`

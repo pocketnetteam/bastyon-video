@@ -1,7 +1,7 @@
 import { DestroyOptions, Op, Transaction } from 'sequelize'
 import { AllowNull, BelongsTo, Column, CreatedAt, ForeignKey, IsInt, Model, Table, UpdatedAt } from 'sequelize-typescript'
 import { MUserAccountId, MUserId } from '@server/types/models'
-import { AttributesOnly } from '@shared/core-utils'
+import { AttributesOnly } from '@shared/typescript-utils'
 import { VideoModel } from '../video/video'
 import { UserModel } from './user'
 
@@ -63,11 +63,21 @@ export class UserVideoHistoryModel extends Model<Partial<AttributesOnly<UserVide
       search,
       sort: '-"userVideoHistory"."updatedAt"',
       nsfw: null, // All
-      includeLocalVideos: true,
-      withFiles: false,
+      displayOnlyForFollower: null,
       user,
       historyOfUser: user
     })
+  }
+
+  static removeUserHistoryElement (user: MUserId, videoId: number) {
+    const query: DestroyOptions = {
+      where: {
+        userId: user.id,
+        videoId
+      }
+    }
+
+    return UserVideoHistoryModel.destroy(query)
   }
 
   static removeUserHistoryBefore (user: MUserId, beforeDate: string, t: Transaction) {

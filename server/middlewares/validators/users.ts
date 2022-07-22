@@ -3,10 +3,8 @@ import { body, param, query } from 'express-validator'
 import { omit } from 'lodash'
 import { Hooks } from '@server/lib/plugins/hooks'
 import { MUserDefault } from '@server/types/models'
-import { HttpStatusCode } from '../../../shared/models/http/http-error-codes'
-import { UserRole } from '../../../shared/models/users'
-import { UserRegister } from '../../../shared/models/users/user-register.model'
-import { toBooleanOrNull, toIntOrNull } from '../../helpers/custom-validators/misc'
+import { HttpStatusCode, UserRegister, UserRight, UserRole } from '@shared/models'
+import { isBooleanValid, isIdValid, toBooleanOrNull, toIntOrNull } from '../../helpers/custom-validators/misc'
 import { isThemeNameValid } from '../../helpers/custom-validators/plugins'
 import {
   isUserAdminFlagsValid,
@@ -17,6 +15,7 @@ import {
   isUserDisplayNameValid,
   isUserNoModal,
   isUserNSFWPolicyValid,
+  isUserP2PEnabledValid,
   isUserPasswordValid,
   isUserPasswordValidOrEmpty,
   isUserRoleValid,
@@ -33,7 +32,7 @@ import { Redis } from '../../lib/redis'
 import { isSignupAllowed, isSignupAllowedForCurrentIP } from '../../lib/signup'
 import { ActorModel } from '../../models/actor/actor'
 import { UserModel } from '../../models/user/user'
-import { areValidationErrors, doesVideoExist, isValidVideoIdParam } from './shared'
+import { areValidationErrors, doesVideoChannelIdExist, doesVideoExist, isValidVideoIdParam } from './shared'
 
 const usersListValidator = [
   query('blocked')
@@ -241,6 +240,9 @@ const usersUpdateMeValidator = [
   body('autoPlayVideo')
     .optional()
     .custom(isUserAutoPlayVideoValid).withMessage('Should have a valid automatically plays video attribute'),
+  body('p2pEnabled')
+    .optional()
+    .custom(isUserP2PEnabledValid).withMessage('Should have a valid p2p enabled boolean'),
   body('videoLanguages')
     .optional()
     .custom(isUserVideoLanguages).withMessage('Should have a valid video languages attribute'),
@@ -315,6 +317,28 @@ const usersVideoRatingValidator = [
 
     if (areValidationErrors(req, res)) return
     if (!await doesVideoExist(req.params.videoId, res, 'id')) return
+
+    return next()
+  }
+]
+
+const usersVideosValidator = [
+  query('isLive')
+    .optional()
+    .customSanitizer(toBooleanOrNull)
+    .custom(isBooleanValid).withMessage('Should have a valid live boolean'),
+
+  query('channelId')
+    .optional()
+    .customSanitizer(toIntOrNull)
+    .custom(isIdValid).withMessage('Should have a valid channel id'),
+
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    logger.debug('Checking usersVideosValidator parameters', { parameters: req.query })
+
+    if (areValidationErrors(req, res)) return
+
+    if (req.query.channelId && !await doesVideoChannelIdExist(req.query.channelId, res)) return
 
     return next()
   }
@@ -462,7 +486,25 @@ const ensureAuthUserOwnsAccountValidator = [
     if (res.locals.account.id !== user.Account.id) {
       return res.fail({
         status: HttpStatusCode.FORBIDDEN_403,
-        message: 'Only owner can access ratings list.'
+        message: 'Only owner of this account can access this ressource.'
+      })
+    }
+
+    return next()
+  }
+]
+
+const ensureCanManageChannel = [
+  (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const user = res.locals.oauth.token.user
+    const isUserOwner = res.locals.videoChannel.Account.userId === user.id
+
+    if (!isUserOwner && user.hasRight(UserRight.MANAGE_ANY_VIDEO_CHANNEL) === false) {
+      const message = `User ${user.username} does not have right to manage channel ${req.params.nameWithHost}.`
+
+      return res.fail({
+        status: HttpStatusCode.FORBIDDEN_403,
+        message
       })
     }
 
@@ -500,13 +542,15 @@ export {
   ensureUserRegistrationAllowed,
   ensureUserRegistrationAllowedForIP,
   usersGetValidator,
+  usersVideosValidator,
   usersAskResetPasswordValidator,
   usersResetPasswordValidator,
   usersAskSendVerifyEmailValidator,
   usersVerifyEmailValidator,
   userAutocompleteValidator,
   ensureAuthUserOwnsAccountValidator,
-  ensureCanManageUser
+  ensureCanManageUser,
+  ensureCanManageChannel
 }
 
 // ---------------------------------------------------------------------------

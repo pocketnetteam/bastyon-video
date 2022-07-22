@@ -2,15 +2,16 @@
 
 import 'mocha'
 import * as chai from 'chai'
+import { dateIsValid } from '@server/tests/shared'
+import { wait } from '@shared/core-utils'
 import {
   cleanupTests,
   createMultipleServers,
-  dateIsValid,
   doubleFollow,
   PeerTubeServer,
   setAccessTokensToServers,
   waitJobs
-} from '@shared/extra-utils'
+} from '@shared/server-commands'
 
 const expect = chai.expect
 
@@ -56,7 +57,7 @@ describe('Test jobs', function () {
 
       let job = body.data[0]
       // Skip repeat jobs
-      if (job.type === 'videos-views') job = body.data[1]
+      if (job.type === 'videos-views-stats') job = body.data[1]
 
       expect(job.state).to.equal('completed')
       expect(job.type.startsWith('activitypub-')).to.be.true
@@ -88,9 +89,33 @@ describe('Test jobs', function () {
     const jobs = body.data
     expect(jobs).to.have.length.above(2)
 
-    // We know there are a least 1 delayed job (video views) and 1 completed job (broadcast)
-    expect(jobs.find(j => j.state === 'delayed')).to.not.be.undefined
     expect(jobs.find(j => j.state === 'completed')).to.not.be.undefined
+  })
+
+  it('Should pause the job queue', async function () {
+    this.timeout(120000)
+
+    const { uuid } = await servers[1].videos.upload({ attributes: { name: 'video2' } })
+    await waitJobs(servers)
+
+    await servers[1].jobs.pauseJobQueue()
+    await servers[1].videos.runTranscoding({ videoId: uuid, transcodingType: 'hls' })
+
+    await wait(5000)
+
+    const body = await servers[1].jobs.list({ state: 'waiting', jobType: 'video-transcoding' })
+    expect(body.data).to.have.lengthOf(4)
+  })
+
+  it('Should resume the job queue', async function () {
+    this.timeout(120000)
+
+    await servers[1].jobs.resumeJobQueue()
+
+    await waitJobs(servers)
+
+    const body = await servers[1].jobs.list({ state: 'waiting', jobType: 'video-transcoding' })
+    expect(body.data).to.have.lengthOf(0)
   })
 
   after(async function () {

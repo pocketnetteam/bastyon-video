@@ -1,3 +1,4 @@
+import { WhereOptions } from 'sequelize'
 import {
   AfterUpdate,
   AllowNull,
@@ -15,8 +16,8 @@ import {
 } from 'sequelize-typescript'
 import { afterCommitIfTransaction } from '@server/helpers/database-utils'
 import { MVideoImportDefault, MVideoImportFormattable } from '@server/types/models/video/video-import'
-import { AttributesOnly } from '@shared/core-utils'
-import { VideoImport, VideoImportState } from '../../../shared'
+import { VideoImport, VideoImportState } from '@shared/models'
+import { AttributesOnly } from '@shared/typescript-utils'
 import { isVideoImportStateValid, isVideoImportTargetUrlValid } from '../../helpers/custom-validators/video-imports'
 import { isVideoMagnetUriValid } from '../../helpers/custom-validators/videos'
 import { CONSTRAINTS_FIELDS, VIDEO_IMPORT_STATES } from '../../initializers/constants'
@@ -125,7 +126,20 @@ export class VideoImportModel extends Model<Partial<AttributesOnly<VideoImportMo
     return VideoImportModel.findByPk(id)
   }
 
-  static listUserVideoImportsForApi (userId: number, start: number, count: number, sort: string) {
+  static listUserVideoImportsForApi (options: {
+    userId: number
+    start: number
+    count: number
+    sort: string
+
+    targetUrl?: string
+  }) {
+    const { userId, start, count, sort, targetUrl } = options
+
+    const where: WhereOptions = { userId }
+
+    if (targetUrl) where['targetUrl'] = targetUrl
+
     const query = {
       distinct: true,
       include: [
@@ -138,18 +152,13 @@ export class VideoImportModel extends Model<Partial<AttributesOnly<VideoImportMo
       offset: start,
       limit: count,
       order: getSort(sort),
-      where: {
-        userId
-      }
+      where
     }
 
-    return VideoImportModel.findAndCountAll<MVideoImportDefault>(query)
-                           .then(({ rows, count }) => {
-                             return {
-                               data: rows,
-                               total: count
-                             }
-                           })
+    return Promise.all([
+      VideoImportModel.unscoped().count(query),
+      VideoImportModel.findAll<MVideoImportDefault>(query)
+    ]).then(([ total, data ]) => ({ total, data }))
   }
 
   getTargetIdentifier () {

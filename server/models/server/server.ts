@@ -1,7 +1,7 @@
 import { Transaction } from 'sequelize'
 import { AllowNull, Column, CreatedAt, Default, HasMany, Is, Model, Table, UpdatedAt } from 'sequelize-typescript'
 import { MServer, MServerFormattable } from '@server/types/models/server'
-import { AttributesOnly } from '@shared/core-utils'
+import { AttributesOnly } from '@shared/typescript-utils'
 import { isHostValid } from '../../helpers/custom-validators/servers'
 import { ActorModel } from '../actor/actor'
 import { throwIfNotValid } from '../utils'
@@ -50,7 +50,7 @@ export class ServerModel extends Model<Partial<AttributesOnly<ServerModel>>> {
     },
     onDelete: 'CASCADE'
   })
-  BlockedByAccounts: ServerBlocklistModel[]
+  BlockedBy: ServerBlocklistModel[]
 
   static load (id: number, transaction?: Transaction): Promise<MServer> {
     const query = {
@@ -81,7 +81,7 @@ export class ServerModel extends Model<Partial<AttributesOnly<ServerModel>>> {
   }
 
   isBlocked () {
-    return this.BlockedByAccounts && this.BlockedByAccounts.length !== 0
+    return this.BlockedBy && this.BlockedBy.length !== 0
   }
 
   toFormattedJSON (this: MServerFormattable) {

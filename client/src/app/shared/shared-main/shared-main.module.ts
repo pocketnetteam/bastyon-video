@@ -21,6 +21,7 @@ import { AccountService } from './account'
 import {
   AutofocusDirective,
   BytesPipe,
+  DeferLoadingDirective,
   DurationFormatterPipe,
   FromNowPipe,
   InfiniteScrollerDirective,
@@ -41,10 +42,10 @@ import {
   SimpleSearchInputComponent,
   TopMenuDropdownComponent
 } from './misc'
-import { PluginPlaceholderComponent } from './plugins'
+import { PluginPlaceholderComponent, PluginSelectorDirective } from './plugins'
 import { ActorRedirectGuard } from './router'
 import { UserHistoryService, UserNotificationsComponent, UserNotificationService, UserQuotaComponent } from './users'
-import { RedundancyService, VideoImportService, VideoOwnershipService, VideoService } from './video'
+import { EmbedComponent, RedundancyService, VideoImportService, VideoOwnershipService, VideoResolver, VideoService } from './video'
 import { VideoCaptionService } from './video-caption'
 import { VideoChannelService } from './video-channel'
 
@@ -80,6 +81,7 @@ import { VideoChannelService } from './video-channel'
     BytesPipe,
     DurationFormatterPipe,
     AutofocusDirective,
+    DeferLoadingDirective,
 
     InfiniteScrollerDirective,
     PeerTubeTemplateDirective,
@@ -106,7 +108,10 @@ import { VideoChannelService } from './video-channel'
     UserQuotaComponent,
     UserNotificationsComponent,
 
-    PluginPlaceholderComponent
+    EmbedComponent,
+
+    PluginPlaceholderComponent,
+    PluginSelectorDirective
   ],
 
   exports: [
@@ -136,6 +141,7 @@ import { VideoChannelService } from './video-channel'
     NumberFormatterPipe,
     DurationFormatterPipe,
     AutofocusDirective,
+    DeferLoadingDirective,
 
     InfiniteScrollerDirective,
     PeerTubeTemplateDirective,
@@ -162,7 +168,10 @@ import { VideoChannelService } from './video-channel'
     UserQuotaComponent,
     UserNotificationsComponent,
 
-    PluginPlaceholderComponent
+    EmbedComponent,
+
+    PluginPlaceholderComponent,
+    PluginSelectorDirective
   ],
 
   providers: [
@@ -181,6 +190,7 @@ import { VideoChannelService } from './video-channel'
     VideoImportService,
     VideoOwnershipService,
     VideoService,
+    VideoResolver,
 
     VideoCaptionService,
 

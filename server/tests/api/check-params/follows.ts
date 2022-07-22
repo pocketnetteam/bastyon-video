@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions,@typescript-eslint/require-await */
 
 import 'mocha'
+import { checkBadCountPagination, checkBadSortPagination, checkBadStartPagination } from '@server/tests/shared'
+import { HttpStatusCode } from '@shared/models'
 import {
-  checkBadCountPagination,
-  checkBadSortPagination,
-  checkBadStartPagination,
   cleanupTests,
   createSingleServer,
   makeDeleteRequest,
@@ -12,8 +11,7 @@ import {
   makePostBodyRequest,
   PeerTubeServer,
   setAccessTokensToServers
-} from '@shared/extra-utils'
-import { HttpStatusCode } from '@shared/models'
+} from '@shared/server-commands'
 
 describe('Test server follows API validators', function () {
   let server: PeerTubeServer

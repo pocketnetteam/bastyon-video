@@ -1,5 +1,7 @@
 # Dependencies
 
+:warning: **Warning**: dependencies guide is maintained by the community. Some parts may be outdated! :warning:
+
 Follow the below guides, and check their versions match [required external dependencies versions](https://github.com/Chocobozzz/PeerTube/blob/master/engines.yaml). You can check them automatically via `sudo npx engineslist`.
 
 _note_: only **LTS** versions of external dependencies are supported. If no LTS version matching the version constraint is available, only **release** versions are supported.
@@ -7,7 +9,7 @@ _note_: only **LTS** versions of external dependencies are supported. If no LTS 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [Debian / Ubuntu and derivatives](#debian--ubuntu-and-derivatives)
+- [Debian / Ubuntu and derivatives](#debian-ubuntu-and-derivatives)
 - [Arch Linux](#arch-linux)
 - [CentOS 7](#centos-7)
 - [Centos 8](#centos-8)
@@ -75,7 +77,7 @@ sudo systemctl start redis postgresql
 1. Run:
 
 ```
-sudo pacman -S nodejs-lts-fermium  yarn ffmpeg postgresql openssl redis git wget unzip python base-devel npm nginx
+sudo pacman -S nodejs-lts-fermium yarn ffmpeg postgresql openssl redis git wget unzip python base-devel npm nginx
 ```
 
 Now that dependencies are installed, before running PeerTube you should start PostgreSQL and Redis:
@@ -86,7 +88,7 @@ sudo systemctl start redis postgresql
 
 ## CentOS 7
 
-1. Install NodeJS 12.x:
+1. Install NodeJS 14.x:
 [https://nodejs.org/en/download/package-manager/#enterprise-linux-and-fedora](https://nodejs.org/en/download/package-manager/#enterprise-linux-and-fedora)
 
 2. Install yarn:
@@ -133,7 +135,7 @@ sudo systemctl enable --now postgresql
 
 ## Centos 8
 
-1. Install NodeJS 12.x:
+1. Install NodeJS 14.x:
 [https://nodejs.org/en/download/package-manager/#enterprise-linux-and-fedora](https://nodejs.org/en/download/package-manager/#enterprise-linux-and-fedora)
 
 2. Install yarn:
@@ -178,9 +180,9 @@ sudo systemctl enable --now postgresql
 sudo dnf update -y
 ```
 
-2. Install NodeJS 12.x (or 14):
+2. Install NodeJS 14.x:
 ```
-sudo dnf module install -y nodejs:12
+sudo dnf module install -y nodejs:14
 ```
 
 3. Install yarn:
@@ -237,7 +239,7 @@ su my-peertube-user
 3. (Optional) Install certbot (choose instructions for your distribution):
 [https://certbot.eff.org/all-instructions](https://certbot.eff.org/all-instructions)
 
-4. Install NodeJS 12.x:
+4. Install NodeJS 14.x:
 [https://nodejs.org/en/download/package-manager/#enterprise-linux-and-fedora](https://nodejs.org/en/download/package-manager/#enterprise-linux-and-fedora)
 
 5. Install yarn:
@@ -329,7 +331,7 @@ echo fs.inotify.max_user_watches=582222 | sudo tee -a /etc/sysctl.conf && sudo s
 2. Install Node.JS
 
 ```
-sudo dnf module install nodejs:12
+sudo dnf module install nodejs:14
 ```
 
 3. Install Yarn
@@ -358,7 +360,7 @@ sudo dnf install nginx postgresql postgresql-server postgresql-contrib openssl g
 6. You'll need a symlink for python3 to python for youtube-dl to work
 
 ```
-sudo ln -s /usr/bin/python3 /usr/bin/python
+sudo alternatives --set python3 /usr/bin/python
 ```
 
 7. Initialize the PostgreSQL database:
@@ -517,6 +519,7 @@ dev-db/redis
 dev-vcs/git
 app-arch/unzip
 dev-lang/python
+dev-lang/python-exec
 www-servers/nginx
 
 # Optional, client for Let’s Encrypt:
@@ -552,6 +555,12 @@ rc-update add redis
 rc-update add postgresql-11
 rc-service redis start
 rc-service postgresql-11 start
+```
+
+6. Create Python version symlink for youtube-dl:
+
+```
+emerge -1 python-exec
 ```
 
 ## OpenBSD

@@ -1,10 +1,21 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, ViewChild } from '@angular/core'
-import { AuthService, ConfirmService, Notifier, ServerService, UserService } from '@app/core'
+import { AuthService, ConfirmService, Notifier, ServerService } from '@app/core'
 import { Account, DropdownAction } from '@app/shared/shared-main'
 import { BulkRemoveCommentsOfBody, User, UserRight } from '@shared/models'
+import { UserAdminService } from '../shared-users'
 import { BlocklistService } from './blocklist.service'
 import { BulkService } from './bulk.service'
 import { UserBanModalComponent } from './user-ban-modal.component'
+
+export type AccountMutedStatus =
+  Pick<Account, 'id' | 'nameWithHost' | 'host' | 'userId' |
+  'mutedByInstance' | 'mutedByUser' | 'mutedServerByInstance' | 'mutedServerByUser'>
+
+export type UserModerationDisplayType = {
+  myAccount?: boolean
+  instanceAccount?: boolean
+  instanceUser?: boolean
+}
 
 @Component({
   selector: 'my-user-moderation-dropdown',
@@ -14,8 +25,8 @@ export class UserModerationDropdownComponent implements OnInit, OnChanges {
   @ViewChild('userBanModal') userBanModal: UserBanModalComponent
 
   @Input() user: User
-  @Input() account: Account
-  @Input() prependActions: DropdownAction<{ user: User, account: Account }>[]
+  @Input() account: AccountMutedStatus
+  @Input() prependActions: DropdownAction<{ user: User, account: AccountMutedStatus }>[]
 
   @Input() buttonSize: 'normal' | 'small' = 'normal'
   @Input() buttonStyled = true
@@ -23,10 +34,16 @@ export class UserModerationDropdownComponent implements OnInit, OnChanges {
   @Input() label: string
   @Input() container: 'body' | undefined = undefined
 
+  @Input() displayOptions: UserModerationDisplayType = {
+    myAccount: true,
+    instanceAccount: true,
+    instanceUser: true
+  }
+
   @Output() userChanged = new EventEmitter()
   @Output() userDeleted = new EventEmitter()
 
-  userActions: DropdownAction<{ user: User, account: Account }>[][] = []
+  userActions: DropdownAction<{ user: User, account: AccountMutedStatus }>[][] = []
 
   requiresEmailVerification = false
 
@@ -35,7 +52,7 @@ export class UserModerationDropdownComponent implements OnInit, OnChanges {
     private notifier: Notifier,
     private confirmService: ConfirmService,
     private serverService: ServerService,
-    private userService: UserService,
+    private userAdminService: UserAdminService,
     private blocklistService: BlocklistService,
     private bulkService: BulkService
   ) { }
@@ -66,7 +83,7 @@ export class UserModerationDropdownComponent implements OnInit, OnChanges {
     const res = await this.confirmService.confirm($localize`Do you really want to unban ${user.username}?`, $localize`Unban`)
     if (res === false) return
 
-    this.userService.unbanUsers(user)
+    this.userAdminService.unbanUsers(user)
         .subscribe({
           next: () => {
             this.notifier.success($localize`User ${user.username} unbanned.`)
@@ -83,11 +100,11 @@ export class UserModerationDropdownComponent implements OnInit, OnChanges {
       return
     }
 
-    const message = $localize`If you remove this user, you will not be able to create another with the same username!`
-    const res = await this.confirmService.confirm(message, $localize`Delete`)
+    const message = $localize`If you remove user ${user.username}, you won't be able to create another with the same username!`
+    const res = await this.confirmService.confirm(message, $localize`Delete ${user.username}`)
     if (res === false) return
 
-    this.userService.removeUser(user)
+    this.userAdminService.removeUser(user)
       .subscribe({
         next: () => {
           this.notifier.success($localize`User ${user.username} deleted.`)
@@ -99,7 +116,7 @@ export class UserModerationDropdownComponent implements OnInit, OnChanges {
   }
 
   setEmailAsVerified (user: User) {
-    this.userService.updateUser(user.id, { emailVerified: true })
+    this.userAdminService.updateUser(user.id, { emailVerified: true })
       .subscribe({
         next: () => {
           this.notifier.success($localize`User ${user.username} email set as verified`)
@@ -110,7 +127,7 @@ export class UserModerationDropdownComponent implements OnInit, OnChanges {
       })
   }
 
-  blockAccountByUser (account: Account) {
+  blockAccountByUser (account: AccountMutedStatus) {
     this.blocklistService.blockAccountByUser(account)
         .subscribe({
           next: () => {
@@ -124,7 +141,7 @@ export class UserModerationDropdownComponent implements OnInit, OnChanges {
         })
   }
 
-  unblockAccountByUser (account: Account) {
+  unblockAccountByUser (account: AccountMutedStatus) {
     this.blocklistService.unblockAccountByUser(account)
         .subscribe({
           next: () => {
@@ -166,7 +183,7 @@ export class UserModerationDropdownComponent implements OnInit, OnChanges {
         })
   }
 
-  blockAccountByInstance (account: Account) {
+  blockAccountByInstance (account: AccountMutedStatus) {
     this.blocklistService.blockAccountByInstance(account)
         .subscribe({
           next: () => {
@@ -180,7 +197,7 @@ export class UserModerationDropdownComponent implements OnInit, OnChanges {
         })
   }
 
-  unblockAccountByInstance (account: Account) {
+  unblockAccountByInstance (account: AccountMutedStatus) {
     this.blocklistService.unblockAccountByInstance(account)
         .subscribe({
           next: () => {
@@ -241,139 +258,163 @@ export class UserModerationDropdownComponent implements OnInit, OnChanges {
     return [ '/admin', 'users', 'update', user.id ]
   }
 
+  private isMyUser (user: User) {
+    return user && this.authService.getUser().id === user.id
+  }
+
+  private isMyAccount (account: AccountMutedStatus) {
+    return account && this.authService.getUser().account.id === account.id
+  }
+
   private buildActions () {
     this.userActions = []
 
-    if (this.prependActions) {
+    if (this.prependActions && this.prependActions.length !== 0) {
       this.userActions = [
         this.prependActions
       ]
     }
 
-    if (this.authService.isLoggedIn()) {
-      const authUser = this.authService.getUser()
+    const myAccountModerationActions = this.buildMyAccountModerationActions()
+    const instanceModerationActions = this.buildInstanceModerationActions()
 
-      if (this.user && authUser.id === this.user.id) return
+    if (myAccountModerationActions.length !== 0) this.userActions.push(myAccountModerationActions)
+    if (instanceModerationActions.length !== 0) this.userActions.push(instanceModerationActions)
+  }
 
-      if (this.user && authUser.hasRight(UserRight.MANAGE_USERS) && authUser.canManage(this.user)) {
-        this.userActions.push([
-          {
-            label: $localize`Edit user`,
-            description: $localize`Change quota, role, and more.`,
-            linkBuilder: ({ user }) => this.getRouterUserEditLink(user)
-          },
-          {
-            label: $localize`Delete user`,
-            description: $localize`Videos will be deleted, comments will be tombstoned.`,
-            handler: ({ user }) => this.removeUser(user)
-          },
-          {
-            label: $localize`Ban`,
-            description: $localize`User won't be able to login anymore, but videos and comments will be kept as is.`,
-            handler: ({ user }) => this.openBanUserModal(user),
-            isDisplayed: ({ user }) => !user.blocked
-          },
-          {
-            label: $localize`Unban user`,
-            description: $localize`Allow the user to login and create videos/comments again`,
-            handler: ({ user }) => this.unbanUser(user),
-            isDisplayed: ({ user }) => user.blocked
-          },
-          {
-            label: $localize`Set Email as Verified`,
-            handler: ({ user }) => this.setEmailAsVerified(user),
-            isDisplayed: ({ user }) => this.requiresEmailVerification && !user.blocked && user.emailVerified === false
-          }
-        ])
+  private buildMyAccountModerationActions () {
+    if (!this.account || !this.displayOptions.myAccount || !this.authService.isLoggedIn()) return []
+
+    const myAccountActions: DropdownAction<{ user: User, account: AccountMutedStatus }>[] = [
+      {
+        label: $localize`My account moderation`,
+        class: [ 'red' ],
+        isHeader: true
+      },
+      {
+        label: $localize`Mute this account`,
+        description: $localize`Hide any content from that user from you.`,
+        isDisplayed: ({ account }) => !this.isMyAccount(account) && account.mutedByUser === false,
+        handler: ({ account }) => this.blockAccountByUser(account)
+      },
+      {
+        label: $localize`Unmute this account`,
+        description: $localize`Show back content from that user for you.`,
+        isDisplayed: ({ account }) => !this.isMyAccount(account) && account.mutedByUser === true,
+        handler: ({ account }) => this.unblockAccountByUser(account)
+      },
+      {
+        label: $localize`Mute the instance`,
+        description: $localize`Hide any content from that instance for you.`,
+        isDisplayed: ({ account }) => !account.userId && account.mutedServerByUser === false,
+        handler: ({ account }) => this.blockServerByUser(account.host)
+      },
+      {
+        label: $localize`Unmute the instance`,
+        description: $localize`Show back content from that instance for you.`,
+        isDisplayed: ({ account }) => !account.userId && account.mutedServerByUser === true,
+        handler: ({ account }) => this.unblockServerByUser(account.host)
+      },
+      {
+        label: $localize`Remove comments from your videos`,
+        description: $localize`Remove comments made by this account on your videos.`,
+        isDisplayed: ({ account }) => !this.isMyAccount(account),
+        handler: ({ account }) => this.bulkRemoveCommentsOf({ accountName: account.nameWithHost, scope: 'my-videos' })
       }
+    ]
 
-      // Actions on accounts/servers
-      if (this.account) {
-        // User actions
-        this.userActions.push([
-          {
-            label: $localize`Mute this account`,
-            description: $localize`Hide any content from that user from you.`,
-            isDisplayed: ({ account }) => account.mutedByUser === false,
-            handler: ({ account }) => this.blockAccountByUser(account)
-          },
-          {
-            label: $localize`Unmute this account`,
-            description: $localize`Show back content from that user for you.`,
-            isDisplayed: ({ account }) => account.mutedByUser === true,
-            handler: ({ account }) => this.unblockAccountByUser(account)
-          },
-          {
-            label: $localize`Mute the instance`,
-            description: $localize`Hide any content from that instance for you.`,
-            isDisplayed: ({ account }) => !account.userId && account.mutedServerByInstance === false,
-            handler: ({ account }) => this.blockServerByUser(account.host)
-          },
-          {
-            label: $localize`Unmute the instance`,
-            description: $localize`Show back content from that instance for you.`,
-            isDisplayed: ({ account }) => !account.userId && account.mutedServerByInstance === true,
-            handler: ({ account }) => this.unblockServerByUser(account.host)
-          },
-          {
-            label: $localize`Remove comments from your videos`,
-            description: $localize`Remove comments made by this account on your videos.`,
-            handler: ({ account }) => this.bulkRemoveCommentsOf({ accountName: account.nameWithHost, scope: 'my-videos' })
-          }
-        ])
+    return myAccountActions
+  }
 
-        let instanceActions: DropdownAction<{ user: User, account: Account }>[] = []
+  private buildInstanceModerationActions () {
+    if (!this.authService.isLoggedIn()) return []
 
-        // Instance actions on account blocklists
-        if (authUser.hasRight(UserRight.MANAGE_ACCOUNTS_BLOCKLIST)) {
-          instanceActions = instanceActions.concat([
-            {
-              label: $localize`Mute this account by your instance`,
-              description: $localize`Hide any content from that user from you, your instance and its users.`,
-              isDisplayed: ({ account }) => account.mutedByInstance === false,
-              handler: ({ account }) => this.blockAccountByInstance(account)
-            },
-            {
-              label: $localize`Unmute this account by your instance`,
-              description: $localize`Show this user's content to the users of this instance again.`,
-              isDisplayed: ({ account }) => account.mutedByInstance === true,
-              handler: ({ account }) => this.unblockAccountByInstance(account)
-            }
-          ])
+    const authUser = this.authService.getUser()
+
+    let instanceActions: DropdownAction<{ user: User, account: AccountMutedStatus }>[] = []
+
+    if (this.user && this.displayOptions.instanceUser && authUser.hasRight(UserRight.MANAGE_USERS) && authUser.canManage(this.user)) {
+      instanceActions = instanceActions.concat([
+        {
+          label: $localize`Edit user`,
+          description: $localize`Change quota, role, and more.`,
+          linkBuilder: ({ user }) => this.getRouterUserEditLink(user)
+        },
+        {
+          label: $localize`Delete user`,
+          description: $localize`Videos will be deleted, comments will be tombstoned.`,
+          isDisplayed: ({ user }) => !this.isMyUser(user),
+          handler: ({ user }) => this.removeUser(user)
+        },
+        {
+          label: $localize`Ban`,
+          description: $localize`User won't be able to login anymore, but videos and comments will be kept as is.`,
+          handler: ({ user }) => this.openBanUserModal(user),
+          isDisplayed: ({ user }) => !this.isMyUser(user) && !user.blocked
+        },
+        {
+          label: $localize`Unban user`,
+          description: $localize`Allow the user to login and create videos/comments again`,
+          handler: ({ user }) => this.unbanUser(user),
+          isDisplayed: ({ user }) => !this.isMyUser(user) && user.blocked
+        },
+        {
+          label: $localize`Set Email as Verified`,
+          handler: ({ user }) => this.setEmailAsVerified(user),
+          isDisplayed: ({ user }) => this.requiresEmailVerification && !user.blocked && user.emailVerified === false
         }
-
-        // Instance actions on server blocklists
-        if (authUser.hasRight(UserRight.MANAGE_SERVERS_BLOCKLIST)) {
-          instanceActions = instanceActions.concat([
-            {
-              label: $localize`Mute the instance by your instance`,
-              description: $localize`Hide any content from that instance from you, your instance and its users.`,
-              isDisplayed: ({ account }) => !account.userId && account.mutedServerByInstance === false,
-              handler: ({ account }) => this.blockServerByInstance(account.host)
-            },
-            {
-              label: $localize`Unmute the instance by your instance`,
-              description: $localize`Show back content from that instance for you, your instance and its users.`,
-              isDisplayed: ({ account }) => !account.userId && account.mutedServerByInstance === true,
-              handler: ({ account }) => this.unblockServerByInstance(account.host)
-            }
-          ])
-        }
-
-        if (authUser.hasRight(UserRight.REMOVE_ANY_VIDEO_COMMENT)) {
-          instanceActions = instanceActions.concat([
-            {
-              label: $localize`Remove comments from your instance`,
-              description: $localize`Remove comments made by this account from your instance.`,
-              handler: ({ account }) => this.bulkRemoveCommentsOf({ accountName: account.nameWithHost, scope: 'instance' })
-            }
-          ])
-        }
-
-        if (instanceActions.length !== 0) {
-          this.userActions.push(instanceActions)
-        }
-      }
+      ])
     }
+
+    // Instance actions on account blocklists
+    if (this.account && this.displayOptions.instanceAccount && authUser.hasRight(UserRight.MANAGE_ACCOUNTS_BLOCKLIST)) {
+      instanceActions = instanceActions.concat([
+        {
+          label: $localize`Mute this account`,
+          description: $localize`Hide any content from that user from you, your instance and its users.`,
+          isDisplayed: ({ account }) => !this.isMyAccount(account) && account.mutedByInstance === false,
+          handler: ({ account }) => this.blockAccountByInstance(account)
+        },
+        {
+          label: $localize`Unmute this account`,
+          description: $localize`Show this user's content to the users of this instance again.`,
+          isDisplayed: ({ account }) => !this.isMyAccount(account) && account.mutedByInstance === true,
+          handler: ({ account }) => this.unblockAccountByInstance(account)
+        }
+      ])
+    }
+
+    // Instance actions on server blocklists
+    if (this.account && this.displayOptions.instanceAccount && authUser.hasRight(UserRight.MANAGE_SERVERS_BLOCKLIST)) {
+      instanceActions = instanceActions.concat([
+        {
+          label: $localize`Mute the instance`,
+          description: $localize`Hide any content from that instance from you, your instance and its users.`,
+          isDisplayed: ({ account }) => !account.userId && account.mutedServerByInstance === false,
+          handler: ({ account }) => this.blockServerByInstance(account.host)
+        },
+        {
+          label: $localize`Unmute the instance by your instance`,
+          description: $localize`Show back content from that instance for you, your instance and its users.`,
+          isDisplayed: ({ account }) => !account.userId && account.mutedServerByInstance === true,
+          handler: ({ account }) => this.unblockServerByInstance(account.host)
+        }
+      ])
+    }
+
+    if (this.account && this.displayOptions.instanceAccount && authUser.hasRight(UserRight.REMOVE_ANY_VIDEO_COMMENT)) {
+      instanceActions = instanceActions.concat([
+        {
+          label: $localize`Remove comments from your instance`,
+          description: $localize`Remove comments made by this account from your instance.`,
+          isDisplayed: ({ account }) => !this.isMyAccount(account),
+          handler: ({ account }) => this.bulkRemoveCommentsOf({ accountName: account.nameWithHost, scope: 'instance' })
+        }
+      ])
+    }
+
+    if (instanceActions.length === 0) return []
+
+    return [ { label: $localize`Instance moderation`, isHeader: true }, ...instanceActions ]
   }
 }

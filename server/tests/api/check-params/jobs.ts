@@ -1,17 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions,@typescript-eslint/require-await */
 
 import 'mocha'
+import { checkBadCountPagination, checkBadSortPagination, checkBadStartPagination } from '@server/tests/shared'
+import { HttpStatusCode } from '@shared/models'
 import {
-  checkBadCountPagination,
-  checkBadSortPagination,
-  checkBadStartPagination,
   cleanupTests,
   createSingleServer,
   makeGetRequest,
+  makePostBodyRequest,
   PeerTubeServer,
   setAccessTokensToServers
-} from '@shared/extra-utils'
-import { HttpStatusCode } from '@shared/models'
+} from '@shared/server-commands'
 
 describe('Test jobs API validators', function () {
   const path = '/api/v1/jobs/failed'
@@ -84,7 +83,41 @@ describe('Test jobs API validators', function () {
         expectedStatus: HttpStatusCode.FORBIDDEN_403
       })
     })
+  })
 
+  describe('When pausing/resuming the job queue', async function () {
+    const commands = [ 'pause', 'resume' ]
+
+    it('Should fail with a non authenticated user', async function () {
+      for (const command of commands) {
+        await makePostBodyRequest({
+          url: server.url,
+          path: '/api/v1/jobs/' + command,
+          expectedStatus: HttpStatusCode.UNAUTHORIZED_401
+        })
+      }
+    })
+
+    it('Should fail with a non admin user', async function () {
+      for (const command of commands) {
+        await makePostBodyRequest({
+          url: server.url,
+          path: '/api/v1/jobs/' + command,
+          expectedStatus: HttpStatusCode.UNAUTHORIZED_401
+        })
+      }
+    })
+
+    it('Should succeed with the correct params', async function () {
+      for (const command of commands) {
+        await makePostBodyRequest({
+          url: server.url,
+          path: '/api/v1/jobs/' + command,
+          token: server.accessToken,
+          expectedStatus: HttpStatusCode.NO_CONTENT_204
+        })
+      }
+    })
   })
 
   after(async function () {

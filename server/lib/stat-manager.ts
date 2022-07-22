@@ -1,4 +1,3 @@
-import * as Bull from 'bull'
 import { mapSeries } from 'bluebird'
 import { CONFIG } from '@server/initializers/config'
 import { ActorFollowModel } from '@server/models/actor/actor-follow'
@@ -9,16 +8,13 @@ import { VideoChannelModel } from '@server/models/video/video-channel'
 import { VideoCommentModel } from '@server/models/video/video-comment'
 import { VideoFileModel } from '@server/models/video/video-file'
 import { VideoPlaylistModel } from '@server/models/video/video-playlist'
-import {
-  ActivityType,
-  ServerStats,
-  VideoRedundancyStrategyWithManual,
-  PerformanceStats
-} from '@shared/models'
+import { ActivityType, ServerStats, VideoRedundancyStrategyWithManual, PerformanceStats } from '@shared/models'
 import { JobQueue } from './job-queue'
 import { logger } from '@server/helpers/logger'
 import { TRANSCODING_JOB_TYPE } from '../initializers/constants'
+
 class StatsManager {
+
   private static instance: StatsManager
 
   private readonly instanceStartDate = new Date()
@@ -51,18 +47,10 @@ class StatsManager {
   }
 
   async getStats () {
-    const { totalLocalVideos, totalLocalVideoViews, totalVideos } =
-      await VideoModel.getStats()
-    const { totalLocalVideoComments, totalVideoComments } =
-      await VideoCommentModel.getStats()
-    const {
-      totalUsers,
-      totalDailyActiveUsers,
-      totalWeeklyActiveUsers,
-      totalMonthlyActiveUsers
-    } = await UserModel.getStats()
-    const { totalInstanceFollowers, totalInstanceFollowing } =
-      await ActorFollowModel.getStats()
+    const { totalLocalVideos, totalLocalVideoViews, totalVideos } = await VideoModel.getStats()
+    const { totalLocalVideoComments, totalVideoComments } = await VideoCommentModel.getStats()
+    const { totalUsers, totalDailyActiveUsers, totalWeeklyActiveUsers, totalMonthlyActiveUsers } = await UserModel.getStats()
+    const { totalInstanceFollowers, totalInstanceFollowing } = await ActorFollowModel.getStats()
     const { totalLocalVideoFilesSize } = await VideoFileModel.getStats()
     const {
       totalLocalVideoChannels,
@@ -184,31 +172,27 @@ class StatsManager {
     return data
   }
 
+
   private buildActivityPubMessagesProcessedPerSecond () {
     const now = new Date()
-    const startedSeconds =
-      (now.getTime() - this.instanceStartDate.getTime()) / 1000
+    const startedSeconds = (now.getTime() - this.instanceStartDate.getTime()) / 1000
 
     return this.inboxMessages.processed / startedSeconds
   }
 
   private buildRedundancyStats () {
-    const strategies = CONFIG.REDUNDANCY.VIDEOS.STRATEGIES.map((r) => ({
-      strategy: r.strategy as VideoRedundancyStrategyWithManual,
-      size: r.size
-    }))
+    const strategies = CONFIG.REDUNDANCY.VIDEOS.STRATEGIES
+                                               .map(r => ({
+                                                 strategy: r.strategy as VideoRedundancyStrategyWithManual,
+                                                 size: r.size
+                                               }))
 
-    strategies.push({ strategy: "manual", size: null })
+    strategies.push({ strategy: 'manual', size: null })
 
-    return mapSeries(strategies, (r) => {
-      return VideoRedundancyModel.getStats(r.strategy).then((stats) =>
-        Object.assign(stats, { strategy: r.strategy, totalSize: r.size })
-      )
+    return mapSeries(strategies, r => {
+      return VideoRedundancyModel.getStats(r.strategy)
+        .then(stats => Object.assign(stats, { strategy: r.strategy, totalSize: r.size }))
     })
-  }
-
-  buildSingleRedundancyStat (strategy: VideoRedundancyStrategyWithManual) {
-    return VideoRedundancyModel.getStats(strategy)
   }
 
   private buildAPPerType () {
@@ -228,6 +212,10 @@ class StatsManager {
     }
   }
 
+  buildSingleRedundancyStat (strategy: VideoRedundancyStrategyWithManual) {
+    return VideoRedundancyModel.getStats(strategy)
+  }
+
   private buildAPStats () {
     return {
       totalActivityPubMessagesProcessed: this.inboxMessages.processed,
@@ -235,56 +223,35 @@ class StatsManager {
       totalActivityPubMessagesSuccesses: this.inboxMessages.successes,
 
       // Dirty, but simpler and with type checking
-      totalActivityPubCreateMessagesSuccesses:
-        this.inboxMessages.successesPerType.Create,
-      totalActivityPubUpdateMessagesSuccesses:
-        this.inboxMessages.successesPerType.Update,
-      totalActivityPubDeleteMessagesSuccesses:
-        this.inboxMessages.successesPerType.Delete,
-      totalActivityPubFollowMessagesSuccesses:
-        this.inboxMessages.successesPerType.Follow,
-      totalActivityPubAcceptMessagesSuccesses:
-        this.inboxMessages.successesPerType.Accept,
-      totalActivityPubRejectMessagesSuccesses:
-        this.inboxMessages.successesPerType.Reject,
-      totalActivityPubAnnounceMessagesSuccesses:
-        this.inboxMessages.successesPerType.Announce,
-      totalActivityPubUndoMessagesSuccesses:
-        this.inboxMessages.successesPerType.Undo,
-      totalActivityPubLikeMessagesSuccesses:
-        this.inboxMessages.successesPerType.Like,
-      totalActivityPubDislikeMessagesSuccesses:
-        this.inboxMessages.successesPerType.Dislike,
-      totalActivityPubFlagMessagesSuccesses:
-        this.inboxMessages.successesPerType.Flag,
-      totalActivityPubViewMessagesSuccesses:
-        this.inboxMessages.successesPerType.View,
+      totalActivityPubCreateMessagesSuccesses: this.inboxMessages.successesPerType.Create,
+      totalActivityPubUpdateMessagesSuccesses: this.inboxMessages.successesPerType.Update,
+      totalActivityPubDeleteMessagesSuccesses: this.inboxMessages.successesPerType.Delete,
+      totalActivityPubFollowMessagesSuccesses: this.inboxMessages.successesPerType.Follow,
+      totalActivityPubAcceptMessagesSuccesses: this.inboxMessages.successesPerType.Accept,
+      totalActivityPubRejectMessagesSuccesses: this.inboxMessages.successesPerType.Reject,
+      totalActivityPubAnnounceMessagesSuccesses: this.inboxMessages.successesPerType.Announce,
+      totalActivityPubUndoMessagesSuccesses: this.inboxMessages.successesPerType.Undo,
+      totalActivityPubLikeMessagesSuccesses: this.inboxMessages.successesPerType.Like,
+      totalActivityPubDislikeMessagesSuccesses: this.inboxMessages.successesPerType.Dislike,
+      totalActivityPubFlagMessagesSuccesses: this.inboxMessages.successesPerType.Flag,
+      totalActivityPubViewMessagesSuccesses: this.inboxMessages.successesPerType.View,
 
-      totalActivityPubCreateMessagesErrors:
-        this.inboxMessages.errorsPerType.Create,
-      totalActivityPubUpdateMessagesErrors:
-        this.inboxMessages.errorsPerType.Update,
-      totalActivityPubDeleteMessagesErrors:
-        this.inboxMessages.errorsPerType.Delete,
-      totalActivityPubFollowMessagesErrors:
-        this.inboxMessages.errorsPerType.Follow,
-      totalActivityPubAcceptMessagesErrors:
-        this.inboxMessages.errorsPerType.Accept,
-      totalActivityPubRejectMessagesErrors:
-        this.inboxMessages.errorsPerType.Reject,
-      totalActivityPubAnnounceMessagesErrors:
-        this.inboxMessages.errorsPerType.Announce,
+      totalActivityPubCreateMessagesErrors: this.inboxMessages.errorsPerType.Create,
+      totalActivityPubUpdateMessagesErrors: this.inboxMessages.errorsPerType.Update,
+      totalActivityPubDeleteMessagesErrors: this.inboxMessages.errorsPerType.Delete,
+      totalActivityPubFollowMessagesErrors: this.inboxMessages.errorsPerType.Follow,
+      totalActivityPubAcceptMessagesErrors: this.inboxMessages.errorsPerType.Accept,
+      totalActivityPubRejectMessagesErrors: this.inboxMessages.errorsPerType.Reject,
+      totalActivityPubAnnounceMessagesErrors: this.inboxMessages.errorsPerType.Announce,
       totalActivityPubUndoMessagesErrors: this.inboxMessages.errorsPerType.Undo,
       totalActivityPubLikeMessagesErrors: this.inboxMessages.errorsPerType.Like,
-      totalActivityPubDislikeMessagesErrors:
-        this.inboxMessages.errorsPerType.Dislike,
+      totalActivityPubDislikeMessagesErrors: this.inboxMessages.errorsPerType.Dislike,
       totalActivityPubFlagMessagesErrors: this.inboxMessages.errorsPerType.Flag,
       totalActivityPubViewMessagesErrors: this.inboxMessages.errorsPerType.View,
 
       totalActivityPubMessagesErrors: this.inboxMessages.errors,
 
-      activityPubMessagesProcessedPerSecond:
-        this.buildActivityPubMessagesProcessedPerSecond(),
+      activityPubMessagesProcessedPerSecond: this.buildActivityPubMessagesProcessedPerSecond(),
       totalActivityPubMessagesWaiting: this.inboxMessages.waiting
     }
   }

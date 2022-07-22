@@ -1,7 +1,6 @@
 import { join } from 'path'
-import { ThumbnailType } from '../../shared/models/videos/thumbnail.type'
-import { generateImageFromVideoFile } from '../helpers/ffmpeg-utils'
-import { generateImageFilename, processImage } from '../helpers/image-utils'
+import { ThumbnailType } from '@shared/models'
+import { generateImageFilename, generateImageFromVideoFile, processImage } from '../helpers/image-utils'
 import { downloadImage } from '../helpers/requests'
 import { CONFIG } from '../initializers/config'
 import { ASSETS_PATH, PREVIEWS_SIZE, THUMBNAILS_SIZE } from '../initializers/constants'
@@ -116,7 +115,7 @@ function generateVideoMiniature (options: {
 }) {
   const { video, videoFile, type, size } = options
 
-  return VideoPathManager.Instance.makeAvailableVideoFile(video, videoFile, input => {
+  return VideoPathManager.Instance.makeAvailableVideoFile(videoFile.withVideoOrPlaylist(video), input => {
     const videoMeta = buildMetadataFromVideo(video, type)
 
     const { filename, basePath, existingThumbnail, outputPath } = videoMeta

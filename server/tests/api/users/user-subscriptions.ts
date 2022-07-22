@@ -2,15 +2,18 @@
 
 import 'mocha'
 import * as chai from 'chai'
+import { VideoPrivacy } from '@shared/models'
 import {
   cleanupTests,
   createMultipleServers,
   doubleFollow,
   PeerTubeServer,
   setAccessTokensToServers,
+  setDefaultAccountAvatar,
+  setDefaultChannelAvatar,
   SubscriptionsCommand,
   waitJobs
-} from '@shared/extra-utils'
+} from '@shared/server-commands'
 
 const expect = chai.expect
 
@@ -22,30 +25,30 @@ describe('Test users subscriptions', function () {
   let command: SubscriptionsCommand
 
   before(async function () {
-    this.timeout(120000)
+    this.timeout(240000)
 
     servers = await createMultipleServers(3)
 
     // Get the access tokens
     await setAccessTokensToServers(servers)
+    await setDefaultChannelAvatar(servers)
+    await setDefaultAccountAvatar(servers)
 
     // Server 1 and server 2 follow each other
     await doubleFollow(servers[0], servers[1])
 
-    {
-      for (const server of servers) {
-        const user = { username: 'user' + server.serverNumber, password: 'password' }
-        await server.users.create({ username: user.username, password: user.password })
+    for (const server of servers) {
+      const user = { username: 'user' + server.serverNumber, password: 'password' }
+      await server.users.create({ username: user.username, password: user.password })
 
-        const accessToken = await server.login.getAccessToken(user)
-        users.push({ accessToken })
+      const accessToken = await server.login.getAccessToken(user)
+      users.push({ accessToken })
 
-        const videoName1 = 'video 1-' + server.serverNumber
-        await server.videos.upload({ token: accessToken, attributes: { name: videoName1 } })
+      const videoName1 = 'video 1-' + server.serverNumber
+      await server.videos.upload({ token: accessToken, attributes: { name: videoName1 } })
 
-        const videoName2 = 'video 2-' + server.serverNumber
-        await server.videos.upload({ token: accessToken, attributes: { name: videoName2 } })
-      }
+      const videoName2 = 'video 2-' + server.serverNumber
+      await server.videos.upload({ token: accessToken, attributes: { name: videoName2 } })
     }
 
     await waitJobs(servers)
@@ -365,6 +368,212 @@ describe('Test users subscriptions', function () {
         expect(video.name).to.not.contain('2-3')
         expect(video.name).to.not.contain('video server 3 added after follow updated')
       }
+    }
+  })
+
+  it('Should follow user channels of server 3 by root of server 3', async function () {
+    this.timeout(60000)
+
+    await servers[2].channels.create({ token: users[2].accessToken, attributes: { name: 'user3_channel2' } })
+
+    await servers[2].subscriptions.add({ token: servers[2].accessToken, targetUri: 'user3_channel@localhost:' + servers[2].port })
+    await servers[2].subscriptions.add({ token: servers[2].accessToken, targetUri: 'user3_channel2@localhost:' + servers[2].port })
+
+    await waitJobs(servers)
+  })
+
+  it('Should list user 3 followers', async function () {
+    {
+      const { total, data } = await servers[2].accounts.listFollowers({
+        token: users[2].accessToken,
+        accountName: 'user3',
+        start: 0,
+        count: 5,
+        sort: 'createdAt'
+      })
+
+      expect(total).to.equal(3)
+      expect(data).to.have.lengthOf(3)
+
+      expect(data[0].following.host).to.equal(servers[2].host)
+      expect(data[0].following.name).to.equal('user3_channel')
+      expect(data[0].follower.host).to.equal(servers[0].host)
+      expect(data[0].follower.name).to.equal('user1')
+
+      expect(data[1].following.host).to.equal(servers[2].host)
+      expect(data[1].following.name).to.equal('user3_channel')
+      expect(data[1].follower.host).to.equal(servers[2].host)
+      expect(data[1].follower.name).to.equal('root')
+
+      expect(data[2].following.host).to.equal(servers[2].host)
+      expect(data[2].following.name).to.equal('user3_channel2')
+      expect(data[2].follower.host).to.equal(servers[2].host)
+      expect(data[2].follower.name).to.equal('root')
+    }
+
+    {
+      const { total, data } = await servers[2].accounts.listFollowers({
+        token: users[2].accessToken,
+        accountName: 'user3',
+        start: 0,
+        count: 1,
+        sort: '-createdAt'
+      })
+
+      expect(total).to.equal(3)
+      expect(data).to.have.lengthOf(1)
+
+      expect(data[0].following.host).to.equal(servers[2].host)
+      expect(data[0].following.name).to.equal('user3_channel2')
+      expect(data[0].follower.host).to.equal(servers[2].host)
+      expect(data[0].follower.name).to.equal('root')
+    }
+
+    {
+      const { total, data } = await servers[2].accounts.listFollowers({
+        token: users[2].accessToken,
+        accountName: 'user3',
+        start: 1,
+        count: 1,
+        sort: '-createdAt'
+      })
+
+      expect(total).to.equal(3)
+      expect(data).to.have.lengthOf(1)
+
+      expect(data[0].following.host).to.equal(servers[2].host)
+      expect(data[0].following.name).to.equal('user3_channel')
+      expect(data[0].follower.host).to.equal(servers[2].host)
+      expect(data[0].follower.name).to.equal('root')
+    }
+
+    {
+      const { total, data } = await servers[2].accounts.listFollowers({
+        token: users[2].accessToken,
+        accountName: 'user3',
+        search: 'user1',
+        sort: '-createdAt'
+      })
+
+      expect(total).to.equal(1)
+      expect(data).to.have.lengthOf(1)
+
+      expect(data[0].following.host).to.equal(servers[2].host)
+      expect(data[0].following.name).to.equal('user3_channel')
+      expect(data[0].follower.host).to.equal(servers[0].host)
+      expect(data[0].follower.name).to.equal('user1')
+    }
+  })
+
+  it('Should list user3_channel followers', async function () {
+    {
+      const { total, data } = await servers[2].channels.listFollowers({
+        token: users[2].accessToken,
+        channelName: 'user3_channel',
+        start: 0,
+        count: 5,
+        sort: 'createdAt'
+      })
+
+      expect(total).to.equal(2)
+      expect(data).to.have.lengthOf(2)
+
+      expect(data[0].following.host).to.equal(servers[2].host)
+      expect(data[0].following.name).to.equal('user3_channel')
+      expect(data[0].follower.host).to.equal(servers[0].host)
+      expect(data[0].follower.name).to.equal('user1')
+
+      expect(data[1].following.host).to.equal(servers[2].host)
+      expect(data[1].following.name).to.equal('user3_channel')
+      expect(data[1].follower.host).to.equal(servers[2].host)
+      expect(data[1].follower.name).to.equal('root')
+    }
+
+    {
+      const { total, data } = await servers[2].channels.listFollowers({
+        token: users[2].accessToken,
+        channelName: 'user3_channel',
+        start: 0,
+        count: 1,
+        sort: '-createdAt'
+      })
+
+      expect(total).to.equal(2)
+      expect(data).to.have.lengthOf(1)
+
+      expect(data[0].following.host).to.equal(servers[2].host)
+      expect(data[0].following.name).to.equal('user3_channel')
+      expect(data[0].follower.host).to.equal(servers[2].host)
+      expect(data[0].follower.name).to.equal('root')
+    }
+
+    {
+      const { total, data } = await servers[2].channels.listFollowers({
+        token: users[2].accessToken,
+        channelName: 'user3_channel',
+        start: 1,
+        count: 1,
+        sort: '-createdAt'
+      })
+
+      expect(total).to.equal(2)
+      expect(data).to.have.lengthOf(1)
+
+      expect(data[0].following.host).to.equal(servers[2].host)
+      expect(data[0].following.name).to.equal('user3_channel')
+      expect(data[0].follower.host).to.equal(servers[0].host)
+      expect(data[0].follower.name).to.equal('user1')
+    }
+
+    {
+      const { total, data } = await servers[2].channels.listFollowers({
+        token: users[2].accessToken,
+        channelName: 'user3_channel',
+        search: 'user1',
+        sort: '-createdAt'
+      })
+
+      expect(total).to.equal(1)
+      expect(data).to.have.lengthOf(1)
+
+      expect(data[0].following.host).to.equal(servers[2].host)
+      expect(data[0].following.name).to.equal('user3_channel')
+      expect(data[0].follower.host).to.equal(servers[0].host)
+      expect(data[0].follower.name).to.equal('user1')
+    }
+  })
+
+  it('Should update video as internal and not see from remote server', async function () {
+    this.timeout(30000)
+
+    await servers[2].videos.update({ id: video3UUID, attributes: { name: 'internal', privacy: VideoPrivacy.INTERNAL } })
+    await waitJobs(servers)
+
+    {
+      const { data } = await command.listVideos({ token: users[0].accessToken })
+      expect(data.find(v => v.name === 'internal')).to.not.exist
+    }
+  })
+
+  it('Should see internal from local user', async function () {
+    const { data } = await servers[2].subscriptions.listVideos({ token: servers[2].accessToken })
+    expect(data.find(v => v.name === 'internal')).to.exist
+  })
+
+  it('Should update video as private and not see from anyone server', async function () {
+    this.timeout(30000)
+
+    await servers[2].videos.update({ id: video3UUID, attributes: { name: 'private', privacy: VideoPrivacy.PRIVATE } })
+    await waitJobs(servers)
+
+    {
+      const { data } = await command.listVideos({ token: users[0].accessToken })
+      expect(data.find(v => v.name === 'private')).to.not.exist
+    }
+
+    {
+      const { data } = await servers[2].subscriptions.listVideos({ token: servers[2].accessToken })
+      expect(data.find(v => v.name === 'private')).to.not.exist
     }
   })
 

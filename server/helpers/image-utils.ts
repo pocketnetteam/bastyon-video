@@ -1,9 +1,12 @@
 import { copy, readFile, remove, rename } from 'fs-extra'
-import Jimp, { read } from 'jimp'
-import { getLowercaseExtension } from './core-utils'
-import { convertWebPToJPG, processGIF } from './ffmpeg-utils'
-import { logger } from './logger'
-import { buildUUID } from './uuid'
+import Jimp, { read as jimpRead } from 'jimp'
+import { join } from 'path'
+import { getLowercaseExtension } from '@shared/core-utils'
+import { buildUUID } from '@shared/extra-utils'
+import { convertWebPToJPG, generateThumbnailFromVideo, processGIF } from './ffmpeg/ffmpeg-images'
+import { logger, loggerTagsFactory } from './logger'
+
+const lTags = loggerTagsFactory('image-utils')
 
 function generateImageFilename (extension = '.jpg') {
   return buildUUID() + extension
@@ -33,21 +36,56 @@ async function processImage (
   if (keepOriginal !== true) await remove(path)
 }
 
+async function generateImageFromVideoFile (fromPath: string, folder: string, imageName: string, size: { width: number, height: number }) {
+  const pendingImageName = 'pending-' + imageName
+  const pendingImagePath = join(folder, pendingImageName)
+
+  try {
+    await generateThumbnailFromVideo(fromPath, folder, imageName)
+
+    const destination = join(folder, imageName)
+    await processImage(pendingImagePath, destination, size)
+  } catch (err) {
+    logger.error('Cannot generate image from video %s.', fromPath, { err, ...lTags() })
+
+    try {
+      await remove(pendingImagePath)
+    } catch (err) {
+      logger.debug('Cannot remove pending image path after generation error.', { err, ...lTags() })
+    }
+  }
+}
+
+async function getImageSize (path: string) {
+  const inputBuffer = await readFile(path)
+
+  const image = await jimpRead(inputBuffer)
+
+  return {
+    width: image.getWidth(),
+    height: image.getHeight()
+  }
+}
+
 // ---------------------------------------------------------------------------
 
 export {
   generateImageFilename,
-  processImage
+  generateImageFromVideoFile,
+
+  processImage,
+
+  getImageSize
 }
 
 // ---------------------------------------------------------------------------
 
 async function jimpProcessor (path: string, destination: string, newSize: { width: number, height: number }, inputExt: string) {
-  let jimpInstance: Jimp
+  let sourceImage: Jimp
   const inputBuffer = await readFile(path)
 
   try {
-    jimpInstance = await read(inputBuffer)
+    sourceImage = await jimpRead(inputBuffer)
   } catch (err) {
     logger.debug('Cannot read %s with jimp. Try to convert the image using ffmpeg first.', path, { err })
 
@@ -55,33 +93,61 @@ async function jimpProcessor (path: string, destination: string, newSize: { widt
     await convertWebPToJPG(path, newName)
     await rename(newName, path)
 
-    jimpInstance = await read(path)
+    sourceImage = await jimpRead(path)
   }
 
   await remove(destination)
 
   // Optimization if the source file has the appropriate size
   const outputExt = getLowercaseExtension(destination)
-  if (skipProcessing({ jimpInstance, newSize, imageBytes: inputBuffer.byteLength, inputExt, outputExt })) {
+  if (skipProcessing({ sourceImage, newSize, imageBytes: inputBuffer.byteLength, inputExt, outputExt })) {
     return copy(path, destination)
   }
 
-  await jimpInstance
-    .quality(95)
-    .writeAsync(destination)
+  await autoResize({ sourceImage, newSize, destination })
+}
+
+async function autoResize (options: {
+  sourceImage: Jimp
+  newSize: { width: number, height: number }
+  destination: string
+}) {
+  const { sourceImage, newSize, destination } = options
+
+  // Portrait mode targetting a landscape, apply some effect on the image
+  const sourceIsPortrait = sourceImage.getWidth() < sourceImage.getHeight()
+  const destIsPortraitOrSquare = newSize.width <= newSize.height
+
+  removeExif(sourceImage)
+
+  if (sourceIsPortrait && !destIsPortraitOrSquare) {
+    const baseImage = sourceImage.cloneQuiet().cover(newSize.width, newSize.height)
+                                              .color([ { apply: 'shade', params: [ 50 ] } ])
+
+    const topImage = sourceImage.cloneQuiet().contain(newSize.width, newSize.height)
+
+    return write(baseImage.blit(topImage, 0, 0), destination)
+  }
+
+  return write(sourceImage.cover(newSize.width, newSize.height), destination)
+}
+
+function write (image: Jimp, destination: string) {
+  return image.quality(80).writeAsync(destination)
 }
 
 function skipProcessing (options: {
-  jimpInstance: Jimp
+  sourceImage: Jimp
   newSize: { width: number, height: number }
   imageBytes: number
   inputExt: string
   outputExt: string
 }) {
-  const { jimpInstance, newSize, imageBytes, inputExt, outputExt } = options
+  const { sourceImage, newSize, imageBytes, inputExt, outputExt } = options
   const { width, height } = newSize
 
-  if (jimpInstance.getWidth() > width || jimpInstance.getHeight() > height) return false
+  if (hasExif(sourceImage)) return false
+  if (sourceImage.getWidth() > width || sourceImage.getHeight() > height) return false
   if (inputExt !== outputExt) return false
 
   const kB = 1000
@@ -90,4 +156,12 @@ function skipProcessing (options: {
   if (height >= 500) return imageBytes <= 100 * kB
 
   return imageBytes <= 15 * kB
+}
+
+function hasExif (image: Jimp) {
+  return !!(image.bitmap as any).exifBuffer
+}
+
+function removeExif (image: Jimp) {
+  (image.bitmap as any).exifBuffer = null
 }
