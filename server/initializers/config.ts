@@ -147,7 +147,8 @@ const CONFIG = {
     IMAGES: {
       CHECK_INTERVAL: parseDurationToMs(config.get<string>('redundancy.images.check_interval')),
       NB_IMAGES_PER_REQ: config.get<number>('redundancy.images.nb_images_per_req')
-    }
+    },
+    GARBAGE_COLLECTOR_CHECK_INTERVAL: parseDurationToMs(config.get<string>('redundancy.garbage_collector_check_interval')),
   },
   REMOTE_REDUNDANCY: {
     VIDEOS: {

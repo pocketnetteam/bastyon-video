@@ -114,6 +114,7 @@ import { RemoveOldJobsScheduler } from './server/lib/schedulers/remove-old-jobs-
 import { UpdateVideosScheduler } from './server/lib/schedulers/update-videos-scheduler'
 import { YoutubeDlUpdateScheduler } from './server/lib/schedulers/youtube-dl-update-scheduler'
 import { VideosRedundancyScheduler } from './server/lib/schedulers/videos-redundancy-scheduler'
+import { GarbageCollectorScheduler } from './server/lib/schedulers/garbage-collector-scheduler'
 import { ImagesRedundancyScheduler } from './server/lib/schedulers/images-redundancy-scheduler'
 import { RemoveOldHistoryScheduler } from './server/lib/schedulers/remove-old-history-scheduler'
 import { AutoFollowIndexInstances } from './server/lib/schedulers/auto-follow-index-instances'
@@ -293,6 +294,7 @@ async function startApplication () {
   UpdateVideosScheduler.Instance.enable()
   YoutubeDlUpdateScheduler.Instance.enable()
   VideosRedundancyScheduler.Instance.enable()
+  GarbageCollectorScheduler.Instance.enable()
   ImagesRedundancyScheduler.Instance.enable()
   RemoveOldHistoryScheduler.Instance.enable()
   RemoveOldViewsScheduler.Instance.enable()

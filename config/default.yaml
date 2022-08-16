@@ -176,6 +176,7 @@ redundancy:
   images:
     check_interval: 120000  # How often you want to check new images to cache (in ms)
     nb_images_per_req: 10
+  garbage_collector_check_interval: '2 hours'
 
 # Other instances that duplicate your content
 remote_redundancy:
