@@ -53,4 +53,6 @@ export interface VideoObject {
 
   to?: string[]
   cc?: string[]
+
+  aspectRatio?: number
 }

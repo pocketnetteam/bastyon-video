@@ -119,6 +119,8 @@ function videoModelToFormattedJSON (video: MVideoFormattable, options: VideoForm
     publishedAt: video.publishedAt,
     originallyPublishedAt: video.originallyPublishedAt,
 
+    aspectRatio: video.aspectRatio,
+
     isLive: video.isLive,
 
     account: video.VideoChannel.Account.toFormattedSummaryJSON(),

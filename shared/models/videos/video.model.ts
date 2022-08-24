@@ -67,6 +67,8 @@ export interface Video {
 
   files?: VideoFile[]
   streamingPlaylists?: VideoStreamingPlaylist[]
+
+  aspectRatio?: number
 }
 
 export interface VideoDetails extends Video {
@@ -86,4 +88,6 @@ export interface VideoDetails extends Video {
 
   files: VideoFile[]
   streamingPlaylists: VideoStreamingPlaylist[]
+
+  aspectRatio?: number
 }
