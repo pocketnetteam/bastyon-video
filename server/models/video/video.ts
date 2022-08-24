@@ -1,8 +1,19 @@
-import Bluebird from 'bluebird'
-import { remove } from 'fs-extra'
-import { maxBy, minBy } from 'lodash'
-import { join } from 'path'
-import { FindOptions, Includeable, IncludeOptions, Op, QueryTypes, ScopeOptions, Sequelize, Transaction, WhereOptions } from 'sequelize'
+import Bluebird from "bluebird"
+import { remove } from "fs-extra"
+import { maxBy, minBy } from "lodash"
+import { join } from "path"
+import {
+  DataTypes,
+  FindOptions,
+  Includeable,
+  IncludeOptions,
+  Op,
+  QueryTypes,
+  ScopeOptions,
+  Sequelize,
+  Transaction,
+  WhereOptions
+} from "sequelize"
 import {
   AllowNull,
   BeforeDestroy,
@@ -23,17 +34,32 @@ import {
   Scopes,
   Table,
   UpdatedAt
-} from 'sequelize-typescript'
-import { buildNSFWFilter } from '@server/helpers/express-utils'
-import { getPrivaciesForFederation, isPrivacyForFederation, isStateForFederation } from '@server/helpers/video'
-import { LiveManager } from '@server/lib/live/live-manager'
-import { removeHLSObjectStorage, removeWebTorrentObjectStorage } from '@server/lib/object-storage'
-import { getHLSDirectory, getHLSRedundancyDirectory } from '@server/lib/paths'
-import { VideoPathManager } from '@server/lib/video-path-manager'
-import { getServerActor } from '@server/models/application/application'
-import { ModelCache } from '@server/models/model-cache'
-import { buildVideoEmbedPath, buildVideoWatchPath, pick } from '@shared/core-utils'
-import { ffprobePromise, getAudioStream, uuidToShort } from '@shared/extra-utils'
+} from "sequelize-typescript"
+import { buildNSFWFilter } from "@server/helpers/express-utils"
+import {
+  getPrivaciesForFederation,
+  isPrivacyForFederation,
+  isStateForFederation
+} from "@server/helpers/video"
+import { LiveManager } from "@server/lib/live/live-manager"
+import {
+  removeHLSObjectStorage,
+  removeWebTorrentObjectStorage
+} from "@server/lib/object-storage"
+import { getHLSDirectory, getHLSRedundancyDirectory } from "@server/lib/paths"
+import { VideoPathManager } from "@server/lib/video-path-manager"
+import { getServerActor } from "@server/models/application/application"
+import { ModelCache } from "@server/models/model-cache"
+import {
+  buildVideoEmbedPath,
+  buildVideoWatchPath,
+  pick
+} from "@shared/core-utils"
+import {
+  ffprobePromise,
+  getAudioStream,
+  uuidToShort
+} from "@shared/extra-utils"
 import {
   ResultList,
   ThumbnailType,
@@ -48,11 +74,11 @@ import {
   VideoState,
   VideoStorage,
   VideoStreamingPlaylistType
-} from '@shared/models'
-import { AttributesOnly } from '@shared/typescript-utils'
-import { peertubeTruncate } from '../../helpers/core-utils'
-import { isActivityPubUrlValid } from '../../helpers/custom-validators/activitypub/misc'
-import { exists, isBooleanValid } from '../../helpers/custom-validators/misc'
+} from "@shared/models"
+import { AttributesOnly } from "@shared/typescript-utils"
+import { peertubeTruncate } from "../../helpers/core-utils"
+import { isActivityPubUrlValid } from "../../helpers/custom-validators/activitypub/misc"
+import { exists, isBooleanValid } from "../../helpers/custom-validators/misc"
 import {
   isVideoDescriptionValid,
   isVideoDurationValid,
@@ -60,12 +86,19 @@ import {
   isVideoPrivacyValid,
   isVideoStateValid,
   isVideoSupportValid
-} from '../../helpers/custom-validators/videos'
-import { getVideoStreamDimensionsInfo } from '../../helpers/ffmpeg'
-import { logger } from '../../helpers/logger'
-import { CONFIG } from '../../initializers/config'
-import { ACTIVITY_PUB, API_VERSION, CONSTRAINTS_FIELDS, LAZY_STATIC_PATHS, STATIC_PATHS, WEBSERVER } from '../../initializers/constants'
-import { sendDeleteVideo } from '../../lib/activitypub/send'
+} from "../../helpers/custom-validators/videos"
+import { getVideoStreamDimensionsInfo } from "../../helpers/ffmpeg"
+import { logger } from "../../helpers/logger"
+import { CONFIG } from "../../initializers/config"
+import {
+  ACTIVITY_PUB,
+  API_VERSION,
+  CONSTRAINTS_FIELDS,
+  LAZY_STATIC_PATHS,
+  STATIC_PATHS,
+  WEBSERVER
+} from "../../initializers/constants"
+import { sendDeleteVideo } from "../../lib/activitypub/send"
 import {
   MChannel,
   MChannelAccountDefault,
@@ -90,64 +123,77 @@ import {
   MVideoThumbnailBlacklist,
   MVideoWithAllFiles,
   MVideoWithFile
-} from '../../types/models'
-import { MThumbnail } from '../../types/models/video/thumbnail'
-import { MVideoFile, MVideoFileStreamingPlaylistVideo } from '../../types/models/video/video-file'
-import { VideoAbuseModel } from '../abuse/video-abuse'
-import { AccountModel } from '../account/account'
-import { AccountVideoRateModel } from '../account/account-video-rate'
-import { ActorModel } from '../actor/actor'
-import { ActorImageModel } from '../actor/actor-image'
-import { VideoRedundancyModel } from '../redundancy/video-redundancy'
-import { ServerModel } from '../server/server'
-import { TrackerModel } from '../server/tracker'
-import { VideoTrackerModel } from '../server/video-tracker'
-import { setAsUpdated } from '../shared'
-import { UserModel } from '../user/user'
-import { UserVideoHistoryModel } from '../user/user-video-history'
-import { buildTrigramSearchIndex, buildWhereIdOrUUID, getVideoSort, isOutdated, throwIfNotValid } from '../utils'
-import { VideoViewModel } from '../view/video-view'
+} from "../../types/models"
+import { MThumbnail } from "../../types/models/video/thumbnail"
+import {
+  MVideoFile,
+  MVideoFileStreamingPlaylistVideo
+} from "../../types/models/video/video-file"
+import { VideoAbuseModel } from "../abuse/video-abuse"
+import { AccountModel } from "../account/account"
+import { AccountVideoRateModel } from "../account/account-video-rate"
+import { ActorModel } from "../actor/actor"
+import { ActorImageModel } from "../actor/actor-image"
+import { VideoRedundancyModel } from "../redundancy/video-redundancy"
+import { ServerModel } from "../server/server"
+import { TrackerModel } from "../server/tracker"
+import { VideoTrackerModel } from "../server/video-tracker"
+import { setAsUpdated } from "../shared"
+import { UserModel } from "../user/user"
+import { UserVideoHistoryModel } from "../user/user-video-history"
+import {
+  buildTrigramSearchIndex,
+  buildWhereIdOrUUID,
+  getVideoSort,
+  isOutdated,
+  throwIfNotValid
+} from "../utils"
+import { VideoViewModel } from "../view/video-view"
 import {
   videoFilesModelToFormattedJSON,
   VideoFormattingJSONOptions,
   videoModelToActivityPubObject,
   videoModelToFormattedDetailsJSON,
   videoModelToFormattedJSON
-} from './formatter/video-format-utils'
-import { ScheduleVideoUpdateModel } from './schedule-video-update'
+} from "./formatter/video-format-utils"
+import { ScheduleVideoUpdateModel } from "./schedule-video-update"
 import {
   BuildVideosListQueryOptions,
   DisplayOnlyForFollowerOptions,
   VideoModelGetQueryBuilder,
   VideosIdListQueryBuilder,
   VideosModelListQueryBuilder
-} from './sql/video'
-import { TagModel } from './tag'
-import { ThumbnailModel } from './thumbnail'
-import { VideoBlacklistModel } from './video-blacklist'
-import { VideoCaptionModel } from './video-caption'
-import { ScopeNames as VideoChannelScopeNames, SummaryOptions, VideoChannelModel } from './video-channel'
-import { VideoCommentModel } from './video-comment'
-import { VideoFileModel } from './video-file'
-import { VideoImportModel } from './video-import'
-import { VideoJobInfoModel } from './video-job-info'
-import { VideoLiveModel } from './video-live'
-import { VideoPlaylistElementModel } from './video-playlist-element'
-import { VideoShareModel } from './video-share'
-import { VideoStreamingPlaylistModel } from './video-streaming-playlist'
-import { VideoTagModel } from './video-tag'
+} from "./sql/video"
+import { TagModel } from "./tag"
+import { ThumbnailModel } from "./thumbnail"
+import { VideoBlacklistModel } from "./video-blacklist"
+import { VideoCaptionModel } from "./video-caption"
+import {
+  ScopeNames as VideoChannelScopeNames,
+  SummaryOptions,
+  VideoChannelModel
+} from "./video-channel"
+import { VideoCommentModel } from "./video-comment"
+import { VideoFileModel } from "./video-file"
+import { VideoImportModel } from "./video-import"
+import { VideoJobInfoModel } from "./video-job-info"
+import { VideoLiveModel } from "./video-live"
+import { VideoPlaylistElementModel } from "./video-playlist-element"
+import { VideoShareModel } from "./video-share"
+import { VideoStreamingPlaylistModel } from "./video-streaming-playlist"
+import { VideoTagModel } from "./video-tag"
 
 export enum ScopeNames {
-  FOR_API = 'FOR_API',
-  WITH_ACCOUNT_DETAILS = 'WITH_ACCOUNT_DETAILS',
-  WITH_TAGS = 'WITH_TAGS',
-  WITH_WEBTORRENT_FILES = 'WITH_WEBTORRENT_FILES',
-  WITH_SCHEDULED_UPDATE = 'WITH_SCHEDULED_UPDATE',
-  WITH_BLACKLISTED = 'WITH_BLACKLISTED',
-  WITH_STREAMING_PLAYLISTS = 'WITH_STREAMING_PLAYLISTS',
-  WITH_IMMUTABLE_ATTRIBUTES = 'WITH_IMMUTABLE_ATTRIBUTES',
-  WITH_USER_HISTORY = 'WITH_USER_HISTORY',
-  WITH_THUMBNAILS = 'WITH_THUMBNAILS'
+  FOR_API = "FOR_API",
+  WITH_ACCOUNT_DETAILS = "WITH_ACCOUNT_DETAILS",
+  WITH_TAGS = "WITH_TAGS",
+  WITH_WEBTORRENT_FILES = "WITH_WEBTORRENT_FILES",
+  WITH_SCHEDULED_UPDATE = "WITH_SCHEDULED_UPDATE",
+  WITH_BLACKLISTED = "WITH_BLACKLISTED",
+  WITH_STREAMING_PLAYLISTS = "WITH_STREAMING_PLAYLISTS",
+  WITH_IMMUTABLE_ATTRIBUTES = "WITH_IMMUTABLE_ATTRIBUTES",
+  WITH_USER_HISTORY = "WITH_USER_HISTORY",
+  WITH_THUMBNAILS = "WITH_THUMBNAILS",
 }
 
 export type ForAPIOptions = {
@@ -160,14 +206,15 @@ export type ForAPIOptions = {
 
 @Scopes(() => ({
   [ScopeNames.WITH_IMMUTABLE_ATTRIBUTES]: {
-    attributes: [ 'id', 'url', 'uuid', 'remote' ]
+    attributes: [ "id", "url", "uuid", "remote" ]
   },
   [ScopeNames.FOR_API]: (options: ForAPIOptions) => {
     const include: Includeable[] = [
       {
         model: VideoChannelModel.scope({
           method: [
-            VideoChannelScopeNames.SUMMARY, {
+            VideoChannelScopeNames.SUMMARY,
+            {
               withAccount: true,
               withAccountBlockerIds: options.withAccountBlockerIds
             } as SummaryOptions
@@ -176,7 +223,7 @@ export type ForAPIOptions = {
         required: true
       },
       {
-        attributes: [ 'type', 'filename' ],
+        attributes: [ "type", "filename" ],
         model: ThumbnailModel,
         required: false
       }
@@ -222,19 +269,19 @@ export type ForAPIOptions = {
         include: [
           {
             attributes: {
-              exclude: [ 'privateKey', 'publicKey' ]
+              exclude: [ "privateKey", "publicKey" ]
             },
             model: ActorModel.unscoped(),
             required: true,
             include: [
               {
-                attributes: [ 'host' ],
+                attributes: [ "host" ],
                 model: ServerModel.unscoped(),
                 required: false
               },
               {
                 model: ActorImageModel,
-                as: 'Avatars',
+                as: "Avatars",
                 required: false
               }
             ]
@@ -246,18 +293,18 @@ export type ForAPIOptions = {
               {
                 model: ActorModel.unscoped(),
                 attributes: {
-                  exclude: [ 'privateKey', 'publicKey' ]
+                  exclude: [ "privateKey", "publicKey" ]
                 },
                 required: true,
                 include: [
                   {
-                    attributes: [ 'host' ],
+                    attributes: [ "host" ],
                     model: ServerModel.unscoped(),
                     required: false
                   },
                   {
                     model: ActorImageModel,
-                    as: 'Avatars',
+                    as: "Avatars",
                     required: false
                   }
                 ]
@@ -274,7 +321,7 @@ export type ForAPIOptions = {
   [ScopeNames.WITH_BLACKLISTED]: {
     include: [
       {
-        attributes: [ 'id', 'reason', 'unfederated' ],
+        attributes: [ "id", "reason", "unfederated" ],
         model: VideoBlacklistModel,
         required: false
       }
@@ -286,7 +333,7 @@ export type ForAPIOptions = {
     if (withRedundancies === true) {
       subInclude = [
         {
-          attributes: [ 'fileUrl' ],
+          attributes: [ "fileUrl" ],
           model: VideoRedundancyModel.unscoped(),
           required: false
         }
@@ -314,7 +361,7 @@ export type ForAPIOptions = {
 
     if (withRedundancies === true) {
       subInclude.push({
-        attributes: [ 'fileUrl' ],
+        attributes: [ "fileUrl" ],
         model: VideoRedundancyModel.unscoped(),
         required: false
       })
@@ -343,7 +390,7 @@ export type ForAPIOptions = {
     return {
       include: [
         {
-          attributes: [ 'currentTime' ],
+          attributes: [ "currentTime" ],
           model: UserVideoHistoryModel.unscoped(),
           required: false,
           where: {
@@ -355,27 +402,27 @@ export type ForAPIOptions = {
   }
 }))
 @Table({
-  tableName: 'video',
+  tableName: "video",
   indexes: [
-    buildTrigramSearchIndex('video_name_trigram', 'name'),
+    buildTrigramSearchIndex("video_name_trigram", "name"),
 
-    { fields: [ 'createdAt' ] },
+    { fields: [ "createdAt" ] },
     {
       fields: [
-        { name: 'publishedAt', order: 'DESC' },
-        { name: 'id', order: 'ASC' }
+        { name: "publishedAt", order: "DESC" },
+        { name: "id", order: "ASC" }
       ]
     },
-    { fields: [ 'duration' ] },
+    { fields: [ "duration" ] },
     {
       fields: [
-        { name: 'views', order: 'DESC' },
-        { name: 'id', order: 'ASC' }
+        { name: "views", order: "DESC" },
+        { name: "id", order: "ASC" }
       ]
     },
-    { fields: [ 'channelId' ] },
+    { fields: [ "channelId" ] },
     {
-      fields: [ 'originallyPublishedAt' ],
+      fields: [ "originallyPublishedAt" ],
       where: {
         originallyPublishedAt: {
           [Op.ne]: null
@@ -383,7 +430,7 @@ export type ForAPIOptions = {
       }
     },
     {
-      fields: [ 'category' ], // We don't care videos with an unknown category
+      fields: [ "category" ], // We don't care videos with an unknown category
       where: {
         category: {
           [Op.ne]: null
@@ -391,7 +438,7 @@ export type ForAPIOptions = {
       }
     },
     {
-      fields: [ 'licence' ], // We don't care videos with an unknown licence
+      fields: [ "licence" ], // We don't care videos with an unknown licence
       where: {
         licence: {
           [Op.ne]: null
@@ -399,7 +446,7 @@ export type ForAPIOptions = {
       }
     },
     {
-      fields: [ 'language' ], // We don't care videos with an unknown language
+      fields: [ "language" ], // We don't care videos with an unknown language
       where: {
         language: {
           [Op.ne]: null
@@ -407,326 +454,344 @@ export type ForAPIOptions = {
       }
     },
     {
-      fields: [ 'nsfw' ], // Most of the videos are not NSFW
+      fields: [ "nsfw" ], // Most of the videos are not NSFW
       where: {
         nsfw: true
       }
     },
     {
-      fields: [ 'remote' ], // Only index local videos
+      fields: [ "remote" ], // Only index local videos
       where: {
         remote: false
       }
     },
     {
-      fields: [ 'uuid' ],
+      fields: [ "uuid" ],
       unique: true
     },
     {
-      fields: [ 'url' ],
+      fields: [ "url" ],
       unique: true
     }
   ]
 })
 export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
-
   @AllowNull(false)
   @Default(DataType.UUIDV4)
   @IsUUID(4)
   @Column(DataType.UUID)
-  uuid: string
+  uuid: string;
 
   @AllowNull(false)
-  @Is('VideoName', value => throwIfNotValid(value, isVideoNameValid, 'name'))
+  @Is("VideoName", (value) => throwIfNotValid(value, isVideoNameValid, "name"))
   @Column
-  name: string
+  name: string;
 
   @AllowNull(true)
   @Default(null)
   @Column
-  category: number
+  category: number;
 
   @AllowNull(true)
   @Default(null)
   @Column
-  licence: number
+  licence: number;
 
   @AllowNull(true)
   @Default(null)
   @Column(DataType.STRING(CONSTRAINTS_FIELDS.VIDEOS.LANGUAGE.max))
-  language: string
+  language: string;
 
   @AllowNull(false)
-  @Is('VideoPrivacy', value => throwIfNotValid(value, isVideoPrivacyValid, 'privacy'))
+  @Is("VideoPrivacy", (value) =>
+    throwIfNotValid(value, isVideoPrivacyValid, "privacy")
+  )
   @Column
-  privacy: VideoPrivacy
+  privacy: VideoPrivacy;
 
   @AllowNull(false)
-  @Is('VideoNSFW', value => throwIfNotValid(value, isBooleanValid, 'NSFW boolean'))
+  @Is("VideoNSFW", (value) =>
+    throwIfNotValid(value, isBooleanValid, "NSFW boolean")
+  )
   @Column
-  nsfw: boolean
+  nsfw: boolean;
 
   @AllowNull(true)
   @Default(null)
-  @Is('VideoDescription', value => throwIfNotValid(value, isVideoDescriptionValid, 'description', true))
+  @Is("VideoDescription", (value) =>
+    throwIfNotValid(value, isVideoDescriptionValid, "description", true)
+  )
   @Column(DataType.STRING(CONSTRAINTS_FIELDS.VIDEOS.DESCRIPTION.max))
-  description: string
+  description: string;
 
   @AllowNull(true)
   @Default(null)
-  @Is('VideoSupport', value => throwIfNotValid(value, isVideoSupportValid, 'support', true))
+  @Is("VideoSupport", (value) =>
+    throwIfNotValid(value, isVideoSupportValid, "support", true)
+  )
   @Column(DataType.STRING(CONSTRAINTS_FIELDS.VIDEOS.SUPPORT.max))
-  support: string
+  support: string;
 
   @AllowNull(false)
-  @Is('VideoDuration', value => throwIfNotValid(value, isVideoDurationValid, 'duration'))
+  @Is("VideoDuration", (value) =>
+    throwIfNotValid(value, isVideoDurationValid, "duration")
+  )
   @Column
-  duration: number
-
-  @AllowNull(false)
-  @Default(0)
-  @IsInt
-  @Min(0)
-  @Column
-  views: number
+  duration: number;
 
   @AllowNull(false)
   @Default(0)
   @IsInt
   @Min(0)
   @Column
-  likes: number
+  views: number;
 
   @AllowNull(false)
   @Default(0)
   @IsInt
   @Min(0)
   @Column
-  dislikes: number
+  likes: number;
+
+  @AllowNull(false)
+  @Default(0)
+  @IsInt
+  @Min(0)
+  @Column
+  dislikes: number;
 
   @AllowNull(false)
   @Column
-  remote: boolean
+  remote: boolean;
 
   @AllowNull(false)
   @Default(false)
   @Column
-  isLive: boolean
+  isLive: boolean;
 
   @AllowNull(false)
-  @Is('VideoUrl', value => throwIfNotValid(value, isActivityPubUrlValid, 'url'))
+  @Is("VideoUrl", (value) =>
+    throwIfNotValid(value, isActivityPubUrlValid, "url")
+  )
   @Column(DataType.STRING(CONSTRAINTS_FIELDS.VIDEOS.URL.max))
-  url: string
+  url: string;
 
   @AllowNull(false)
   @Column
-  commentsEnabled: boolean
+  commentsEnabled: boolean;
 
   @AllowNull(false)
   @Column
-  downloadEnabled: boolean
+  downloadEnabled: boolean;
 
   @AllowNull(false)
   @Column
-  waitTranscoding: boolean
+  waitTranscoding: boolean;
 
   @AllowNull(false)
   @Default(null)
-  @Is('VideoState', value => throwIfNotValid(value, isVideoStateValid, 'state'))
+  @Is("VideoState", (value) =>
+    throwIfNotValid(value, isVideoStateValid, "state")
+  )
   @Column
-  state: VideoState
+  state: VideoState;
 
   @CreatedAt
-  createdAt: Date
+  createdAt: Date;
 
   @UpdatedAt
-  updatedAt: Date
+  updatedAt: Date;
 
   @AllowNull(false)
   @Default(DataType.NOW)
   @Column
-  publishedAt: Date
+  publishedAt: Date;
 
   @AllowNull(true)
   @Default(null)
   @Column
-  originallyPublishedAt: Date
+  originallyPublishedAt: Date;
+
+  @AllowNull(false)
+  @Default(0)
+  @Column(DataTypes.DOUBLE)
+  aspectRatio: number
 
   @ForeignKey(() => VideoChannelModel)
   @Column
-  channelId: number
+  channelId: number;
 
   @BelongsTo(() => VideoChannelModel, {
     foreignKey: {
       allowNull: true
     },
-    onDelete: 'cascade'
+    onDelete: "cascade"
   })
-  VideoChannel: VideoChannelModel
+  VideoChannel: VideoChannelModel;
 
   @BelongsToMany(() => TagModel, {
-    foreignKey: 'videoId',
+    foreignKey: "videoId",
     through: () => VideoTagModel,
-    onDelete: 'CASCADE'
+    onDelete: "CASCADE"
   })
-  Tags: TagModel[]
+  Tags: TagModel[];
 
   @BelongsToMany(() => TrackerModel, {
-    foreignKey: 'videoId',
+    foreignKey: "videoId",
     through: () => VideoTrackerModel,
-    onDelete: 'CASCADE'
+    onDelete: "CASCADE"
   })
-  Trackers: TrackerModel[]
+  Trackers: TrackerModel[];
 
   @HasMany(() => ThumbnailModel, {
     foreignKey: {
-      name: 'videoId',
+      name: "videoId",
       allowNull: true
     },
     hooks: true,
-    onDelete: 'cascade'
+    onDelete: "cascade"
   })
-  Thumbnails: ThumbnailModel[]
+  Thumbnails: ThumbnailModel[];
 
   @HasMany(() => VideoPlaylistElementModel, {
     foreignKey: {
-      name: 'videoId',
+      name: "videoId",
       allowNull: true
     },
-    onDelete: 'set null'
+    onDelete: "set null"
   })
-  VideoPlaylistElements: VideoPlaylistElementModel[]
+  VideoPlaylistElements: VideoPlaylistElementModel[];
 
   @HasMany(() => VideoAbuseModel, {
     foreignKey: {
-      name: 'videoId',
+      name: "videoId",
       allowNull: true
     },
-    onDelete: 'set null'
+    onDelete: "set null"
   })
-  VideoAbuses: VideoAbuseModel[]
+  VideoAbuses: VideoAbuseModel[];
 
   @HasMany(() => VideoFileModel, {
     foreignKey: {
-      name: 'videoId',
+      name: "videoId",
       allowNull: true
     },
     hooks: true,
-    onDelete: 'cascade'
+    onDelete: "cascade"
   })
-  VideoFiles: VideoFileModel[]
+  VideoFiles: VideoFileModel[];
 
   @HasMany(() => VideoStreamingPlaylistModel, {
     foreignKey: {
-      name: 'videoId',
+      name: "videoId",
       allowNull: false
     },
     hooks: true,
-    onDelete: 'cascade'
+    onDelete: "cascade"
   })
-  VideoStreamingPlaylists: VideoStreamingPlaylistModel[]
+  VideoStreamingPlaylists: VideoStreamingPlaylistModel[];
 
   @HasMany(() => VideoShareModel, {
     foreignKey: {
-      name: 'videoId',
+      name: "videoId",
       allowNull: false
     },
-    onDelete: 'cascade'
+    onDelete: "cascade"
   })
-  VideoShares: VideoShareModel[]
+  VideoShares: VideoShareModel[];
 
   @HasMany(() => AccountVideoRateModel, {
     foreignKey: {
-      name: 'videoId',
+      name: "videoId",
       allowNull: false
     },
-    onDelete: 'cascade'
+    onDelete: "cascade"
   })
-  AccountVideoRates: AccountVideoRateModel[]
+  AccountVideoRates: AccountVideoRateModel[];
 
   @HasMany(() => VideoCommentModel, {
     foreignKey: {
-      name: 'videoId',
+      name: "videoId",
       allowNull: false
     },
-    onDelete: 'cascade',
+    onDelete: "cascade",
     hooks: true
   })
-  VideoComments: VideoCommentModel[]
+  VideoComments: VideoCommentModel[];
 
   @HasMany(() => VideoViewModel, {
     foreignKey: {
-      name: 'videoId',
+      name: "videoId",
       allowNull: false
     },
-    onDelete: 'cascade'
+    onDelete: "cascade"
   })
-  VideoViews: VideoViewModel[]
+  VideoViews: VideoViewModel[];
 
   @HasMany(() => UserVideoHistoryModel, {
     foreignKey: {
-      name: 'videoId',
+      name: "videoId",
       allowNull: false
     },
-    onDelete: 'cascade'
+    onDelete: "cascade"
   })
-  UserVideoHistories: UserVideoHistoryModel[]
+  UserVideoHistories: UserVideoHistoryModel[];
 
   @HasOne(() => ScheduleVideoUpdateModel, {
     foreignKey: {
-      name: 'videoId',
+      name: "videoId",
       allowNull: false
     },
-    onDelete: 'cascade'
+    onDelete: "cascade"
   })
-  ScheduleVideoUpdate: ScheduleVideoUpdateModel
+  ScheduleVideoUpdate: ScheduleVideoUpdateModel;
 
   @HasOne(() => VideoBlacklistModel, {
     foreignKey: {
-      name: 'videoId',
+      name: "videoId",
       allowNull: false
     },
-    onDelete: 'cascade'
+    onDelete: "cascade"
   })
-  VideoBlacklist: VideoBlacklistModel
+  VideoBlacklist: VideoBlacklistModel;
 
   @HasOne(() => VideoLiveModel, {
     foreignKey: {
-      name: 'videoId',
+      name: "videoId",
       allowNull: false
     },
-    onDelete: 'cascade'
+    onDelete: "cascade"
   })
-  VideoLive: VideoLiveModel
+  VideoLive: VideoLiveModel;
 
   @HasOne(() => VideoImportModel, {
     foreignKey: {
-      name: 'videoId',
+      name: "videoId",
       allowNull: true
     },
-    onDelete: 'set null'
+    onDelete: "set null"
   })
-  VideoImport: VideoImportModel
+  VideoImport: VideoImportModel;
 
   @HasMany(() => VideoCaptionModel, {
     foreignKey: {
-      name: 'videoId',
+      name: "videoId",
       allowNull: false
     },
-    onDelete: 'cascade',
+    onDelete: "cascade",
     hooks: true,
-    ['separate' as any]: true
+    ["separate" as any]: true
   })
-  VideoCaptions: VideoCaptionModel[]
+  VideoCaptions: VideoCaptionModel[];
 
   @HasOne(() => VideoJobInfoModel, {
     foreignKey: {
-      name: 'videoId',
+      name: "videoId",
       allowNull: false
     },
-    onDelete: 'cascade'
+    onDelete: "cascade"
   })
-  VideoJobInfo: VideoJobInfoModel
+  VideoJobInfo: VideoJobInfoModel;
 
   @BeforeDestroy
   static async sendDelete (instance: MVideoAccountLight, options) {
@@ -734,13 +799,10 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
 
     // Lazy load channels
     if (!instance.VideoChannel) {
-      instance.VideoChannel = await instance.$get('VideoChannel', {
-        include: [
-          ActorModel,
-          AccountModel
-        ],
+      instance.VideoChannel = (await instance.$get("VideoChannel", {
+        include: [ ActorModel, AccountModel ],
         transaction: options.transaction
-      }) as MChannelAccountDefault
+      })) as MChannelAccountDefault
     }
 
     return sendDeleteVideo(instance, options.transaction)
@@ -750,21 +812,26 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
   static async removeFiles (instance: VideoModel, options) {
     const tasks: Promise<any>[] = []
 
-    logger.info('Removing files of video %s.', instance.url)
+    logger.info("Removing files of video %s.", instance.url)
 
     if (instance.isOwned()) {
       if (!Array.isArray(instance.VideoFiles)) {
-        instance.VideoFiles = await instance.$get('VideoFiles', { transaction: options.transaction })
+        instance.VideoFiles = await instance.$get("VideoFiles", {
+          transaction: options.transaction
+        })
       }
 
       // Remove physical files and torrents
-      instance.VideoFiles.forEach(file => {
+      instance.VideoFiles.forEach((file) => {
         tasks.push(instance.removeWebTorrentFileAndTorrent(file))
       })
 
       // Remove playlists file
       if (!Array.isArray(instance.VideoStreamingPlaylists)) {
-        instance.VideoStreamingPlaylists = await instance.$get('VideoStreamingPlaylists', { transaction: options.transaction })
+        instance.VideoStreamingPlaylists = await instance.$get(
+          "VideoStreamingPlaylists",
+          { transaction: options.transaction }
+        )
       }
 
       for (const p of instance.VideoStreamingPlaylists) {
@@ -773,10 +840,13 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     }
 
     // Do not wait video deletion because we could be in a transaction
-    Promise.all(tasks)
-           .catch(err => {
-             logger.error('Some errors when removing files of video %s in before destroy hook.', instance.uuid, { err })
-           })
+    Promise.all(tasks).catch((err) => {
+      logger.error(
+        "Some errors when removing files of video %s in before destroy hook.",
+        instance.uuid,
+        { err }
+      )
+    })
 
     return undefined
   }
@@ -785,14 +855,17 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
   static stopLiveIfNeeded (instance: VideoModel) {
     if (!instance.isLive) return
 
-    logger.info('Stopping live of video %s after video deletion.', instance.uuid)
+    logger.info(
+      "Stopping live of video %s after video deletion.",
+      instance.uuid
+    )
 
     LiveManager.Instance.stopSessionOf(instance.id, null)
   }
 
   @BeforeDestroy
   static invalidateCache (instance: VideoModel) {
-    ModelCache.Instance.invalidateCache('video', instance.id)
+    ModelCache.Instance.invalidateCache("video", instance.id)
   }
 
   @BeforeDestroy
@@ -800,14 +873,20 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     const tasks: Promise<any>[] = []
 
     if (!Array.isArray(instance.VideoAbuses)) {
-      instance.VideoAbuses = await instance.$get('VideoAbuses', { transaction: options.transaction })
+      instance.VideoAbuses = await instance.$get("VideoAbuses", {
+        transaction: options.transaction
+      })
 
       if (instance.VideoAbuses.length === 0) return undefined
     }
 
-    logger.info('Saving video abuses details of video %s.', instance.url)
+    logger.info("Saving video abuses details of video %s.", instance.url)
 
-    if (!instance.Trackers) instance.Trackers = await instance.$get('Trackers', { transaction: options.transaction })
+    if (!instance.Trackers) {
+      instance.Trackers = await instance.$get("Trackers", {
+        transaction: options.transaction
+      })
+    }
     const details = instance.toFormattedDetailsJSON()
 
     for (const abuse of instance.VideoAbuses) {
@@ -820,26 +899,37 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
 
   static listLocalIds (): Promise<number[]> {
     const query = {
-      attributes: [ 'id' ],
+      attributes: [ "id" ],
       raw: true,
       where: {
         remote: false
       }
     }
 
-    return VideoModel.findAll(query)
-      .then(rows => rows.map(r => r.id))
+    return VideoModel.findAll(query).then((rows) => rows.map((r) => r.id))
   }
 
-  static listAllAndSharedByActorForOutbox (actorId: number, start: number, count: number) {
+  static listAllAndSharedByActorForOutbox (
+    actorId: number,
+    start: number,
+    count: number
+  ) {
     function getRawQuery (select: string) {
-      const queryVideo = 'SELECT ' + select + ' FROM "video" AS "Video" ' +
+      const queryVideo =
+        "SELECT " +
+        select +
+        ' FROM "video" AS "Video" ' +
         'INNER JOIN "videoChannel" AS "VideoChannel" ON "VideoChannel"."id" = "Video"."channelId" ' +
         'INNER JOIN "account" AS "Account" ON "Account"."id" = "VideoChannel"."accountId" ' +
-        'WHERE "Account"."actorId" = ' + actorId
-      const queryVideoShare = 'SELECT ' + select + ' FROM "videoShare" AS "VideoShare" ' +
+        'WHERE "Account"."actorId" = ' +
+        actorId
+      const queryVideoShare =
+        "SELECT " +
+        select +
+        ' FROM "videoShare" AS "VideoShare" ' +
         'INNER JOIN "video" AS "Video" ON "Video"."id" = "VideoShare"."videoId" ' +
-        'WHERE "VideoShare"."actorId" = ' + actorId
+        'WHERE "VideoShare"."actorId" = ' +
+        actorId
 
       return `(${queryVideo}) UNION (${queryVideoShare})`
     }
@@ -851,21 +941,21 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
       distinct: true,
       offset: start,
       limit: count,
-      order: getVideoSort('-createdAt', [ 'Tags', 'name', 'ASC' ]),
+      order: getVideoSort("-createdAt", [ "Tags", "name", "ASC" ]),
       where: {
         id: {
-          [Op.in]: Sequelize.literal('(' + rawQuery + ')')
+          [Op.in]: Sequelize.literal("(" + rawQuery + ")")
         },
         [Op.or]: getPrivaciesForFederation()
       },
       include: [
         {
-          attributes: [ 'filename', 'language', 'fileUrl' ],
+          attributes: [ "filename", "language", "fileUrl" ],
           model: VideoCaptionModel.unscoped(),
           required: false
         },
         {
-          attributes: [ 'id', 'url' ],
+          attributes: [ "id", "url" ],
           model: VideoShareModel.unscoped(),
           required: false,
           // We only want videos shared by this actor
@@ -883,7 +973,7 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
           },
           include: [
             {
-              attributes: [ 'id', 'url' ],
+              attributes: [ "id", "url" ],
               model: ActorModel.unscoped()
             }
           ]
@@ -893,19 +983,19 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
           required: true,
           include: [
             {
-              attributes: [ 'name' ],
+              attributes: [ "name" ],
               model: AccountModel.unscoped(),
               required: true,
               include: [
                 {
-                  attributes: [ 'id', 'url', 'followersUrl' ],
+                  attributes: [ "id", "url", "followersUrl" ],
                   model: ActorModel.unscoped(),
                   required: true
                 }
               ]
             },
             {
-              attributes: [ 'id', 'url', 'followersUrl' ],
+              attributes: [ "id", "url", "followersUrl" ],
               model: ActorModel.unscoped(),
               required: true
             }
@@ -929,7 +1019,9 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
 
     return Bluebird.all([
       VideoModel.scope(ScopeNames.WITH_THUMBNAILS).findAll(query),
-      VideoModel.sequelize.query<{ total: string }>(rawCountQuery, { type: QueryTypes.SELECT })
+      VideoModel.sequelize.query<{ total: string }>(rawCountQuery, {
+        type: QueryTypes.SELECT
+      })
     ]).then(([ rows, totals ]) => {
       // totals: totalVideos + totalVideoShares
       let totalVideos = 0
@@ -947,7 +1039,7 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
 
   static async listPublishedLiveUUIDs () {
     const options = {
-      attributes: [ 'uuid' ],
+      attributes: [ "uuid" ],
       where: {
         isLive: true,
         remote: false,
@@ -957,7 +1049,7 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
 
     const result = await VideoModel.findAll(options)
 
-    return result.map(v => v.uuid)
+    return result.map((v) => v.uuid)
   }
 
   static listUserVideosForApi (options: {
@@ -970,14 +1062,15 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     isLive?: boolean
     search?: string
   }) {
-    const { accountId, channelId, start, count, sort, search, isLive } = options
+    const { accountId, channelId, start, count, sort, search, isLive } =
+      options
 
     function buildBaseQuery (forCount: boolean): FindOptions {
       const where: WhereOptions = {}
 
       if (search) {
         where.name = {
-          [Op.iLike]: '%' + search + '%'
+          [Op.iLike]: "%" + search + "%"
         }
       }
 
@@ -985,9 +1078,7 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
         where.isLive = isLive
       }
 
-      const channelWhere = channelId
-        ? { id: channelId }
-        : {}
+      const channelWhere = channelId ? { id: channelId } : {}
 
       const baseQuery = {
         offset: start,
@@ -1001,9 +1092,7 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
             where: channelWhere,
             include: [
               {
-                model: forCount
-                  ? AccountModel.unscoped()
-                  : AccountModel,
+                model: forCount ? AccountModel.unscoped() : AccountModel,
                 where: {
                   id: accountId
                 },
@@ -1075,43 +1164,46 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     search?: string
   }) {
     VideoModel.throwIfPrivateIncludeWithoutUser(options.include, options.user)
-    VideoModel.throwIfPrivacyOneOfWithoutUser(options.privacyOneOf, options.user)
+    VideoModel.throwIfPrivacyOneOfWithoutUser(
+      options.privacyOneOf,
+      options.user
+    )
 
-    const trendingDays = options.sort.endsWith('trending')
+    const trendingDays = options.sort.endsWith("trending")
       ? CONFIG.TRENDING.VIDEOS.INTERVAL_DAYS
       : undefined
 
     let trendingAlgorithm: string
-    if (options.sort.endsWith('hot')) trendingAlgorithm = 'hot'
-    if (options.sort.endsWith('best')) trendingAlgorithm = 'best'
+    if (options.sort.endsWith("hot")) trendingAlgorithm = "hot"
+    if (options.sort.endsWith("best")) trendingAlgorithm = "best"
 
     const serverActor = await getServerActor()
 
     const queryOptions = {
       ...pick(options, [
-        'start',
-        'count',
-        'sort',
-        'nsfw',
-        'isLive',
-        'categoryOneOf',
-        'licenceOneOf',
-        'languageOneOf',
-        'tagsOneOf',
-        'tagsAllOf',
-        'privacyOneOf',
-        'isLocal',
-        'include',
-        'displayOnlyForFollower',
-        'hasFiles',
-        'accountId',
-        'videoChannelId',
-        'videoPlaylistId',
-        'user',
-        'historyOfUser',
-        'hasHLSFiles',
-        'hasWebtorrentFiles',
-        'search'
+        "start",
+        "count",
+        "sort",
+        "nsfw",
+        "isLive",
+        "categoryOneOf",
+        "licenceOneOf",
+        "languageOneOf",
+        "tagsOneOf",
+        "tagsAllOf",
+        "privacyOneOf",
+        "isLocal",
+        "include",
+        "displayOnlyForFollower",
+        "hasFiles",
+        "accountId",
+        "videoChannelId",
+        "videoPlaylistId",
+        "user",
+        "historyOfUser",
+        "hasHLSFiles",
+        "hasWebtorrentFiles",
+        "search"
       ]),
 
       serverAccountIdForBlock: serverActor.Account.id,
@@ -1159,38 +1251,41 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     uuids?: string[]
   }) {
     VideoModel.throwIfPrivateIncludeWithoutUser(options.include, options.user)
-    VideoModel.throwIfPrivacyOneOfWithoutUser(options.privacyOneOf, options.user)
+    VideoModel.throwIfPrivacyOneOfWithoutUser(
+      options.privacyOneOf,
+      options.user
+    )
 
     const serverActor = await getServerActor()
 
     const queryOptions = {
       ...pick(options, [
-        'include',
-        'nsfw',
-        'isLive',
-        'categoryOneOf',
-        'licenceOneOf',
-        'languageOneOf',
-        'tagsOneOf',
-        'tagsAllOf',
-        'privacyOneOf',
-        'user',
-        'isLocal',
-        'host',
-        'start',
-        'count',
-        'sort',
-        'startDate',
-        'endDate',
-        'originallyPublishedStartDate',
-        'originallyPublishedEndDate',
-        'durationMin',
-        'durationMax',
-        'hasHLSFiles',
-        'hasWebtorrentFiles',
-        'uuids',
-        'search',
-        'displayOnlyForFollower'
+        "include",
+        "nsfw",
+        "isLive",
+        "categoryOneOf",
+        "licenceOneOf",
+        "languageOneOf",
+        "tagsOneOf",
+        "tagsAllOf",
+        "privacyOneOf",
+        "user",
+        "isLocal",
+        "host",
+        "start",
+        "count",
+        "sort",
+        "startDate",
+        "endDate",
+        "originallyPublishedStartDate",
+        "originallyPublishedEndDate",
+        "durationMin",
+        "durationMax",
+        "hasHLSFiles",
+        "hasWebtorrentFiles",
+        "uuids",
+        "search",
+        "displayOnlyForFollower"
       ]),
       serverAccountIdForBlock: serverActor.Account.id
     }
@@ -1268,37 +1363,55 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     return VideoModel.count(options)
   }
 
-  static load (id: number | string, transaction?: Transaction): Promise<MVideoThumbnail> {
+  static load (
+    id: number | string,
+    transaction?: Transaction
+  ): Promise<MVideoThumbnail> {
     const queryBuilder = new VideoModelGetQueryBuilder(VideoModel.sequelize)
 
-    return queryBuilder.queryVideo({ id, transaction, type: 'thumbnails' })
+    return queryBuilder.queryVideo({ id, transaction, type: "thumbnails" })
   }
 
-  static loadWithBlacklist (id: number | string, transaction?: Transaction): Promise<MVideoThumbnailBlacklist> {
+  static loadWithBlacklist (
+    id: number | string,
+    transaction?: Transaction
+  ): Promise<MVideoThumbnailBlacklist> {
     const queryBuilder = new VideoModelGetQueryBuilder(VideoModel.sequelize)
 
-    return queryBuilder.queryVideo({ id, transaction, type: 'thumbnails-blacklist' })
+    return queryBuilder.queryVideo({
+      id,
+      transaction,
+      type: "thumbnails-blacklist"
+    })
   }
 
-  static loadImmutableAttributes (id: number | string, t?: Transaction): Promise<MVideoImmutable> {
+  static loadImmutableAttributes (
+    id: number | string,
+    t?: Transaction
+  ): Promise<MVideoImmutable> {
     const fun = () => {
       const query = {
         where: buildWhereIdOrUUID(id),
         transaction: t
       }
 
-      return VideoModel.scope(ScopeNames.WITH_IMMUTABLE_ATTRIBUTES).findOne(query)
+      return VideoModel.scope(ScopeNames.WITH_IMMUTABLE_ATTRIBUTES).findOne(
+        query
+      )
     }
 
     return ModelCache.Instance.doCache({
-      cacheType: 'load-video-immutable-id',
-      key: '' + id,
-      deleteKey: 'video',
+      cacheType: "load-video-immutable-id",
+      key: "" + id,
+      deleteKey: "video",
       fun
     })
   }
 
-  static loadByUrlImmutableAttributes (url: string, transaction?: Transaction): Promise<MVideoImmutable> {
+  static loadByUrlImmutableAttributes (
+    url: string,
+    transaction?: Transaction
+  ): Promise<MVideoImmutable> {
     const fun = () => {
       const query: FindOptions = {
         where: {
@@ -1307,45 +1420,78 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
         transaction
       }
 
-      return VideoModel.scope(ScopeNames.WITH_IMMUTABLE_ATTRIBUTES).findOne(query)
+      return VideoModel.scope(ScopeNames.WITH_IMMUTABLE_ATTRIBUTES).findOne(
+        query
+      )
     }
 
     return ModelCache.Instance.doCache({
-      cacheType: 'load-video-immutable-url',
+      cacheType: "load-video-immutable-url",
       key: url,
-      deleteKey: 'video',
+      deleteKey: "video",
       fun
     })
   }
 
-  static loadOnlyId (id: number | string, transaction?: Transaction): Promise<MVideoId> {
+  static loadOnlyId (
+    id: number | string,
+    transaction?: Transaction
+  ): Promise<MVideoId> {
     const queryBuilder = new VideoModelGetQueryBuilder(VideoModel.sequelize)
 
-    return queryBuilder.queryVideo({ id, transaction, type: 'id' })
+    return queryBuilder.queryVideo({ id, transaction, type: "id" })
   }
 
-  static loadWithFiles (id: number | string, transaction?: Transaction, logging?: boolean): Promise<MVideoWithAllFiles> {
+  static loadWithFiles (
+    id: number | string,
+    transaction?: Transaction,
+    logging?: boolean
+  ): Promise<MVideoWithAllFiles> {
     const queryBuilder = new VideoModelGetQueryBuilder(VideoModel.sequelize)
 
-    return queryBuilder.queryVideo({ id, transaction, type: 'all-files', logging })
+    return queryBuilder.queryVideo({
+      id,
+      transaction,
+      type: "all-files",
+      logging
+    })
   }
 
-  static loadByUrl (url: string, transaction?: Transaction): Promise<MVideoThumbnail> {
+  static loadByUrl (
+    url: string,
+    transaction?: Transaction
+  ): Promise<MVideoThumbnail> {
     const queryBuilder = new VideoModelGetQueryBuilder(VideoModel.sequelize)
 
-    return queryBuilder.queryVideo({ url, transaction, type: 'thumbnails' })
+    return queryBuilder.queryVideo({ url, transaction, type: "thumbnails" })
   }
 
-  static loadByUrlAndPopulateAccount (url: string, transaction?: Transaction): Promise<MVideoAccountLightBlacklistAllFiles> {
+  static loadByUrlAndPopulateAccount (
+    url: string,
+    transaction?: Transaction
+  ): Promise<MVideoAccountLightBlacklistAllFiles> {
     const queryBuilder = new VideoModelGetQueryBuilder(VideoModel.sequelize)
 
-    return queryBuilder.queryVideo({ url, transaction, type: 'account-blacklist-files' })
+    return queryBuilder.queryVideo({
+      url,
+      transaction,
+      type: "account-blacklist-files"
+    })
   }
 
-  static loadAndPopulateAccountAndServerAndTags (id: number | string, t?: Transaction, userId?: number): Promise<MVideoFullLight> {
+  static loadAndPopulateAccountAndServerAndTags (
+    id: number | string,
+    t?: Transaction,
+    userId?: number
+  ): Promise<MVideoFullLight> {
     const queryBuilder = new VideoModelGetQueryBuilder(VideoModel.sequelize)
 
-    return queryBuilder.queryVideo({ id, transaction: t, type: 'full-light', userId })
+    return queryBuilder.queryVideo({
+      id,
+      transaction: t,
+      type: "full-light",
+      userId
+    })
   }
 
   static loadForGetAPI (parameters: {
@@ -1356,7 +1502,7 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     const { id, transaction, userId } = parameters
     const queryBuilder = new VideoModelGetQueryBuilder(VideoModel.sequelize)
 
-    return queryBuilder.queryVideo({ id, transaction, type: 'api', userId })
+    return queryBuilder.queryVideo({ id, transaction, type: "api", userId })
   }
 
   static async getStats () {
@@ -1366,7 +1512,7 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
       }
     })
 
-    let totalLocalVideoViews = await VideoModel.sum('views', {
+    let totalLocalVideoViews = await VideoModel.sum("views", {
       where: {
         remote: false
       }
@@ -1380,7 +1526,7 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     const { total: totalVideos } = await VideoModel.listForApi({
       start: 0,
       count: 0,
-      sort: '-publishedAt',
+      sort: "-publishedAt",
       nsfw: buildNSFWFilter(),
       displayOnlyForFollower: {
         actorId: serverActor.id,
@@ -1396,7 +1542,7 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
   }
 
   static incrementViews (id: number, views: number) {
-    return VideoModel.increment('views', {
+    return VideoModel.increment("views", {
       by: views,
       where: {
         id
@@ -1404,10 +1550,13 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     })
   }
 
-  static updateRatesOf (videoId: number, type: VideoRateType, count: number, t: Transaction) {
-    const field = type === 'like'
-      ? 'likes'
-      : 'dislikes'
+  static updateRatesOf (
+    videoId: number,
+    type: VideoRateType,
+    count: number,
+    t: Transaction
+  ) {
+    const field = type === "like" ? "likes" : "dislikes"
 
     const rawQuery = `UPDATE "video" SET "${field}" = :count WHERE "video"."id" = :videoId`
 
@@ -1419,14 +1568,13 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
   }
 
   static syncLocalRates (videoId: number, type: VideoRateType, t: Transaction) {
-    const field = type === 'like'
-      ? 'likes'
-      : 'dislikes'
+    const field = type === "like" ? "likes" : "dislikes"
 
-    const rawQuery = `UPDATE "video" SET "${field}" = ` +
-      '(' +
-        'SELECT COUNT(id) FROM "accountVideoRate" WHERE "accountVideoRate"."videoId" = "video"."id" AND type = :rateType' +
-      ') ' +
+    const rawQuery =
+      `UPDATE "video" SET "${field}" = ` +
+      "(" +
+      'SELECT COUNT(id) FROM "accountVideoRate" WHERE "accountVideoRate"."videoId" = "video"."id" AND type = :rateType' +
+      ") " +
       'WHERE "video"."id" = :videoId'
 
     return AccountVideoRateModel.sequelize.query(rawQuery, {
@@ -1438,10 +1586,11 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
 
   static checkVideoHasInstanceFollow (videoId: number, followerActorId: number) {
     // Instances only share videos
-    const query = 'SELECT 1 FROM "videoShare" ' +
+    const query =
+      'SELECT 1 FROM "videoShare" ' +
       'INNER JOIN "actorFollow" ON "actorFollow"."targetActorId" = "videoShare"."actorId" ' +
       'WHERE "actorFollow"."actorId" = $followerActorId AND "actorFollow"."state" = \'accepted\' AND "videoShare"."videoId" = $videoId ' +
-      'LIMIT 1'
+      "LIMIT 1"
 
     const options = {
       type: QueryTypes.SELECT as QueryTypes.SELECT,
@@ -1449,8 +1598,9 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
       raw: true
     }
 
-    return VideoModel.sequelize.query(query, options)
-                     .then(results => results.length === 1)
+    return VideoModel.sequelize
+      .query(query, options)
+      .then((results) => results.length === 1)
   }
 
   static bulkUpdateSupportField (ofChannel: MChannel, t: Transaction) {
@@ -1466,18 +1616,21 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
 
   static getAllIdsFromChannel (videoChannel: MChannelId): Promise<number[]> {
     const query = {
-      attributes: [ 'id' ],
+      attributes: [ "id" ],
       where: {
         channelId: videoChannel.id
       }
     }
 
-    return VideoModel.findAll(query)
-                     .then(videos => videos.map(v => v.id))
+    return VideoModel.findAll(query).then((videos) => videos.map((v) => v.id))
   }
 
   // threshold corresponds to how many video the field should have to be returned
-  static async getRandomFieldSamples (field: 'category' | 'channelId', threshold: number, count: number) {
+  static async getRandomFieldSamples (
+    field: "category" | "channelId",
+    threshold: number,
+    count: number
+  ) {
     const serverActor = await getServerActor()
 
     const queryOptions: BuildVideosListQueryOptions = {
@@ -1485,7 +1638,7 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
       group: `GROUP BY "${field}"`,
       having: `HAVING COUNT("${field}") >= ${threshold}`,
       start: 0,
-      sort: 'random',
+      sort: "random",
       count,
       serverAccountIdForBlock: serverActor.Account.id,
       displayOnlyForFollower: {
@@ -1496,8 +1649,9 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
 
     const queryBuilder = new VideosIdListQueryBuilder(VideoModel.sequelize)
 
-    return queryBuilder.queryVideoIds(queryOptions)
-      .then(rows => rows.map(r => r[field]))
+    return queryBuilder
+      .queryVideoIds(queryOptions)
+      .then((rows) => rows.map((r) => r[field]))
   }
 
   static buildTrendingQuery (trendingDays: number) {
@@ -1509,7 +1663,9 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
       where: {
         startDate: {
           // FIXME: ts error
-          [Op.gte as any]: new Date(new Date().getTime() - (24 * 3600 * 1000) * trendingDays)
+          [Op.gte as any]: new Date(
+            new Date().getTime() - 24 * 3600 * 1000 * trendingDays
+          )
         }
       }
     }
@@ -1531,7 +1687,9 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     function getModels () {
       if (options.count === 0) return Promise.resolve([])
 
-      const queryBuilder = new VideosModelListQueryBuilder(VideoModel.sequelize)
+      const queryBuilder = new VideosModelListQueryBuilder(
+        VideoModel.sequelize
+      )
 
       return queryBuilder.queryVideos(options)
     }
@@ -1544,22 +1702,35 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     }
   }
 
-  private static throwIfPrivateIncludeWithoutUser (include: VideoInclude, user: MUserAccountId) {
-    if (VideoModel.isPrivateInclude(include) && !user?.hasRight(UserRight.SEE_ALL_VIDEOS)) {
-      throw new Error('Try to filter all-local but user cannot see all videos')
+  private static throwIfPrivateIncludeWithoutUser (
+    include: VideoInclude,
+    user: MUserAccountId
+  ) {
+    if (
+      VideoModel.isPrivateInclude(include) &&
+      !user?.hasRight(UserRight.SEE_ALL_VIDEOS)
+    ) {
+      throw new Error("Try to filter all-local but user cannot see all videos")
     }
   }
 
-  private static throwIfPrivacyOneOfWithoutUser (privacyOneOf: VideoPrivacy[], user: MUserAccountId) {
+  private static throwIfPrivacyOneOfWithoutUser (
+    privacyOneOf: VideoPrivacy[],
+    user: MUserAccountId
+  ) {
     if (privacyOneOf && !user?.hasRight(UserRight.SEE_ALL_VIDEOS)) {
-      throw new Error('Try to choose video privacies but user cannot see all videos')
+      throw new Error(
+        "Try to choose video privacies but user cannot see all videos"
+      )
     }
   }
 
   private static isPrivateInclude (include: VideoInclude) {
-    return include & VideoInclude.BLACKLISTED ||
-           include & VideoInclude.BLOCKED_OWNER ||
-           include & VideoInclude.NOT_PUBLISHED_STATE
+    return (
+      include & VideoInclude.BLACKLISTED ||
+      include & VideoInclude.BLOCKED_OWNER ||
+      include & VideoInclude.NOT_PUBLISHED_STATE
+    )
   }
 
   isBlacklisted () {
@@ -1567,47 +1738,73 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
   }
 
   isBlocked () {
-    return this.VideoChannel.Account.Actor.Server?.isBlocked() || this.VideoChannel.Account.isBlocked()
+    return (
+      this.VideoChannel.Account.Actor.Server?.isBlocked() ||
+      this.VideoChannel.Account.isBlocked()
+    )
   }
 
-  getQualityFileBy<T extends MVideoWithFile> (this: T, fun: (files: MVideoFile[], it: (file: MVideoFile) => number) => MVideoFile) {
+  getQualityFileBy<T extends MVideoWithFile>(
+    this: T,
+    fun: (files: MVideoFile[], it: (file: MVideoFile) => number) => MVideoFile
+  ) {
     // We first transcode to WebTorrent format, so try this array first
     if (Array.isArray(this.VideoFiles) && this.VideoFiles.length !== 0) {
-      const file = fun(this.VideoFiles, file => file.resolution)
+      const file = fun(this.VideoFiles, (file) => file.resolution)
 
       return Object.assign(file, { Video: this })
     }
 
     // No webtorrent files, try with streaming playlist files
-    if (Array.isArray(this.VideoStreamingPlaylists) && this.VideoStreamingPlaylists.length !== 0) {
-      const streamingPlaylistWithVideo = Object.assign(this.VideoStreamingPlaylists[0], { Video: this })
+    if (
+      Array.isArray(this.VideoStreamingPlaylists) &&
+      this.VideoStreamingPlaylists.length !== 0
+    ) {
+      const streamingPlaylistWithVideo = Object.assign(
+        this.VideoStreamingPlaylists[0],
+        { Video: this }
+      )
 
-      const file = fun(streamingPlaylistWithVideo.VideoFiles, file => file.resolution)
-      return Object.assign(file, { VideoStreamingPlaylist: streamingPlaylistWithVideo })
+      const file = fun(
+        streamingPlaylistWithVideo.VideoFiles,
+        (file) => file.resolution
+      )
+      return Object.assign(file, {
+        VideoStreamingPlaylist: streamingPlaylistWithVideo
+      })
     }
 
     return undefined
   }
 
-  getMaxQualityFile<T extends MVideoWithFile> (this: T): MVideoFileVideo | MVideoFileStreamingPlaylistVideo {
+  getMaxQualityFile<T extends MVideoWithFile>(
+    this: T
+  ): MVideoFileVideo | MVideoFileStreamingPlaylistVideo {
     return this.getQualityFileBy(maxBy)
   }
 
-  getMinQualityFile<T extends MVideoWithFile> (this: T): MVideoFileVideo | MVideoFileStreamingPlaylistVideo {
+  getMinQualityFile<T extends MVideoWithFile>(
+    this: T
+  ): MVideoFileVideo | MVideoFileStreamingPlaylistVideo {
     return this.getQualityFileBy(minBy)
   }
 
-  getWebTorrentFile<T extends MVideoWithFile> (this: T, resolution: number): MVideoFileVideo {
+  getWebTorrentFile<T extends MVideoWithFile>(
+    this: T,
+    resolution: number
+  ): MVideoFileVideo {
     if (Array.isArray(this.VideoFiles) === false) return undefined
 
-    const file = this.VideoFiles.find(f => f.resolution === resolution)
+    const file = this.VideoFiles.find((f) => f.resolution === resolution)
     if (!file) return undefined
 
     return Object.assign(file, { Video: this })
   }
 
   hasWebTorrentFiles () {
-    return Array.isArray(this.VideoFiles) === true && this.VideoFiles.length !== 0
+    return (
+      Array.isArray(this.VideoFiles) === true && this.VideoFiles.length !== 0
+    )
   }
 
   async addAndSaveThumbnail (thumbnail: MThumbnail, transaction?: Transaction) {
@@ -1617,14 +1814,14 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
 
     if (Array.isArray(this.Thumbnails) === false) this.Thumbnails = []
 
-    this.Thumbnails = this.Thumbnails.filter(t => t.id !== savedThumbnail.id)
+    this.Thumbnails = this.Thumbnails.filter((t) => t.id !== savedThumbnail.id)
     this.Thumbnails.push(savedThumbnail)
   }
 
   getMiniature () {
     if (Array.isArray(this.Thumbnails) === false) return undefined
 
-    return this.Thumbnails.find(t => t.type === ThumbnailType.MINIATURE)
+    return this.Thumbnails.find((t) => t.type === ThumbnailType.MINIATURE)
   }
 
   hasPreview () {
@@ -1634,7 +1831,7 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
   getPreview () {
     if (Array.isArray(this.Thumbnails) === false) return undefined
 
-    return this.Thumbnails.find(t => t.type === ThumbnailType.PREVIEW)
+    return this.Thumbnails.find((t) => t.type === ThumbnailType.PREVIEW)
   }
 
   isOwned () {
@@ -1664,7 +1861,10 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     return join(LAZY_STATIC_PATHS.PREVIEWS, preview.filename)
   }
 
-  toFormattedJSON (this: MVideoFormattable, options?: VideoFormattingJSONOptions): Video {
+  toFormattedJSON (
+    this: MVideoFormattable,
+    options?: VideoFormattingJSONOptions
+  ): Video {
     return videoModelToFormattedJSON(this, options)
   }
 
@@ -1676,12 +1876,20 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     let files: VideoFile[] = []
 
     if (Array.isArray(this.VideoFiles)) {
-      const result = videoFilesModelToFormattedJSON(this, this.VideoFiles, includeMagnet)
+      const result = videoFilesModelToFormattedJSON(
+        this,
+        this.VideoFiles,
+        includeMagnet
+      )
       files = files.concat(result)
     }
 
-    for (const p of (this.VideoStreamingPlaylists || [])) {
-      const result = videoFilesModelToFormattedJSON(this, p.VideoFiles, includeMagnet)
+    for (const p of this.VideoStreamingPlaylists || []) {
+      const result = videoFilesModelToFormattedJSON(
+        this,
+        p.VideoFiles,
+        includeMagnet
+      )
       files = files.concat(result)
     }
 
@@ -1721,17 +1929,20 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     const file = this.getMaxQualityFile()
     const videoOrPlaylist = file.getVideoOrStreamingPlaylist()
 
-    return VideoPathManager.Instance.makeAvailableVideoFile(file.withVideoOrPlaylist(videoOrPlaylist), async originalFilePath => {
-      const probe = await ffprobePromise(originalFilePath)
+    return VideoPathManager.Instance.makeAvailableVideoFile(
+      file.withVideoOrPlaylist(videoOrPlaylist),
+      async (originalFilePath) => {
+        const probe = await ffprobePromise(originalFilePath)
 
-      const { audioStream } = await getAudioStream(originalFilePath, probe)
+        const { audioStream } = await getAudioStream(originalFilePath, probe)
 
-      return {
-        audioStream,
+        return {
+          audioStream,
 
-        ...await getVideoStreamDimensionsInfo(originalFilePath, probe)
+          ...(await getVideoStreamDimensionsInfo(originalFilePath, probe))
+        }
       }
-    })
+    )
   }
 
   getDescriptionAPIPath () {
@@ -1741,7 +1952,9 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
   getHLSPlaylist (): MStreamingPlaylistFilesVideo {
     if (!this.VideoStreamingPlaylists) return undefined
 
-    const playlist = this.VideoStreamingPlaylists.find(p => p.type === VideoStreamingPlaylistType.HLS)
+    const playlist = this.VideoStreamingPlaylists.find(
+      (p) => p.type === VideoStreamingPlaylistType.HLS
+    )
     if (!playlist) return undefined
 
     playlist.Video = this
@@ -1750,16 +1963,19 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
   }
 
   setHLSPlaylist (playlist: MStreamingPlaylist) {
-    const toAdd = [ playlist ] as [ VideoStreamingPlaylistModel ]
+    const toAdd = [ playlist ] as [VideoStreamingPlaylistModel]
 
-    if (Array.isArray(this.VideoStreamingPlaylists) === false || this.VideoStreamingPlaylists.length === 0) {
+    if (
+      Array.isArray(this.VideoStreamingPlaylists) === false ||
+      this.VideoStreamingPlaylists.length === 0
+    ) {
       this.VideoStreamingPlaylists = toAdd
       return
     }
 
-    this.VideoStreamingPlaylists = this.VideoStreamingPlaylists
-                                       .filter(s => s.type !== VideoStreamingPlaylistType.HLS)
-                                       .concat(toAdd)
+    this.VideoStreamingPlaylists = this.VideoStreamingPlaylists.filter(
+      (s) => s.type !== VideoStreamingPlaylistType.HLS
+    ).concat(toAdd)
   }
 
   removeWebTorrentFileAndTorrent (videoFile: MVideoFile, isRedundancy = false) {
@@ -1777,7 +1993,10 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     return Promise.all(promises)
   }
 
-  async removeStreamingPlaylistFiles (streamingPlaylist: MStreamingPlaylist, isRedundancy = false) {
+  async removeStreamingPlaylistFiles (
+    streamingPlaylist: MStreamingPlaylist,
+    isRedundancy = false
+  ) {
     const directoryPath = isRedundancy
       ? getHLSRedundancyDirectory(this)
       : getHLSDirectory(this)
@@ -1785,16 +2004,20 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     await remove(directoryPath)
 
     if (isRedundancy !== true) {
-      const streamingPlaylistWithFiles = streamingPlaylist as MStreamingPlaylistFilesVideo
+      const streamingPlaylistWithFiles =
+        streamingPlaylist as MStreamingPlaylistFilesVideo
       streamingPlaylistWithFiles.Video = this
 
       if (!Array.isArray(streamingPlaylistWithFiles.VideoFiles)) {
-        streamingPlaylistWithFiles.VideoFiles = await streamingPlaylistWithFiles.$get('VideoFiles')
+        streamingPlaylistWithFiles.VideoFiles =
+          await streamingPlaylistWithFiles.$get("VideoFiles")
       }
 
       // Remove physical files and torrents
       await Promise.all(
-        streamingPlaylistWithFiles.VideoFiles.map(file => file.removeTorrent())
+        streamingPlaylistWithFiles.VideoFiles.map((file) =>
+          file.removeTorrent()
+        )
       )
 
       if (streamingPlaylist.storage === VideoStorage.OBJECT_STORAGE) {
@@ -1818,19 +2041,29 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
   }
 
   isNewVideo (newPrivacy: VideoPrivacy) {
-    return this.hasPrivacyForFederation() === false && isPrivacyForFederation(newPrivacy) === true
+    return (
+      this.hasPrivacyForFederation() === false &&
+      isPrivacyForFederation(newPrivacy) === true
+    )
   }
 
   setAsRefreshed (transaction?: Transaction) {
-    return setAsUpdated('video', this.id, transaction)
+    return setAsUpdated("video", this.id, transaction)
   }
 
   requiresAuth () {
-    return this.privacy === VideoPrivacy.PRIVATE || this.privacy === VideoPrivacy.INTERNAL || !!this.VideoBlacklist
+    return (
+      this.privacy === VideoPrivacy.PRIVATE ||
+      this.privacy === VideoPrivacy.INTERNAL ||
+      !!this.VideoBlacklist
+    )
   }
 
   setPrivacy (newPrivacy: VideoPrivacy) {
-    if (this.privacy === VideoPrivacy.PRIVATE && newPrivacy !== VideoPrivacy.PRIVATE) {
+    if (
+      this.privacy === VideoPrivacy.PRIVATE &&
+      newPrivacy !== VideoPrivacy.PRIVATE
+    ) {
       this.publishedAt = new Date()
     }
 
@@ -1838,13 +2071,19 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
   }
 
   isConfidential () {
-    return this.privacy === VideoPrivacy.PRIVATE ||
+    return (
+      this.privacy === VideoPrivacy.PRIVATE ||
       this.privacy === VideoPrivacy.UNLISTED ||
       this.privacy === VideoPrivacy.INTERNAL
+    )
   }
 
-  async setNewState (newState: VideoState, isNewVideo: boolean, transaction: Transaction) {
-    if (this.state === newState) throw new Error('Cannot use same state ' + newState)
+  async setNewState (
+    newState: VideoState,
+    isNewVideo: boolean,
+    transaction: Transaction
+  ) {
+    if (this.state === newState) { throw new Error("Cannot use same state " + newState) }
 
     this.state = newState
 
@@ -1862,11 +2101,16 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
   getTrackerUrls () {
     if (this.isOwned()) {
       return [
-        WEBSERVER.URL + '/tracker/announce',
-        WEBSERVER.WS + '://' + WEBSERVER.HOSTNAME + ':' + WEBSERVER.PORT + '/tracker/socket'
+        WEBSERVER.URL + "/tracker/announce",
+        WEBSERVER.WS +
+          "://" +
+          WEBSERVER.HOSTNAME +
+          ":" +
+          WEBSERVER.PORT +
+          "/tracker/socket"
       ]
     }
 
-    return this.Trackers.map(t => t.url)
+    return this.Trackers.map((t) => t.url)
   }
 }

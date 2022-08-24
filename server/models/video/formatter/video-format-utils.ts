@@ -196,7 +196,8 @@ function videoModelToFormattedDetailsJSON (video: MVideoFormattableDetails): Vid
       label: getStateLabel(video.state)
     },
 
-    trackerUrls: video.getTrackerUrls()
+    trackerUrls: video.getTrackerUrls(),
+    aspectRatio: video.aspectRatio
   }
 
   return Object.assign(videoJSON, detailsJSON)

@@ -111,11 +111,14 @@ function generateVideoMiniature (options: {
   video: MVideoThumbnail
   videoFile: MVideoFile
   type: ThumbnailType
+  size?: ImageSize
 }) {
-  const { video, videoFile, type } = options
+  const { video, videoFile, type, size } = options
 
   return VideoPathManager.Instance.makeAvailableVideoFile(videoFile.withVideoOrPlaylist(video), input => {
-    const { filename, basePath, height, width, existingThumbnail, outputPath } = buildMetadataFromVideo(video, type)
+    const videoMeta = buildMetadataFromVideo(video, type)
+    const { filename, basePath, existingThumbnail, outputPath } = videoMeta
+    const { height, width } = size || videoMeta
 
     const thumbnailCreator = videoFile.isAudio()
       ? () => processImage(ASSETS_PATH.DEFAULT_AUDIO_BACKGROUND, outputPath, { width, height }, true)

@@ -104,9 +104,12 @@ async function jimpProcessor (path: string, destination: string, newSize: { widt
     return copy(path, destination)
   }
 
-  await autoResize({ sourceImage, newSize, destination })
+  await sourceImage
+    .quality(95)
+    .writeAsync(destination)
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function autoResize (options: {
   sourceImage: Jimp
   newSize: { width: number, height: number }
