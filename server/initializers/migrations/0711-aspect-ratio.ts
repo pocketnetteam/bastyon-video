@@ -1,11 +1,12 @@
 import * as Sequelize from 'sequelize'
 
-function up (utils: {
+async function up (utils: {
   transaction: Sequelize.Transaction
   queryInterface: Sequelize.QueryInterface
   sequelize: Sequelize.Sequelize
+  db: any
 }): Promise<void> {
-  const q = utils.queryInterface
+  const { transaction } = utils
 
   const data = {
     type: Sequelize.DOUBLE,
@@ -13,7 +14,7 @@ function up (utils: {
     defaultValue: 1
   }
 
-  return q.addColumn('video', 'aspectRatio', data)
+  await utils.queryInterface.addColumn('video', 'aspectRatio', data, { transaction })
 }
 
 function down (options) {
