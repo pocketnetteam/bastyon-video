@@ -21,4 +21,8 @@ export class SystemComponent {
   hasDebugRight () {
     return this.auth.getUser().hasRight(UserRight.MANAGE_DEBUG)
   }
+
+  hasConfigurationRight () {
+    return this.auth.getUser().hasRight(UserRight.MANAGE_CONFIGURATION)
+  }
 }

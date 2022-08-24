@@ -5,6 +5,8 @@ import { AbstractScheduler } from './abstract-scheduler'
 import { Op } from 'sequelize'
 import { POCKETNET_PROXY_META } from '@server/initializers/constants'
 import moment from 'moment'
+import { GarbageCollectorHistoryModel } from '@server/models/garbage-collector/garbage-collector-history'
+import { GarbageCollectorState } from '../../../shared/models'
 
 const { Api } = require('../../../../node_modules/peertube-plugin-pocketnet-auth/libs/api');
 const api = new Api({});
@@ -27,6 +29,8 @@ export class GarbageCollectorScheduler extends AbstractScheduler {
 
   private constructor () {
     super()
+    // If server crashed while garbage collector was running, we will need to change the state
+    this.clearPendingGbEntries();
   }
 
   protected async internalExecute () {
@@ -36,8 +40,24 @@ export class GarbageCollectorScheduler extends AbstractScheduler {
     this.oldVideos = [];
     this.videosToDelete = [];
 
-    await this.fetchOldVideos();
-    await this.checkVideosBlockchain();
+    // Clear pending gb entries if needed
+    await this.clearPendingGbEntries();
+
+    var gcModel = await GarbageCollectorHistoryModel.create({
+      progress: 0,
+      state: GarbageCollectorState.STARTED
+    });
+
+    await this.fetchOldVideos(gcModel);
+    await this.checkVideosBlockchain(gcModel);
+
+    gcModel.update({
+      progress: 100,
+      nbVideos: this.videosToDelete.length,
+      videosUrls: this.videosToDelete.map((v) => v.url),
+      state: GarbageCollectorState.COMPLETED,
+      finishedOn: new Date()
+    });
 
     logger.info('Garbage collector: Found ' + this.videosToDelete.length + ' video(s) to delete !');
   }
@@ -47,7 +67,7 @@ export class GarbageCollectorScheduler extends AbstractScheduler {
   }
 
   // Find all the old videos from database
-  private async fetchOldVideos() {
+  private async fetchOldVideos(gcModel: GarbageCollectorHistoryModel) {
     try {
       let maxPublishedAt = moment().subtract(this.timePeriodOldVideos);
       const query = {
@@ -66,11 +86,17 @@ export class GarbageCollectorScheduler extends AbstractScheduler {
     } catch(err) {
       logger.error('Garbage collector: Cannot fetch videos from database');
       logger.error('Error: ', err);
+      gcModel.update({
+        state: GarbageCollectorState.FAILED,
+        error: err,
+        finishedOn: new Date()
+      });
     }
   }
 
   // For each chunk of 100 videos, check the blockchain (nbBlockchainChecks times)
-  private async checkVideosBlockchain() {
+  private async checkVideosBlockchain(gcModel: GarbageCollectorHistoryModel) {
+    var nbVideosTotal = this.oldVideos.length;
     while (this.oldVideos.length > 0) {
       var currentChunk = this.oldVideos.splice(0, 100), lastNbVideosBlockchain, hasBlockchainDoubt = false, vidsToDelete;
       for (var i = 0; i < this.nbBlockchainChecks; i++) {
@@ -81,6 +107,10 @@ export class GarbageCollectorScheduler extends AbstractScheduler {
       }
       if (!hasBlockchainDoubt && lastNbVideosBlockchain > 0)
         this.videosToDelete = this.videosToDelete.concat(vidsToDelete);
+      // Update progress
+      gcModel.update({
+        progress: 100 - Math.round((this.oldVideos.length / nbVideosTotal) * 100)
+      });
     }
     return;
   }
@@ -104,7 +134,8 @@ export class GarbageCollectorScheduler extends AbstractScheduler {
       }).map((v) => {
         return {
           host: v.host,
-          uuid: v.uuid
+          uuid: v.uuid,
+          url: v.url
         }
       }));
       return vidsToDelete;
@@ -117,6 +148,20 @@ export class GarbageCollectorScheduler extends AbstractScheduler {
   private encodeVideoUrl(video) {
     let url = new URL(video.url);
     return encodeURIComponent(`peertube://${url.host}/${video.uuid}`);
+  }
+
+  // Make sure to clear all pending garbage collector entries to a finished state
+  async clearPendingGbEntries() {
+    const query = { where: { state: { [Op.eq]: GarbageCollectorState.STARTED }}};
+    var runningGbs = await GarbageCollectorHistoryModel.findAll(query);
+    runningGbs.forEach((gb) => {
+      gb.update({
+        state: GarbageCollectorState.FAILED,
+        error: 'Server stopped while garbage collector was running',
+        finishedOn: new Date()
+      });
+      gb.save();
+    });
   }
 
 }

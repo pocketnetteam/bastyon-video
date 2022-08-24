@@ -5,6 +5,7 @@ import { DebugComponent } from './debug'
 import { JobsComponent } from './jobs/jobs.component'
 import { LogsComponent } from './logs'
 import { SystemComponent } from './system.component'
+import { GarbageCollectorComponent } from './garbage-collector'
 
 export const SystemRoutes: Routes = [
   {
@@ -48,7 +49,18 @@ export const SystemRoutes: Routes = [
             title: $localize`Debug`
           }
         }
-      }
+      },
+      {
+        path: 'garbage-collector',
+        canActivate: [ UserRightGuard ],
+        component: GarbageCollectorComponent,
+        data: {
+          meta: {
+            userRight: UserRight.MANAGE_CONFIGURATION,
+            title: $localize`Garbage Collector`
+          }
+        }
+      },
     ]
   }
 ]

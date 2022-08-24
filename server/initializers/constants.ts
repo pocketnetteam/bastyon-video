@@ -5,6 +5,7 @@ import { join } from 'path'
 import { randomInt } from '../../shared/core-utils/common/miscs'
 import {
   AbuseState,
+  GarbageCollectorState,
   JobType,
   VideoImportState,
   VideoPrivacy,
@@ -448,6 +449,12 @@ const VIDEO_PLAYLIST_PRIVACIES: { [ id in VideoPlaylistPrivacy ]: string } = {
 const VIDEO_PLAYLIST_TYPES: { [ id in VideoPlaylistType ]: string } = {
   [VideoPlaylistType.REGULAR]: 'Regular',
   [VideoPlaylistType.WATCH_LATER]: 'Watch later'
+}
+
+const GARBAGE_COLLECTOR_STATES: { [ id in GarbageCollectorState ]: string } = {
+  [GarbageCollectorState.STARTED]: 'Running',
+  [GarbageCollectorState.COMPLETED]: 'Completed',
+  [GarbageCollectorState.FAILED]: 'Failed'
 }
 
 const MIMETYPES = {
@@ -922,6 +929,7 @@ export {
   PLUGIN_EXTERNAL_AUTH_TOKEN_LIFETIME,
   ASSETS_PATH,
   FILES_CONTENT_HASH,
+  GARBAGE_COLLECTOR_STATES,
   loadLanguages,
   buildLanguages,
   generateContentHash

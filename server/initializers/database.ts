@@ -48,6 +48,7 @@ import { ActorCustomPageModel } from '@server/models/account/actor-custom-page'
 import { VideoJobInfoModel } from '@server/models/video/video-job-info'
 import { ImageModel } from '@server/models/image/image'
 import { ImageRedundancyModel } from '@server/models/image/image-redundancy'
+import { GarbageCollectorHistoryModel } from '@server/models/garbage-collector/garbage-collector-history'
 
 require('pg').defaults.parseInt8 = true // Avoid BIGINT to be converted to string
 
@@ -149,7 +150,8 @@ async function initDatabaseModels (silent: boolean) {
     ActorCustomPageModel,
     VideoJobInfoModel,
     ImageModel,
-    ImageRedundancyModel
+    ImageRedundancyModel,
+    GarbageCollectorHistoryModel
   ])
 
   // Check extensions exist in the database

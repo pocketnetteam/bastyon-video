@@ -38,9 +38,11 @@ import { PluginSearchComponent } from './plugins/plugin-search/plugin-search.com
 import { PluginShowInstalledComponent } from './plugins/plugin-show-installed/plugin-show-installed.component'
 import { PluginsComponent } from './plugins/plugins.component'
 import { PluginApiService } from './plugins/shared/plugin-api.service'
-import { JobService, LogsComponent, LogsService, SystemComponent } from './system'
+import { JobService, LogsComponent, LogsService, SystemComponent, GarbageCollectorService } from './system'
 import { DebugComponent, DebugService } from './system/debug'
 import { JobsComponent } from './system/jobs/jobs.component'
+import { GarbageCollectorComponent } from './system/garbage-collector/garbage-collector.component'
+import { ListVideosModalComponent } from './system/garbage-collector/list-videos-modal/list-videos-modal.component'
 import { UserCreateComponent, UserListComponent, UserPasswordComponent, UsersComponent, UserUpdateComponent } from './users'
 
 @NgModule({
@@ -96,6 +98,8 @@ import { UserCreateComponent, UserListComponent, UserPasswordComponent, UsersCom
     JobsComponent,
     LogsComponent,
     DebugComponent,
+    GarbageCollectorComponent,
+    ListVideosModalComponent,
 
     ConfigComponent,
 
@@ -114,6 +118,7 @@ import { UserCreateComponent, UserListComponent, UserPasswordComponent, UsersCom
 
   providers: [
     JobService,
+    GarbageCollectorService,
     LogsService,
     DebugService,
     ConfigService,
