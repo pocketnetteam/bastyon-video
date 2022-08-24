@@ -24,6 +24,8 @@ export class GarbageCollectorComponent implements OnInit, OnDestroy {
   // Internal variables
   private interval: any;
   private isRequesting: boolean = false;
+  private isTriggering: boolean = false;
+  public isExecuting: boolean = false;
   public hasError: boolean = false;
 
   public garbageCollectorRunningState = GarbageCollectorState.STARTED;
@@ -54,24 +56,38 @@ export class GarbageCollectorComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.interval = setInterval(() => {
-      if (this.isRequesting)
-        return;
-      this.isRequesting = true;
-      this.garbageCollectorService.fetchGbHistory().then((gbRuns: any[]) => {
-        this.gbRuns = gbRuns;
-        console.log(this.gbRuns[0]);
-      }, (err) => {
-        this.gbRuns = null;
-        this.hasError = true;
-        clearInterval(this.interval);
-      }).finally(() => {
-        this.isRequesting = false;
-      });
+      this.fetchGbHistory();
     }, this.refreshTime);
+    this.fetchGbHistory();
+  }
+
+  fetchGbHistory() {
+    if (this.isRequesting)
+      return;
+    this.isRequesting = true;
+    this.garbageCollectorService.fetchGbHistory().then((gbRuns: any[]) => {
+      this.gbRuns = gbRuns;
+    }, (err) => {
+      this.gbRuns = null;
+      this.hasError = true;
+      clearInterval(this.interval);
+    }).finally(() => {
+      this.isRequesting = false;
+      if (!this.isTriggering)
+        this.isExecuting = false;
+    });
   }
 
   executeGarbageCollector() {
-    this.garbageCollectorService.triggerGarbageCollector();
+    if (this.isTriggering)
+      return;
+    this.isTriggering = true;
+    this.isExecuting = true;
+    this.garbageCollectorService.triggerGarbageCollector().then(() => {
+
+    }).finally(() => {
+      this.isTriggering = false;
+    });
   }
 
   openModalListVideos(gbRun: any) {

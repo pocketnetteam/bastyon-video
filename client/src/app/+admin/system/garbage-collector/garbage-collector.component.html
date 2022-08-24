@@ -22,7 +22,7 @@
             Garbage collector is running...
         </div>
         <div *ngIf="!(gbRuns.length > 0 && gbRuns[0].state == garbageCollectorRunningState)">
-            <button (click)="executeGarbageCollector()">Execute</button>
+            <button *ngIf="!isExecuting" (click)="executeGarbageCollector()">Execute</button>
         </div>
     </div>
 
