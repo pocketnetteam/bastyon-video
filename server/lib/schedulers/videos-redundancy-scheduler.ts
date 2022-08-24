@@ -23,12 +23,8 @@ import { getLocalVideoCacheFileActivityPubUrl, getLocalVideoCacheStreamingPlayli
 import { getOrCreateAPVideo } from '../activitypub/videos'
 import { downloadPlaylistSegments } from '../hls'
 import { removeVideoRedundancy } from '../redundancy'
-import {
-  generateHLSRedundancyUrl,
-  generateWebTorrentRedundancyUrl
-} from '../video-urls'
+import { generateHLSRedundancyUrl, generateWebTorrentRedundancyUrl } from '../video-urls'
 import { AbstractScheduler } from './abstract-scheduler'
-import { sequelizeTypescript } from '@server/initializers/database'
 
 const lTags = loggerTagsFactory('redundancy')
 
@@ -77,7 +73,6 @@ export class VideosRedundancyScheduler extends AbstractScheduler {
 
       try {
         const videoToDuplicate = await this.findVideoToDuplicate(redundancyConfig)
-
         if (!videoToDuplicate) continue
 
         const candidateToDuplicate = {
@@ -119,27 +114,17 @@ export class VideosRedundancyScheduler extends AbstractScheduler {
 
     for (const redundancyModel of expired) {
       try {
-        // const redundancyConfig = CONFIG.REDUNDANCY.VIDEOS.STRATEGIES.find(s => s.strategy === redundancyModel.strategy)
-        // const candidate: CandidateToDuplicate = {
-        //   redundancy: redundancyConfig,
-        //   video: null,
-        //   files: [],
-        //   streamingPlaylists: []
-        // }
+        const redundancyConfig = CONFIG.REDUNDANCY.VIDEOS.STRATEGIES.find(s => s.strategy === redundancyModel.strategy)
+        const { totalUsed } = await VideoRedundancyModel.getStats(redundancyConfig.strategy)
 
         // If the administrator disabled the redundancy or decreased the cache size, remove this redundancy instead of extending it
-        // if (!redundancyConfig || await this.isTooHeavy(candidate)) {
-        //   logger.info(
-        //     'Destroying redundancy %s because the cache size %s is too heavy.',
-        //     redundancyModel.url, redundancyModel.strategy, lTags(candidate.video.uuid)
-        //   )
+        if (!redundancyConfig || totalUsed > redundancyConfig.size) {
+          logger.info('Destroying redundancy %s because the cache size %s is too heavy.', redundancyModel.url, redundancyModel.strategy)
 
-        //   await removeVideoRedundancy(redundancyModel)
-        // } else {
-        //   await this.extendsRedundancy(redundancyModel)
-        // }
-
-        await this.extendsRedundancy(redundancyModel)
+          await removeVideoRedundancy(redundancyModel)
+        } else {
+          await this.extendsRedundancy(redundancyModel)
+        }
       } catch (err) {
         logger.error(
           'Cannot extend or remove expiration of %s video from our redundancy system.',
@@ -198,60 +183,28 @@ export class VideosRedundancyScheduler extends AbstractScheduler {
 
       return
     }
-    // For clearing, if something went wrong
-    const fileRedundancyModels = []
-    const streamingPlaylistRedundancyModels = []
 
-    try {
-      for (const file of data.files) {
-        const existingRedundancy = await VideoRedundancyModel.loadLocalByFileId(file.id)
-        if (existingRedundancy) {
-          await this.extendsRedundancy(existingRedundancy)
+    for (const file of data.files) {
+      const existingRedundancy = await VideoRedundancyModel.loadLocalByFileId(file.id)
+      if (existingRedundancy) {
+        await this.extendsRedundancy(existingRedundancy)
 
-          continue
-        }
-
-        const returnedModel = await this.createVideoFileRedundancy(data.redundancy, video, file)
-
-        fileRedundancyModels.push(returnedModel)
+        continue
       }
 
-      for (const streamingPlaylist of data.streamingPlaylists) {
-        const existingRedundancy = await VideoRedundancyModel.loadLocalByStreamingPlaylistId(streamingPlaylist.id)
-        if (existingRedundancy) {
-          await this.extendsRedundancy(existingRedundancy)
-
-          continue
-        }
-
-        const returnedModel = await this.createStreamingPlaylistRedundancy(data.redundancy, video, streamingPlaylist)
-
-        streamingPlaylistRedundancyModels.push(returnedModel)
-      }
-    } catch (error) {
-      await this.clearVideoRedundancyModels(fileRedundancyModels, streamingPlaylistRedundancyModels)
-
-      throw new Error('Failed Request')
+      await this.createVideoFileRedundancy(data.redundancy, video, file)
     }
-  }
 
-  private async clearVideoRedundancyModels (
-    fileRedundancyModels: MVideoRedundancyFileVideo[],
-    streamingPlaylistRedundancyModels: MVideoRedundancyStreamingPlaylistVideo[]
-  ) {
-    await sequelizeTypescript.transaction(async t => {
-      for (const fileModel of fileRedundancyModels) {
-        await fileModel.destroy({ transaction: t })
+    for (const streamingPlaylist of data.streamingPlaylists) {
+      const existingRedundancy = await VideoRedundancyModel.loadLocalByStreamingPlaylistId(streamingPlaylist.id)
+      if (existingRedundancy) {
+        await this.extendsRedundancy(existingRedundancy)
 
-        logger.warn('DESTROYED FILE MODEL')
+        continue
       }
 
-      for (const playlistModel of streamingPlaylistRedundancyModels) {
-        await playlistModel.destroy({ transaction: t })
-
-        logger.warn('DESTROYED PLAYLIST MODEL')
-      }
-    })
+      await this.createStreamingPlaylistRedundancy(data.redundancy, video, streamingPlaylist)
+    }
   }
 
   private async createVideoFileRedundancy (redundancy: VideosRedundancyStrategy | null, video: MVideoAccountLight, fileArg: MVideoFile) {
@@ -285,23 +238,10 @@ export class VideosRedundancyScheduler extends AbstractScheduler {
     })
 
     createdModel.VideoFile = file
-    try {
-      // throw new Error('123')
 
-      await sendCreateCacheFile(serverActor, video, createdModel)
+    await sendCreateCacheFile(serverActor, video, createdModel)
 
-      logger.info('Duplicated %s - %d -> %s.', video.url, file.resolution, createdModel.url, lTags(video.uuid))
-
-      return createdModel
-    } catch (err) {
-      await sequelizeTypescript.transaction(async t => {
-        await createdModel.destroy({ transaction: t })
-      })
-
-      logger.error('REMOVED MODEL')
-
-      throw new Error('Fail to Download')
-    }
+    logger.info('Duplicated %s - %d -> %s.', video.url, file.resolution, createdModel.url, lTags(video.uuid))
   }
 
   private async createStreamingPlaylistRedundancy (
@@ -322,13 +262,12 @@ export class VideosRedundancyScheduler extends AbstractScheduler {
 
     logger.info('Duplicating %s streaming playlist in videos redundancy with "%s" strategy.', video.url, strategy, lTags(video.uuid))
 
-    const segmentsUrl = playlist.getSha256SegmentsUrl(video)
     const destDirectory = join(HLS_REDUNDANCY_DIRECTORY, video.uuid)
     const masterPlaylistUrl = playlist.getMasterPlaylistUrl(video)
 
     const maxSizeKB = this.getTotalFileSizes([], [ playlist ]) / 1000
     const toleranceKB = maxSizeKB + ((5 * maxSizeKB) / 100) // 5% more tolerance
-    await downloadPlaylistSegments(masterPlaylistUrl, destDirectory, VIDEO_IMPORT_TIMEOUT, toleranceKB, segmentsUrl)
+    await downloadPlaylistSegments(masterPlaylistUrl, destDirectory, VIDEO_IMPORT_TIMEOUT, toleranceKB)
 
     const createdModel: MVideoRedundancyStreamingPlaylistVideo = await VideoRedundancyModel.create({
       expiresOn,
@@ -341,23 +280,9 @@ export class VideosRedundancyScheduler extends AbstractScheduler {
 
     createdModel.VideoStreamingPlaylist = playlist
 
-    try {
-      // throw new Error('123')
+    await sendCreateCacheFile(serverActor, video, createdModel)
 
-      await sendCreateCacheFile(serverActor, video, createdModel)
-
-      logger.info('Duplicated playlist %s -> %s.', masterPlaylistUrl, createdModel.url, lTags(video.uuid))
-
-      return createdModel
-    } catch (error) {
-      await sequelizeTypescript.transaction(async t => {
-        await createdModel.destroy({ transaction: t })
-      })
-
-      logger.error('REMOVED MODEL')
-
-      throw new Error('Fail to Download Playlist')
-    }
+    logger.info('Duplicated playlist %s -> %s.', masterPlaylistUrl, createdModel.url, lTags(video.uuid))
   }
 
   private async extendsExpirationOf (redundancy: MVideoRedundancyVideo, expiresAfterMs: number) {
@@ -427,7 +352,7 @@ export class VideosRedundancyScheduler extends AbstractScheduler {
     // We need more attributes and check if the video still exists
     const getVideoOptions = {
       videoObject: videoUrl,
-      syncParam: { likes: false, dislikes: false, shares: false, comments: false, thumbnail: false, refreshVideo: true },
+      syncParam: { rates: false, shares: false, comments: false, thumbnail: false, refreshVideo: true },
       fetchType: 'all' as 'all'
     }
     const { video } = await getOrCreateAPVideo(getVideoOptions)

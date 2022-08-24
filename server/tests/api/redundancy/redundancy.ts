@@ -5,21 +5,8 @@ import * as chai from 'chai'
 import { readdir } from 'fs-extra'
 import magnetUtil from 'magnet-uri'
 import { basename, join } from 'path'
-import {
-  checkSegmentHash,
-  checkVideoFilesWereRemoved,
-  cleanupTests,
-  createMultipleServers,
-  doubleFollow,
-  killallServers,
-  makeRawRequest,
-  PeerTubeServer,
-  root,
-  saveVideoInServers,
-  setAccessTokensToServers,
-  wait,
-  waitJobs
-} from '@shared/extra-utils'
+import { checkSegmentHash, checkVideoFilesWereRemoved, saveVideoInServers } from '@server/tests/shared'
+import { root, wait } from '@shared/core-utils'
 import {
   HttpStatusCode,
   VideoDetails,
@@ -28,6 +15,16 @@ import {
   VideoRedundancyStrategy,
   VideoRedundancyStrategyWithManual
 } from '@shared/models'
+import {
+  cleanupTests,
+  createMultipleServers,
+  doubleFollow,
+  killallServers,
+  makeRawRequest,
+  PeerTubeServer,
+  setAccessTokensToServers,
+  waitJobs
+} from '@shared/server-commands'
 
 const expect = chai.expect
 
@@ -90,7 +87,7 @@ async function createServers (strategy: VideoRedundancyStrategy | null, addition
     const { id } = await servers[1].videos.upload({ attributes: { name: 'video 1 server 2' } })
     video1Server2 = await servers[1].videos.get({ id })
 
-    await servers[1].videos.view({ id })
+    await servers[1].views.simulateView({ id })
   }
 
   await waitJobs(servers)
@@ -307,7 +304,7 @@ describe('Test videos redundancy', function () {
     const strategy = 'most-views'
 
     before(function () {
-      this.timeout(120000)
+      this.timeout(240000)
 
       return createServers(strategy)
     })
@@ -357,7 +354,7 @@ describe('Test videos redundancy', function () {
     const strategy = 'trending'
 
     before(function () {
-      this.timeout(120000)
+      this.timeout(240000)
 
       return createServers(strategy)
     })
@@ -420,7 +417,7 @@ describe('Test videos redundancy', function () {
     const strategy = 'recently-added'
 
     before(function () {
-      this.timeout(120000)
+      this.timeout(240000)
 
       return createServers(strategy, { min_views: 3 })
     })
@@ -450,8 +447,8 @@ describe('Test videos redundancy', function () {
     it('Should view 2 times the first video to have > min_views config', async function () {
       this.timeout(80000)
 
-      await servers[0].videos.view({ id: video1Server2.uuid })
-      await servers[2].videos.view({ id: video1Server2.uuid })
+      await servers[0].views.simulateView({ id: video1Server2.uuid })
+      await servers[2].views.simulateView({ id: video1Server2.uuid })
 
       await wait(10000)
       await waitJobs(servers)
@@ -491,7 +488,7 @@ describe('Test videos redundancy', function () {
     const strategy = 'recently-added'
 
     before(async function () {
-      this.timeout(120000)
+      this.timeout(240000)
 
       await createServers(strategy, { min_views: 3 }, false)
     })
@@ -519,8 +516,8 @@ describe('Test videos redundancy', function () {
     it('Should have 1 redundancy on the first video', async function () {
       this.timeout(160000)
 
-      await servers[0].videos.view({ id: video1Server2.uuid })
-      await servers[2].videos.view({ id: video1Server2.uuid })
+      await servers[0].views.simulateView({ id: video1Server2.uuid })
+      await servers[2].views.simulateView({ id: video1Server2.uuid })
 
       await wait(10000)
       await waitJobs(servers)
@@ -553,7 +550,7 @@ describe('Test videos redundancy', function () {
 
   describe('With manual strategy', function () {
     before(function () {
-      this.timeout(120000)
+      this.timeout(240000)
 
       return createServers(null)
     })
@@ -632,7 +629,7 @@ describe('Test videos redundancy', function () {
     }
 
     before(async function () {
-      this.timeout(120000)
+      this.timeout(240000)
 
       await createServers(strategy, { min_lifetime: '7 seconds', min_views: 0 })
 
@@ -674,7 +671,7 @@ describe('Test videos redundancy', function () {
     const strategy = 'recently-added'
 
     before(async function () {
-      this.timeout(120000)
+      this.timeout(240000)
 
       await createServers(strategy, { min_lifetime: '7 seconds', min_views: 0 })
 
@@ -698,7 +695,7 @@ describe('Test videos redundancy', function () {
     })
 
     it('Should cache video 2 webseeds on the first video', async function () {
-      this.timeout(120000)
+      this.timeout(240000)
 
       await waitJobs(servers)
 

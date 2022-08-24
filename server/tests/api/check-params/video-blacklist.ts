@@ -2,11 +2,10 @@
 
 import 'mocha'
 import { expect } from 'chai'
+import { checkBadCountPagination, checkBadSortPagination, checkBadStartPagination } from '@server/tests/shared'
+import { HttpStatusCode, VideoBlacklistType } from '@shared/models'
 import {
   BlacklistCommand,
-  checkBadCountPagination,
-  checkBadSortPagination,
-  checkBadStartPagination,
   cleanupTests,
   createMultipleServers,
   doubleFollow,
@@ -15,8 +14,7 @@ import {
   PeerTubeServer,
   setAccessTokensToServers,
   waitJobs
-} from '@shared/extra-utils'
-import { HttpStatusCode, VideoBlacklistType } from '@shared/models'
+} from '@shared/server-commands'
 
 describe('Test video blacklist API validators', function () {
   let servers: PeerTubeServer[]

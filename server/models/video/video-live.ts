@@ -1,8 +1,9 @@
 import { AllowNull, BelongsTo, Column, CreatedAt, DataType, DefaultScope, ForeignKey, Model, Table, UpdatedAt } from 'sequelize-typescript'
+import { CONFIG } from '@server/initializers/config'
 import { WEBSERVER } from '@server/initializers/constants'
 import { MVideoLive, MVideoLiveVideo } from '@server/types/models'
-import { AttributesOnly } from '@shared/core-utils'
-import { LiveVideo, VideoState } from '@shared/models'
+import { LiveVideo, LiveVideoLatencyMode, VideoState } from '@shared/models'
+import { AttributesOnly } from '@shared/typescript-utils'
 import { VideoModel } from './video'
 import { VideoBlacklistModel } from './video-blacklist'
 
@@ -42,6 +43,10 @@ export class VideoLiveModel extends Model<Partial<AttributesOnly<VideoLiveModel>
   @AllowNull(false)
   @Column
   permanentLive: boolean
+
+  @AllowNull(false)
+  @Column
+  latencyMode: LiveVideoLatencyMode
 
   @CreatedAt
   createdAt: Date
@@ -86,31 +91,6 @@ export class VideoLiveModel extends Model<Partial<AttributesOnly<VideoLiveModel>
     return VideoLiveModel.findOne<MVideoLiveVideo>(query)
   }
 
-  static loadByStreamKeyLiveEnded (streamKey: string) {
-    const query = {
-      where: {
-        streamKey
-      },
-      include: [
-        {
-          model: VideoModel.unscoped(),
-          required: true,
-          where: {
-            state: VideoState.LIVE_ENDED
-          },
-          include: [
-            {
-              model: VideoBlacklistModel.unscoped(),
-              required: false
-            }
-          ]
-        }
-      ]
-    }
-
-    return VideoLiveModel.findOne<MVideoLiveVideo>(query)
-  }
-
   static loadByVideoId (videoId: number) {
     const query = {
       where: {
@@ -121,16 +101,31 @@ export class VideoLiveModel extends Model<Partial<AttributesOnly<VideoLiveModel>
     return VideoLiveModel.findOne<MVideoLive>(query)
   }
 
-  toFormattedJSON (): LiveVideo {
-    return {
-      // If we don't have a stream key, it means this is a remote live so we don't specify the rtmp URL
-      rtmpUrl: this.streamKey
-        ? WEBSERVER.RTMP_URL
-        : null,
+  toFormattedJSON (canSeePrivateInformation: boolean): LiveVideo {
+    let privateInformation: Pick<LiveVideo, 'rtmpUrl' | 'rtmpsUrl' | 'streamKey'> | {} = {}
 
-      streamKey: this.streamKey,
+    // If we don't have a stream key, it means this is a remote live so we don't specify the rtmp URL
+    // We also display these private information only to the live owne/moderators
+    if (this.streamKey && canSeePrivateInformation === true) {
+      privateInformation = {
+        streamKey: this.streamKey,
+
+        rtmpUrl: CONFIG.LIVE.RTMP.ENABLED
+          ? WEBSERVER.RTMP_URL
+          : null,
+
+        rtmpsUrl: CONFIG.LIVE.RTMPS.ENABLED
+          ? WEBSERVER.RTMPS_URL
+          : null
+      }
+    }
+
+    return {
+      ...privateInformation,
+
       permanentLive: this.permanentLive,
-      saveReplay: this.saveReplay
+      saveReplay: this.saveReplay,
+      latencyMode: this.latencyMode
     }
   }
 }

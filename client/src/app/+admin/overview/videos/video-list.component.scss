@@ -1,0 +1,30 @@
+@use '_variables' as *;
+@use '_mixins' as *;
+
+my-embed {
+  display: block;
+  max-width: 500px;
+  width: 50%;
+}
+
+.badge {
+  @include peertube-badge;
+
+  margin-right: 5px;
+}
+
+.video-info > div {
+  display: flex;
+}
+
+.loading {
+  opacity: 0.5;
+}
+
+.right-form {
+  display: flex;
+
+  > *:not(:last-child) {
+    @include margin-right(10px);
+  }
+}

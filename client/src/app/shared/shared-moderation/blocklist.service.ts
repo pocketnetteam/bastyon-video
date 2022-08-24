@@ -1,9 +1,10 @@
 import { SortMeta } from 'primeng/api'
-import { catchError, map } from 'rxjs/operators'
+import { from } from 'rxjs'
+import { catchError, concatMap, map, toArray } from 'rxjs/operators'
 import { HttpClient, HttpParams } from '@angular/common/http'
 import { Injectable } from '@angular/core'
 import { RestExtractor, RestPagination, RestService } from '@app/core'
-import { AccountBlock as AccountBlockServer, ResultList, ServerBlock } from '@shared/models'
+import { AccountBlock as AccountBlockServer, BlockStatus, ResultList, ServerBlock } from '@shared/models'
 import { environment } from '../../../environments/environment'
 import { Account } from '../shared-main'
 import { AccountBlock } from './account-block.model'
@@ -12,6 +13,7 @@ export enum BlocklistComponentType { Account, Instance }
 
 @Injectable()
 export class BlocklistService {
+  static BASE_BLOCKLIST_URL = environment.apiUrl + '/api/v1/blocklist'
   static BASE_USER_BLOCKLIST_URL = environment.apiUrl + '/api/v1/users/me/blocklist'
   static BASE_SERVER_BLOCKLIST_URL = environment.apiUrl + '/api/v1/server/blocklist'
 
@@ -20,6 +22,23 @@ export class BlocklistService {
     private restExtractor: RestExtractor,
     private restService: RestService
   ) { }
+
+  /** ********************* Blocklist status ***********************/
+
+  getStatus (options: {
+    accounts?: string[]
+    hosts?: string[]
+  }) {
+    const { accounts, hosts } = options
+
+    let params = new HttpParams()
+
+    if (accounts) params = this.restService.addArrayParams(params, 'accounts', accounts)
+    if (hosts) params = this.restService.addArrayParams(params, 'hosts', hosts)
+
+    return this.authHttp.get<BlockStatus>(BlocklistService.BASE_BLOCKLIST_URL + '/status', { params })
+      .pipe(catchError(err => this.restExtractor.handleError(err)))
+  }
 
   /** ********************* User -> Account blocklist ***********************/
 
@@ -102,11 +121,15 @@ export class BlocklistService {
                )
   }
 
-  blockAccountByInstance (account: Pick<Account, 'nameWithHost'>) {
-    const body = { accountName: account.nameWithHost }
+  blockAccountByInstance (accountsArg: Pick<Account, 'nameWithHost'> | Pick<Account, 'nameWithHost'>[]) {
+    const accounts = Array.isArray(accountsArg) ? accountsArg : [ accountsArg ]
 
-    return this.authHttp.post(BlocklistService.BASE_SERVER_BLOCKLIST_URL + '/accounts', body)
-               .pipe(catchError(err => this.restExtractor.handleError(err)))
+    return from(accounts)
+      .pipe(
+        concatMap(a => this.authHttp.post(BlocklistService.BASE_SERVER_BLOCKLIST_URL + '/accounts', { accountName: a.nameWithHost })),
+        toArray(),
+        catchError(err => this.restExtractor.handleError(err))
+      )
   }
 
   unblockAccountByInstance (account: Pick<Account, 'nameWithHost'>) {

@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions,@typescript-eslint/require-await */
 
 import 'mocha'
+import { checkBadCountPagination, checkBadSortPagination, checkBadStartPagination } from '@server/tests/shared'
+import { HttpStatusCode } from '@shared/models'
 import {
-  checkBadCountPagination,
-  checkBadSortPagination,
-  checkBadStartPagination,
   cleanupTests,
   createMultipleServers,
   doubleFollow,
@@ -13,8 +12,7 @@ import {
   makePostBodyRequest,
   PeerTubeServer,
   setAccessTokensToServers
-} from '@shared/extra-utils'
-import { HttpStatusCode } from '@shared/models'
+} from '@shared/server-commands'
 
 describe('Test blocklist API validators', function () {
   let servers: PeerTubeServer[]
@@ -477,6 +475,78 @@ describe('Test blocklist API validators', function () {
             expectedStatus: HttpStatusCode.NO_CONTENT_204
           })
         })
+      })
+    })
+  })
+
+  describe('When getting blocklist status', function () {
+    const path = '/api/v1/blocklist/status'
+
+    it('Should fail with a bad token', async function () {
+      await makeGetRequest({
+        url: server.url,
+        path,
+        token: 'false',
+        expectedStatus: HttpStatusCode.UNAUTHORIZED_401
+      })
+    })
+
+    it('Should fail with a bad accounts field', async function () {
+      await makeGetRequest({
+        url: server.url,
+        path,
+        query: {
+          accounts: 1
+        },
+        expectedStatus: HttpStatusCode.BAD_REQUEST_400
+      })
+
+      await makeGetRequest({
+        url: server.url,
+        path,
+        query: {
+          accounts: [ 1 ]
+        },
+        expectedStatus: HttpStatusCode.BAD_REQUEST_400
+      })
+    })
+
+    it('Should fail with a bad hosts field', async function () {
+      await makeGetRequest({
+        url: server.url,
+        path,
+        query: {
+          hosts: 1
+        },
+        expectedStatus: HttpStatusCode.BAD_REQUEST_400
+      })
+
+      await makeGetRequest({
+        url: server.url,
+        path,
+        query: {
+          hosts: [ 1 ]
+        },
+        expectedStatus: HttpStatusCode.BAD_REQUEST_400
+      })
+    })
+
+    it('Should succeed with the correct parameters', async function () {
+      await makeGetRequest({
+        url: server.url,
+        path,
+        query: {},
+        expectedStatus: HttpStatusCode.OK_200
+      })
+
+      await makeGetRequest({
+        url: server.url,
+        path,
+        query: {
+          hosts: [ 'example.com' ],
+          accounts: [ 'john@example.com' ]
+        },
+        expectedStatus: HttpStatusCode.OK_200
       })
     })
   })

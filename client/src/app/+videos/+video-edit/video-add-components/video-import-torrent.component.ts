@@ -81,8 +81,6 @@ export class VideoImportTorrentComponent extends VideoSend implements OnInit, Af
     const videoUpdate: VideoUpdate = {
       privacy: this.highestPrivacy,
       waitTranscoding: false,
-      commentsEnabled: true,
-      downloadEnabled: true,
       channelId: this.firstStepChannelId
     }
 
@@ -125,10 +123,8 @@ export class VideoImportTorrentComponent extends VideoSend implements OnInit, Af
       })
   }
 
-  updateSecondStep () {
-    if (this.checkForm() === false) {
-      return
-    }
+  async updateSecondStep () {
+    if (!await this.isFormValid()) return
 
     this.video.patch(this.form.value)
 

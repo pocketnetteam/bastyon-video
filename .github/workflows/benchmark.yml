@@ -1,0 +1,88 @@
+name: Benchmark
+
+on:
+  push:
+    branches:
+      - ci
+  schedule:
+    - cron: '0 */12 * * *'
+
+jobs:
+
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+
+      postgres:
+        image: postgres:9.6
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: peertube
+          POSTGRES_HOST_AUTH_METHOD: trust
+
+    env:
+      PGUSER: peertube
+      PGHOST: localhost
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: './.github/actions/reusable-prepare-peertube-build'
+        with:
+          node-version: '14.x'
+
+      - uses: './.github/actions/reusable-prepare-peertube-run'
+
+      - name: Build
+        run: |
+          startClient=`date +%s`
+          npm run build:client
+          endClient=`date +%s`
+          clientBuildTime=$((endClient-startClient))
+
+          startServer=`date +%s`
+          npm run build:server
+          endServer=`date +%s`
+          serverBuildTime=$((endServer-startServer))
+
+          echo '{"clientBuildTime":'$clientBuildTime',"serverBuildTime":'$serverBuildTime'}'> build-time.json
+
+      - name: Startup
+        run: |
+          npm run clean:server:test
+
+          startCold=`date +%s%3N`
+          NODE_APP_INSTANCE=1 NODE_ENV=test node dist/server --benchmark-startup
+          endCold=`date +%s%3N`
+          coldStartupTime=$(echo "scale=2; ($endCold-$startCold)/1000" | bc)
+
+          startHot=`date +%s%3N`
+          NODE_APP_INSTANCE=1 NODE_ENV=test node dist/server --benchmark-startup
+          endHot=`date +%s%3N`
+          hotStartupTime=$(echo "scale=2; ($endHot-$startHot)/1000" | bc)
+
+          echo '{"coldStartupTime":'$coldStartupTime',"hotStartupTime":'$hotStartupTime'}'> startup-time.json
+
+      - name: Run benchmark
+        run: |
+          node dist/scripts/benchmark.js -o benchmark.json
+
+      - name: Display result
+        run: |
+          cat benchmark.json build-time.json startup-time.json
+
+      - name: Upload benchmark result
+        uses: './.github/actions/reusable-deploy'
+        with:
+          source: benchmark.json build-time.json startup-time.json
+          destination: peertube-stats
+          knownHosts: ${{ secrets.STATS_DEPLOYEMENT_KNOWN_HOSTS }}
+          deployKey: ${{ secrets.STATS_DEPLOYEMENT_KEY }}
+          deployUser: ${{ secrets.STATS_DEPLOYEMENT_USER }}
+          deployHost: ${{ secrets.STATS_DEPLOYEMENT_HOST }}

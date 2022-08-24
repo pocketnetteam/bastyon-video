@@ -11,9 +11,9 @@ database:
 # From the project root directory
 storage:
   tmp: 'test4/tmp/'
+  bin: 'test4/bin/'
   avatars: 'test4/avatars/'
   videos: 'test4/videos/'
-  images: 'test4/images/'
   streaming_playlists: 'test4/streaming-playlists/'
   redundancy: 'test4/redundancy/'
   logs: 'test4/logs/'
@@ -29,4 +29,7 @@ admin:
   email: 'admin4@example.com'
 
 transcoding:
+  enabled: false
+
+video_studio:
   enabled: false

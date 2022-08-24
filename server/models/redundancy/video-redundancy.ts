@@ -16,15 +16,17 @@ import {
 } from 'sequelize-typescript'
 import { getServerActor } from '@server/models/application/application'
 import { MActor, MVideoForRedundancyAPI, MVideoRedundancy, MVideoRedundancyAP, MVideoRedundancyVideo } from '@server/types/models'
-import { AttributesOnly } from '@shared/core-utils'
-import { VideoRedundanciesTarget } from '@shared/models/redundancy/video-redundancies-filters.model'
 import {
+  CacheFileObject,
   FileRedundancyInformation,
   StreamingPlaylistRedundancyInformation,
-  VideoRedundancy
-} from '@shared/models/redundancy/video-redundancy.model'
-import { CacheFileObject, VideoPrivacy } from '../../../shared'
-import { VideoRedundancyStrategy, VideoRedundancyStrategyWithManual } from '../../../shared/models/redundancy'
+  VideoPrivacy,
+  VideoRedundanciesTarget,
+  VideoRedundancy,
+  VideoRedundancyStrategy,
+  VideoRedundancyStrategyWithManual
+} from '@shared/models'
+import { AttributesOnly } from '@shared/typescript-utils'
 import { isTestInstance } from '../../helpers/core-utils'
 import { isActivityPubUrlValid, isUrlValid } from '../../helpers/custom-validators/activitypub/misc'
 import { logger } from '../../helpers/logger'
@@ -160,7 +162,7 @@ export class VideoRedundancyModel extends Model<Partial<AttributesOnly<VideoRedu
       const logIdentifier = `${videoFile.Video.uuid}-${videoFile.resolution}`
       logger.info('Removing duplicated video file %s.', logIdentifier)
 
-      videoFile.Video.removeFileAndTorrent(videoFile, true)
+      videoFile.Video.removeWebTorrentFileAndTorrent(videoFile, true)
         .catch(err => logger.error('Cannot delete %s files.', logIdentifier, { err }))
     }
 

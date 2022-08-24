@@ -4,7 +4,8 @@ import { createTransport, Transporter } from 'nodemailer'
 import { join } from 'path'
 import { EmailPayload } from '@shared/models'
 import { SendEmailDefaultOptions } from '../../shared/models/server/emailer.model'
-import { isTestInstance, root } from '../helpers/core-utils'
+import { isTestInstance } from '../helpers/core-utils'
+import { root } from '@shared/core-utils'
 import { bunyanLogger, logger } from '../helpers/logger'
 import { CONFIG, isEmailEnabled } from '../initializers/config'
 import { WEBSERVER } from '../initializers/constants'
@@ -140,6 +141,12 @@ class Emailer {
 
     const email = new Email({
       send: true,
+      htmlToText: {
+        selectors: [
+          { selector: 'img', format: 'skip' },
+          { selector: 'a', options: { hideLinkHrefIfSameAsText: true } }
+        ]
+      },
       message: {
         from: `"${fromDisplayName}" <${CONFIG.SMTP.FROM_ADDRESS}>`
       },
@@ -222,7 +229,7 @@ class Emailer {
       sendmail: true,
       newline: 'unix',
       path: CONFIG.SMTP.SENDMAIL,
-      logger: bunyanLogger as any
+      logger: bunyanLogger
     })
   }
 

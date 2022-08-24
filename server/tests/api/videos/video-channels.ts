@@ -4,19 +4,19 @@ import 'mocha'
 import * as chai from 'chai'
 import { basename } from 'path'
 import { ACTOR_IMAGES_SIZE } from '@server/initializers/constants'
+import { testFileExistsOrNot, testImage } from '@server/tests/shared'
+import { wait } from '@shared/core-utils'
+import { ActorImageType, User, VideoChannel } from '@shared/models'
 import {
   cleanupTests,
   createMultipleServers,
   doubleFollow,
   PeerTubeServer,
   setAccessTokensToServers,
+  setDefaultAccountAvatar,
   setDefaultVideoChannel,
-  testFileExistsOrNot,
-  testImage,
-  wait,
   waitJobs
-} from '@shared/extra-utils'
-import { User, VideoChannel } from '@shared/models'
+} from '@shared/server-commands'
 
 const expect = chai.expect
 
@@ -33,6 +33,7 @@ describe('Test video channels', function () {
   let totoChannel: number
   let videoUUID: string
   let accountName: string
+  let secondUserChannelName: string
 
   const avatarPaths: { [ port: number ]: string } = {}
   const bannerPaths: { [ port: number ]: string } = {}
@@ -44,6 +45,7 @@ describe('Test video channels', function () {
 
     await setAccessTokensToServers(servers)
     await setDefaultVideoChannel(servers)
+    await setDefaultAccountAvatar(servers)
 
     await doubleFollow(servers[0], servers[1])
   })
@@ -219,6 +221,35 @@ describe('Test video channels', function () {
     }
   })
 
+  it('Should update another accounts video channel', async function () {
+    this.timeout(15000)
+
+    const result = await servers[0].users.generate('second_user')
+    secondUserChannelName = result.userChannelName
+
+    await servers[0].videos.quickUpload({ name: 'video', token: result.token })
+
+    const videoChannelAttributes = {
+      displayName: 'video channel updated',
+      description: 'video channel description updated',
+      support: 'support updated'
+    }
+
+    await servers[0].channels.update({ channelName: secondUserChannelName, attributes: videoChannelAttributes })
+
+    await waitJobs(servers)
+  })
+
+  it('Should have another accounts video channel updated', async function () {
+    for (const server of servers) {
+      const body = await server.channels.get({ channelName: `${secondUserChannelName}@${servers[0].host}` })
+
+      expect(body.displayName).to.equal('video channel updated')
+      expect(body.description).to.equal('video channel description updated')
+      expect(body.support).to.equal('support updated')
+    }
+  })
+
   it('Should update the channel support field and update videos too', async function () {
     this.timeout(35000)
 
@@ -252,14 +283,19 @@ describe('Test video channels', function () {
 
     for (const server of servers) {
       const videoChannel = await findChannel(server, secondVideoChannelId)
+      const expectedSizes = ACTOR_IMAGES_SIZE[ActorImageType.AVATAR]
 
-      avatarPaths[server.port] = videoChannel.avatar.path
-      await testImage(server.url, 'avatar-resized', avatarPaths[server.port], '.png')
-      await testFileExistsOrNot(server, 'avatars', basename(avatarPaths[server.port]), true)
+      expect(videoChannel.avatars.length).to.equal(expectedSizes.length, 'Expected avatars to be generated in all sizes')
 
-      const row = await server.sql.getActorImage(basename(avatarPaths[server.port]))
-      expect(row.height).to.equal(ACTOR_IMAGES_SIZE.AVATARS.height)
-      expect(row.width).to.equal(ACTOR_IMAGES_SIZE.AVATARS.width)
+      for (const avatar of videoChannel.avatars) {
+        avatarPaths[server.port] = avatar.path
+        await testImage(server.url, `avatar-resized-${avatar.width}x${avatar.width}`, avatarPaths[server.port], '.png')
+        await testFileExistsOrNot(server, 'avatars', basename(avatarPaths[server.port]), true)
+
+        const row = await server.sql.getActorImage(basename(avatarPaths[server.port]))
+
+        expect(expectedSizes.some(({ height, width }) => row.height === height && row.width === width)).to.equal(true)
+      }
     }
   })
 
@@ -279,19 +315,36 @@ describe('Test video channels', function () {
     for (const server of servers) {
       const videoChannel = await server.channels.get({ channelName: 'second_video_channel@' + servers[0].host })
 
-      bannerPaths[server.port] = videoChannel.banner.path
+      bannerPaths[server.port] = videoChannel.banners[0].path
       await testImage(server.url, 'banner-resized', bannerPaths[server.port])
       await testFileExistsOrNot(server, 'avatars', basename(bannerPaths[server.port]), true)
 
       const row = await server.sql.getActorImage(basename(bannerPaths[server.port]))
-      expect(row.height).to.equal(ACTOR_IMAGES_SIZE.BANNERS.height)
-      expect(row.width).to.equal(ACTOR_IMAGES_SIZE.BANNERS.width)
+      expect(row.height).to.equal(ACTOR_IMAGES_SIZE[ActorImageType.BANNER][0].height)
+      expect(row.width).to.equal(ACTOR_IMAGES_SIZE[ActorImageType.BANNER][0].width)
+    }
+  })
+
+  it('Should still correctly list channels', async function () {
+    {
+      const body = await servers[0].channels.list({ start: 1, count: 1, sort: 'createdAt' })
+
+      expect(body.total).to.equal(3)
+      expect(body.data).to.have.lengthOf(1)
+      expect(body.data[0].name).to.equal('second_video_channel')
+    }
+
+    {
+      const body = await servers[0].channels.listByAccount({ accountName, start: 1, count: 1, sort: 'createdAt' })
+
+      expect(body.total).to.equal(2)
+      expect(body.data).to.have.lengthOf(1)
+      expect(body.data[0].name).to.equal('second_video_channel')
     }
   })
 
   it('Should delete the video channel avatar', async function () {
     this.timeout(15000)
-
     await servers[0].channels.deleteImage({ channelName: 'second_video_channel', type: 'avatar' })
 
     await waitJobs(servers)
@@ -300,7 +353,7 @@ describe('Test video channels', function () {
       const videoChannel = await findChannel(server, secondVideoChannelId)
       await testFileExistsOrNot(server, 'avatars', basename(avatarPaths[server.port]), false)
 
-      expect(videoChannel.avatar).to.be.null
+      expect(videoChannel.avatars).to.be.empty
     }
   })
 
@@ -315,7 +368,7 @@ describe('Test video channels', function () {
       const videoChannel = await findChannel(server, secondVideoChannelId)
       await testFileExistsOrNot(server, 'avatars', basename(bannerPaths[server.port]), false)
 
-      expect(videoChannel.banner).to.be.null
+      expect(videoChannel.banners).to.be.empty
     }
   })
 
@@ -368,12 +421,13 @@ describe('Test video channels', function () {
   })
 
   it('Should have video channel deleted', async function () {
-    const body = await servers[0].channels.list({ start: 0, count: 10 })
+    const body = await servers[0].channels.list({ start: 0, count: 10, sort: 'createdAt' })
 
-    expect(body.total).to.equal(1)
+    expect(body.total).to.equal(2)
     expect(body.data).to.be.an('array')
-    expect(body.data).to.have.lengthOf(1)
+    expect(body.data).to.have.lengthOf(2)
     expect(body.data[0].displayName).to.equal('Main root channel')
+    expect(body.data[1].displayName).to.equal('video channel updated')
   })
 
   it('Should create the main channel with an uuid if there is a conflict', async function () {
@@ -412,8 +466,8 @@ describe('Test video channels', function () {
 
     {
       // video has been posted on channel servers[0].store.videoChannel.id since last update
-      await servers[0].videos.view({ id: videoUUID, xForwardedFor: '0.0.0.1,127.0.0.1' })
-      await servers[0].videos.view({ id: videoUUID, xForwardedFor: '0.0.0.2,127.0.0.1' })
+      await servers[0].views.simulateView({ id: videoUUID, xForwardedFor: '0.0.0.1,127.0.0.1' })
+      await servers[0].views.simulateView({ id: videoUUID, xForwardedFor: '0.0.0.2,127.0.0.1' })
 
       // Wait the repeatable job
       await wait(8000)

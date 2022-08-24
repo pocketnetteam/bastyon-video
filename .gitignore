@@ -47,8 +47,13 @@ yarn-error.log
 /*.zip
 /*.tar.xz
 /*.asc
+*.DS_Store
 /server/tools/import-mediacore.ts
 /docker-volume/
 /init.mp4
 
-.DS_Store
+# TypeScript
+*.tsbuildinfo
+
+# Packages
+/packages/types/dist/

@@ -11,7 +11,8 @@ import {
   PeerTubeServer,
   setAccessTokensToServers,
   waitJobs
-} from '@shared/extra-utils'
+} from '@shared/server-commands'
+import { getAllFiles } from '../shared'
 
 describe('Test update host scripts', function () {
   let server: PeerTubeServer
@@ -108,9 +109,9 @@ describe('Test update host scripts', function () {
 
     for (const video of data) {
       const videoDetails = await server.videos.get({ id: video.id })
-      const files = videoDetails.files.concat(videoDetails.streamingPlaylists[0].files)
+      const files = getAllFiles(videoDetails)
 
-      expect(files).to.have.lengthOf(10)
+      expect(files).to.have.lengthOf(8)
 
       for (const file of files) {
         expect(file.magnetUri).to.contain('localhost%3A9002%2Ftracker%2Fsocket')

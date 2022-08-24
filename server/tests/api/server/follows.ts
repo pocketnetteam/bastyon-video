@@ -2,19 +2,9 @@
 
 import 'mocha'
 import * as chai from 'chai'
-import {
-  cleanupTests,
-  completeVideoCheck,
-  createMultipleServers,
-  dateIsValid,
-  expectAccountFollows,
-  expectChannelsFollows,
-  PeerTubeServer,
-  setAccessTokensToServers,
-  testCaptionFile,
-  waitJobs
-} from '@shared/extra-utils'
+import { completeVideoCheck, dateIsValid, expectAccountFollows, expectChannelsFollows, testCaptionFile } from '@server/tests/shared'
 import { VideoCreateResult, VideoPrivacy } from '@shared/models'
+import { cleanupTests, createMultipleServers, PeerTubeServer, setAccessTokensToServers, waitJobs } from '@shared/server-commands'
 
 const expect = chai.expect
 
@@ -22,7 +12,7 @@ describe('Test follows', function () {
   let servers: PeerTubeServer[] = []
 
   before(async function () {
-    this.timeout(30000)
+    this.timeout(120000)
 
     servers = await createMultipleServers(3)
 
@@ -292,7 +282,7 @@ describe('Test follows', function () {
     })
 
     it('Should upload a video on server 2 and 3 and propagate only the video of server 2', async function () {
-      this.timeout(60000)
+      this.timeout(120000)
 
       await servers[1].videos.upload({ attributes: { name: 'server2' } })
       await servers[2].videos.upload({ attributes: { name: 'server3' } })

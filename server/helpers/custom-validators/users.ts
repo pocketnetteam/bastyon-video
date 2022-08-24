@@ -1,6 +1,6 @@
 import { values } from 'lodash'
 import validator from 'validator'
-import { UserRole } from '../../../shared'
+import { UserRole } from '@shared/models'
 import { isEmailEnabled } from '../../initializers/config'
 import { CONSTRAINTS_FIELDS, NSFW_POLICY_TYPES } from '../../initializers/constants'
 import { exists, isArray, isBooleanValid } from './misc'
@@ -29,7 +29,7 @@ function isUserVideoQuotaDailyValid (value: string) {
 function isUserUsernameValid (value: string) {
   const max = USERS_CONSTRAINTS_FIELDS.USERNAME.max
   const min = USERS_CONSTRAINTS_FIELDS.USERNAME.min
-  return exists(value) && validator.matches(value, new RegExp(`^[a-zA-Z0-9._]{${min},${max}}$`))
+  return exists(value) && validator.matches(value, new RegExp(`^[a-z0-9._]{${min},${max}}$`))
 }
 
 function isUserDisplayNameValid (value: string) {
@@ -49,7 +49,7 @@ function isUserNSFWPolicyValid (value: any) {
   return exists(value) && nsfwPolicies.includes(value)
 }
 
-function isUserWebTorrentEnabledValid (value: any) {
+function isUserP2PEnabledValid (value: any) {
   return isBooleanValid(value)
 }
 
@@ -90,7 +90,7 @@ function isUserBlockedReasonValid (value: any) {
 }
 
 function isUserRoleValid (value: any) {
-  return exists(value) && validator.isInt('' + value) && UserRole[value] !== undefined
+  return exists(value) && validator.isInt('' + value) && [ UserRole.ADMINISTRATOR, UserRole.MODERATOR, UserRole.USER ].includes(value)
 }
 
 // ---------------------------------------------------------------------------
@@ -109,7 +109,7 @@ export {
   isUserAdminFlagsValid,
   isUserEmailVerifiedValid,
   isUserNSFWPolicyValid,
-  isUserWebTorrentEnabledValid,
+  isUserP2PEnabledValid,
   isUserAutoPlayVideoValid,
   isUserAutoPlayNextVideoValid,
   isUserAutoPlayNextVideoPlaylistValid,

@@ -2,19 +2,19 @@
 
 import 'mocha'
 import * as chai from 'chai'
+import { areObjectStorageTestsDisabled } from '@shared/core-utils'
 import { HttpStatusCode, VideoFile } from '@shared/models'
 import {
-  areObjectStorageTestsDisabled,
   cleanupTests,
   createMultipleServers,
   doubleFollow,
-  expectStartWith,
   makeRawRequest,
   ObjectStorageCommand,
   PeerTubeServer,
   setAccessTokensToServers,
   waitJobs
-} from '../../../shared/extra-utils'
+} from '@shared/server-commands'
+import { checkResolutionsInMasterPlaylist, expectStartWith } from '../shared'
 
 const expect = chai.expect
 
@@ -100,7 +100,7 @@ function runTests (objectStorage: boolean) {
         const videoDetails = await server.videos.get({ id: video.uuid })
 
         if (video.shortUUID === videosUUID[1] || video.uuid === videosUUID[1]) {
-          expect(videoDetails.files).to.have.lengthOf(5)
+          expect(videoDetails.files).to.have.lengthOf(4)
           expect(videoDetails.streamingPlaylists).to.have.lengthOf(0)
 
           if (objectStorage) await checkFilesInObjectStorage(videoDetails.files, 'webtorrent')
@@ -163,11 +163,18 @@ function runTests (objectStorage: boolean) {
 
       expect(videoDetails.streamingPlaylists).to.have.lengthOf(1)
 
-      const files = videoDetails.streamingPlaylists[0].files
+      const hlsPlaylist = videoDetails.streamingPlaylists[0]
+
+      const files = hlsPlaylist.files
       expect(files).to.have.lengthOf(1)
       expect(files[0].resolution.id).to.equal(480)
 
-      if (objectStorage) await checkFilesInObjectStorage(files, 'playlist')
+      if (objectStorage) {
+        await checkFilesInObjectStorage(files, 'playlist')
+
+        const resolutions = files.map(f => f.resolution.id)
+        await checkResolutionsInMasterPlaylist({ server, playlistUrl: hlsPlaylist.playlistUrl, resolutions })
+      }
     }
   })
 
@@ -203,7 +210,7 @@ function runTests (objectStorage: boolean) {
       expect(videoDetails.streamingPlaylists).to.have.lengthOf(1)
 
       const files = videoDetails.streamingPlaylists[0].files
-      expect(files).to.have.lengthOf(5)
+      expect(files).to.have.lengthOf(4)
 
       if (objectStorage) await checkFilesInObjectStorage(files, 'playlist')
     }

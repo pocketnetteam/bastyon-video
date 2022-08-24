@@ -6,6 +6,7 @@ import { badRequest } from '../../helpers/express-utils'
 import { CONFIG } from '../../initializers/config'
 import { abuseRouter } from './abuse'
 import { accountsRouter } from './accounts'
+import { blocklistRouter } from './blocklist'
 import { bulkRouter } from './bulk'
 import { configRouter } from './config'
 import { customPageRouter } from './custom-page'
@@ -19,7 +20,6 @@ import { usersRouter } from './users'
 import { videoChannelRouter } from './video-channel'
 import { videoPlaylistRouter } from './video-playlist'
 import { videosRouter } from './videos'
-import { imagesRouter } from './images'
 
 const apiRouter = express.Router()
 
@@ -45,12 +45,12 @@ apiRouter.use('/accounts', accountsRouter)
 apiRouter.use('/video-channels', videoChannelRouter)
 apiRouter.use('/video-playlists', videoPlaylistRouter)
 apiRouter.use('/videos', videosRouter)
-apiRouter.use('/images', imagesRouter)
 apiRouter.use('/jobs', jobsRouter)
 apiRouter.use('/search', searchRouter)
 apiRouter.use('/overviews', overviewsRouter)
 apiRouter.use('/plugins', pluginRouter)
 apiRouter.use('/custom-pages', customPageRouter)
+apiRouter.use('/blocklist', blocklistRouter)
 apiRouter.use('/ping', pong)
 apiRouter.use('/*', badRequest)
 

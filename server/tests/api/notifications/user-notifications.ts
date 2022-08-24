@@ -2,33 +2,34 @@
 
 import 'mocha'
 import * as chai from 'chai'
-import { buildUUID } from '@server/helpers/uuid'
 import {
   CheckerBaseParams,
   checkMyVideoImportIsFinished,
   checkNewActorFollow,
   checkNewVideoFromSubscription,
   checkVideoIsPublished,
-  cleanupTests,
+  checkVideoStudioEditionIsFinished,
   FIXTURE_URLS,
   MockSmtpServer,
-  PeerTubeServer,
   prepareNotificationsTest,
-  uploadRandomVideoOnServers,
-  wait,
-  waitJobs
-} from '@shared/extra-utils'
-import { UserNotification, UserNotificationType, VideoPrivacy } from '@shared/models'
+  uploadRandomVideoOnServers
+} from '@server/tests/shared'
+import { wait } from '@shared/core-utils'
+import { buildUUID } from '@shared/extra-utils'
+import { UserNotification, UserNotificationType, VideoPrivacy, VideoStudioTask } from '@shared/models'
+import { cleanupTests, findExternalSavedVideo, PeerTubeServer, stopFfmpeg, waitJobs } from '@shared/server-commands'
 
 const expect = chai.expect
 
 describe('Test user notifications', function () {
   let servers: PeerTubeServer[] = []
   let userAccessToken: string
+
   let userNotifications: UserNotification[] = []
   let adminNotifications: UserNotification[] = []
   let adminNotificationsServer2: UserNotification[] = []
   let emails: object[] = []
+
   let channelId: number
 
   before(async function () {
@@ -61,7 +62,7 @@ describe('Test user notifications', function () {
 
       await uploadRandomVideoOnServers(servers, 1)
 
-      const notification = await servers[0].notifications.getLastest({ token: userAccessToken })
+      const notification = await servers[0].notifications.getLatest({ token: userAccessToken })
       expect(notification).to.be.undefined
 
       expect(emails).to.have.lengthOf(0)
@@ -128,7 +129,7 @@ describe('Test user notifications', function () {
     })
 
     it('Should not send a notification before the video is published', async function () {
-      this.timeout(50000)
+      this.timeout(150000)
 
       const updateAt = new Date(new Date().getTime() + 1000000)
 
@@ -185,7 +186,7 @@ describe('Test user notifications', function () {
     })
 
     it('Should not send a new video notification when a remote video becomes unlisted', async function () {
-      this.timeout(50000)
+      this.timeout(100000)
 
       const data = { privacy: VideoPrivacy.PRIVATE }
       const { name, uuid, shortUUID } = await uploadRandomVideoOnServers(servers, 2, data)
@@ -237,12 +238,12 @@ describe('Test user notifications', function () {
     })
 
     it('Should not send a notification if the wait transcoding is false', async function () {
-      this.timeout(50000)
+      this.timeout(100_000)
 
       await uploadRandomVideoOnServers(servers, 2, { waitTranscoding: false })
       await waitJobs(servers)
 
-      const notification = await servers[0].notifications.getLastest({ token: userAccessToken })
+      const notification = await servers[0].notifications.getLatest({ token: userAccessToken })
       if (notification) {
         expect(notification.type).to.not.equal(UserNotificationType.MY_VIDEO_PUBLISHED)
       }
@@ -267,7 +268,7 @@ describe('Test user notifications', function () {
     })
 
     it('Should send a notification when an imported video is transcoded', async function () {
-      this.timeout(50000)
+      this.timeout(120000)
 
       const name = 'video import ' + buildUUID()
 
@@ -319,6 +320,112 @@ describe('Test user notifications', function () {
 
       await wait(6000)
       await checkVideoIsPublished({ ...baseParams, videoName: name, shortUUID, checkType: 'absence' })
+    })
+  })
+
+  describe('My live replay is published', function () {
+
+    let baseParams: CheckerBaseParams
+
+    before(() => {
+      baseParams = {
+        server: servers[1],
+        emails,
+        socketNotifications: adminNotificationsServer2,
+        token: servers[1].accessToken
+      }
+    })
+
+    it('Should send a notification is a live replay of a non permanent live is published', async function () {
+      this.timeout(120000)
+
+      const { shortUUID } = await servers[1].live.create({
+        fields: {
+          name: 'non permanent live',
+          privacy: VideoPrivacy.PUBLIC,
+          channelId: servers[1].store.channel.id,
+          saveReplay: true,
+          permanentLive: false
+        }
+      })
+
+      const ffmpegCommand = await servers[1].live.sendRTMPStreamInVideo({ videoId: shortUUID })
+
+      await waitJobs(servers)
+      await servers[1].live.waitUntilPublished({ videoId: shortUUID })
+
+      await stopFfmpeg(ffmpegCommand)
+      await servers[1].live.waitUntilReplacedByReplay({ videoId: shortUUID })
+
+      await waitJobs(servers)
+      await checkVideoIsPublished({ ...baseParams, videoName: 'non permanent live', shortUUID, checkType: 'presence' })
+    })
+
+    it('Should send a notification is a live replay of a permanent live is published', async function () {
+      this.timeout(120000)
+
+      const { shortUUID } = await servers[1].live.create({
+        fields: {
+          name: 'permanent live',
+          privacy: VideoPrivacy.PUBLIC,
+          channelId: servers[1].store.channel.id,
+          saveReplay: true,
+          permanentLive: true
+        }
+      })
+
+      const ffmpegCommand = await servers[1].live.sendRTMPStreamInVideo({ videoId: shortUUID })
+
+      await waitJobs(servers)
+      await servers[1].live.waitUntilPublished({ videoId: shortUUID })
+
+      const liveDetails = await servers[1].videos.get({ id: shortUUID })
+
+      await stopFfmpeg(ffmpegCommand)
+
+      await servers[1].live.waitUntilWaiting({ videoId: shortUUID })
+      await waitJobs(servers)
+
+      const video = await findExternalSavedVideo(servers[1], liveDetails)
+      expect(video).to.exist
+
+      await checkVideoIsPublished({ ...baseParams, videoName: video.name, shortUUID: video.shortUUID, checkType: 'presence' })
+    })
+  })
+
+  describe('Video studio', function () {
+    let baseParams: CheckerBaseParams
+
+    before(() => {
+      baseParams = {
+        server: servers[1],
+        emails,
+        socketNotifications: adminNotificationsServer2,
+        token: servers[1].accessToken
+      }
+    })
+
+    it('Should send a notification after studio edition', async function () {
+      this.timeout(240000)
+
+      const { name, shortUUID, id } = await uploadRandomVideoOnServers(servers, 2, { waitTranscoding: true })
+
+      await waitJobs(servers)
+      await checkVideoIsPublished({ ...baseParams, videoName: name, shortUUID, checkType: 'presence' })
+
+      const tasks: VideoStudioTask[] = [
+        {
+          name: 'cut',
+          options: {
+            start: 0,
+            end: 1
+          }
+        }
+      ]
+      await servers[1].videoStudio.createEditionTasks({ videoId: id, tasks })
+      await waitJobs(servers)
+
+      await checkVideoStudioEditionIsFinished({ ...baseParams, videoName: name, shortUUID, checkType: 'presence' })
     })
   })
 

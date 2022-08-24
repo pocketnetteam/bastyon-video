@@ -2,9 +2,6 @@
 
 import 'mocha'
 import {
-  checkBadCountPagination,
-  checkBadSortPagination,
-  checkBadStartPagination,
   cleanupTests,
   createSingleServer,
   makeDeleteRequest,
@@ -13,8 +10,9 @@ import {
   PeerTubeServer,
   setAccessTokensToServers,
   waitJobs
-} from '@shared/extra-utils'
+} from '@shared/server-commands'
 import { HttpStatusCode } from '@shared/models'
+import { checkBadStartPagination, checkBadCountPagination, checkBadSortPagination } from '@server/tests/shared'
 
 describe('Test user subscriptions API validators', function () {
   const path = '/api/v1/users/me/subscriptions'

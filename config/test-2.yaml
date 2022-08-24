@@ -11,9 +11,9 @@ database:
 # From the project root directory
 storage:
   tmp: 'test2/tmp/'
+  bin: 'test2/bin/'
   avatars: 'test2/avatars/'
   videos: 'test2/videos/'
-  images: 'test2/images/'
   streaming_playlists: 'test2/streaming-playlists/'
   redundancy: 'test2/redundancy/'
   logs: 'test2/logs/'

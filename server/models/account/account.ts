@@ -17,7 +17,7 @@ import {
   UpdatedAt
 } from 'sequelize-typescript'
 import { ModelCache } from '@server/models/model-cache'
-import { AttributesOnly } from '@shared/core-utils'
+import { AttributesOnly } from '@shared/typescript-utils'
 import { Account, AccountSummary } from '../../../shared/models/actors'
 import { isAccountDescriptionValid } from '../../helpers/custom-validators/accounts'
 import { CONSTRAINTS_FIELDS, SERVER_ACTOR_NAME, WEBSERVER } from '../../initializers/constants'
@@ -54,6 +54,7 @@ export type SummaryOptions = {
   whereActor?: WhereOptions
   whereServer?: WhereOptions
   withAccountBlockerIds?: number[]
+  forCount?: boolean
 }
 
 @DefaultScope(() => ({
@@ -73,22 +74,24 @@ export type SummaryOptions = {
       where: options.whereServer
     }
 
-    const queryInclude: Includeable[] = [
-      {
-        attributes: [ 'id', 'preferredUsername', 'url', 'serverId', 'avatarId' ],
-        model: ActorModel.unscoped(),
-        required: options.actorRequired ?? true,
-        where: options.whereActor,
-        include: [
-          serverInclude,
+    const actorInclude: Includeable = {
+      attributes: [ 'id', 'preferredUsername', 'url', 'serverId' ],
+      model: ActorModel.unscoped(),
+      required: options.actorRequired ?? true,
+      where: options.whereActor,
+      include: [ serverInclude ]
+    }
 
-          {
-            model: ActorImageModel.unscoped(),
-            as: 'Avatar',
-            required: false
-          }
-        ]
-      }
+    if (options.forCount !== true) {
+      actorInclude.include.push({
+        model: ActorImageModel,
+        as: 'Avatars',
+        required: false
+      })
+    }
+
+    const queryInclude: Includeable[] = [
+      actorInclude
     ]
 
     const query: FindOptions = {
@@ -99,7 +102,7 @@ export type SummaryOptions = {
       queryInclude.push({
         attributes: [ 'id' ],
         model: AccountBlocklistModel.unscoped(),
-        as: 'BlockedAccounts',
+        as: 'BlockedBy',
         required: false,
         where: {
           accountId: {
@@ -228,10 +231,10 @@ export class AccountModel extends Model<Partial<AttributesOnly<AccountModel>>> {
       name: 'targetAccountId',
       allowNull: false
     },
-    as: 'BlockedAccounts',
+    as: 'BlockedBy',
     onDelete: 'CASCADE'
   })
-  BlockedAccounts: AccountBlocklistModel[]
+  BlockedBy: AccountBlocklistModel[]
 
   @BeforeDestroy
   static async sendDeleteIfOwned (instance: AccountModel, options) {
@@ -349,13 +352,10 @@ export class AccountModel extends Model<Partial<AttributesOnly<AccountModel>>> {
       order: getSort(sort)
     }
 
-    return AccountModel.findAndCountAll(query)
-      .then(({ rows, count }) => {
-        return {
-          data: rows,
-          total: count
-        }
-      })
+    return Promise.all([
+      AccountModel.count(),
+      AccountModel.findAll(query)
+    ]).then(([ total, data ]) => ({ total, data }))
   }
 
   static loadAccountIdFromVideo (videoId: number): Promise<MAccount> {
@@ -407,16 +407,15 @@ export class AccountModel extends Model<Partial<AttributesOnly<AccountModel>>> {
   }
 
   toFormattedJSON (this: MAccountFormattable): Account {
-    const actor = this.Actor.toFormattedJSON()
-    const account = {
+    return {
+      ...this.Actor.toFormattedJSON(),
+
       id: this.id,
       displayName: this.getDisplayName(),
       description: this.description,
       updatedAt: this.updatedAt,
-      userId: this.userId ? this.userId : undefined
+      userId: this.userId ?? undefined
     }
-
-    return Object.assign(actor, account)
   }
 
   toFormattedSummaryJSON (this: MAccountSummaryFormattable): AccountSummary {
@@ -424,10 +423,14 @@ export class AccountModel extends Model<Partial<AttributesOnly<AccountModel>>> {
 
     return {
       id: this.id,
-      name: actor.name,
       displayName: this.getDisplayName(),
+
+      name: actor.name,
       url: actor.url,
       host: actor.host,
+      avatars: actor.avatars,
+
+      // TODO: remove, deprecated in 4.2
       avatar: actor.avatar
     }
   }
@@ -457,6 +460,6 @@ export class AccountModel extends Model<Partial<AttributesOnly<AccountModel>>> {
   }
 
   isBlocked () {
-    return this.BlockedAccounts && this.BlockedAccounts.length !== 0
+    return this.BlockedBy && this.BlockedBy.length !== 0
   }
 }

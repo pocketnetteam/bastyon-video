@@ -2,15 +2,9 @@
 
 import 'mocha'
 import * as chai from 'chai'
-import {
-  cleanupTests,
-  createMultipleServers,
-  MockInstancesIndex,
-  PeerTubeServer,
-  setAccessTokensToServers,
-  wait,
-  waitJobs
-} from '@shared/extra-utils'
+import { MockInstancesIndex } from '@server/tests/shared'
+import { wait } from '@shared/core-utils'
+import { cleanupTests, createMultipleServers, PeerTubeServer, setAccessTokensToServers, waitJobs } from '@shared/server-commands'
 
 const expect = chai.expect
 
@@ -19,16 +13,16 @@ async function checkFollow (follower: PeerTubeServer, following: PeerTubeServer,
     const body = await following.follows.getFollowers({ start: 0, count: 5, sort: '-createdAt' })
     const follow = body.data.find(f => f.follower.host === follower.host && f.state === 'accepted')
 
-    if (exists === true) expect(follow).to.exist
-    else expect(follow).to.be.undefined
+    if (exists === true) expect(follow, `Follower ${follower.url} should exist on ${following.url}`).to.exist
+    else expect(follow, `Follower ${follower.url} should not exist on ${following.url}`).to.be.undefined
   }
 
   {
     const body = await follower.follows.getFollowings({ start: 0, count: 5, sort: '-createdAt' })
     const follow = body.data.find(f => f.following.host === following.host && f.state === 'accepted')
 
-    if (exists === true) expect(follow).to.exist
-    else expect(follow).to.be.undefined
+    if (exists === true) expect(follow, `Following ${following.url} should exist on ${follower.url}`).to.exist
+    else expect(follow, `Following ${following.url} should not exist on ${follower.url}`).to.be.undefined
   }
 }
 
@@ -185,6 +179,10 @@ describe('Test auto follows', function () {
 
       await checkFollow(servers[0], servers[1], false)
       await checkFollow(servers[0], servers[2], true)
+    })
+
+    after(async function () {
+      await instanceIndexServer.terminate()
     })
   })
 

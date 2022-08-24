@@ -2,18 +2,18 @@
 
 import 'mocha'
 import * as chai from 'chai'
+import { completeVideoCheck } from '@server/tests/shared'
+import { wait } from '@shared/core-utils'
+import { HttpStatusCode, JobState, VideoCreateResult, VideoPrivacy } from '@shared/models'
 import {
   cleanupTests,
   CommentsCommand,
-  completeVideoCheck,
   createMultipleServers,
   killallServers,
   PeerTubeServer,
   setAccessTokensToServers,
-  wait,
   waitJobs
-} from '@shared/extra-utils'
-import { HttpStatusCode, JobState, VideoCreateResult, VideoPrivacy } from '@shared/models'
+} from '@shared/server-commands'
 
 const expect = chai.expect
 
@@ -50,7 +50,7 @@ describe('Test handle downs', function () {
   let commentCommands: CommentsCommand[]
 
   before(async function () {
-    this.timeout(30000)
+    this.timeout(120000)
 
     servers = await createMultipleServers(3)
     commentCommands = servers.map(s => s.comments)
@@ -172,7 +172,7 @@ describe('Test handle downs', function () {
   })
 
   it('Should re-follow server 1', async function () {
-    this.timeout(35000)
+    this.timeout(70000)
 
     await servers[1].run()
     await servers[2].run()

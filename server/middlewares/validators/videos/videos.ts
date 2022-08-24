@@ -1,17 +1,18 @@
 import express from 'express'
 import { body, header, param, query, ValidationChain } from 'express-validator'
+import { isTestInstance } from '@server/helpers/core-utils'
 import { getResumableUploadPath } from '@server/helpers/upload'
-import { isAbleToUploadVideo } from '@server/lib/user'
+import { Redis } from '@server/lib/redis'
 import { getServerActor } from '@server/models/application/application'
-import { ExpressPromiseHandler } from '@server/types/express'
+import { ExpressPromiseHandler } from '@server/types/express-handler'
 import { MUserAccountId, MVideoFullLight } from '@server/types/models'
-import { ServerErrorCode, UserRight, VideoPrivacy } from '../../../../shared'
-import { HttpStatusCode } from '../../../../shared/models/http/http-error-codes'
+import { getAllPrivacies } from '@shared/core-utils'
+import { HttpStatusCode, ServerErrorCode, UserRight, VideoInclude, VideoPrivacy } from '@shared/models'
 import {
   exists,
   isBooleanValid,
   isDateValid,
-  isFileFieldValid,
+  isFileValid,
   isIdValid,
   isUUIDValid,
   toArray,
@@ -21,23 +22,24 @@ import {
 } from '../../../helpers/custom-validators/misc'
 import { isBooleanBothQueryValid, isNumberArray, isStringArray } from '../../../helpers/custom-validators/search'
 import {
+  areVideoTagsValid,
   isScheduleVideoUpdatePrivacyValid,
   isVideoCategoryValid,
   isVideoDescriptionValid,
   isVideoFileMimeTypeValid,
   isVideoFileSizeValid,
   isVideoFilterValid,
-  isVideoImage,
+  isVideoImageValid,
+  isVideoIncludeValid,
   isVideoLanguageValid,
   isVideoLicenceValid,
   isVideoNameValid,
   isVideoOriginallyPublishedAtValid,
   isVideoPrivacyValid,
-  isVideoSupportValid,
-  isVideoTagsValid
+  isVideoSupportValid
 } from '../../../helpers/custom-validators/videos'
 import { cleanUpReqFiles } from '../../../helpers/express-utils'
-import { getDurationFromVideoFile } from '../../../helpers/ffprobe-utils'
+import { getVideoStreamDuration } from '../../../helpers/ffmpeg'
 import { logger } from '../../../helpers/logger'
 import { deleteFileAndCatch } from '../../../helpers/utils'
 import { getVideoWithAttributes } from '../../../helpers/video'
@@ -46,10 +48,11 @@ import { CONSTRAINTS_FIELDS, OVERVIEWS } from '../../../initializers/constants'
 import { isLocalVideoAccepted } from '../../../lib/moderation'
 import { Hooks } from '../../../lib/plugins/hooks'
 import { VideoModel } from '../../../models/video/video'
-import { authenticatePromiseIfNeeded } from '../../auth'
 import {
   areValidationErrors,
+  checkCanSeePrivateVideo,
   checkUserCanManageVideo,
+  checkUserQuota,
   doesVideoChannelOfAccountExist,
   doesVideoExist,
   doesVideoFileOfVideoExist,
@@ -58,7 +61,7 @@ import {
 
 const videosAddLegacyValidator = getCommonVideoEditAttributes().concat([
   body('videofile')
-    .custom((value, { req }) => isFileFieldValid(req.files, 'videofile'))
+    .custom((_, { req }) => isFileValid({ files: req.files, field: 'videofile', mimeTypeRegex: null, maxSize: null }))
     .withMessage('Should have a file'),
   body('name')
     .trim()
@@ -105,11 +108,33 @@ const videosAddLegacyValidator = getCommonVideoEditAttributes().concat([
 const videosAddResumableValidator = [
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     const user = res.locals.oauth.token.User
-
     const body: express.CustomUploadXFile<express.UploadXFileMetadata> = req.body
-    const file = { ...body, duration: undefined, path: getResumableUploadPath(body.id), filename: body.metadata.filename }
-
+    const file = { ...body, duration: undefined, path: getResumableUploadPath(body.name), filename: body.metadata.filename }
     const cleanup = () => deleteFileAndCatch(file.path)
+
+    const uploadId = req.query.upload_id
+    const sessionExists = await Redis.Instance.doesUploadSessionExist(uploadId)
+
+    if (sessionExists) {
+      const sessionResponse = await Redis.Instance.getUploadSession(uploadId)
+
+      if (!sessionResponse) {
+        res.setHeader('Retry-After', 300) // ask to retry after 5 min, knowing the upload_id is kept for up to 15 min after completion
+
+        return res.fail({
+          status: HttpStatusCode.SERVICE_UNAVAILABLE_503,
+          message: 'The upload is already being processed'
+        })
+      }
+
+      if (isTestInstance()) {
+        res.setHeader('x-resumable-upload-cached', 'true')
+      }
+
+      return res.json(sessionResponse)
+    }
+
+    await Redis.Instance.setUploadSession(uploadId)
 
     if (!await doesVideoChannelOfAccountExist(file.metadata.channelId, user, res)) return cleanup()
 
@@ -168,7 +193,7 @@ const videosAddResumableInitValidator = getCommonVideoEditAttributes().concat([
     const videoFileMetadata = {
       mimetype: req.headers['x-upload-content-type'] as string,
       size: +req.headers['x-upload-content-length'],
-      originalname: req.body.name
+      originalname: req.body.filename
     }
 
     const user = res.locals.oauth.token.User
@@ -274,19 +299,11 @@ const videosCustomGetValidator = (
 
       // Video private or blacklisted
       if (video.requiresAuth()) {
-        await authenticatePromiseIfNeeded(req, res, authenticateInQuery)
-
-        const user = res.locals.oauth ? res.locals.oauth.token.User : null
-
-        // Only the owner or a user that have blocklist rights can see the video
-        if (!user || !user.canGetVideo(video)) {
-          return res.fail({
-            status: HttpStatusCode.FORBIDDEN_403,
-            message: 'Cannot get this private/internal or blocklisted video'
-          })
+        if (await checkCanSeePrivateVideo(req, res, video, authenticateInQuery)) {
+          return next()
         }
 
-        return next()
+        return
       }
 
       // Video is public, anyone can access it
@@ -357,12 +374,12 @@ const videosOverviewValidator = [
 function getCommonVideoEditAttributes () {
   return [
     body('thumbnailfile')
-      .custom((value, { req }) => isVideoImage(req.files, 'thumbnailfile')).withMessage(
+      .custom((value, { req }) => isVideoImageValid(req.files, 'thumbnailfile')).withMessage(
         'This thumbnail file is not supported or too large. Please, make sure it is of the following type: ' +
         CONSTRAINTS_FIELDS.VIDEOS.IMAGE.EXTNAME.join(', ')
       ),
     body('previewfile')
-      .custom((value, { req }) => isVideoImage(req.files, 'previewfile')).withMessage(
+      .custom((value, { req }) => isVideoImageValid(req.files, 'previewfile')).withMessage(
         'This preview file is not supported or too large. Please, make sure it is of the following type: ' +
         CONSTRAINTS_FIELDS.VIDEOS.IMAGE.EXTNAME.join(', ')
       ),
@@ -402,7 +419,7 @@ function getCommonVideoEditAttributes () {
     body('tags')
       .optional()
       .customSanitizer(toValueOrNull)
-      .custom(isVideoTagsValid)
+      .custom(areVideoTagsValid)
       .withMessage(
         `Should have an array of up to ${CONSTRAINTS_FIELDS.VIDEOS.TAGS.max} tags between ` +
         `${CONSTRAINTS_FIELDS.VIDEOS.TAG.min} and ${CONSTRAINTS_FIELDS.VIDEOS.TAG.max} characters each`
@@ -445,6 +462,10 @@ const commonVideosFiltersValidator = [
     .optional()
     .customSanitizer(toArray)
     .custom(isStringArray).withMessage('Should have a valid one of language array'),
+  query('privacyOneOf')
+    .optional()
+    .customSanitizer(toArray)
+    .custom(isNumberArray).withMessage('Should have a valid one of privacy array'),
   query('tagsOneOf')
     .optional()
     .customSanitizer(toArray)
@@ -463,6 +484,21 @@ const commonVideosFiltersValidator = [
   query('filter')
     .optional()
     .custom(isVideoFilterValid).withMessage('Should have a valid filter attribute'),
+  query('include')
+    .optional()
+    .custom(isVideoIncludeValid).withMessage('Should have a valid include attribute'),
+  query('isLocal')
+    .optional()
+    .customSanitizer(toBooleanOrNull)
+    .custom(isBooleanValid).withMessage('Should have a valid local boolean'),
+  query('hasHLSFiles')
+    .optional()
+    .customSanitizer(toBooleanOrNull)
+    .custom(isBooleanValid).withMessage('Should have a valid has hls boolean'),
+  query('hasWebtorrentFiles')
+    .optional()
+    .customSanitizer(toBooleanOrNull)
+    .custom(isBooleanValid).withMessage('Should have a valid has webtorrent boolean'),
   query('skipCount')
     .optional()
     .customSanitizer(toBooleanOrNull)
@@ -476,16 +512,31 @@ const commonVideosFiltersValidator = [
 
     if (areValidationErrors(req, res)) return
 
-    const user = res.locals.oauth ? res.locals.oauth.token.User : undefined
-    if (
-      (req.query.filter === 'all-local' || req.query.filter === 'all') &&
-      (!user || user.hasRight(UserRight.SEE_ALL_VIDEOS) === false)
-    ) {
-      res.fail({
-        status: HttpStatusCode.UNAUTHORIZED_401,
-        message: 'You are not allowed to see all local videos.'
-      })
-      return
+    // FIXME: deprecated in 4.0, to remove
+    {
+      if (req.query.filter === 'all-local') {
+        req.query.include = VideoInclude.NOT_PUBLISHED_STATE
+        req.query.isLocal = true
+        req.query.privacyOneOf = getAllPrivacies()
+      } else if (req.query.filter === 'all') {
+        req.query.include = VideoInclude.NOT_PUBLISHED_STATE
+        req.query.privacyOneOf = getAllPrivacies()
+      } else if (req.query.filter === 'local') {
+        req.query.isLocal = true
+      }
+
+      req.query.filter = undefined
+    }
+
+    const user = res.locals.oauth?.token.User
+
+    if ((!user || user.hasRight(UserRight.SEE_ALL_VIDEOS) !== true)) {
+      if (req.query.include || req.query.privacyOneOf) {
+        return res.fail({
+          status: HttpStatusCode.UNAUTHORIZED_401,
+          message: 'You are not allowed to see all videos.'
+        })
+      }
     }
 
     return next()
@@ -560,14 +611,7 @@ async function commonVideoChecksPass (parameters: {
     return false
   }
 
-  if (await isAbleToUploadVideo(user.id, videoFileSize) === false) {
-    res.fail({
-      status: HttpStatusCode.PAYLOAD_TOO_LARGE_413,
-      message: 'The user video quota is exceeded with this video.',
-      type: ServerErrorCode.QUOTA_REACHED
-    })
-    return false
-  }
+  if (await checkUserQuota(user, videoFileSize, res) === false) return false
 
   return true
 }
@@ -602,9 +646,10 @@ export async function isVideoAccepted (
 }
 
 async function addDurationToVideo (videoFile: { path: string, duration?: number }) {
-  const duration: number = await getDurationFromVideoFile(videoFile.path)
+  const duration = await getVideoStreamDuration(videoFile.path)
 
-  if (isNaN(duration)) throw new Error(`Couldn't get video duration`)
-
-  videoFile.duration = duration
+  // FFmpeg may not be able to guess video duration
+  // For example with m2v files: https://trac.ffmpeg.org/ticket/9726#comment:2
+  if (isNaN(duration)) videoFile.duration = 0
+  else videoFile.duration = duration
 }

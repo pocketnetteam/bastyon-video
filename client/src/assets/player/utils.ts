@@ -1,5 +1,4 @@
-import { escapeHTML } from '@shared/core-utils/renderer'
-import { VideoFile } from '@shared/models'
+import { HTMLServerConfig, Video, VideoFile } from '@shared/models'
 
 function toTitleCase (str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1)
@@ -7,6 +6,13 @@ function toTitleCase (str: string) {
 
 function isWebRTCDisabled () {
   return !!((window as any).RTCPeerConnection || (window as any).mozRTCPeerConnection || (window as any).webkitRTCPeerConnection) === false
+}
+
+function isP2PEnabled (video: Video, config: HTMLServerConfig, userP2PEnabled: boolean) {
+  if (video.isLocal && config.tracker.enabled === false) return false
+  if (isWebRTCDisabled()) return false
+
+  return userP2PEnabled
 }
 
 function isIOS () {
@@ -44,14 +50,17 @@ function isMobile () {
 }
 
 function buildVideoOrPlaylistEmbed (embedUrl: string, embedTitle: string) {
-  const title = escapeHTML(embedTitle)
+  const iframe = document.createElement('iframe')
 
-  return '<iframe width="560" height="315" ' +
-    'sandbox="allow-same-origin allow-scripts allow-popups" ' +
-    'title="' + title + '" ' +
-    'src="' + embedUrl + '" ' +
-    'frameborder="0" allowfullscreen>' +
-    '</iframe>'
+  iframe.title = embedTitle
+  iframe.width = '560'
+  iframe.height = '315'
+  iframe.src = embedUrl
+  iframe.frameBorder = '0'
+  iframe.allowFullscreen = true
+  iframe.sandbox.add('allow-same-origin', 'allow-scripts', 'allow-popups')
+
+  return iframe.outerHTML
 }
 
 function videoFileMaxByResolution (files: VideoFile[]) {
@@ -95,6 +104,7 @@ export {
   getRtcConfig,
   toTitleCase,
   isWebRTCDisabled,
+  isP2PEnabled,
 
   buildVideoOrPlaylistEmbed,
   videoFileMaxByResolution,

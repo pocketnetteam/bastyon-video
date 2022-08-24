@@ -22,6 +22,7 @@ import {
   UpdatedAt
 } from 'sequelize-typescript'
 import { TokensCache } from '@server/lib/auth/tokens-cache'
+import { LiveQuotaStore } from '@server/lib/live'
 import {
   MMyUserFormattable,
   MUser,
@@ -31,7 +32,7 @@ import {
   MUserWithNotificationSetting,
   MVideoWithRights
 } from '@server/types/models'
-import { AttributesOnly } from '@shared/core-utils'
+import { AttributesOnly } from '@shared/typescript-utils'
 import { hasUserRight, USER_ROLE_LABELS } from '../../../shared/core-utils/users'
 import { AbuseState, MyUser, UserRight, VideoPlaylistType, VideoPrivacy } from '../../../shared/models'
 import { User, UserRole } from '../../../shared/models/users'
@@ -48,14 +49,14 @@ import {
   isUserEmailVerifiedValid,
   isUserNoModal,
   isUserNSFWPolicyValid,
+  isUserP2PEnabledValid,
   isUserPasswordValid,
   isUserRoleValid,
   isUserUsernameValid,
   isUserVideoLanguages,
   isUserVideoQuotaDailyValid,
   isUserVideoQuotaValid,
-  isUserVideosHistoryEnabledValid,
-  isUserWebTorrentEnabledValid
+  isUserVideosHistoryEnabledValid
 } from '../../helpers/custom-validators/users'
 import { comparePassword, cryptPassword } from '../../helpers/peertube-crypto'
 import { DEFAULT_USER_THEME_NAME, NSFW_POLICY_TYPES } from '../../initializers/constants'
@@ -76,6 +77,7 @@ import { UserNotificationSettingModel } from './user-notification-setting'
 enum ScopeNames {
   FOR_ME_API = 'FOR_ME_API',
   WITH_VIDEOCHANNELS = 'WITH_VIDEOCHANNELS',
+  WITH_QUOTA = 'WITH_QUOTA',
   WITH_STATS = 'WITH_STATS'
 }
 
@@ -106,7 +108,7 @@ enum ScopeNames {
                 include: [
                   {
                     model: ActorImageModel,
-                    as: 'Banner',
+                    as: 'Banners',
                     required: false
                   }
                 ]
@@ -153,7 +155,7 @@ enum ScopeNames {
       }
     ]
   },
-  [ScopeNames.WITH_STATS]: {
+  [ScopeNames.WITH_QUOTA]: {
     attributes: {
       include: [
         [
@@ -161,12 +163,31 @@ enum ScopeNames {
             '(' +
               UserModel.generateUserQuotaBaseSQL({
                 withSelect: false,
-                whereUserId: '"UserModel"."id"'
+                whereUserId: '"UserModel"."id"',
+                daily: false
               }) +
             ')'
           ),
           'videoQuotaUsed'
         ],
+        [
+          literal(
+            '(' +
+              UserModel.generateUserQuotaBaseSQL({
+                withSelect: false,
+                whereUserId: '"UserModel"."id"',
+                daily: true
+              }) +
+            ')'
+          ),
+          'videoQuotaUsedDaily'
+        ]
+      ]
+    }
+  },
+  [ScopeNames.WITH_STATS]: {
+    attributes: {
+      include: [
         [
           literal(
             '(' +
@@ -267,10 +288,9 @@ export class UserModel extends Model<Partial<AttributesOnly<UserModel>>> {
   nsfwPolicy: NSFWPolicyType
 
   @AllowNull(false)
-  @Default(true)
-  @Is('UserWebTorrentEnabled', value => throwIfNotValid(value, isUserWebTorrentEnabledValid, 'WebTorrent enabled'))
+  @Is('p2pEnabled', value => throwIfNotValid(value, isUserP2PEnabledValid, 'P2P enabled'))
   @Column
-  webTorrentEnabled: boolean
+  p2pEnabled: boolean
 
   @AllowNull(false)
   @Default(true)
@@ -475,34 +495,16 @@ export class UserModel extends Model<Partial<AttributesOnly<UserModel>>> {
     }
 
     const query: FindOptions = {
-      attributes: {
-        include: [
-          [
-            literal(
-              '(' +
-                UserModel.generateUserQuotaBaseSQL({
-                  withSelect: false,
-                  whereUserId: '"UserModel"."id"'
-                }) +
-              ')'
-            ),
-            'videoQuotaUsed'
-          ] as any // FIXME: typings
-        ]
-      },
       offset: start,
       limit: count,
       order: getSort(sort),
       where
     }
 
-    return UserModel.findAndCountAll(query)
-                    .then(({ rows, count }) => {
-                      return {
-                        data: rows,
-                        total: count
-                      }
-                    })
+    return Promise.all([
+      UserModel.unscoped().count(query),
+      UserModel.scope([ 'defaultScope', ScopeNames.WITH_QUOTA ]).findAll(query)
+    ]).then(([ total, data ]) => ({ total, data }))
   }
 
   static listWithRight (right: UserRight): Promise<MUserDefault[]> {
@@ -583,7 +585,10 @@ export class UserModel extends Model<Partial<AttributesOnly<UserModel>>> {
       ScopeNames.WITH_VIDEOCHANNELS
     ]
 
-    if (withStats) scopes.push(ScopeNames.WITH_STATS)
+    if (withStats) {
+      scopes.push(ScopeNames.WITH_QUOTA)
+      scopes.push(ScopeNames.WITH_STATS)
+    }
 
     return UserModel.scope(scopes).findByPk(id)
   }
@@ -624,7 +629,7 @@ export class UserModel extends Model<Partial<AttributesOnly<UserModel>>> {
     const query = {
       where: {
         [Op.or]: [
-          where(fn('lower', col('username')), fn('lower', username)),
+          where(fn('lower', col('username')), fn('lower', username) as any),
 
           { email }
         ]
@@ -764,18 +769,15 @@ export class UserModel extends Model<Partial<AttributesOnly<UserModel>>> {
   static generateUserQuotaBaseSQL (options: {
     whereUserId: '$userId' | '"UserModel"."id"'
     withSelect: boolean
-    where?: string
-  }, user?: UserModel) {
-    const andWhere = options.where
-      ? 'AND ' + options.where
+    daily: boolean
+  }) {
+    const andWhere = options.daily === true
+      ? 'AND "video"."createdAt" > now() - interval \'24 hours\''
       : ''
 
-    const usernameQuotes = user?.username ? `'${user.username}'` : null
-    const tableQuotes = user?.username ? `"name"` : `"userId"`
-
     const videoChannelJoin = 'INNER JOIN "videoChannel" ON "videoChannel"."id" = "video"."channelId" ' +
-        'INNER JOIN "account" ON "videoChannel"."accountId" = "account"."id" ' +
-        `WHERE "account".${tableQuotes}=${usernameQuotes || options.whereUserId} ${andWhere}`
+      'INNER JOIN "account" ON "videoChannel"."accountId" = "account"."id" ' +
+      `WHERE "account"."userId" = ${options.whereUserId} ${andWhere}`
 
     const webtorrentFiles = 'SELECT "videoFile"."size" AS "size", "video"."id" AS "videoId" FROM "videoFile" ' +
       'INNER JOIN "video" ON "videoFile"."videoId" = "video"."id" ' +
@@ -817,10 +819,10 @@ export class UserModel extends Model<Partial<AttributesOnly<UserModel>>> {
         }
       }
 
-      return UserModel.count(query)
+      return UserModel.unscoped().count(query)
     }
 
-    const totalUsers = await UserModel.count()
+    const totalUsers = await UserModel.unscoped().count()
     const totalDailyActiveUsers = await getActiveUsers(1)
     const totalWeeklyActiveUsers = await getActiveUsers(7)
     const totalMonthlyActiveUsers = await getActiveUsers(30)
@@ -895,7 +897,11 @@ export class UserModel extends Model<Partial<AttributesOnly<UserModel>>> {
       emailVerified: this.emailVerified,
 
       nsfwPolicy: this.nsfwPolicy,
-      webTorrentEnabled: this.webTorrentEnabled,
+
+      // FIXME: deprecated in 4.1
+      webTorrentEnabled: this.p2pEnabled,
+      p2pEnabled: this.p2pEnabled,
+
       videosHistoryEnabled: this.videosHistoryEnabled,
       autoPlayVideo: this.autoPlayVideo,
       autoPlayNextVideo: this.autoPlayNextVideo,
@@ -907,12 +913,15 @@ export class UserModel extends Model<Partial<AttributesOnly<UserModel>>> {
 
       videoQuota: this.videoQuota,
       videoQuotaDaily: this.videoQuotaDaily,
+
       videoQuotaUsed: videoQuotaUsed !== undefined
-        ? parseInt(videoQuotaUsed + '', 10)
+        ? parseInt(videoQuotaUsed + '', 10) + LiveQuotaStore.Instance.getLiveQuotaOf(this.id)
         : undefined,
+
       videoQuotaUsedDaily: videoQuotaUsedDaily !== undefined
-        ? parseInt(videoQuotaUsedDaily + '', 10)
+        ? parseInt(videoQuotaUsedDaily + '', 10) + LiveQuotaStore.Instance.getLiveQuotaOf(this.id)
         : undefined,
+
       videosCount: videosCount !== undefined
         ? parseInt(videosCount + '', 10)
         : undefined,

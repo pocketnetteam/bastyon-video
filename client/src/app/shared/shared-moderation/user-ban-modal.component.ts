@@ -1,10 +1,14 @@
+import { forkJoin } from 'rxjs'
 import { Component, EventEmitter, OnInit, Output, ViewChild } from '@angular/core'
-import { Notifier, UserService } from '@app/core'
+import { Notifier } from '@app/core'
 import { FormReactive, FormValidatorService } from '@app/shared/shared-forms'
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap'
 import { NgbModalRef } from '@ng-bootstrap/ng-bootstrap/modal/modal-ref'
 import { User } from '@shared/models'
 import { USER_BAN_REASON_VALIDATOR } from '../form-validators/user-validators'
+import { Account } from '../shared-main'
+import { UserAdminService } from '../shared-users'
+import { BlocklistService } from './blocklist.service'
 
 @Component({
   selector: 'my-user-ban-modal',
@@ -17,19 +21,22 @@ export class UserBanModalComponent extends FormReactive implements OnInit {
 
   private usersToBan: User | User[]
   private openedModal: NgbModalRef
+  modalMessage = ''
 
   constructor (
     protected formValidatorService: FormValidatorService,
     private modalService: NgbModal,
     private notifier: Notifier,
-    private userService: UserService
+    private userAdminService: UserAdminService,
+    private blocklistService: BlocklistService
   ) {
     super()
   }
 
   ngOnInit () {
     this.buildForm({
-      reason: USER_BAN_REASON_VALIDATOR
+      reason: USER_BAN_REASON_VALIDATOR,
+      mute: null
     })
   }
 
@@ -45,8 +52,15 @@ export class UserBanModalComponent extends FormReactive implements OnInit {
 
   banUser () {
     const reason = this.form.value['reason'] || undefined
+    const mute = this.form.value['mute']
 
-    this.userService.banUsers(this.usersToBan, reason)
+    const observables = [
+      this.userAdminService.banUsers(this.usersToBan, reason)
+    ]
+
+    if (mute) observables.push(this.muteAccounts())
+
+    forkJoin(observables)
       .subscribe({
         next: () => {
           const message = Array.isArray(this.usersToBan)
@@ -56,6 +70,7 @@ export class UserBanModalComponent extends FormReactive implements OnInit {
           this.notifier.success(message)
 
           this.userBanned.emit(this.usersToBan)
+
           this.hide()
         },
 
@@ -63,4 +78,17 @@ export class UserBanModalComponent extends FormReactive implements OnInit {
       })
   }
 
+  getModalTitle () {
+    if (Array.isArray(this.usersToBan)) return $localize`Ban ${this.usersToBan.length} users`
+
+    return $localize`Ban "${this.usersToBan.username}"`
+  }
+
+  private muteAccounts () {
+    const accounts = Array.isArray(this.usersToBan)
+      ? this.usersToBan.map(u => new Account(u.account))
+      : new Account(this.usersToBan.account)
+
+    return this.blocklistService.blockAccountByInstance(accounts)
+  }
 }

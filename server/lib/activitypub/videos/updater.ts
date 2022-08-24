@@ -7,7 +7,7 @@ import { autoBlacklistVideoIfNeeded } from '@server/lib/video-blacklist'
 import { VideoLiveModel } from '@server/models/video/video-live'
 import { MActor, MChannelAccountLight, MChannelId, MVideoAccountLightBlacklistAllFiles, MVideoFullLight } from '@server/types/models'
 import { VideoObject, VideoPrivacy } from '@shared/models'
-import { APVideoAbstractBuilder, getVideoAttributesFromObject } from './shared'
+import { APVideoAbstractBuilder, getVideoAttributesFromObject, updateVideoRates } from './shared'
 
 export class APVideoUpdater extends APVideoAbstractBuilder {
   private readonly wasPrivateVideo: boolean
@@ -74,6 +74,8 @@ export class APVideoUpdater extends APVideoAbstractBuilder {
         transaction: undefined
       })
 
+      await updateVideoRates(videoUpdated, this.videoObject)
+
       // Notify our users?
       if (this.wasPrivateVideo || this.wasUnlistedVideo) {
         Notifier.Instance.notifyOnNewVideoIfNeeded(videoUpdated)
@@ -81,7 +83,6 @@ export class APVideoUpdater extends APVideoAbstractBuilder {
 
       if (videoUpdated.isLive) {
         PeerTubeSocket.Instance.sendVideoLiveNewState(videoUpdated)
-        PeerTubeSocket.Instance.sendVideoViewsUpdate(videoUpdated)
       }
 
       logger.info('Remote video with uuid %s updated', this.videoObject.uuid, this.lTags())
@@ -127,7 +128,6 @@ export class APVideoUpdater extends APVideoAbstractBuilder {
     this.video.channelId = videoData.channelId
     this.video.views = videoData.views
     this.video.isLive = videoData.isLive
-    this.video.aspectRatio = videoData.aspectRatio
 
     // Ensures we update the updatedAt attribute, even if main attributes did not change
     this.video.changed('updatedAt', true)

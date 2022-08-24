@@ -2,20 +2,18 @@
 
 import 'mocha'
 import { io } from 'socket.io-client'
+import { checkBadCountPagination, checkBadSortPagination, checkBadStartPagination } from '@server/tests/shared'
+import { wait } from '@shared/core-utils'
+import { HttpStatusCode, UserNotificationSetting, UserNotificationSettingValue } from '@shared/models'
 import {
-  checkBadCountPagination,
-  checkBadSortPagination,
-  checkBadStartPagination,
   cleanupTests,
   createSingleServer,
   makeGetRequest,
   makePostBodyRequest,
   makePutBodyRequest,
   PeerTubeServer,
-  setAccessTokensToServers,
-  wait
-} from '@shared/extra-utils'
-import { HttpStatusCode, UserNotificationSetting, UserNotificationSettingValue } from '@shared/models'
+  setAccessTokensToServers
+} from '@shared/server-commands'
 
 describe('Test user notifications API validators', function () {
   let server: PeerTubeServer
@@ -173,6 +171,7 @@ describe('Test user notifications API validators', function () {
       abuseNewMessage: UserNotificationSettingValue.WEB,
       abuseStateChange: UserNotificationSettingValue.WEB,
       newPeerTubeVersion: UserNotificationSettingValue.WEB,
+      myVideoStudioEditionFinished: UserNotificationSettingValue.WEB,
       newPluginVersion: UserNotificationSettingValue.WEB
     }
 

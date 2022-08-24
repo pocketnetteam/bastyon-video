@@ -1,10 +1,12 @@
 import { Component, ElementRef, Input, ViewChild } from '@angular/core'
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
+import { ServerService } from '@app/core'
 import { VideoDetails } from '@app/shared/shared-main'
 import { VideoPlaylist } from '@app/shared/shared-video-playlist'
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap'
+import { buildVideoOrPlaylistEmbed } from '@root-helpers/video'
 import { buildPlaylistLink, buildVideoLink, decoratePlaylistLink, decorateVideoLink } from '@shared/core-utils'
-import { VideoCaption } from '@shared/models'
-import { buildVideoOrPlaylistEmbed } from '../../../assets/player/utils'
+import { VideoCaption, VideoPlaylistPrivacy, VideoPrivacy } from '@shared/models'
 
 type Customizations = {
   startAtCheckbox: boolean
@@ -20,9 +22,12 @@ type Customizations = {
   originUrl: boolean
   autoplay: boolean
   muted: boolean
+
+  embedP2P: boolean
+  onlyEmbedUrl: boolean
   title: boolean
   warningTitle: boolean
-  controls: boolean
+  controlBar: boolean
   peertubeLink: boolean
 }
 
@@ -48,7 +53,14 @@ export class VideoShareComponent {
   isAdvancedCustomizationCollapsed = true
   includeVideoInPlaylist = false
 
-  constructor (private modalService: NgbModal) { }
+  playlistEmbedHTML: SafeHtml
+  videoEmbedHTML: SafeHtml
+
+  constructor (
+    private modalService: NgbModal,
+    private sanitizer: DomSanitizer,
+    private server: ServerService
+  ) { }
 
   show (currentVideoTimestamp?: number, currentPlaylistPosition?: number) {
     let subtitle: string
@@ -56,7 +68,7 @@ export class VideoShareComponent {
       subtitle = this.videoCaptions[0].language.id
     }
 
-    this.customizations = {
+    this.customizations = new Proxy({
       startAtCheckbox: false,
       startAt: currentVideoTimestamp ? Math.floor(currentVideoTimestamp) : 0,
 
@@ -72,38 +84,59 @@ export class VideoShareComponent {
       muted: false,
 
       // Embed options
+      embedP2P: this.server.getHTMLConfig().defaults.p2p.embed.enabled,
+      onlyEmbedUrl: false,
       title: true,
       warningTitle: true,
-      controls: true,
+      controlBar: true,
       peertubeLink: true
-    }
+    }, {
+      set: (target, prop, value) => {
+        target[prop] = value
+
+        if (prop === 'embedP2P') {
+          // Auto enabled warning title if P2P is enabled
+          this.customizations.warningTitle = value
+        }
+
+        this.updateEmbedCode()
+
+        return true
+      }
+    })
 
     this.playlistPosition = currentPlaylistPosition
+
+    this.updateEmbedCode()
 
     this.modalService.open(this.modal, { centered: true })
   }
 
   getVideoIframeCode () {
-    const embedUrl = decorateVideoLink({ url: this.video.embedUrl, ...this.getVideoOptions() })
+    return buildVideoOrPlaylistEmbed(this.getVideoEmbedUrl(), this.video.name)
+  }
 
-    return buildVideoOrPlaylistEmbed(embedUrl, this.video.name)
+  getVideoEmbedUrl () {
+    return decorateVideoLink({ url: this.video.embedUrl, ...this.getVideoOptions(true) })
+  }
+
+  getPlaylistEmbedUrl () {
+    return decoratePlaylistLink({ url: this.playlist.embedUrl, ...this.getPlaylistOptions() })
   }
 
   getPlaylistIframeCode () {
-    const embedUrl = decoratePlaylistLink({ url: this.playlist.embedUrl, ...this.getPlaylistOptions() })
-
-    return buildVideoOrPlaylistEmbed(embedUrl, this.playlist.displayName)
+    return buildVideoOrPlaylistEmbed(this.getPlaylistEmbedUrl(), this.playlist.displayName)
   }
 
   getVideoUrl () {
-    const baseUrl = this.customizations.originUrl
-      ? this.video.originInstanceUrl
-      : window.location.origin
+    const url = this.customizations.originUrl
+      ? this.video.url
+      : buildVideoLink(this.video, window.location.origin)
 
     return decorateVideoLink({
-      url: buildVideoLink(this.video, baseUrl),
+      url,
 
-      ...this.getVideoOptions()
+      ...this.getVideoOptions(false)
     })
   }
 
@@ -114,16 +147,34 @@ export class VideoShareComponent {
     return decoratePlaylistLink({ url, playlistPosition: this.playlistPosition })
   }
 
+  updateEmbedCode () {
+    if (this.playlist) this.playlistEmbedHTML = this.sanitizer.bypassSecurityTrustHtml(this.getPlaylistIframeCode())
+
+    if (this.video) this.videoEmbedHTML = this.sanitizer.bypassSecurityTrustHtml(this.getVideoIframeCode())
+  }
+
   notSecure () {
     return window.location.protocol === 'http:'
   }
 
-  isVideoInEmbedTab () {
+  isInVideoEmbedTab () {
     return this.activeVideoId === 'embed'
+  }
+
+  isInPlaylistEmbedTab () {
+    return this.activePlaylistId === 'embed'
   }
 
   isLocalVideo () {
     return this.video.isLocal
+  }
+
+  isPrivateVideo () {
+    return this.video.privacy.id === VideoPrivacy.PRIVATE
+  }
+
+  isPrivatePlaylist () {
+    return this.playlist.privacy.id === VideoPlaylistPrivacy.PRIVATE
   }
 
   private getPlaylistOptions (baseUrl?: string) {
@@ -134,7 +185,21 @@ export class VideoShareComponent {
     }
   }
 
-  private getVideoOptions () {
+  private getVideoOptions (forEmbed: boolean) {
+    const embedOptions = forEmbed
+      ? {
+        title: this.customizations.title,
+        warningTitle: this.customizations.warningTitle,
+        controlBar: this.customizations.controlBar,
+        peertubeLink: this.customizations.peertubeLink,
+
+        // If using default value, we don't need to specify it
+        p2p: this.customizations.embedP2P === this.server.getHTMLConfig().defaults.p2p.embed.enabled
+          ? undefined
+          : this.customizations.embedP2P
+      }
+      : {}
+
     return {
       startTime: this.customizations.startAtCheckbox ? this.customizations.startAt : undefined,
       stopTime: this.customizations.stopAtCheckbox ? this.customizations.stopAt : undefined,
@@ -145,10 +210,7 @@ export class VideoShareComponent {
       autoplay: this.customizations.autoplay,
       muted: this.customizations.muted,
 
-      title: this.customizations.title,
-      warningTitle: this.customizations.warningTitle,
-      controls: this.customizations.controls,
-      peertubeLink: this.customizations.peertubeLink
+      ...embedOptions
     }
   }
 }

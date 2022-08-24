@@ -10,9 +10,12 @@ import {
   UserRight,
   Video as VideoServerModel,
   VideoConstant,
+  VideoFile,
   VideoPrivacy,
   VideoScheduleUpdate,
-  VideoState
+  VideoState,
+  VideoStreamingPlaylist,
+  VideoStreamingPlaylistType
 } from '@shared/models'
 
 export class Video implements VideoServerModel {
@@ -52,9 +55,11 @@ export class Video implements VideoServerModel {
   embedPath: string
   embedUrl: string
 
-  url?: string
+  url: string
 
   views: number
+  viewers: number
+
   likes: number
   dislikes: number
   nsfw: boolean
@@ -65,8 +70,12 @@ export class Video implements VideoServerModel {
   waitTranscoding?: boolean
   state?: VideoConstant<VideoState>
   scheduledUpdate?: VideoScheduleUpdate
+
   blacklisted?: boolean
-  blockedReason?: string
+  blacklistedReason?: string
+
+  blockedOwner?: boolean
+  blockedServer?: boolean
 
   account: {
     id: number
@@ -74,7 +83,11 @@ export class Video implements VideoServerModel {
     displayName: string
     url: string
     host: string
-    avatar?: ActorImage
+
+    // TODO: remove, deprecated in 4.2
+    avatar: ActorImage
+
+    avatars: ActorImage[]
   }
 
   channel: {
@@ -83,7 +96,11 @@ export class Video implements VideoServerModel {
     displayName: string
     url: string
     host: string
-    avatar?: ActorImage
+
+    // TODO: remove, deprecated in 4.2
+    avatar: ActorImage
+
+    avatars: ActorImage[]
   }
 
   userHistory?: {
@@ -91,6 +108,9 @@ export class Video implements VideoServerModel {
   }
 
   pluginData?: any
+
+  streamingPlaylists?: VideoStreamingPlaylist[]
+  files?: VideoFile[]
 
   static buildWatchUrl (video: Partial<Pick<Video, 'uuid' | 'shortUUID'>>) {
     return buildVideoWatchPath({ shortUUID: video.shortUUID || video.uuid })
@@ -141,6 +161,7 @@ export class Video implements VideoServerModel {
     this.url = hash.url
 
     this.views = hash.views
+    this.viewers = hash.viewers
     this.likes = hash.likes
     this.dislikes = hash.dislikes
 
@@ -163,7 +184,13 @@ export class Video implements VideoServerModel {
     if (this.state) this.state.label = peertubeTranslate(this.state.label, translations)
 
     this.blacklisted = hash.blacklisted
-    this.blockedReason = hash.blacklistedReason
+    this.blacklistedReason = hash.blacklistedReason
+
+    this.blockedOwner = hash.blockedOwner
+    this.blockedServer = hash.blockedServer
+
+    this.streamingPlaylists = hash.streamingPlaylists
+    this.files = hash.files
 
     this.userHistory = hash.userHistory
 
@@ -198,6 +225,38 @@ export class Video implements VideoServerModel {
 
   isUpdatableBy (user: AuthUser) {
     return user && this.isLocal === true && (this.account.name === user.username || user.hasRight(UserRight.UPDATE_ANY_VIDEO))
+  }
+
+  isEditableBy (user: AuthUser, videoStudioEnabled: boolean) {
+    return videoStudioEnabled &&
+      this.state?.id === VideoState.PUBLISHED &&
+      this.isUpdatableBy(user)
+  }
+
+  canSeeStats (user: AuthUser) {
+    return user && this.isLocal === true && (this.account.name === user.username || user.hasRight(UserRight.SEE_ALL_VIDEOS))
+  }
+
+  canRemoveFiles (user: AuthUser) {
+    return this.isLocal &&
+      user && user.hasRight(UserRight.MANAGE_VIDEO_FILES) &&
+      this.state.id !== VideoState.TO_TRANSCODE &&
+      this.hasHLS() &&
+      this.hasWebTorrent()
+  }
+
+  canRunTranscoding (user: AuthUser) {
+    return this.isLocal &&
+      user && user.hasRight(UserRight.RUN_VIDEO_TRANSCODING) &&
+      this.state.id !== VideoState.TO_TRANSCODE
+  }
+
+  hasHLS () {
+    return this.streamingPlaylists?.some(p => p.type === VideoStreamingPlaylistType.HLS)
+  }
+
+  hasWebTorrent () {
+    return this.files && this.files.length !== 0
   }
 
   isLiveInfoAvailableBy (user: AuthUser) {

@@ -10,7 +10,8 @@ export class VideoAvatarChannelComponent implements OnInit {
   @Input() video: Video
   @Input() byAccount: string
 
-  @Input() genericChannel: boolean
+  @Input() showAccount: boolean
+  @Input() showChannel: boolean
 
   channelLinkTitle = ''
   accountLinkTitle = ''
@@ -18,9 +19,5 @@ export class VideoAvatarChannelComponent implements OnInit {
   ngOnInit () {
     this.channelLinkTitle = $localize`${this.video.account.name} (channel page)`
     this.accountLinkTitle = $localize`${this.video.byAccount} (account page)`
-  }
-
-  isChannelAvatarNull () {
-    return this.video.channel.avatar === null
   }
 }

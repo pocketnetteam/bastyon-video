@@ -6,14 +6,12 @@ import { logsRouter } from './logs'
 import { serverRedundancyRouter } from './redundancy'
 import { serverBlocklistRouter } from './server-blocklist'
 import { statsRouter } from './stats'
-import { spaceRouter } from './check-space'
 
 const serverRouter = express.Router()
 
 serverRouter.use('/', serverFollowsRouter)
 serverRouter.use('/', serverRedundancyRouter)
 serverRouter.use('/', statsRouter)
-serverRouter.use('/', spaceRouter)
 serverRouter.use('/', serverBlocklistRouter)
 serverRouter.use('/', contactRouter)
 serverRouter.use('/', logsRouter)

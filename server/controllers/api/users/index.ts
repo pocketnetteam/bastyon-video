@@ -3,11 +3,9 @@ import RateLimit from 'express-rate-limit'
 import { tokensRouter } from '@server/controllers/api/users/token'
 import { Hooks } from '@server/lib/plugins/hooks'
 import { OAuthTokenModel } from '@server/models/oauth/oauth-token'
-import { MUser, MUserAccountDefault } from '@server/types/models'
-import { UserCreate, UserCreateResult, UserRight, UserRole, UserUpdate } from '../../../../shared'
-import { HttpStatusCode } from '../../../../shared/models/http/http-error-codes'
-import { UserAdminFlag } from '../../../../shared/models/users/user-flag.model'
-import { UserRegister } from '../../../../shared/models/users/user-register.model'
+import { MUserAccountDefault } from '@server/types/models'
+import { pick } from '@shared/core-utils'
+import { HttpStatusCode, UserCreate, UserCreateResult, UserRegister, UserRight, UserUpdate } from '@shared/models'
 import { auditLoggerFactory, getAuditIdFromRes, UserAuditView } from '../../../helpers/audit-logger'
 import { logger } from '../../../helpers/logger'
 import { generateRandomString, getFormattedObjects } from '../../../helpers/utils'
@@ -17,7 +15,7 @@ import { sequelizeTypescript } from '../../../initializers/database'
 import { Emailer } from '../../../lib/emailer'
 import { Notifier } from '../../../lib/notifier'
 import { Redis } from '../../../lib/redis'
-import { createUserAccountAndChannelAndPlaylist, sendVerifyUserEmail } from '../../../lib/user'
+import { buildUser, createUserAccountAndChannelAndPlaylist, sendVerifyUserEmail } from '../../../lib/user'
 import {
   asyncMiddleware,
   asyncRetryTransactionMiddleware,
@@ -178,17 +176,11 @@ export {
 async function createUser (req: express.Request, res: express.Response) {
   const body: UserCreate = req.body
 
-  const userToCreate = new UserModel({
-    username: body.username,
-    password: body.password,
-    email: body.email,
-    nsfwPolicy: CONFIG.INSTANCE.DEFAULT_NSFW_POLICY,
-    autoPlayVideo: true,
-    role: body.role,
-    videoQuota: body.videoQuota,
-    videoQuotaDaily: body.videoQuotaDaily,
-    adminFlags: body.adminFlags || UserAdminFlag.NONE
-  }) as MUser
+  const userToCreate = buildUser({
+    ...pick(body, [ 'username', 'password', 'email', 'role', 'videoQuota', 'videoQuotaDaily', 'adminFlags' ]),
+
+    emailVerified: null
+  })
 
   // NB: due to the validator usersAddValidator, password==='' can only be true if we can send the mail.
   const createPassword = userToCreate.password === ''
@@ -209,10 +201,10 @@ async function createUser (req: express.Request, res: express.Response) {
     logger.info('Sending to user %s a create password email', body.username)
     const verificationString = await Redis.Instance.setCreatePasswordVerificationString(user.id)
     const url = WEBSERVER.URL + '/reset-password?userId=' + user.id + '&verificationString=' + verificationString
-    await Emailer.Instance.addPasswordCreateEmailJob(userToCreate.username, user.email, url)
+    Emailer.Instance.addPasswordCreateEmailJob(userToCreate.username, user.email, url)
   }
 
-  Hooks.runAction('action:api.user.created', { body, user, account, videoChannel })
+  Hooks.runAction('action:api.user.created', { body, user, account, videoChannel, req, res })
 
   return res.json({
     user: {
@@ -227,15 +219,9 @@ async function createUser (req: express.Request, res: express.Response) {
 async function registerUser (req: express.Request, res: express.Response) {
   const body: UserRegister = req.body
 
-  const userToCreate = new UserModel({
-    username: body.username,
-    password: body.password,
-    email: body.email,
-    nsfwPolicy: CONFIG.INSTANCE.DEFAULT_NSFW_POLICY,
-    autoPlayVideo: true,
-    role: UserRole.USER,
-    videoQuota: CONFIG.USER.VIDEO_QUOTA,
-    videoQuotaDaily: CONFIG.USER.VIDEO_QUOTA_DAILY,
+  const userToCreate = buildUser({
+    ...pick(body, [ 'username', 'password', 'email' ]),
+
     emailVerified: CONFIG.SIGNUP.REQUIRES_EMAIL_VERIFICATION ? false : null
   })
 
@@ -254,7 +240,7 @@ async function registerUser (req: express.Request, res: express.Response) {
 
   Notifier.Instance.notifyOnNewUserRegistration(user)
 
-  Hooks.runAction('action:api.user.registered', { body, user, account, videoChannel })
+  Hooks.runAction('action:api.user.registered', { body, user, account, videoChannel, req, res })
 
   return res.type('json').status(HttpStatusCode.NO_CONTENT_204).end()
 }
@@ -264,7 +250,7 @@ async function unblockUser (req: express.Request, res: express.Response) {
 
   await changeUserBlock(res, user, false)
 
-  Hooks.runAction('action:api.user.unblocked', { user })
+  Hooks.runAction('action:api.user.unblocked', { user, req, res })
 
   return res.status(HttpStatusCode.NO_CONTENT_204).end()
 }
@@ -275,7 +261,7 @@ async function blockUser (req: express.Request, res: express.Response) {
 
   await changeUserBlock(res, user, true, reason)
 
-  Hooks.runAction('action:api.user.blocked', { user })
+  Hooks.runAction('action:api.user.blocked', { user, req, res })
 
   return res.status(HttpStatusCode.NO_CONTENT_204).end()
 }
@@ -312,7 +298,7 @@ async function removeUser (req: express.Request, res: express.Response) {
     await user.destroy({ transaction: t })
   })
 
-  Hooks.runAction('action:api.user.deleted', { user })
+  Hooks.runAction('action:api.user.deleted', { user, req, res })
 
   return res.status(HttpStatusCode.NO_CONTENT_204).end()
 }
@@ -345,7 +331,7 @@ async function updateUser (req: express.Request, res: express.Response) {
 
   auditLogger.update(getAuditIdFromRes(res), new UserAuditView(user.toFormattedJSON()), oldUserAuditView)
 
-  Hooks.runAction('action:api.user.updated', { user })
+  Hooks.runAction('action:api.user.updated', { user, req, res })
 
   // Don't need to send this update to followers, these attributes are not federated
 

@@ -2,16 +2,18 @@
 
 import 'mocha'
 import * as chai from 'chai'
+import { wait } from '@shared/core-utils'
+import { ActivityType, VideoPlaylistPrivacy } from '@shared/models'
 import {
   cleanupTests,
   createMultipleServers,
   doubleFollow,
   PeerTubeServer,
   setAccessTokensToServers,
-  wait,
+  setDefaultAccountAvatar,
+  setDefaultChannelAvatar,
   waitJobs
-} from '@shared/extra-utils'
-import { ActivityType, VideoPlaylistPrivacy } from '@shared/models'
+} from '@shared/server-commands'
 
 const expect = chai.expect
 
@@ -29,6 +31,8 @@ describe('Test stats (excluding redundancy)', function () {
     servers = await createMultipleServers(3)
 
     await setAccessTokensToServers(servers)
+    await setDefaultChannelAvatar(servers)
+    await setDefaultAccountAvatar(servers)
 
     await doubleFollow(servers[0], servers[1])
 
@@ -38,7 +42,7 @@ describe('Test stats (excluding redundancy)', function () {
 
     await servers[0].comments.createThread({ videoId: uuid, text: 'comment' })
 
-    await servers[0].videos.view({ id: uuid })
+    await servers[0].views.simulateView({ id: uuid })
 
     // Wait the video views repeatable job
     await wait(8000)
@@ -198,6 +202,7 @@ describe('Test stats (excluding redundancy)', function () {
           },
           resolutions: {
             '0p': false,
+            '144p': false,
             '240p': false,
             '360p': false,
             '480p': false,
@@ -229,13 +234,7 @@ describe('Test stats (excluding redundancy)', function () {
   it('Should have the correct AP stats', async function () {
     this.timeout(60000)
 
-    await servers[0].config.updateCustomSubConfig({
-      newConfig: {
-        transcoding: {
-          enabled: false
-        }
-      }
-    })
+    await servers[0].config.disableTranscoding()
 
     const first = await servers[1].stats.get()
 

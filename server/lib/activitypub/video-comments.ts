@@ -1,5 +1,4 @@
 import { map } from 'bluebird'
-import { checkUrlsSameHost } from '../../helpers/activitypub'
 import { sanitizeAndCheckVideoCommentObject } from '../../helpers/custom-validators/activitypub/video-comments'
 import { logger } from '../../helpers/logger'
 import { doJSONRequest } from '../../helpers/requests'
@@ -7,6 +6,7 @@ import { ACTIVITY_PUB, CRAWL_REQUEST_CONCURRENCY } from '../../initializers/cons
 import { VideoCommentModel } from '../../models/video/video-comment'
 import { MCommentOwner, MCommentOwnerVideo, MVideoAccountLightBlacklistAllFiles } from '../../types/models/video'
 import { getOrCreateAPActor } from './actors'
+import { checkUrlsSameHost } from './url'
 import { getOrCreateAPVideo } from './videos'
 
 type ResolveThreadParams = {
@@ -87,7 +87,7 @@ async function tryToResolveThreadFromVideo (params: ResolveThreadParams) {
 
   // Maybe it's a reply to a video?
   // If yes, it's done: we resolved all the thread
-  const syncParam = { likes: true, dislikes: true, shares: true, comments: false, thumbnail: true, refreshVideo: false }
+  const syncParam = { rates: true, shares: true, comments: false, thumbnail: true, refreshVideo: false }
   const { video } = await getOrCreateAPVideo({ videoObject: url, syncParam })
 
   if (video.isOwned() && !video.hasPrivacyForFederation()) {

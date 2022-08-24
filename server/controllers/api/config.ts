@@ -3,15 +3,13 @@ import { remove, writeJSON } from 'fs-extra'
 import { snakeCase } from 'lodash'
 import validator from 'validator'
 import { ServerConfigManager } from '@server/lib/server-config-manager'
-import { UserRight } from '../../../shared'
-import { About } from '../../../shared/models/server/about.model'
-import { CustomConfig } from '../../../shared/models/server/custom-config.model'
+import { About, CustomConfig, UserRight } from '@shared/models'
 import { auditLoggerFactory, CustomConfigAuditView, getAuditIdFromRes } from '../../helpers/audit-logger'
 import { objectConverter } from '../../helpers/core-utils'
 import { CONFIG, reloadConfig } from '../../initializers/config'
 import { ClientHtml } from '../../lib/client-html'
 import { asyncMiddleware, authenticate, ensureUserHasRight, openapiOperationDoc } from '../../middlewares'
-import { customConfigUpdateValidator } from '../../middlewares/validators/config'
+import { customConfigUpdateValidator, ensureConfigIsEditable } from '../../middlewares/validators/config'
 
 const configRouter = express.Router()
 
@@ -38,6 +36,7 @@ configRouter.put('/custom',
   openapiOperationDoc({ operationId: 'putCustomConfig' }),
   authenticate,
   ensureUserHasRight(UserRight.MANAGE_CONFIGURATION),
+  ensureConfigIsEditable,
   customConfigUpdateValidator,
   asyncMiddleware(updateCustomConfig)
 )
@@ -46,6 +45,7 @@ configRouter.delete('/custom',
   openapiOperationDoc({ operationId: 'delCustomConfig' }),
   authenticate,
   ensureUserHasRight(UserRight.MANAGE_CONFIGURATION),
+  ensureConfigIsEditable,
   asyncMiddleware(deleteCustomConfig)
 )
 
@@ -167,6 +167,18 @@ function customConfig (): CustomConfig {
         whitelisted: CONFIG.SERVICES.TWITTER.WHITELISTED
       }
     },
+    client: {
+      videos: {
+        miniature: {
+          preferAuthorDisplayName: CONFIG.CLIENT.VIDEOS.MINIATURE.PREFER_AUTHOR_DISPLAY_NAME
+        }
+      },
+      menu: {
+        login: {
+          redirectOnSingleExternalAuth: CONFIG.CLIENT.MENU.LOGIN.REDIRECT_ON_SINGLE_EXTERNAL_AUTH
+        }
+      }
+    },
     cache: {
       previews: {
         size: CONFIG.CACHE.PREVIEWS.SIZE
@@ -194,6 +206,9 @@ function customConfig (): CustomConfig {
       videoQuota: CONFIG.USER.VIDEO_QUOTA,
       videoQuotaDaily: CONFIG.USER.VIDEO_QUOTA_DAILY
     },
+    videoChannels: {
+      maxPerUser: CONFIG.VIDEO_CHANNELS.MAX_PER_USER
+    },
     transcoding: {
       enabled: CONFIG.TRANSCODING.ENABLED,
       allowAdditionalExtensions: CONFIG.TRANSCODING.ALLOW_ADDITIONAL_EXTENSIONS,
@@ -203,6 +218,7 @@ function customConfig (): CustomConfig {
       profile: CONFIG.TRANSCODING.PROFILE,
       resolutions: {
         '0p': CONFIG.TRANSCODING.RESOLUTIONS['0p'],
+        '144p': CONFIG.TRANSCODING.RESOLUTIONS['144p'],
         '240p': CONFIG.TRANSCODING.RESOLUTIONS['240p'],
         '360p': CONFIG.TRANSCODING.RESOLUTIONS['360p'],
         '480p': CONFIG.TRANSCODING.RESOLUTIONS['480p'],
@@ -221,6 +237,9 @@ function customConfig (): CustomConfig {
     live: {
       enabled: CONFIG.LIVE.ENABLED,
       allowReplay: CONFIG.LIVE.ALLOW_REPLAY,
+      latencySetting: {
+        enabled: CONFIG.LIVE.LATENCY_SETTING.ENABLED
+      },
       maxDuration: CONFIG.LIVE.MAX_DURATION,
       maxInstanceLives: CONFIG.LIVE.MAX_INSTANCE_LIVES,
       maxUserLives: CONFIG.LIVE.MAX_USER_LIVES,
@@ -229,6 +248,7 @@ function customConfig (): CustomConfig {
         threads: CONFIG.LIVE.TRANSCODING.THREADS,
         profile: CONFIG.LIVE.TRANSCODING.PROFILE,
         resolutions: {
+          '144p': CONFIG.LIVE.TRANSCODING.RESOLUTIONS['144p'],
           '240p': CONFIG.LIVE.TRANSCODING.RESOLUTIONS['240p'],
           '360p': CONFIG.LIVE.TRANSCODING.RESOLUTIONS['360p'],
           '480p': CONFIG.LIVE.TRANSCODING.RESOLUTIONS['480p'],
@@ -238,6 +258,9 @@ function customConfig (): CustomConfig {
           '2160p': CONFIG.LIVE.TRANSCODING.RESOLUTIONS['2160p']
         }
       }
+    },
+    videoStudio: {
+      enabled: CONFIG.VIDEO_STUDIO.ENABLED
     },
     import: {
       videos: {

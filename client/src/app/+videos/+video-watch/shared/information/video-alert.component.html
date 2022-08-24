@@ -1,9 +1,21 @@
+<div i18n class="alert alert-warning" *ngIf="isVideoTranscodingFailed()">
+  Transcoding failed, this video may not work properly.
+</div>
+
+<div i18n class="alert alert-warning" *ngIf="isVideoMoveToObjectStorageFailed()">
+  Move to external storage failed, this video may not work properly.
+</div>
+
 <div i18n class="alert alert-warning" *ngIf="isVideoToImport()">
   The video is being imported, it will be available when the import is finished.
 </div>
 
 <div i18n class="alert alert-warning" *ngIf="isVideoToTranscode()">
   The video is being transcoded, it may not work properly.
+</div>
+
+<div i18n class="alert alert-warning" *ngIf="isVideoToEdit()">
+  The video is being edited, it may not work properly.
 </div>
 
 <div i18n class="alert alert-warning" *ngIf="isVideoToMoveToExternalStorage()">
@@ -22,7 +34,11 @@
   This live has ended.
 </div>
 
+<div i18n class="alert alert-warning" *ngIf="noPlaylistVideoFound">
+  There are no videos available in this playlist.
+</div>
+
 <div class="alert alert-danger" *ngIf="video?.blacklisted">
   <div class="blocked-label" i18n>This video is blocked.</div>
-  {{ video.blockedReason }}
+  {{ video.blacklistedReason }}
 </div>

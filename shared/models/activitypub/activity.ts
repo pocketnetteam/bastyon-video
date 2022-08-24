@@ -1,12 +1,11 @@
 import { ActivityPubActor } from './activitypub-actor'
 import { ActivityPubSignature } from './activitypub-signature'
-import { ActivityFlagReasonObject, CacheFileObject, VideoObject } from './objects'
+import { ActivityFlagReasonObject, CacheFileObject, VideoObject, WatchActionObject } from './objects'
 import { AbuseObject } from './objects/abuse-object'
 import { DislikeObject } from './objects/dislike-object'
 import { APObject } from './objects/object.model'
 import { PlaylistObject } from './objects/playlist-object'
 import { VideoCommentObject } from './objects/video-comment-object'
-import { ViewObject } from './objects/view-object'
 
 export type Activity =
   ActivityCreate |
@@ -53,7 +52,7 @@ export interface BaseActivity {
 
 export interface ActivityCreate extends BaseActivity {
   type: 'Create'
-  object: VideoObject | AbuseObject | ViewObject | DislikeObject | VideoCommentObject | CacheFileObject | PlaylistObject
+  object: VideoObject | AbuseObject | DislikeObject | VideoCommentObject | CacheFileObject | PlaylistObject | WatchActionObject
 }
 
 export interface ActivityUpdate extends BaseActivity {
@@ -100,6 +99,9 @@ export interface ActivityView extends BaseActivity {
   type: 'View'
   actor: string
   object: APObject
+
+  // If sending a "viewer" event
+  expires?: string
 }
 
 export interface ActivityDislike extends BaseActivity {

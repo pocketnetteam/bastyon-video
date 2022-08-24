@@ -2,6 +2,7 @@
 
 import 'mocha'
 import * as chai from 'chai'
+import { wait } from '@shared/core-utils'
 import { LiveVideoCreate, VideoPrivacy, VideoState } from '@shared/models'
 import {
   cleanupTests,
@@ -12,9 +13,8 @@ import {
   setAccessTokensToServers,
   setDefaultVideoChannel,
   stopFfmpeg,
-  wait,
   waitJobs
-} from '../../../../shared/extra-utils'
+} from '@shared/server-commands'
 
 const expect = chai.expect
 
@@ -101,6 +101,7 @@ describe('Permanent live', function () {
   it('Should stream into this permanent live', async function () {
     this.timeout(120000)
 
+    const beforePublication = new Date()
     const ffmpegCommand = await servers[0].live.sendRTMPStreamInVideo({ videoId: videoUUID })
 
     for (const server of servers) {
@@ -109,13 +110,18 @@ describe('Permanent live', function () {
 
     await checkVideoState(videoUUID, VideoState.PUBLISHED)
 
+    for (const server of servers) {
+      const video = await server.videos.get({ id: videoUUID })
+      expect(new Date(video.publishedAt)).greaterThan(beforePublication)
+    }
+
     await stopFfmpeg(ffmpegCommand)
     await servers[0].live.waitUntilWaiting({ videoId: videoUUID })
 
     await waitJobs(servers)
   })
 
-  it('Should not have cleaned up this live', async function () {
+  it('Should have cleaned up this live', async function () {
     this.timeout(40000)
 
     await wait(5000)
@@ -123,7 +129,8 @@ describe('Permanent live', function () {
 
     for (const server of servers) {
       const videoDetails = await server.videos.get({ id: videoUUID })
-      expect(videoDetails.streamingPlaylists).to.have.lengthOf(1)
+
+      expect(videoDetails.streamingPlaylists).to.have.lengthOf(0)
     }
   })
 
@@ -134,7 +141,7 @@ describe('Permanent live', function () {
   })
 
   it('Should be able to stream again in the permanent live', async function () {
-    this.timeout(20000)
+    this.timeout(60000)
 
     await servers[0].config.updateCustomSubConfig({
       newConfig: {
@@ -160,9 +167,26 @@ describe('Permanent live', function () {
 
     const count = await servers[0].live.countPlaylists({ videoUUID })
     // master playlist and 720p playlist
-    expect(count).to.equal(5)
+    expect(count).to.equal(2)
 
     await stopFfmpeg(ffmpegCommand)
+  })
+
+  it('Should have appropriate sessions', async function () {
+    this.timeout(60000)
+
+    await servers[0].live.waitUntilWaiting({ videoId: videoUUID })
+
+    const { data, total } = await servers[0].live.listSessions({ videoId: videoUUID })
+    expect(total).to.equal(2)
+    expect(data).to.have.lengthOf(2)
+
+    for (const session of data) {
+      expect(session.startDate).to.exist
+      expect(session.endDate).to.exist
+
+      expect(session.error).to.not.exist
+    }
   })
 
   after(async function () {

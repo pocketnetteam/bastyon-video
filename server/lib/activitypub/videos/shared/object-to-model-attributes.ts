@@ -11,7 +11,7 @@ import { VideoCaptionModel } from '@server/models/video/video-caption'
 import { VideoFileModel } from '@server/models/video/video-file'
 import { VideoStreamingPlaylistModel } from '@server/models/video/video-streaming-playlist'
 import { FilteredModelAttributes } from '@server/types'
-import { isStreamingPlaylist, MChannelId, MStreamingPlaylistVideo, MVideo, MVideoFile, MVideoId } from '@server/types/models'
+import { isStreamingPlaylist, MChannelId, MStreamingPlaylistVideo, MVideo, MVideoId } from '@server/types/models'
 import {
   ActivityHashTagObject,
   ActivityMagnetUrlObject,
@@ -24,6 +24,7 @@ import {
   VideoPrivacy,
   VideoStreamingPlaylistType
 } from '@shared/models'
+import { getDurationFromActivityStream } from '../../activity'
 
 function getThumbnailFromIcons (videoObject: VideoObject) {
   let validIcons = videoObject.icon.filter(i => i.width > THUMBNAILS_SIZE.minWidth)
@@ -110,7 +111,7 @@ function getFileAttributesFromUrl (
   return attributes
 }
 
-function getStreamingPlaylistAttributesFromObject (video: MVideoId, videoObject: VideoObject, videoFiles: MVideoFile[]) {
+function getStreamingPlaylistAttributesFromObject (video: MVideoId, videoObject: VideoObject) {
   const playlistUrls = videoObject.url.filter(u => isAPStreamingPlaylistUrlObject(u)) as ActivityPlaylistUrlObject[]
   if (playlistUrls.length === 0) return []
 
@@ -118,10 +119,7 @@ function getStreamingPlaylistAttributesFromObject (video: MVideoId, videoObject:
   for (const playlistUrlObject of playlistUrls) {
     const segmentsSha256UrlObject = playlistUrlObject.tag.find(isAPPlaylistSegmentHashesUrlObject)
 
-    let files: unknown[] = playlistUrlObject.tag.filter(u => isAPVideoUrlObject(u)) as ActivityVideoUrlObject[]
-
-    // FIXME: backward compatibility introduced in v2.1.0
-    if (files.length === 0) files = videoFiles
+    const files: unknown[] = playlistUrlObject.tag.filter(u => isAPVideoUrlObject(u)) as ActivityVideoUrlObject[]
 
     if (!segmentsSha256UrlObject) {
       logger.warn('No segment sha256 URL found in AP playlist object.', { playlistUrl: playlistUrlObject })
@@ -154,6 +152,7 @@ function getLiveAttributesFromObject (video: MVideoId, videoObject: VideoObject)
   return {
     saveReplay: videoObject.liveSaveReplay,
     permanentLive: videoObject.permanentLive,
+    latencyMode: videoObject.latencyMode,
     videoId: video.id
   }
 }
@@ -172,7 +171,6 @@ function getVideoAttributesFromObject (videoChannel: MChannelId, videoObject: Vi
     ? VideoPrivacy.PUBLIC
     : VideoPrivacy.UNLISTED
 
-  const duration = videoObject.duration.replace(/[^\d]+/, '')
   const language = videoObject.language?.identifier
 
   const category = videoObject.category
@@ -202,7 +200,7 @@ function getVideoAttributesFromObject (videoChannel: MChannelId, videoObject: Vi
     isLive: videoObject.isLiveBroadcast,
     state: videoObject.state,
     channelId: videoChannel.id,
-    duration: parseInt(duration, 10),
+    duration: getDurationFromActivityStream(videoObject.duration),
     createdAt: new Date(videoObject.published),
     publishedAt: new Date(videoObject.published),
 
@@ -215,8 +213,7 @@ function getVideoAttributesFromObject (videoChannel: MChannelId, videoObject: Vi
     likes: 0,
     dislikes: 0,
     remote: true,
-    privacy,
-    aspectRatio: videoObject.aspectRatio
+    privacy
   }
 }
 

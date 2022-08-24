@@ -1,5 +1,5 @@
 import { difference, values } from 'lodash'
-import { IncludeOptions, Op, QueryTypes, Transaction, WhereOptions } from 'sequelize'
+import { Includeable, IncludeOptions, Op, QueryTypes, Transaction } from 'sequelize'
 import {
   AfterCreate,
   AfterDestroy,
@@ -19,26 +19,30 @@ import {
   UpdatedAt
 } from 'sequelize-typescript'
 import { isActivityPubUrlValid } from '@server/helpers/custom-validators/activitypub/misc'
+import { afterCommitIfTransaction } from '@server/helpers/database-utils'
 import { getServerActor } from '@server/models/application/application'
 import {
+  MActor,
+  MActorFollowActors,
   MActorFollowActorsDefault,
   MActorFollowActorsDefaultSubscription,
   MActorFollowFollowingHost,
   MActorFollowFormattable,
   MActorFollowSubscriptions
 } from '@server/types/models'
-import { AttributesOnly } from '@shared/core-utils'
-import { ActivityPubActorType } from '@shared/models'
+import { AttributesOnly } from '@shared/typescript-utils'
 import { FollowState } from '../../../shared/models/actors'
 import { ActorFollow } from '../../../shared/models/actors/follow.model'
 import { logger } from '../../helpers/logger'
-import { ACTOR_FOLLOW_SCORE, CONSTRAINTS_FIELDS, FOLLOW_STATES, SERVER_ACTOR_NAME } from '../../initializers/constants'
+import { ACTOR_FOLLOW_SCORE, CONSTRAINTS_FIELDS, FOLLOW_STATES, SERVER_ACTOR_NAME, SORTABLE_COLUMNS } from '../../initializers/constants'
 import { AccountModel } from '../account/account'
 import { ServerModel } from '../server/server'
 import { doesExist } from '../shared/query'
-import { createSafeIn, getFollowsSort, getSort, searchAttribute, throwIfNotValid } from '../utils'
+import { createSafeIn, getSort, searchAttribute, throwIfNotValid } from '../utils'
 import { VideoChannelModel } from '../video/video-channel'
 import { ActorModel, unusedActorAttributesForAPI } from './actor'
+import { InstanceListFollowersQueryBuilder, ListFollowersOptions } from './sql/instance-list-followers-query-builder'
+import { InstanceListFollowingQueryBuilder, ListFollowingOptions } from './sql/instance-list-following-query-builder'
 
 @Table({
   tableName: 'actorFollow',
@@ -118,20 +122,60 @@ export class ActorFollowModel extends Model<Partial<AttributesOnly<ActorFollowMo
   @AfterCreate
   @AfterUpdate
   static incrementFollowerAndFollowingCount (instance: ActorFollowModel, options: any) {
-    if (instance.state !== 'accepted') return undefined
-
-    return Promise.all([
-      ActorModel.rebuildFollowsCount(instance.actorId, 'following', options.transaction),
-      ActorModel.rebuildFollowsCount(instance.targetActorId, 'followers', options.transaction)
-    ])
+    return afterCommitIfTransaction(options.transaction, () => {
+      return Promise.all([
+        ActorModel.rebuildFollowsCount(instance.actorId, 'following'),
+        ActorModel.rebuildFollowsCount(instance.targetActorId, 'followers')
+      ])
+    })
   }
 
   @AfterDestroy
   static decrementFollowerAndFollowingCount (instance: ActorFollowModel, options: any) {
-    return Promise.all([
-      ActorModel.rebuildFollowsCount(instance.actorId, 'following', options.transaction),
-      ActorModel.rebuildFollowsCount(instance.targetActorId, 'followers', options.transaction)
-    ])
+    return afterCommitIfTransaction(options.transaction, () => {
+      return Promise.all([
+        ActorModel.rebuildFollowsCount(instance.actorId, 'following'),
+        ActorModel.rebuildFollowsCount(instance.targetActorId, 'followers')
+      ])
+    })
+  }
+
+  /*
+   * @deprecated Use `findOrCreateCustom` instead
+  */
+  static findOrCreate (): any {
+    throw new Error('Must not be called')
+  }
+
+  // findOrCreate has issues with actor follow hooks
+  static async findOrCreateCustom (options: {
+    byActor: MActor
+    targetActor: MActor
+    activityId: string
+    state: FollowState
+    transaction: Transaction
+  }): Promise<[ MActorFollowActors, boolean ]> {
+    const { byActor, targetActor, activityId, state, transaction } = options
+
+    let created = false
+    let actorFollow: MActorFollowActors = await ActorFollowModel.loadByActorAndTarget(byActor.id, targetActor.id, transaction)
+
+    if (!actorFollow) {
+      created = true
+
+      actorFollow = await ActorFollowModel.create({
+        actorId: byActor.id,
+        targetActorId: targetActor.id,
+        url: activityId,
+
+        state
+      }, { transaction })
+
+      actorFollow.ActorFollowing = targetActor
+      actorFollow.ActorFollower = byActor
+    }
+
+    return [ actorFollow, created ]
   }
 
   static removeFollowsOf (actorId: number, t?: Transaction) {
@@ -245,7 +289,7 @@ export class ActorFollowModel extends Model<Partial<AttributesOnly<ActorFollowMo
     return ActorFollowModel.findOne(query)
   }
 
-  static listSubscribedIn (actorId: number, targets: { name: string, host?: string }[]): Promise<MActorFollowFollowingHost[]> {
+  static listSubscriptionsOf (actorId: number, targets: { name: string, host?: string }[]): Promise<MActorFollowFollowingHost[]> {
     const whereTab = targets
       .map(t => {
         if (t.host) {
@@ -305,136 +349,18 @@ export class ActorFollowModel extends Model<Partial<AttributesOnly<ActorFollowMo
     return ActorFollowModel.findAll(query)
   }
 
-  static listFollowingForApi (options: {
-    id: number
-    start: number
-    count: number
-    sort: string
-    state?: FollowState
-    actorType?: ActivityPubActorType
-    search?: string
-  }) {
-    const { id, start, count, sort, search, state, actorType } = options
-
-    const followWhere = state ? { state } : {}
-    const followingWhere: WhereOptions = {}
-
-    if (search) {
-      Object.assign(followWhere, {
-        [Op.or]: [
-          searchAttribute(options.search, '$ActorFollowing.preferredUsername$'),
-          searchAttribute(options.search, '$ActorFollowing.Server.host$')
-        ]
-      })
-    }
-
-    if (actorType) {
-      Object.assign(followingWhere, { type: actorType })
-    }
-
-    const query = {
-      distinct: true,
-      offset: start,
-      limit: count,
-      order: getFollowsSort(sort),
-      where: followWhere,
-      include: [
-        {
-          model: ActorModel,
-          required: true,
-          as: 'ActorFollower',
-          where: {
-            id
-          }
-        },
-        {
-          model: ActorModel,
-          as: 'ActorFollowing',
-          required: true,
-          where: followingWhere,
-          include: [
-            {
-              model: ServerModel,
-              required: true
-            }
-          ]
-        }
-      ]
-    }
-
-    return ActorFollowModel.findAndCountAll<MActorFollowActorsDefault>(query)
-      .then(({ rows, count }) => {
-        return {
-          data: rows,
-          total: count
-        }
-      })
+  static listInstanceFollowingForApi (options: ListFollowingOptions) {
+    return Promise.all([
+      new InstanceListFollowingQueryBuilder(this.sequelize, options).countFollowing(),
+      new InstanceListFollowingQueryBuilder(this.sequelize, options).listFollowing()
+    ]).then(([ total, data ]) => ({ total, data }))
   }
 
-  static listFollowersForApi (options: {
-    actorId: number
-    start: number
-    count: number
-    sort: string
-    state?: FollowState
-    actorType?: ActivityPubActorType
-    search?: string
-  }) {
-    const { actorId, start, count, sort, search, state, actorType } = options
-
-    const followWhere = state ? { state } : {}
-    const followerWhere: WhereOptions = {}
-
-    if (search) {
-      Object.assign(followWhere, {
-        [Op.or]: [
-          searchAttribute(search, '$ActorFollower.preferredUsername$'),
-          searchAttribute(search, '$ActorFollower.Server.host$')
-        ]
-      })
-    }
-
-    if (actorType) {
-      Object.assign(followerWhere, { type: actorType })
-    }
-
-    const query = {
-      distinct: true,
-      offset: start,
-      limit: count,
-      order: getFollowsSort(sort),
-      where: followWhere,
-      include: [
-        {
-          model: ActorModel,
-          required: true,
-          as: 'ActorFollower',
-          where: followerWhere,
-          include: [
-            {
-              model: ServerModel,
-              required: true
-            }
-          ]
-        },
-        {
-          model: ActorModel,
-          as: 'ActorFollowing',
-          required: true,
-          where: {
-            id: actorId
-          }
-        }
-      ]
-    }
-
-    return ActorFollowModel.findAndCountAll<MActorFollowActorsDefault>(query)
-                           .then(({ rows, count }) => {
-                             return {
-                               data: rows,
-                               total: count
-                             }
-                           })
+  static listFollowersForApi (options: ListFollowersOptions) {
+    return Promise.all([
+      new InstanceListFollowersQueryBuilder(this.sequelize, options).countFollowers(),
+      new InstanceListFollowersQueryBuilder(this.sequelize, options).listFollowers()
+    ]).then(([ total, data ]) => ({ total, data }))
   }
 
   static listSubscriptionsForApi (options: {
@@ -458,58 +384,68 @@ export class ActorFollowModel extends Model<Partial<AttributesOnly<ActorFollowMo
       })
     }
 
-    const query = {
-      attributes: [],
-      distinct: true,
-      offset: start,
-      limit: count,
-      order: getSort(sort),
-      where,
-      include: [
-        {
-          attributes: [ 'id' ],
-          model: ActorModel.unscoped(),
-          as: 'ActorFollowing',
-          required: true,
-          include: [
-            {
-              model: VideoChannelModel.unscoped(),
-              required: true,
-              include: [
-                {
-                  attributes: {
-                    exclude: unusedActorAttributesForAPI
-                  },
-                  model: ActorModel,
-                  required: true
+    const getQuery = (forCount: boolean) => {
+      let channelInclude: Includeable[] = []
+
+      if (forCount !== true) {
+        channelInclude = [
+          {
+            attributes: {
+              exclude: unusedActorAttributesForAPI
+            },
+            model: ActorModel,
+            required: true
+          },
+          {
+            model: AccountModel.unscoped(),
+            required: true,
+            include: [
+              {
+                attributes: {
+                  exclude: unusedActorAttributesForAPI
                 },
-                {
-                  model: AccountModel.unscoped(),
-                  required: true,
-                  include: [
-                    {
-                      attributes: {
-                        exclude: unusedActorAttributesForAPI
-                      },
-                      model: ActorModel,
-                      required: true
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      ]
+                model: ActorModel,
+                required: true
+              }
+            ]
+          }
+        ]
+      }
+
+      return {
+        attributes: forCount === true
+          ? []
+          : SORTABLE_COLUMNS.USER_SUBSCRIPTIONS,
+        distinct: true,
+        offset: start,
+        limit: count,
+        order: getSort(sort),
+        where,
+        include: [
+          {
+            attributes: [ 'id' ],
+            model: ActorModel.unscoped(),
+            as: 'ActorFollowing',
+            required: true,
+            include: [
+              {
+                model: VideoChannelModel.unscoped(),
+                required: true,
+                include: channelInclude
+              }
+            ]
+          }
+        ]
+      }
     }
 
-    return ActorFollowModel.findAndCountAll<MActorFollowSubscriptions>(query)
-                           .then(({ rows, count }) => {
-                             return {
-                               data: rows.map(r => r.ActorFollowing.VideoChannel),
-                               total: count
-                             }
-                           })
+    return Promise.all([
+      ActorFollowModel.count(getQuery(true)),
+      ActorFollowModel.findAll<MActorFollowSubscriptions>(getQuery(false))
+    ]).then(([ total, rows ]) => ({
+      total,
+      data: rows.map(r => r.ActorFollowing.VideoChannel)
+    }))
   }
 
   static async keepUnfollowedInstance (hosts: string[]) {

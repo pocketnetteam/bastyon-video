@@ -12,7 +12,7 @@ export class PluginsCheckScheduler extends AbstractScheduler {
 
   private static instance: AbstractScheduler
 
-  protected schedulerIntervalMs = SCHEDULER_INTERVALS_MS.checkPlugins
+  protected schedulerIntervalMs = SCHEDULER_INTERVALS_MS.CHECK_PLUGINS
 
   private constructor () {
     super()
@@ -25,7 +25,7 @@ export class PluginsCheckScheduler extends AbstractScheduler {
   private async checkLatestPluginsVersion () {
     if (CONFIG.PLUGINS.INDEX.ENABLED === false) return
 
-    // logger.info('Checking latest plugins version.')
+    logger.info('Checking latest plugins version.')
 
     const plugins = await PluginModel.listInstalled()
 
@@ -59,7 +59,7 @@ export class PluginsCheckScheduler extends AbstractScheduler {
               Notifier.Instance.notifyOfNewPluginVersion(plugin)
             }
 
-            // logger.info('Plugin %s has a new latest version %s.', result.npmName, plugin.latestVersion)
+            logger.info('Plugin %s has a new latest version %s.', result.npmName, plugin.latestVersion)
           }
         }
       } catch (err) {

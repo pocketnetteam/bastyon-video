@@ -1,5 +1,4 @@
 import { literal, Op, OrderItem, Sequelize } from 'sequelize'
-import { Col } from 'sequelize/types/lib/utils'
 import validator from 'validator'
 
 type SortType = { sortModel: string, sortValue: string }
@@ -8,7 +7,7 @@ type SortType = { sortModel: string, sortValue: string }
 function getSort (value: string, lastSort: OrderItem = [ 'id', 'ASC' ]): OrderItem[] {
   const { direction, field } = buildDirectionAndField(value)
 
-  let finalField: string | Col
+  let finalField: string | ReturnType<typeof Sequelize.col>
 
   if (field.toLowerCase() === 'match') { // Search
     finalField = Sequelize.col('similarity')
@@ -65,7 +64,7 @@ function getVideoSort (value: string, lastSort: OrderItem = [ 'id', 'ASC' ]): Or
     ]
   }
 
-  let finalField: string | Col
+  let finalField: string | ReturnType<typeof Sequelize.col>
 
   // Alias
   if (field.toLowerCase() === 'match') { // Search
@@ -74,8 +73,8 @@ function getVideoSort (value: string, lastSort: OrderItem = [ 'id', 'ASC' ]): Or
     finalField = field
   }
 
-  const firstSort = typeof finalField === 'string'
-    ? finalField.split('.').concat([ direction ]) as any // FIXME: sequelize typings
+  const firstSort: OrderItem = typeof finalField === 'string'
+    ? finalField.split('.').concat([ direction ]) as OrderItem
     : [ finalField, direction ]
 
   return [ firstSort, lastSort ]
@@ -84,16 +83,16 @@ function getVideoSort (value: string, lastSort: OrderItem = [ 'id', 'ASC' ]): Or
 function getBlacklistSort (model: any, value: string, lastSort: OrderItem = [ 'id', 'ASC' ]): OrderItem[] {
   const [ firstSort ] = getSort(value)
 
-  if (model) return [ [ literal(`"${model}.${firstSort[0]}" ${firstSort[1]}`) ], lastSort ] as any[] // FIXME: typings
+  if (model) return [ [ literal(`"${model}.${firstSort[0]}" ${firstSort[1]}`) ], lastSort ] as OrderItem[]
   return [ firstSort, lastSort ]
 }
 
-function getFollowsSort (value: string, lastSort: OrderItem = [ 'id', 'ASC' ]): OrderItem[] {
+function getInstanceFollowsSort (value: string, lastSort: OrderItem = [ 'id', 'ASC' ]): OrderItem[] {
   const { direction, field } = buildDirectionAndField(value)
 
   if (field === 'redundancyAllowed') {
     return [
-      [ 'ActorFollowing', 'Server', 'redundancyAllowed', direction ],
+      [ 'ActorFollowing.Server.redundancyAllowed', direction ],
       lastSort
     ]
   }
@@ -182,7 +181,7 @@ function buildServerIdsFollowedBy (actorId: any) {
     'SELECT "actor"."serverId" FROM "actorFollow" ' +
     'INNER JOIN "actor" ON actor.id = "actorFollow"."targetActorId" ' +
     'WHERE "actorFollow"."actorId" = ' + actorIdNumber +
-    ')'
+  ')'
 }
 
 function buildWhereIdOrUUID (id: number | string) {
@@ -196,6 +195,12 @@ function parseAggregateResult (result: any) {
   if (isNaN(total)) return 0
 
   return total
+}
+
+function parseRowCountResult (result: any) {
+  if (result.length !== 0) return result[0].total
+
+  return 0
 }
 
 function createSafeIn (sequelize: Sequelize, stringArr: (string | number)[]) {
@@ -238,7 +243,8 @@ function searchAttribute (sourceField?: string, targetField?: string) {
 
   return {
     [targetField]: {
-      [Op.iLike]: `%${sourceField}%`
+      // FIXME: ts error
+      [Op.iLike as any]: `%${sourceField}%`
     }
   }
 }
@@ -263,10 +269,11 @@ export {
   buildWhereIdOrUUID,
   isOutdated,
   parseAggregateResult,
-  getFollowsSort,
+  getInstanceFollowsSort,
   buildDirectionAndField,
   createSafeIn,
-  searchAttribute
+  searchAttribute,
+  parseRowCountResult
 }
 
 // ---------------------------------------------------------------------------

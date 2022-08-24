@@ -1,4 +1,4 @@
-import { PickWith, PickWithOpt } from '@shared/core-utils'
+import { PickWith, PickWithOpt } from '@shared/typescript-utils'
 import { VideoModel } from '../../../models/video/video'
 import { MTrackerUrl } from '../server/tracker'
 import { MUserVideoHistoryTime } from '../user/user-video-history'
@@ -210,7 +210,9 @@ export type MVideoFormattable =
   PickWithOpt<VideoModel, 'UserVideoHistories', MUserVideoHistoryTime[]> &
   Use<'VideoChannel', MChannelAccountSummaryFormattable> &
   PickWithOpt<VideoModel, 'ScheduleVideoUpdate', Pick<MScheduleVideoUpdate, 'updateAt' | 'privacy'>> &
-  PickWithOpt<VideoModel, 'VideoBlacklist', Pick<MVideoBlacklist, 'reason'>>
+  PickWithOpt<VideoModel, 'VideoBlacklist', Pick<MVideoBlacklist, 'reason'>> &
+  PickWithOpt<VideoModel, 'VideoStreamingPlaylists', MStreamingPlaylistFiles[]> &
+  PickWithOpt<VideoModel, 'VideoFiles', MVideoFile[]>
 
 export type MVideoFormattableDetails =
   MVideoFormattable &

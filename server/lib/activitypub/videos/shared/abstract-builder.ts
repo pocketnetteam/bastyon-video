@@ -1,5 +1,4 @@
 import { Transaction } from 'sequelize/types'
-import { checkUrlsSameHost } from '@server/helpers/activitypub'
 import { deleteAllModels, filterNonExistingModels } from '@server/helpers/database-utils'
 import { logger, LoggerTagsFn } from '@server/helpers/logger'
 import { updatePlaceholderThumbnail, updateVideoMiniatureFromUrl } from '@server/lib/thumbnail'
@@ -11,6 +10,7 @@ import { VideoStreamingPlaylistModel } from '@server/models/video/video-streamin
 import { MStreamingPlaylistFilesVideo, MThumbnail, MVideoCaption, MVideoFile, MVideoFullLight, MVideoThumbnail } from '@server/types/models'
 import { ActivityTagObject, ThumbnailType, VideoObject, VideoStreamingPlaylistType } from '@shared/models'
 import { getOrCreateAPActor } from '../../actors'
+import { checkUrlsSameHost } from '../../url'
 import {
   getCaptionAttributesFromObject,
   getFileAttributesFromUrl,
@@ -119,7 +119,7 @@ export abstract class APVideoAbstractBuilder {
   }
 
   protected async setStreamingPlaylists (video: MVideoFullLight, t: Transaction) {
-    const streamingPlaylistAttributes = getStreamingPlaylistAttributesFromObject(video, this.videoObject, video.VideoFiles || [])
+    const streamingPlaylistAttributes = getStreamingPlaylistAttributesFromObject(video, this.videoObject)
     const newStreamingPlaylists = streamingPlaylistAttributes.map(a => new VideoStreamingPlaylistModel(a))
 
     // Remove video playlists that do not exist anymore

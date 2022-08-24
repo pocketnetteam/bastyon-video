@@ -1,18 +1,24 @@
-import { Response } from 'express'
+import { Request, Response } from 'express'
 import { loadVideo, VideoLoadType } from '@server/lib/model-loaders'
+import { isAbleToUploadVideo } from '@server/lib/user'
+import { authenticatePromiseIfNeeded } from '@server/middlewares/auth'
+import { VideoModel } from '@server/models/video/video'
 import { VideoChannelModel } from '@server/models/video/video-channel'
 import { VideoFileModel } from '@server/models/video/video-file'
 import {
   MUser,
   MUserAccountId,
+  MUserId,
+  MVideo,
   MVideoAccountLight,
   MVideoFormattableDetails,
   MVideoFullLight,
   MVideoId,
   MVideoImmutable,
-  MVideoThumbnail
+  MVideoThumbnail,
+  MVideoWithRights
 } from '@server/types/models'
-import { HttpStatusCode, UserRight } from '@shared/models'
+import { HttpStatusCode, ServerErrorCode, UserRight } from '@shared/models'
 
 async function doesVideoExist (id: number | string, res: Response, fetchType: VideoLoadType = 'all') {
   const userId = res.locals.oauth ? res.locals.oauth.token.User.id : undefined
@@ -89,6 +95,32 @@ async function doesVideoChannelOfAccountExist (channelId: number, user: MUserAcc
   return true
 }
 
+async function checkCanSeeVideoIfPrivate (req: Request, res: Response, video: MVideo, authenticateInQuery = false) {
+  if (!video.requiresAuth()) return true
+
+  const videoWithRights = await VideoModel.loadAndPopulateAccountAndServerAndTags(video.id)
+
+  return checkCanSeePrivateVideo(req, res, videoWithRights, authenticateInQuery)
+}
+
+async function checkCanSeePrivateVideo (req: Request, res: Response, video: MVideoWithRights, authenticateInQuery = false) {
+  await authenticatePromiseIfNeeded(req, res, authenticateInQuery)
+
+  const user = res.locals.oauth ? res.locals.oauth.token.User : null
+
+  // Only the owner or a user that have blocklist rights can see the video
+  if (!user || !user.canGetVideo(video)) {
+    res.fail({
+      status: HttpStatusCode.FORBIDDEN_403,
+      message: 'Cannot fetch information of private/internal/blocklisted video'
+    })
+
+    return false
+  }
+
+  return true
+}
+
 function checkUserCanManageVideo (user: MUser, video: MVideoAccountLight, right: UserRight, res: Response, onlyOwned = true) {
   // Retrieve the user who did the request
   if (onlyOwned && video.isOwned() === false) {
@@ -114,11 +146,28 @@ function checkUserCanManageVideo (user: MUser, video: MVideoAccountLight, right:
   return true
 }
 
+async function checkUserQuota (user: MUserId, videoFileSize: number, res: Response) {
+  if (await isAbleToUploadVideo(user.id, videoFileSize) === false) {
+    res.fail({
+      status: HttpStatusCode.PAYLOAD_TOO_LARGE_413,
+      message: 'The user video quota is exceeded with this video.',
+      type: ServerErrorCode.QUOTA_REACHED
+    })
+    return false
+  }
+
+  return true
+}
+
 // ---------------------------------------------------------------------------
 
 export {
   doesVideoChannelOfAccountExist,
   doesVideoExist,
   doesVideoFileOfVideoExist,
-  checkUserCanManageVideo
+
+  checkUserCanManageVideo,
+  checkCanSeeVideoIfPrivate,
+  checkCanSeePrivateVideo,
+  checkUserQuota
 }

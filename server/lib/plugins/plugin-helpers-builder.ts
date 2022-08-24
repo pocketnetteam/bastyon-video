@@ -1,5 +1,6 @@
 import express from 'express'
 import { join } from 'path'
+import { ffprobePromise } from '@server/helpers/ffmpeg/ffprobe-utils'
 import { buildLogger } from '@server/helpers/logger'
 import { CONFIG } from '@server/initializers/config'
 import { WEBSERVER } from '@server/initializers/constants'
@@ -9,15 +10,16 @@ import { AccountBlocklistModel } from '@server/models/account/account-blocklist'
 import { getServerActor } from '@server/models/application/application'
 import { ServerModel } from '@server/models/server/server'
 import { ServerBlocklistModel } from '@server/models/server/server-blocklist'
+import { UserModel } from '@server/models/user/user'
 import { VideoModel } from '@server/models/video/video'
 import { VideoBlacklistModel } from '@server/models/video/video-blacklist'
 import { MPlugin } from '@server/types/models'
 import { PeerTubeHelpers } from '@server/types/plugins'
-import { VideoBlacklistCreate } from '@shared/models'
+import { VideoBlacklistCreate, VideoStorage } from '@shared/models'
 import { addAccountInBlocklist, addServerInBlocklist, removeAccountFromBlocklist, removeServerFromBlocklist } from '../blocklist'
 import { ServerConfigManager } from '../server-config-manager'
 import { blacklistVideo, unblacklistVideo } from '../video-blacklist'
-import { UserModel } from '@server/models/user/user'
+import { VideoPathManager } from '../video-path-manager'
 
 function buildPluginHelpers (pluginModel: MPlugin, npmName: string): PeerTubeHelpers {
   const logger = buildPluginLogger(npmName)
@@ -85,6 +87,60 @@ function buildVideosHelpers () {
 
         await video.destroy({ transaction: t })
       })
+    },
+
+    ffprobe: (path: string) => {
+      return ffprobePromise(path)
+    },
+
+    getFiles: async (id: number | string) => {
+      const video = await VideoModel.loadAndPopulateAccountAndServerAndTags(id)
+      if (!video) return undefined
+
+      const webtorrentVideoFiles = (video.VideoFiles || []).map(f => ({
+        path: f.storage === VideoStorage.FILE_SYSTEM
+          ? VideoPathManager.Instance.getFSVideoFileOutputPath(video, f)
+          : null,
+        url: f.getFileUrl(video),
+
+        resolution: f.resolution,
+        size: f.size,
+        fps: f.fps
+      }))
+
+      const hls = video.getHLSPlaylist()
+
+      const hlsVideoFiles = hls
+        ? (video.getHLSPlaylist().VideoFiles || []).map(f => {
+          return {
+            path: f.storage === VideoStorage.FILE_SYSTEM
+              ? VideoPathManager.Instance.getFSVideoFileOutputPath(hls, f)
+              : null,
+            url: f.getFileUrl(video),
+            resolution: f.resolution,
+            size: f.size,
+            fps: f.fps
+          }
+        })
+        : []
+
+      const thumbnails = video.Thumbnails.map(t => ({
+        type: t.type,
+        url: t.getFileUrl(video),
+        path: t.getPath()
+      }))
+
+      return {
+        webtorrent: {
+          videoFiles: webtorrentVideoFiles
+        },
+
+        hls: {
+          videoFiles: hlsVideoFiles
+        },
+
+        thumbnails
+      }
     }
   }
 }

@@ -26,6 +26,10 @@ export const clientFilterHookObject = {
   'filter:api.video-watch.video.get.params': true,
   'filter:api.video-watch.video.get.result': true,
 
+  // Filter params/result of the function that fetch video playlist elements of the video-watch page
+  'filter:api.video-watch.video-playlist-elements.get.params': true,
+  'filter:api.video-watch.video-playlist-elements.get.result': true,
+
   // Filter params/result of the function that fetch the threads of the video-watch page
   'filter:api.video-watch.video-threads.list.params': true,
   'filter:api.video-watch.video-threads.list.result': true,
@@ -60,6 +64,9 @@ export const clientFilterHookObject = {
 
   // Filter upload page alert messages
   'filter:upload.messages.create.result': true,
+
+  'filter:login.instance-about-plugin-panels.create.result': true,
+  'filter:signup.instance-about-plugin-panels.create.result': true,
 
   // Filter videojs options built for PeerTube player
   'filter:internal.player.videojs.options.result': true

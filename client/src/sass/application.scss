@@ -17,6 +17,8 @@ $icon-font-path: '~@neos21/bootstrap3-glyphicons/assets/fonts/';
 @import './bootstrap';
 @import './primeng-custom';
 
+@import './z-index';
+
 [hidden] {
   display: none !important;
 }
@@ -28,13 +30,18 @@ body {
   --mainColor: #{$main-color};
   --mainColorLighter: #{$main-color-lighter};
   --mainColorLightest: #{$main-color-lightest};
+
   --mainHoverColor: #{$main-hover-color};
+  --mainBackgroundHoverColor: #{$main-background-hover-color};
+
   --mainBackgroundColor: #{$bg-color};
   --mainForegroundColor: #{$fg-color};
+
   --secondaryColor: #{$secondary-color};
 
   --greyForegroundColor: #{$grey-foreground-color};
   --greyBackgroundColor: #{$grey-background-color};
+  --greySecondaryBackgroundColor: #{$grey-background-hover-color};
 
   --menuBackgroundColor: #{$menu-background};
   --menuForegroundColor: #{$menu-color};
@@ -51,6 +58,7 @@ body {
   --markdownTextareaBackgroundColor: #{$markdown-textarea-background-color};
 
   --actionButtonColor: #{$grey-foreground-color};
+
   --supportButtonBackgroundColor: #{transparent};
   --supportButtonColor: #{pvar(--actionButtonColor)};
   --supportButtonHeartColor: #{$support-button-heart};
@@ -92,7 +100,7 @@ strong {
   font-weight: $font-semibold;
 }
 
-input.readonly {
+input[readonly] {
   /* Force blank on readonly inputs */
   background-color: pvar(--inputBackgroundColor) !important;
 }
@@ -261,37 +269,6 @@ my-input-toggle-hidden ::ng-deep input {
   display: flex;
   align-items: center;
   margin-bottom: 30px;
-
-  .form-sub-title {
-    flex-grow: 1;
-  }
-
-  .admin-sub-nav a {
-    @include disable-default-a-behaviour;
-
-    font-size: 16px;
-    color: pvar(--mainForegroundColor);
-    padding: 5px 15px;
-    border-radius: 0.25rem;
-    font-weight: $font-semibold;
-    opacity: 0.6;
-
-    &.active {
-      background-color: pvar(--submenuBackgroundColor);
-    }
-
-    &.active,
-    &:hover,
-    &:active,
-    &:focus {
-      opacity: 1;
-    }
-  }
-}
-
-.form-sub-title {
-  font-size: 20px;
-  font-weight: bold;
 }
 
 // In tables, don't have a hover different background
@@ -343,14 +320,10 @@ table {
 }
 
 .form-group-description {
-  @extend .text-muted;
+  @extend .muted !optional;
 
   font-size: 90%;
   margin-top: 10px;
-}
-
-ngx-loading-bar {
-  z-index: z(header) + 1 !important;
 }
 
 @media screen and (max-width: #{breakpoint(xxl)}) {
@@ -411,26 +384,6 @@ ngx-loading-bar {
 
     .admin-sub-header {
       flex-direction: column;
-
-      .form-sub-title {
-        @include margin-right(0 !important);
-
-        margin-bottom: 10px;
-        text-align: center;
-      }
-
-      .admin-sub-nav {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
-        height: 50px;
-        padding: 10px 0;
-        width: 100%;
-
-        a {
-          @include margin-left(5px);
-        }
-      }
     }
 
     my-markdown-textarea {

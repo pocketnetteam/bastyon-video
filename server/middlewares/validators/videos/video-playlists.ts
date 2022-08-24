@@ -1,11 +1,15 @@
 import express from 'express'
 import { body, param, query, ValidationChain } from 'express-validator'
-import { ExpressPromiseHandler } from '@server/types/express'
+import { ExpressPromiseHandler } from '@server/types/express-handler'
 import { MUserAccountId } from '@server/types/models'
-import { UserRight, VideoPlaylistCreate, VideoPlaylistUpdate } from '../../../../shared'
-import { HttpStatusCode } from '../../../../shared/models/http/http-error-codes'
-import { VideoPlaylistPrivacy } from '../../../../shared/models/videos/playlist/video-playlist-privacy.model'
-import { VideoPlaylistType } from '../../../../shared/models/videos/playlist/video-playlist-type.model'
+import {
+  HttpStatusCode,
+  UserRight,
+  VideoPlaylistCreate,
+  VideoPlaylistPrivacy,
+  VideoPlaylistType,
+  VideoPlaylistUpdate
+} from '@shared/models'
 import {
   isArrayOf,
   isIdOrUUIDValid,
@@ -23,7 +27,7 @@ import {
   isVideoPlaylistTimestampValid,
   isVideoPlaylistTypeValid
 } from '../../../helpers/custom-validators/video-playlists'
-import { isVideoImage } from '../../../helpers/custom-validators/videos'
+import { isVideoImageValid } from '../../../helpers/custom-validators/videos'
 import { cleanUpReqFiles } from '../../../helpers/express-utils'
 import { logger } from '../../../helpers/logger'
 import { CONSTRAINTS_FIELDS } from '../../../initializers/constants'
@@ -386,7 +390,7 @@ export {
 function getCommonPlaylistEditAttributes () {
   return [
     body('thumbnailfile')
-      .custom((value, { req }) => isVideoImage(req.files, 'thumbnailfile'))
+      .custom((value, { req }) => isVideoImageValid(req.files, 'thumbnailfile'))
       .withMessage(
         'This thumbnail file is not supported or too large. Please, make sure it is of the following type: ' +
         CONSTRAINTS_FIELDS.VIDEO_PLAYLISTS.IMAGE.EXTNAME.join(', ')

@@ -2,19 +2,17 @@
 
 import 'mocha'
 import { expect } from 'chai'
+import { areHttpImportTestsDisabled, buildAbsoluteFixturePath } from '@shared/core-utils'
 import {
-  areHttpImportTestsDisabled,
-  buildAbsoluteFixturePath,
   cleanupTests,
   CLICommand,
   createSingleServer,
   doubleFollow,
-  FIXTURE_URLS,
   PeerTubeServer,
   setAccessTokensToServers,
-  testHelloWorldRegisteredSettings,
   waitJobs
-} from '../../../shared/extra-utils'
+} from '@shared/server-commands'
+import { FIXTURE_URLS, testHelloWorldRegisteredSettings } from '../shared'
 
 describe('Test CLI wrapper', function () {
   let server: PeerTubeServer
@@ -138,9 +136,26 @@ describe('Test CLI wrapper', function () {
       expect(videoDetails.channel.name).to.equal('user_channel')
       expect(videoDetails.support).to.equal('super support text')
       expect(videoDetails.nsfw).to.be.false
+    })
+
+    it('Should not import again the same video', async function () {
+      if (areHttpImportTestsDisabled()) return
+
+      this.timeout(60000)
+
+      const params = `--target-url ${FIXTURE_URLS.youtube} --channel-name user_channel`
+      await cliCommand.execWithEnv(`${cmd} import ${params}`)
+
+      await waitJobs([ server ])
+
+      const { total, data } = await server.videos.list()
+      expect(total).to.equal(2)
+
+      const videos = data.filter(v => v.name === 'small video - youtube')
+      expect(videos).to.have.lengthOf(1)
 
       // So we can reimport it
-      await server.videos.remove({ token: userAccessToken, id: video.id })
+      await server.videos.remove({ token: userAccessToken, id: videos[0].id })
     })
 
     it('Should import and override some imported attributes', async function () {
@@ -203,6 +218,25 @@ describe('Test CLI wrapper', function () {
     })
 
     it('Should uninstall the plugin', async function () {
+      const res = await cliCommand.execWithEnv(`${cmd} plugins uninstall --npm-name peertube-plugin-hello-world`)
+
+      expect(res).to.not.contain('peertube-plugin-hello-world')
+    })
+
+    it('Should install a plugin in requested version', async function () {
+      this.timeout(60000)
+
+      await cliCommand.execWithEnv(`${cmd} plugins install --npm-name peertube-plugin-hello-world --plugin-version 0.0.17`)
+    })
+
+    it('Should list installed plugins, in correct version', async function () {
+      const res = await cliCommand.execWithEnv(`${cmd} plugins list`)
+
+      expect(res).to.contain('peertube-plugin-hello-world')
+      expect(res).to.contain('0.0.17')
+    })
+
+    it('Should uninstall the plugin again', async function () {
       const res = await cliCommand.execWithEnv(`${cmd} plugins uninstall --npm-name peertube-plugin-hello-world`)
 
       expect(res).to.not.contain('peertube-plugin-hello-world')

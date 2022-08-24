@@ -1,6 +1,3 @@
-import { registerTSPaths } from '../helpers/register-ts-paths'
-registerTSPaths()
-
 import CliTable3 from 'cli-table3'
 import { Command, program } from 'commander'
 import { uniq } from 'lodash'
@@ -12,7 +9,7 @@ import { assignToken, buildServer, getServerCredentials } from './cli'
 import bytes = require('bytes')
 
 program
-  .name('plugins')
+  .name('redundancy')
   .usage('[command] [options]')
 
 program

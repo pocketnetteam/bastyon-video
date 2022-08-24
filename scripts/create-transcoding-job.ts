@@ -1,15 +1,12 @@
-import { registerTSPaths } from '../server/helpers/register-ts-paths'
-registerTSPaths()
-
 import { program } from 'commander'
-import { VideoModel } from '../server/models/video/video'
+import { isUUIDValid, toCompleteUUID } from '@server/helpers/custom-validators/misc'
+import { computeLowerResolutionsToTranscode } from '@server/helpers/ffmpeg'
+import { CONFIG } from '@server/initializers/config'
+import { addTranscodingJob } from '@server/lib/video'
+import { VideoState, VideoTranscodingPayload } from '@shared/models'
 import { initDatabaseModels } from '../server/initializers/database'
 import { JobQueue } from '../server/lib/job-queue'
-import { computeResolutionsToTranscode } from '@server/helpers/ffprobe-utils'
-import { VideoState, VideoTranscodingPayload } from '@shared/models'
-import { CONFIG } from '@server/initializers/config'
-import { isUUIDValid, toCompleteUUID } from '@server/helpers/custom-validators/misc'
-import { addTranscodingJob } from '@server/lib/video'
+import { VideoModel } from '../server/models/video/video'
 
 program
   .option('-v, --video [videoUUID]', 'Video UUID')
@@ -50,23 +47,28 @@ async function run () {
   if (!video) throw new Error('Video not found.')
 
   const dataInput: VideoTranscodingPayload[] = []
-  const resolution = video.getMaxQualityFile().resolution
+  const maxResolution = video.getMaxQualityFile().resolution
 
   // Generate HLS files
   if (options.generateHls || CONFIG.TRANSCODING.WEBTORRENT.ENABLED === false) {
     const resolutionsEnabled = options.resolution
-      ? [ options.resolution ]
-      : computeResolutionsToTranscode(resolution, 'vod').concat([ resolution ])
+      ? [ parseInt(options.resolution) ]
+      : computeLowerResolutionsToTranscode(maxResolution, 'vod').concat([ maxResolution ])
 
     for (const resolution of resolutionsEnabled) {
       dataInput.push({
         type: 'new-resolution-to-hls',
         videoUUID: video.uuid,
         resolution,
+
+        // FIXME: check the file has audio and is not in portrait mode
         isPortraitMode: false,
+        hasAudio: true,
+
         copyCodecs: false,
         isNewVideo: false,
-        isMaxQuality: false
+        isMaxQuality: maxResolution === resolution,
+        autoDeleteWebTorrentIfNeeded: false
       })
     }
   } else {
@@ -74,8 +76,14 @@ async function run () {
       dataInput.push({
         type: 'new-resolution-to-webtorrent',
         videoUUID: video.uuid,
+
+        createHLSIfNeeded: true,
+
+        // FIXME: check the file has audio
+        hasAudio: true,
+
         isNewVideo: false,
-        resolution: options.resolution
+        resolution: parseInt(options.resolution)
       })
     } else {
       if (video.VideoFiles.length === 0) {
@@ -91,7 +99,7 @@ async function run () {
     }
   }
 
-  JobQueue.Instance.init()
+  JobQueue.Instance.init(true)
 
   video.state = VideoState.TO_TRANSCODE
   await video.save()

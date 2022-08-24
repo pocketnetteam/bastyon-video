@@ -1,11 +1,11 @@
-import { ensureDir, remove } from 'fs-extra'
+import { ensureDir, readdir, remove } from 'fs-extra'
 import passwordGenerator from 'password-generator'
-import { UserRole } from '../../shared'
+import { join } from 'path'
+import { UserRole } from '@shared/models'
 import { logger } from '../helpers/logger'
-import { createApplicationActor, createUserAccountAndChannelAndPlaylist } from '../lib/user'
+import { buildUser, createApplicationActor, createUserAccountAndChannelAndPlaylist } from '../lib/user'
 import { ApplicationModel } from '../models/application/application'
 import { OAuthClientModel } from '../models/oauth/oauth-client'
-import { UserModel } from '../models/user/user'
 import { applicationExist, clientsExist, usersExist } from './checker-after-init'
 import { CONFIG } from './config'
 import { FILES_CACHE, HLS_STREAMING_PLAYLIST_DIRECTORY, LAST_MIGRATION_VERSION, RESUMABLE_UPLOAD_DIRECTORY } from './constants'
@@ -51,12 +51,26 @@ function removeCacheAndTmpDirectories () {
   // Cache directories
   for (const key of Object.keys(cacheDirectories)) {
     const dir = cacheDirectories[key]
-    tasks.push(remove(dir))
+    tasks.push(removeDirectoryOrContent(dir))
   }
 
-  tasks.push(remove(CONFIG.STORAGE.TMP_DIR))
+  tasks.push(removeDirectoryOrContent(CONFIG.STORAGE.TMP_DIR))
 
   return Promise.all(tasks)
+}
+
+async function removeDirectoryOrContent (dir: string) {
+  try {
+    await remove(dir)
+  } catch (err) {
+    logger.debug('Cannot remove directory %s. Removing content instead.', dir, { err })
+
+    const files = await readdir(dir)
+
+    for (const file of files) {
+      await remove(join(dir, file))
+    }
+  }
 }
 
 function createDirectoriesIfNotExist () {
@@ -137,17 +151,15 @@ async function createOAuthAdminIfNotExist () {
     password = passwordGenerator(16, true)
   }
 
-  const userData = {
+  const user = buildUser({
     username,
     email,
     password,
     role,
-    verified: true,
-    nsfwPolicy: CONFIG.INSTANCE.DEFAULT_NSFW_POLICY,
+    emailVerified: true,
     videoQuota: -1,
     videoQuotaDaily: -1
-  }
-  const user = new UserModel(userData)
+  })
 
   await createUserAccountAndChannelAndPlaylist({ userToCreate: user, channelNames: undefined, validateUser: validatePassword })
   logger.info('Username: ' + username)

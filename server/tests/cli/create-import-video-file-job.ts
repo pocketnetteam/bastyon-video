@@ -2,19 +2,19 @@
 
 import 'mocha'
 import * as chai from 'chai'
+import { areObjectStorageTestsDisabled } from '@shared/core-utils'
+import { HttpStatusCode, VideoDetails, VideoFile, VideoInclude } from '@shared/models'
 import {
-  areObjectStorageTestsDisabled,
   cleanupTests,
   createMultipleServers,
   doubleFollow,
-  expectStartWith,
   makeRawRequest,
   ObjectStorageCommand,
   PeerTubeServer,
   setAccessTokensToServers,
   waitJobs
-} from '@shared/extra-utils'
-import { HttpStatusCode, VideoDetails, VideoFile } from '@shared/models'
+} from '@shared/server-commands'
+import { expectStartWith } from '../shared'
 
 const expect = chai.expect
 
@@ -69,6 +69,10 @@ function runTests (objectStorage: boolean) {
     }
 
     await waitJobs(servers)
+
+    for (const server of servers) {
+      await server.config.enableTranscoding()
+    }
   })
 
   it('Should run a import job on video 1 with a lower resolution', async function () {
@@ -100,13 +104,13 @@ function runTests (objectStorage: boolean) {
     await waitJobs(servers)
 
     for (const server of servers) {
-      const { data: videos } = await server.videos.list()
+      const { data: videos } = await server.videos.listWithToken({ include: VideoInclude.NOT_PUBLISHED_STATE })
       expect(videos).to.have.lengthOf(2)
 
       const video = videos.find(({ uuid }) => uuid === video2UUID)
       const videoDetails = await server.videos.get({ id: video.uuid })
 
-      expect(videoDetails.files).to.have.lengthOf(5)
+      expect(videoDetails.files).to.have.lengthOf(4)
       const [ originalVideo, transcodedVideo420, transcodedVideo320, transcodedVideo240 ] = videoDetails.files
       assertVideoProperties(originalVideo, 720, 'ogv', 140849)
       assertVideoProperties(transcodedVideo420, 480, 'mp4')
@@ -124,7 +128,7 @@ function runTests (objectStorage: boolean) {
     await waitJobs(servers)
 
     for (const server of servers) {
-      const { data: videos } = await server.videos.list()
+      const { data: videos } = await server.videos.listWithToken({ include: VideoInclude.NOT_PUBLISHED_STATE })
       expect(videos).to.have.lengthOf(2)
 
       const video = videos.find(({ shortUUID }) => shortUUID === video1ShortId)
@@ -137,6 +141,11 @@ function runTests (objectStorage: boolean) {
 
       await checkFiles(videoDetails, objectStorage)
     }
+  })
+
+  it('Should not have run transcoding after an import job', async function () {
+    const { data } = await servers[0].jobs.list({ jobType: 'video-transcoding' })
+    expect(data).to.have.lengthOf(0)
   })
 
   after(async function () {

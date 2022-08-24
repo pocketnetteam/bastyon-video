@@ -1,6 +1,5 @@
 webserver:
   hostname: "PEERTUBE_WEBSERVER_HOSTNAME"
-  ip: "PEERTUBE_WEBSERVER_IP"
   port:
     __name: "PEERTUBE_WEBSERVER_PORT"
     __format: "json"
@@ -55,6 +54,10 @@ object_storage:
 
   region: "PEERTUBE_OBJECT_STORAGE_REGION"
 
+  credentials:
+    access_key_id: "PEERTUBE_OBJECT_STORAGE_CREDENTIALS_ACCESS_KEY_ID"
+    secret_access_key: 'PEERTUBE_OBJECT_STORAGE_CREDENTIALS_SECRET_ACCESS_KEY'
+
   max_upload_part:
     __name: "PEERTUBE_OBJECT_STORAGE_MAX_UPLOAD_PART"
     __format: "json"
@@ -63,11 +66,19 @@ object_storage:
     bucket_name: "PEERTUBE_OBJECT_STORAGE_STREAMING_PLAYLISTS_BUCKET_NAME"
     prefix: "PEERTUBE_OBJECT_STORAGE_STREAMING_PLAYLISTS_PREFIX"
     base_url: "PEERTUBE_OBJECT_STORAGE_STREAMING_PLAYLISTS_BASE_URL"
+    upload_acl: "PEERTUBE_OBJECT_STORAGE_UPLOAD_ACL"
 
   videos:
     bucket_name: "PEERTUBE_OBJECT_STORAGE_VIDEOS_BUCKET_NAME"
     prefix: "PEERTUBE_OBJECT_STORAGE_VIDEOS_PREFIX"
     base_url: "PEERTUBE_OBJECT_STORAGE_VIDEOS_BASE_URL"
+
+webadmin:
+  configuration:
+    edition:
+      allowed:
+        __name: "PEERTUBE_WEBADMIN_CONFIGURATION_EDITION_ALLOWED"
+        __format: "json"
 
 log:
   level: "PEERTUBE_LOG_LEVEL"
@@ -124,6 +135,9 @@ transcoding:
     __name: "PEERTUBE_TRANSCODING_THREADS"
     __format: "json"
   resolutions:
+    144p:
+      __name: "PEERTUBE_TRANSCODING_144P"
+      __format: "json"
     240p:
       __name: "PEERTUBE_TRANSCODING_240P"
       __format: "json"

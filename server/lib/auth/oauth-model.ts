@@ -5,14 +5,14 @@ import { ActorModel } from '@server/models/actor/actor'
 import { MOAuthClient } from '@server/types/models'
 import { MOAuthTokenUser } from '@server/types/models/oauth/oauth-token'
 import { MUser } from '@server/types/models/user/user'
-import { UserAdminFlag } from '@shared/models/users/user-flag.model'
+import { pick } from '@shared/core-utils'
 import { UserRole } from '@shared/models/users/user-role'
 import { logger } from '../../helpers/logger'
 import { CONFIG } from '../../initializers/config'
-import { UserModel } from '../../models/user/user'
 import { OAuthClientModel } from '../../models/oauth/oauth-client'
 import { OAuthTokenModel } from '../../models/oauth/oauth-token'
-import { createUserAccountAndChannelAndPlaylist } from '../user'
+import { UserModel } from '../../models/user/user'
+import { buildUser, createUserAccountAndChannelAndPlaylist } from '../user'
 import { TokensCache } from './tokens-cache'
 
 type TokenInfo = {
@@ -31,7 +31,6 @@ export type BypassLogin = {
     email: string
     displayName: string
     role: UserRole
-    userQuota?: number
   }
 }
 
@@ -92,12 +91,6 @@ async function getUser (usernameOrEmail?: string, password?: string, bypassLogin
     let user = await UserModel.loadByEmail(bypassLogin.user.email)
     if (!user) user = await createUserFromExternal(bypassLogin.pluginName, bypassLogin.user)
 
-    // dynamic user quota
-    if (bypassLogin.user.userQuota) {
-      user.videoQuotaDaily = bypassLogin.user.userQuota
-      await user.save()
-    }
-
     // Cannot create a user
     if (!user) throw new AccessDeniedError('Cannot create such user: an actor with that name already exists.')
 
@@ -105,7 +98,14 @@ async function getUser (usernameOrEmail?: string, password?: string, bypassLogin
     // Then we just go through a regular login process
     if (user.pluginAuth !== null) {
       // This user does not belong to this plugin, skip it
-      // if (user.pluginAuth !== bypassLogin.pluginName) return null
+      if (user.pluginAuth !== bypassLogin.pluginName) {
+        logger.info(
+          'Cannot bypass oauth login by plugin %s because %s has another plugin auth method (%s).',
+          bypassLogin.pluginName, bypassLogin.user.email, user.pluginAuth
+        )
+
+        return null
+      }
 
       checkUserValidityOrThrow(user)
 
@@ -116,6 +116,7 @@ async function getUser (usernameOrEmail?: string, password?: string, bypassLogin
   logger.debug('Getting User (username/email: ' + usernameOrEmail + ', password: ******).')
 
   const user = await UserModel.loadByUsernameOrEmail(usernameOrEmail)
+
   // If we don't find the user, or if the user belongs to a plugin
   if (!user || user.pluginAuth !== null || !password) return null
 
@@ -223,24 +224,18 @@ async function createUserFromExternal (pluginAuth: string, options: {
   email: string
   role: UserRole
   displayName: string
-  userQuota?: number
 }) {
   // Check an actor does not already exists with that name (removed user)
   const actor = await ActorModel.loadLocalByName(options.username)
   if (actor) return null
 
-  const userToCreate = new UserModel({
-    username: options.username,
+  const userToCreate = buildUser({
+    ...pick(options, [ 'username', 'email', 'role' ]),
+
+    emailVerified: null,
     password: null,
-    email: options.email,
-    nsfwPolicy: CONFIG.INSTANCE.DEFAULT_NSFW_POLICY,
-    autoPlayVideo: true,
-    role: options.role,
-    videoQuota: CONFIG.USER.VIDEO_QUOTA,
-    videoQuotaDaily: options.userQuota || CONFIG.USER.VIDEO_QUOTA_DAILY,
-    adminFlags: UserAdminFlag.NONE,
     pluginAuth
-  }) as MUser
+  })
 
   const { user } = await createUserAccountAndChannelAndPlaylist({
     userToCreate,

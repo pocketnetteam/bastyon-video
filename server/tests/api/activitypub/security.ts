@@ -2,13 +2,14 @@
 
 import 'mocha'
 import * as chai from 'chai'
-import { activityPubContextify, buildSignedActivity } from '@server/helpers/activitypub'
 import { buildDigest } from '@server/helpers/peertube-crypto'
 import { HTTP_SIGNATURE } from '@server/initializers/constants'
-import { buildGlobalHeaders } from '@server/lib/job-queue/handlers/utils/activitypub-http-utils'
-import { buildAbsoluteFixturePath, cleanupTests, createMultipleServers, killallServers, PeerTubeServer, wait } from '@shared/extra-utils'
-import { makeFollowRequest, makePOSTAPRequest } from '@shared/extra-utils/requests/activitypub'
+import { activityPubContextify } from '@server/lib/activitypub/context'
+import { buildGlobalHeaders, signAndContextify } from '@server/lib/activitypub/send'
+import { makeFollowRequest, makePOSTAPRequest } from '@server/tests/shared'
+import { buildAbsoluteFixturePath, wait } from '@shared/core-utils'
 import { HttpStatusCode } from '@shared/models'
+import { cleanupTests, createMultipleServers, killallServers, PeerTubeServer } from '@shared/server-commands'
 
 const expect = chai.expect
 
@@ -79,7 +80,7 @@ describe('Test ActivityPub security', function () {
   describe('When checking HTTP signature', function () {
 
     it('Should fail with an invalid digest', async function () {
-      const body = activityPubContextify(getAnnounceWithoutContext(servers[1]))
+      const body = activityPubContextify(getAnnounceWithoutContext(servers[1]), 'Announce')
       const headers = {
         Digest: buildDigest({ hello: 'coucou' })
       }
@@ -93,7 +94,7 @@ describe('Test ActivityPub security', function () {
     })
 
     it('Should fail with an invalid date', async function () {
-      const body = activityPubContextify(getAnnounceWithoutContext(servers[1]))
+      const body = activityPubContextify(getAnnounceWithoutContext(servers[1]), 'Announce')
       const headers = buildGlobalHeaders(body)
       headers['date'] = 'Wed, 21 Oct 2015 07:28:00 GMT'
 
@@ -109,7 +110,7 @@ describe('Test ActivityPub security', function () {
       await setKeysOfServer(servers[0], servers[1], invalidKeys.publicKey, invalidKeys.privateKey)
       await setKeysOfServer(servers[1], servers[1], invalidKeys.publicKey, invalidKeys.privateKey)
 
-      const body = activityPubContextify(getAnnounceWithoutContext(servers[1]))
+      const body = activityPubContextify(getAnnounceWithoutContext(servers[1]), 'Announce')
       const headers = buildGlobalHeaders(body)
 
       try {
@@ -124,7 +125,7 @@ describe('Test ActivityPub security', function () {
       await setKeysOfServer(servers[0], servers[1], keys.publicKey, keys.privateKey)
       await setKeysOfServer(servers[1], servers[1], keys.publicKey, keys.privateKey)
 
-      const body = activityPubContextify(getAnnounceWithoutContext(servers[1]))
+      const body = activityPubContextify(getAnnounceWithoutContext(servers[1]), 'Announce')
       const headers = buildGlobalHeaders(body)
 
       const signatureOptions = baseHttpSignature()
@@ -146,8 +147,19 @@ describe('Test ActivityPub security', function () {
       }
     })
 
+    it('Should succeed with a valid HTTP signature draft 11 (without date but with (created))', async function () {
+      const body = activityPubContextify(getAnnounceWithoutContext(servers[1]), 'Announce')
+      const headers = buildGlobalHeaders(body)
+
+      const signatureOptions = baseHttpSignature()
+      signatureOptions.headers = [ '(request-target)', '(created)', 'host', 'digest' ]
+
+      const { statusCode } = await makePOSTAPRequest(url, body, signatureOptions, headers)
+      expect(statusCode).to.equal(HttpStatusCode.NO_CONTENT_204)
+    })
+
     it('Should succeed with a valid HTTP signature', async function () {
-      const body = activityPubContextify(getAnnounceWithoutContext(servers[1]))
+      const body = activityPubContextify(getAnnounceWithoutContext(servers[1]), 'Announce')
       const headers = buildGlobalHeaders(body)
 
       const { statusCode } = await makePOSTAPRequest(url, body, baseHttpSignature(), headers)
@@ -166,7 +178,7 @@ describe('Test ActivityPub security', function () {
       await killallServers([ servers[1] ])
       await servers[1].run()
 
-      const body = activityPubContextify(getAnnounceWithoutContext(servers[1]))
+      const body = activityPubContextify(getAnnounceWithoutContext(servers[1]), 'Announce')
       const headers = buildGlobalHeaders(body)
 
       try {
@@ -202,7 +214,7 @@ describe('Test ActivityPub security', function () {
       body.actor = 'http://localhost:' + servers[2].port + '/accounts/peertube'
 
       const signer: any = { privateKey: invalidKeys.privateKey, url: 'http://localhost:' + servers[2].port + '/accounts/peertube' }
-      const signedBody = await buildSignedActivity(signer, body)
+      const signedBody = await signAndContextify(signer, body, 'Announce')
 
       const headers = buildGlobalHeaders(signedBody)
 
@@ -224,7 +236,7 @@ describe('Test ActivityPub security', function () {
       body.actor = 'http://localhost:' + servers[2].port + '/accounts/peertube'
 
       const signer: any = { privateKey: keys.privateKey, url: 'http://localhost:' + servers[2].port + '/accounts/peertube' }
-      const signedBody = await buildSignedActivity(signer, body)
+      const signedBody = await signAndContextify(signer, body, 'Announce')
 
       signedBody.actor = 'http://localhost:' + servers[2].port + '/account/peertube'
 
@@ -245,7 +257,7 @@ describe('Test ActivityPub security', function () {
       body.actor = 'http://localhost:' + servers[2].port + '/accounts/peertube'
 
       const signer: any = { privateKey: keys.privateKey, url: 'http://localhost:' + servers[2].port + '/accounts/peertube' }
-      const signedBody = await buildSignedActivity(signer, body)
+      const signedBody = await signAndContextify(signer, body, 'Announce')
 
       const headers = buildGlobalHeaders(signedBody)
 
@@ -267,7 +279,7 @@ describe('Test ActivityPub security', function () {
       body.actor = 'http://localhost:' + servers[2].port + '/accounts/peertube'
 
       const signer: any = { privateKey: keys.privateKey, url: 'http://localhost:' + servers[2].port + '/accounts/peertube' }
-      const signedBody = await buildSignedActivity(signer, body)
+      const signedBody = await signAndContextify(signer, body, 'Announce')
 
       const headers = buildGlobalHeaders(signedBody)
 

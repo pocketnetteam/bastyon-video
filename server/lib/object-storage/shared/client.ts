@@ -1,7 +1,21 @@
 import { S3Client } from '@aws-sdk/client-s3'
+import { NodeHttpHandler } from '@aws-sdk/node-http-handler'
 import { logger } from '@server/helpers/logger'
+import { isProxyEnabled } from '@server/helpers/proxy'
+import { getAgent } from '@server/helpers/requests'
 import { CONFIG } from '@server/initializers/config'
 import { lTags } from './logger'
+
+function getProxyRequestHandler () {
+  if (!isProxyEnabled()) return null
+
+  const { agent } = getAgent()
+
+  return new NodeHttpHandler({
+    httpAgent: agent.http,
+    httpsAgent: agent.https
+  })
+}
 
 let endpointParsed: URL
 function getEndpointParsed () {
@@ -26,22 +40,9 @@ function getClient () {
         accessKeyId: OBJECT_STORAGE.CREDENTIALS.ACCESS_KEY_ID,
         secretAccessKey: OBJECT_STORAGE.CREDENTIALS.SECRET_ACCESS_KEY
       }
-      : undefined
+      : undefined,
+    requestHandler: getProxyRequestHandler()
   })
-
-  // FIXME: https://github.com/aws/aws-sdk-js-v3/issues/2445 workaround
-  s3Client.middlewareStack.add(
-    (next, _context) => (args: any) => {
-      if (typeof args.request?.body === 'string' && args.request.body.includes('CompletedMultipartUpload')) {
-        args.request.body = args.request.body.replace(/CompletedMultipartUpload/g, 'CompleteMultipartUpload')
-      }
-      return next(args)
-    },
-    {
-      step: 'build',
-      priority: 'high'
-    }
-  )
 
   logger.info('Initialized S3 client %s with region %s.', getEndpoint(), OBJECT_STORAGE.REGION, lTags())
 

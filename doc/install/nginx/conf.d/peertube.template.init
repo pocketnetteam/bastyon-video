@@ -1,8 +1,0 @@
-server {
-    listen 80;
-    server_name ${WEBSERVER_HOST};
-
-    location /.well-known/acme-challenge {
-        root /var/www/certbot;
-    }
-}

@@ -7,10 +7,10 @@ import { CONFIG } from '@server/initializers/config'
 import { Hooks } from '@server/lib/plugins/hooks'
 import { buildFileLocale, getCompleteLocale, is18nLocale, LOCALE_FILES } from '@shared/core-utils/i18n'
 import { HttpStatusCode } from '@shared/models'
-import { root } from '../helpers/core-utils'
+import { root } from '@shared/core-utils'
 import { STATIC_MAX_AGE } from '../initializers/constants'
 import { ClientHtml, sendHTML, serveIndexHTML } from '../lib/client-html'
-import { asyncMiddleware, disableRobots, embedCSP } from '../middlewares'
+import { asyncMiddleware, embedCSP } from '../middlewares'
 
 const clientsRouter = express.Router()
 
@@ -65,7 +65,12 @@ const staticClientOverrides = [
   'assets/images/icons/icon-96x96.png',
   'assets/images/icons/icon-144x144.png',
   'assets/images/icons/icon-192x192.png',
-  'assets/images/icons/icon-512x512.png'
+  'assets/images/icons/icon-512x512.png',
+  'assets/images/default-playlist.jpg',
+  'assets/images/default-avatar-account.png',
+  'assets/images/default-avatar-account-48x48.png',
+  'assets/images/default-avatar-video-channel.png',
+  'assets/images/default-avatar-video-channel-48x48.png'
 ]
 
 for (const staticClientOverride of staticClientOverrides) {
@@ -80,12 +85,6 @@ clientsRouter.use('/client', express.static(distPath, { maxAge: STATIC_MAX_AGE.C
 clientsRouter.use('/client/*', (req: express.Request, res: express.Response) => {
   res.status(HttpStatusCode.NOT_FOUND_404).end()
 })
-
-// No index exceptions
-clientsRouter.all('/about/peertube',
-  disableRobots,
-  asyncMiddleware(serveIndexHTML)
-)
 
 // Always serve index client page (the client is a single page application, let it handle routing)
 // Try to provide the right language index.html
@@ -141,31 +140,31 @@ async function generateEmbedHtmlPage (req: express.Request, res: express.Respons
 async function generateWatchHtmlPage (req: express.Request, res: express.Response) {
   const html = await ClientHtml.getWatchHTMLPage(req.params.id + '', req, res)
 
-  return sendHTML(html, res)
+  return sendHTML(html, res, true)
 }
 
 async function generateWatchPlaylistHtmlPage (req: express.Request, res: express.Response) {
   const html = await ClientHtml.getWatchPlaylistHTMLPage(req.params.id + '', req, res)
 
-  return sendHTML(html, res)
+  return sendHTML(html, res, true)
 }
 
 async function generateAccountHtmlPage (req: express.Request, res: express.Response) {
   const html = await ClientHtml.getAccountHTMLPage(req.params.nameWithHost, req, res)
 
-  return sendHTML(html, res)
+  return sendHTML(html, res, true)
 }
 
 async function generateVideoChannelHtmlPage (req: express.Request, res: express.Response) {
   const html = await ClientHtml.getVideoChannelHTMLPage(req.params.nameWithHost, req, res)
 
-  return sendHTML(html, res)
+  return sendHTML(html, res, true)
 }
 
 async function generateActorHtmlPage (req: express.Request, res: express.Response) {
   const html = await ClientHtml.getActorHTMLPage(req.params.nameWithHost, req, res)
 
-  return sendHTML(html, res)
+  return sendHTML(html, res, true)
 }
 
 async function generateManifest (req: express.Request, res: express.Response) {

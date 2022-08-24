@@ -3,7 +3,7 @@ import { AuthService, Notifier, ServerService } from '@app/core'
 import { Video } from '@app/shared/shared-main'
 import { NgbDropdown } from '@ng-bootstrap/ng-bootstrap'
 import { secondsToTime } from '@shared/core-utils'
-import { HTMLServerConfig, VideoPlaylistElementType, VideoPlaylistElementUpdate } from '@shared/models'
+import { HTMLServerConfig, VideoPlaylistElementType, VideoPlaylistElementUpdate, VideoPrivacy } from '@shared/models'
 import { VideoPlaylistElement } from './video-playlist-element.model'
 import { VideoPlaylist } from './video-playlist.model'
 import { VideoPlaylistService } from './video-playlist.service'
@@ -49,6 +49,10 @@ export class VideoPlaylistElementMiniatureComponent implements OnInit {
 
   ngOnInit (): void {
     this.serverConfig = this.serverService.getHTMLConfig()
+  }
+
+  isVideoPrivate () {
+    return this.playlistElement.video.privacy.id === VideoPrivacy.PRIVATE
   }
 
   isUnavailable (e: VideoPlaylistElement) {
@@ -166,9 +170,6 @@ export class VideoPlaylistElementMiniatureComponent implements OnInit {
       }
     }
 
-    // FIXME: why do we have to use setTimeout here?
-    setTimeout(() => {
-      this.cdr.detectChanges()
-    })
+    this.cdr.markForCheck()
   }
 }

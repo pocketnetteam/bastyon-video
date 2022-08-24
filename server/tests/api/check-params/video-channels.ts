@@ -3,12 +3,11 @@
 import 'mocha'
 import * as chai from 'chai'
 import { omit } from 'lodash'
+import { checkBadCountPagination, checkBadSortPagination, checkBadStartPagination } from '@server/tests/shared'
+import { buildAbsoluteFixturePath } from '@shared/core-utils'
+import { HttpStatusCode, VideoChannelUpdate } from '@shared/models'
 import {
-  buildAbsoluteFixturePath,
   ChannelsCommand,
-  checkBadCountPagination,
-  checkBadSortPagination,
-  checkBadStartPagination,
   cleanupTests,
   createSingleServer,
   makeGetRequest,
@@ -17,8 +16,7 @@ import {
   makeUploadRequest,
   PeerTubeServer,
   setAccessTokensToServers
-} from '@shared/extra-utils'
-import { HttpStatusCode, VideoChannelUpdate } from '@shared/models'
+} from '@shared/server-commands'
 
 const expect = chai.expect
 
@@ -230,7 +228,7 @@ describe('Test video channels API validator', function () {
     })
   })
 
-  describe('When updating video channel avatar/banner', function () {
+  describe('When updating video channel avatars/banners', function () {
     const types = [ 'avatar', 'banner' ]
     let path: string
 
@@ -318,6 +316,34 @@ describe('Test video channels API validator', function () {
         path: videoChannelPath + '/super_channel',
         expectedStatus: HttpStatusCode.OK_200
       })
+    })
+  })
+
+  describe('When getting channel followers', function () {
+    const path = '/api/v1/video-channels/super_channel/followers'
+
+    it('Should fail with a bad start pagination', async function () {
+      await checkBadStartPagination(server.url, path, server.accessToken)
+    })
+
+    it('Should fail with a bad count pagination', async function () {
+      await checkBadCountPagination(server.url, path, server.accessToken)
+    })
+
+    it('Should fail with an incorrect sort', async function () {
+      await checkBadSortPagination(server.url, path, server.accessToken)
+    })
+
+    it('Should fail with a unauthenticated user', async function () {
+      await makeGetRequest({ url: server.url, path, expectedStatus: HttpStatusCode.UNAUTHORIZED_401 })
+    })
+
+    it('Should fail with a another user', async function () {
+      await makeGetRequest({ url: server.url, path, token: accessTokenUser, expectedStatus: HttpStatusCode.FORBIDDEN_403 })
+    })
+
+    it('Should succeed with the correct params', async function () {
+      await makeGetRequest({ url: server.url, path, token: server.accessToken, expectedStatus: HttpStatusCode.OK_200 })
     })
   })
 

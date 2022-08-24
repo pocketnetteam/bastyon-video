@@ -6,21 +6,20 @@ import { VideoModel } from '@server/models/video/video'
 import { VideoJobInfoModel } from '@server/models/video/video-job-info'
 import { FilteredModelAttributes } from '@server/types'
 import { MThumbnail, MUserId, MVideoFile, MVideoTag, MVideoThumbnail, MVideoUUID } from '@server/types/models'
-import { ThumbnailType, VideoCreate, VideoPrivacy, VideoTranscodingPayload } from '@shared/models'
+import { ThumbnailType, VideoCreate, VideoPrivacy, VideoState, VideoTranscodingPayload } from '@shared/models'
 import { CreateJobOptions, JobQueue } from './job-queue/job-queue'
 import { updateVideoMiniatureFromExisting } from './thumbnail'
-
-type ImageSize = { height?: number, width?: number }
+import { CONFIG } from '@server/initializers/config'
 
 function buildLocalVideoFromReq (videoInfo: VideoCreate, channelId: number): FilteredModelAttributes<VideoModel> {
   return {
     name: videoInfo.name,
     remote: false,
     category: videoInfo.category,
-    licence: videoInfo.licence,
+    licence: videoInfo.licence ?? CONFIG.DEFAULTS.PUBLISH.LICENCE,
     language: videoInfo.language,
-    commentsEnabled: videoInfo.commentsEnabled !== false, // If the value is not "false", the default is "true"
-    downloadEnabled: videoInfo.downloadEnabled !== false,
+    commentsEnabled: videoInfo.commentsEnabled ?? CONFIG.DEFAULTS.PUBLISH.COMMENTS_ENABLED,
+    downloadEnabled: videoInfo.downloadEnabled ?? CONFIG.DEFAULTS.PUBLISH.DOWNLOAD_ENABLED,
     waitTranscoding: videoInfo.waitTranscoding || false,
     nsfw: videoInfo.nsfw || false,
     description: videoInfo.description,
@@ -29,8 +28,7 @@ function buildLocalVideoFromReq (videoInfo: VideoCreate, channelId: number): Fil
     channelId: channelId,
     originallyPublishedAt: videoInfo.originallyPublishedAt
       ? new Date(videoInfo.originallyPublishedAt)
-      : null,
-    aspectRatio: videoInfo.aspectRatio
+      : null
   }
 }
 
@@ -39,7 +37,6 @@ async function buildVideoThumbnailsFromReq (options: {
   files: UploadFiles
   fallback: (type: ThumbnailType) => Promise<MThumbnail>
   automaticallyGenerated?: boolean
-  size?: ImageSize
 }) {
   const { video, files, fallback, automaticallyGenerated } = options
 
@@ -70,6 +67,8 @@ async function buildVideoThumbnailsFromReq (options: {
   return Promise.all(promises)
 }
 
+// ---------------------------------------------------------------------------
+
 async function setVideoTags (options: {
   video: MVideoTag
   tags: string[]
@@ -84,7 +83,16 @@ async function setVideoTags (options: {
   video.Tags = tagInstances
 }
 
-async function addOptimizeOrMergeAudioJob (video: MVideoUUID, videoFile: MVideoFile, user: MUserId) {
+// ---------------------------------------------------------------------------
+
+async function addOptimizeOrMergeAudioJob (options: {
+  video: MVideoUUID
+  videoFile: MVideoFile
+  user: MUserId
+  isNewVideo?: boolean // Default true
+}) {
+  const { video, videoFile, user, isNewVideo } = options
+
   let dataInput: VideoTranscodingPayload
 
   if (videoFile.isAudio()) {
@@ -92,13 +100,14 @@ async function addOptimizeOrMergeAudioJob (video: MVideoUUID, videoFile: MVideoF
       type: 'merge-audio-to-webtorrent',
       resolution: DEFAULT_AUDIO_RESOLUTION,
       videoUUID: video.uuid,
-      isNewVideo: true
+      createHLSIfNeeded: true,
+      isNewVideo
     }
   } else {
     dataInput = {
       type: 'optimize-to-webtorrent',
       videoUUID: video.uuid,
-      isNewVideo: true
+      isNewVideo
     }
   }
 
@@ -109,17 +118,10 @@ async function addOptimizeOrMergeAudioJob (video: MVideoUUID, videoFile: MVideoF
   return addTranscodingJob(dataInput, jobOptions)
 }
 
-async function addTranscodingJob (payload: VideoTranscodingPayload, options: CreateJobOptions) {
+async function addTranscodingJob (payload: VideoTranscodingPayload, options: CreateJobOptions = {}) {
   await VideoJobInfoModel.increaseOrCreate(payload.videoUUID, 'pendingTranscode')
 
   return JobQueue.Instance.createJobWithPromise({ type: 'video-transcoding', payload: payload }, options)
-}
-
-async function addMoveToObjectStorageJob (video: MVideoUUID, isNewVideo = true) {
-  await VideoJobInfoModel.increaseOrCreate(video.uuid, 'pendingMove')
-
-  const dataInput = { videoUUID: video.uuid, isNewVideo }
-  return JobQueue.Instance.createJobWithPromise({ type: 'move-to-object-storage', payload: dataInput })
 }
 
 async function getTranscodingJobPriority (user: MUserId) {
@@ -129,6 +131,21 @@ async function getTranscodingJobPriority (user: MUserId) {
   const videoUploadedByUser = await VideoModel.countVideosUploadedByUserSince(user.id, lastWeek)
 
   return JOB_PRIORITY.TRANSCODING + videoUploadedByUser
+}
+
+// ---------------------------------------------------------------------------
+
+async function addMoveToObjectStorageJob (options: {
+  video: MVideoUUID
+  previousVideoState: VideoState
+  isNewVideo?: boolean // Default true
+}) {
+  const { video, previousVideoState, isNewVideo = true } = options
+
+  await VideoJobInfoModel.increaseOrCreate(video.uuid, 'pendingMove')
+
+  const dataInput = { videoUUID: video.uuid, isNewVideo, previousVideoState }
+  return JobQueue.Instance.createJobWithPromise({ type: 'move-to-object-storage', payload: dataInput })
 }
 
 // ---------------------------------------------------------------------------

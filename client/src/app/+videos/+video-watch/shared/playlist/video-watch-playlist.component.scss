@@ -4,6 +4,7 @@
 @use '_miniature' as *;
 
 .playlist {
+  position: relative;
   min-width: 200px;
   max-width: 470px;
   height: 66vh;
@@ -13,7 +14,7 @@
 
   .playlist-info {
     padding: 5px 30px;
-    background-color: #e4e4e4;
+    background-color: pvar(--greyBackgroundColor);
 
     .playlist-display-name {
       font-size: 18px;

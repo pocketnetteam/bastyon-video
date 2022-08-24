@@ -2,7 +2,8 @@
 
 import 'mocha'
 import { expect } from 'chai'
-import { getAudioStream, getVideoFileFPS, getVideoStreamFromFile } from '@server/helpers/ffprobe-utils'
+import { getAudioStream, getVideoStreamFPS, getVideoStream } from '@server/helpers/ffmpeg'
+import { VideoPrivacy } from '@shared/models'
 import {
   cleanupTests,
   createSingleServer,
@@ -12,8 +13,7 @@ import {
   setDefaultVideoChannel,
   testFfmpegStreamError,
   waitJobs
-} from '@shared/extra-utils'
-import { VideoPrivacy } from '@shared/models'
+} from '@shared/server-commands'
 
 async function createLiveWrapper (server: PeerTubeServer) {
   const liveAttributes = {
@@ -68,11 +68,11 @@ describe('Test transcoding plugins', function () {
   before(async function () {
     this.timeout(60000)
 
-      server = await createSingleServer(1)
-      await setAccessTokensToServers([ server ])
-      await setDefaultVideoChannel([ server ])
+    server = await createSingleServer(1)
+    await setAccessTokensToServers([ server ])
+    await setDefaultVideoChannel([ server ])
 
-      await updateConf(server, 'default', 'default')
+    await updateConf(server, 'default', 'default')
   })
 
   describe('When using a plugin adding profiles to existing encoders', function () {
@@ -92,7 +92,7 @@ describe('Test transcoding plugins', function () {
 
     async function checkLiveFPS (uuid: string, type: 'above' | 'below', fps: number) {
       const playlistUrl = `${server.url}/static/streaming-playlists/hls/${uuid}/0.m3u8`
-      const videoFPS = await getVideoFileFPS(playlistUrl)
+      const videoFPS = await getVideoStreamFPS(playlistUrl)
 
       if (type === 'above') {
         expect(videoFPS).to.be.above(fps)
@@ -224,7 +224,7 @@ describe('Test transcoding plugins', function () {
         expect(config.live.transcoding.availableProfiles).to.deep.equal([ 'default' ])
 
         const videoUUID = (await server.videos.quickUpload({ name: 'video', fixture: 'video_very_short_240p.mp4' })).uuid
-        await waitJobs([ server ], true)
+        await waitJobs([ server ])
 
         await checkVideoFPS(videoUUID, 'above', 20)
       })
@@ -244,7 +244,7 @@ describe('Test transcoding plugins', function () {
       this.timeout(240000)
 
       const videoUUID = (await server.videos.quickUpload({ name: 'video', fixture: 'video_very_short_240p.mp4' })).uuid
-      await waitJobs([ server ], true)
+      await waitJobs([ server ])
 
       const video = await server.videos.get({ id: videoUUID })
 
@@ -252,7 +252,7 @@ describe('Test transcoding plugins', function () {
       const audioProbe = await getAudioStream(path)
       expect(audioProbe.audioStream.codec_name).to.equal('opus')
 
-      const videoProbe = await getVideoStreamFromFile(path)
+      const videoProbe = await getVideoStream(path)
       expect(videoProbe.codec_name).to.equal('vp9')
     })
 
@@ -263,13 +263,13 @@ describe('Test transcoding plugins', function () {
 
       await server.live.sendRTMPStreamInVideo({ videoId: liveVideoId, fixtureName: 'video_short2.webm' })
       await server.live.waitUntilPublished({ videoId: liveVideoId })
-      await waitJobs([ server ], true)
+      await waitJobs([ server ])
 
       const playlistUrl = `${server.url}/static/streaming-playlists/hls/${liveVideoId}/0.m3u8`
       const audioProbe = await getAudioStream(playlistUrl)
       expect(audioProbe.audioStream.codec_name).to.equal('opus')
 
-      const videoProbe = await getVideoStreamFromFile(playlistUrl)
+      const videoProbe = await getVideoStream(playlistUrl)
       expect(videoProbe.codec_name).to.equal('h264')
     })
   })

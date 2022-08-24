@@ -1,7 +1,4 @@
-import { registerTSPaths } from '../server/helpers/register-ts-paths'
-registerTSPaths()
-
-import { CLICommand } from '@shared/extra-utils'
+import { CLICommand } from '@shared/server-commands'
 
 run()
   .then(() => process.exit(0))
@@ -193,6 +190,9 @@ function getContributorsBlacklist () {
   return {
     'Bigard Florian': true,
     'chocobozzz': true,
-    'Rigel': true
+    'Rigel': true,
+
+    // Requested by the contributor
+    'Marcel Cramm': true
   }
 }

@@ -2,6 +2,7 @@ import { NSFWPolicyType } from '../videos/nsfw-policy.type'
 import { BroadcastMessageLevel } from './broadcast-message-level.type'
 
 export type ConfigResolutions = {
+  '144p': boolean
   '240p': boolean
   '360p': boolean
   '480p': boolean
@@ -51,6 +52,20 @@ export interface CustomConfig {
     }
   }
 
+  client: {
+    videos: {
+      miniature: {
+        preferAuthorDisplayName: boolean
+      }
+    }
+
+    menu: {
+      login: {
+        redirectOnSingleExternalAuth: boolean
+      }
+    }
+  }
+
   cache: {
     previews: {
       size: number
@@ -85,6 +100,10 @@ export interface CustomConfig {
     videoQuotaDaily: number
   }
 
+  videoChannels: {
+    maxPerUser: number
+  }
+
   transcoding: {
     enabled: boolean
 
@@ -112,6 +131,10 @@ export interface CustomConfig {
 
     allowReplay: boolean
 
+    latencySetting: {
+      enabled: boolean
+    }
+
     maxDuration: number
     maxInstanceLives: number
     maxUserLives: number
@@ -122,6 +145,10 @@ export interface CustomConfig {
       profile: string
       resolutions: ConfigResolutions
     }
+  }
+
+  videoStudio: {
+    enabled: boolean
   }
 
   import: {

@@ -2,6 +2,8 @@
 
 import 'mocha'
 import * as chai from 'chai'
+import { testImage } from '@server/tests/shared'
+import { AbuseState, HttpStatusCode, OAuth2ErrorCode, UserAdminFlag, UserRole, Video, VideoPlaylistType } from '@shared/models'
 import {
   cleanupTests,
   createSingleServer,
@@ -9,10 +11,8 @@ import {
   makePutBodyRequest,
   PeerTubeServer,
   setAccessTokensToServers,
-  testImage,
   waitJobs
-} from '@shared/extra-utils'
-import { AbuseState, HttpStatusCode, OAuth2ErrorCode, UserAdminFlag, UserRole, Video, VideoPlaylistType } from '@shared/models'
+} from '@shared/server-commands'
 
 const expect = chai.expect
 
@@ -230,7 +230,7 @@ describe('Test users', function () {
     })
 
     it('Should have an expired access token', async function () {
-      this.timeout(15000)
+      this.timeout(60000)
 
       await server.sql.setTokenField(server.accessToken, 'accessTokenExpiresAt', new Date().toISOString())
       await server.sql.setTokenField(server.accessToken, 'refreshTokenExpiresAt', new Date().toISOString())
@@ -318,6 +318,8 @@ describe('Test users', function () {
         fixture: 'video_short.webm'
       }
       await server.videos.upload({ token: userToken, attributes })
+
+      await server.channels.create({ token: userToken, attributes: { name: 'other_channel' } })
     })
 
     it('Should have video quota updated', async function () {
@@ -338,6 +340,29 @@ describe('Test users', function () {
       expect(video.name).to.equal('super user video')
       expect(video.thumbnailPath).to.not.be.null
       expect(video.previewPath).to.not.be.null
+    })
+
+    it('Should be able to filter by channel in my videos', async function () {
+      const myInfo = await server.users.getMyInfo({ token: userToken })
+      const mainChannel = myInfo.videoChannels.find(c => c.name !== 'other_channel')
+      const otherChannel = myInfo.videoChannels.find(c => c.name === 'other_channel')
+
+      {
+        const { total, data } = await server.videos.listMyVideos({ token: userToken, channelId: mainChannel.id })
+        expect(total).to.equal(1)
+        expect(data).to.have.lengthOf(1)
+
+        const video: Video = data[0]
+        expect(video.name).to.equal('super user video')
+        expect(video.thumbnailPath).to.not.be.null
+        expect(video.previewPath).to.not.be.null
+      }
+
+      {
+        const { total, data } = await server.videos.listMyVideos({ token: userToken, channelId: otherChannel.id })
+        expect(total).to.equal(0)
+        expect(data).to.have.lengthOf(0)
+      }
     })
 
     it('Should be able to search in my videos', async function () {
@@ -534,6 +559,28 @@ describe('Test users', function () {
       expect(user.autoPlayNextVideo).to.be.true
     })
 
+    it('Should be able to change the p2p attribute', async function () {
+      {
+        await server.users.updateMe({
+          token: userToken,
+          webTorrentEnabled: false
+        })
+
+        const user = await server.users.getMyInfo({ token: userToken })
+        expect(user.p2pEnabled).to.be.false
+      }
+
+      {
+        await server.users.updateMe({
+          token: userToken,
+          p2pEnabled: true
+        })
+
+        const user = await server.users.getMyInfo({ token: userToken })
+        expect(user.p2pEnabled).to.be.true
+      }
+    })
+
     it('Should be able to change the email attribute', async function () {
       await server.users.updateMe({
         token: userToken,
@@ -557,7 +604,9 @@ describe('Test users', function () {
       await server.users.updateMyAvatar({ token: userToken, fixture })
 
       const user = await server.users.getMyInfo({ token: userToken })
-      await testImage(server.url, 'avatar-resized', user.account.avatar.path, '.gif')
+      for (const avatar of user.account.avatars) {
+        await testImage(server.url, `avatar-resized-${avatar.width}x${avatar.width}`, avatar.path, '.gif')
+      }
     })
 
     it('Should be able to update my avatar with a gif, and then a png', async function () {
@@ -567,8 +616,17 @@ describe('Test users', function () {
         await server.users.updateMyAvatar({ token: userToken, fixture })
 
         const user = await server.users.getMyInfo({ token: userToken })
-        await testImage(server.url, 'avatar-resized', user.account.avatar.path, extension)
+        for (const avatar of user.account.avatars) {
+          await testImage(server.url, `avatar-resized-${avatar.width}x${avatar.width}`, avatar.path, extension)
+        }
       }
+    })
+
+    it('Should still have the same amount of videos in my account', async function () {
+      const { total, data } = await server.videos.listMyVideos({ token: userToken })
+
+      expect(total).to.equal(2)
+      expect(data).to.have.lengthOf(2)
     })
 
     it('Should be able to update my display name', async function () {

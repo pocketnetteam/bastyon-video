@@ -9,26 +9,6 @@ $setting-transition-easing: ease-out;
 
 .video-js {
 
-  .vjs-settings {
-    @include disable-outline;
-
-    cursor: pointer;
-    width: 33px;
-
-    .vjs-icon-placeholder {
-      display: inline-block;
-      width: 17px;
-      height: 17px;
-      vertical-align: middle;
-      background: url('#{$assets-path}/player/images/settings.svg') no-repeat;
-      background-size: contain;
-
-      &::before {
-        content: '';
-      }
-    }
-  }
-
   .vjs-settings-sub-menu-title {
     width: 4em;
     text-transform: initial;
@@ -42,6 +22,7 @@ $setting-transition-easing: ease-out;
     opacity: $primary-foreground-opacity;
     margin: 0 auto;
     font-size: $font-size !important;
+    z-index: 100;
 
     width: auto;
     overflow: hidden;
@@ -146,7 +127,6 @@ $setting-transition-easing: ease-out;
           padding: 5px 8px;
 
           &.vjs-back-button {
-            background-color: inherit;
             padding: 8px 8px 13px 12px;
             margin-bottom: 5px;
             border-bottom: 1px solid #808080;
@@ -163,6 +143,10 @@ $setting-transition-easing: ease-out;
             background-color: inherit;
             color: inherit;
             position: relative;
+
+            &:focus {
+              background-color: rgba(115, 133, 159, 0.5);
+            }
 
             &::before {
               @include icon(15px);

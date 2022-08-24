@@ -7,8 +7,8 @@
 <p align=center>
   <strong><a href="https://joinpeertube.org">Website</a></strong>
   | <strong><a href="https://joinpeertube.org/instances">Join an instance</a></strong>
-  | <strong><a href="#package-create-your-own-instance">Create an instance</a></strong>
-  | <strong><a href="#contact">Chat with us</a></strong>
+  | <strong><a href="https://github.com/Chocobozzz/PeerTube/blob/develop/README.md#package-create-your-own-instance">Create an instance</a></strong>
+  | <strong><a href="https://github.com/Chocobozzz/PeerTube/blob/develop/README.md#contact">Chat with us</a></strong>
   | <strong><a href="https://framasoft.org/en/#soutenir">Donate</a></strong>
 </p>
 
@@ -180,7 +180,13 @@ See our [ActivityPub documentation](https://docs.joinpeertube.org/api-activitypu
 
 ## License
 
-Copyright (C) 2015-2021 PeerTube Contributors (see [CREDITS.md](CREDITS.md))
+### Logo
+
+[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/), by [Framasoft](https://framasoft.org)
+
+### Code
+
+Copyright (C) 2015-2022 PeerTube Contributors (see [CREDITS.md](CREDITS.md))
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -194,34 +200,3 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-
-## Images
-
-PeerTube has been modified to handle images.
-
-### Get root access token
-
-Simply follow:  [https://docs.joinpeertube.org/api-rest-reference.html#operation/getOAuthToken](https://docs.joinpeertube.org/api-rest-reference.html#operation/getOAuthToken)
-
-### Upload an image
-
-```
-curl "https://{serverUrl}/api/v1/images/upload" -X POST -H "Authorization: Bearer {access_token}" --form imagefile=@"./path/to/image.jpg" -s
-```
-
-Response example:
-
-```json
-{
-  "image": {
-    "id": "87fab76aae3d2a254a811740a0127213",
-    "url": "http://test.peertube.pocketnet.app:443/static/images/87fab76aae3d2a254a811740a0127213/87fab76aae3d2a254a811740a0127213.jpg",
-    "thumbnailUrl": "http://test.peertube.pocketnet.app:443/static/images/87fab76aae3d2a254a811740a0127213/87fab76aae3d2a254a811740a0127213-thumbnail.jpg"
-  }
-}
-```
-
-The `url` field contains the static link to the image at full quality.
-
-While the `thumbnailUrl` field contains a static link to a smaller version of the image (max width or height: 200px)

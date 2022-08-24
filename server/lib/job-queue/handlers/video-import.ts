@@ -1,8 +1,7 @@
 import { Job } from 'bull'
 import { move, remove, stat } from 'fs-extra'
-import { getLowercaseExtension } from '@server/helpers/core-utils'
 import { retryTransactionWrapper } from '@server/helpers/database-utils'
-import { YoutubeDL } from '@server/helpers/youtube-dl'
+import { YoutubeDLWrapper } from '@server/helpers/youtube-dl'
 import { isPostImportVideoAccepted } from '@server/lib/moderation'
 import { generateWebTorrentVideoFilename } from '@server/lib/paths'
 import { Hooks } from '@server/lib/plugins/hooks'
@@ -13,21 +12,24 @@ import { VideoPathManager } from '@server/lib/video-path-manager'
 import { buildNextVideoState } from '@server/lib/video-state'
 import { ThumbnailModel } from '@server/models/video/thumbnail'
 import { MVideoImportDefault, MVideoImportDefaultFiles, MVideoImportVideo } from '@server/types/models/video/video-import'
+import { getLowercaseExtension } from '@shared/core-utils'
+import { isAudioFile } from '@shared/extra-utils'
 import {
+  ThumbnailType,
   VideoImportPayload,
+  VideoImportState,
   VideoImportTorrentPayload,
   VideoImportTorrentPayloadType,
   VideoImportYoutubeDLPayload,
   VideoImportYoutubeDLPayloadType,
+  VideoResolution,
   VideoState
-} from '../../../../shared'
-import { VideoImportState } from '../../../../shared/models/videos'
-import { ThumbnailType } from '../../../../shared/models/videos/thumbnail.type'
-import { getDurationFromVideoFile, getVideoFileFPS, getVideoFileResolution } from '../../../helpers/ffprobe-utils'
+} from '@shared/models'
+import { ffprobePromise, getVideoStreamDuration, getVideoStreamFPS, getVideoStreamDimensionsInfo } from '../../../helpers/ffmpeg'
 import { logger } from '../../../helpers/logger'
 import { getSecureTorrentName } from '../../../helpers/utils'
 import { createTorrentAndSetInfoHash, downloadWebTorrentVideo } from '../../../helpers/webtorrent'
-import { VIDEO_IMPORT_TIMEOUT } from '../../../initializers/constants'
+import { JOB_TTL } from '../../../initializers/constants'
 import { sequelizeTypescript } from '../../../initializers/database'
 import { VideoModel } from '../../../models/video/video'
 import { VideoFileModel } from '../../../models/video/video-file'
@@ -40,8 +42,17 @@ import { generateVideoMiniature } from '../../thumbnail'
 async function processVideoImport (job: Job) {
   const payload = job.data as VideoImportPayload
 
-  if (payload.type === 'youtube-dl') return processYoutubeDLImport(job, payload)
-  if (payload.type === 'magnet-uri' || payload.type === 'torrent-file') return processTorrentImport(job, payload)
+  const videoImport = await getVideoImportOrDie(payload)
+  if (videoImport.state === VideoImportState.CANCELLED) {
+    logger.info('Do not process import since it has been cancelled', { payload })
+    return
+  }
+
+  videoImport.state = VideoImportState.PROCESSING
+  await videoImport.save()
+
+  if (payload.type === 'youtube-dl') return processYoutubeDLImport(job, videoImport, payload)
+  if (payload.type === 'magnet-uri' || payload.type === 'torrent-file') return processTorrentImport(job, videoImport, payload)
 }
 
 // ---------------------------------------------------------------------------
@@ -52,44 +63,36 @@ export {
 
 // ---------------------------------------------------------------------------
 
-async function processTorrentImport (job: Job, payload: VideoImportTorrentPayload) {
+async function processTorrentImport (job: Job, videoImport: MVideoImportDefault, payload: VideoImportTorrentPayload) {
   logger.info('Processing torrent video import in job %d.', job.id)
 
-  const videoImport = await getVideoImportOrDie(payload.videoImportId)
+  const options = { type: payload.type, videoImportId: payload.videoImportId }
 
-  const options = {
-    type: payload.type,
-    videoImportId: payload.videoImportId
-  }
   const target = {
     torrentName: videoImport.torrentName ? getSecureTorrentName(videoImport.torrentName) : undefined,
     uri: videoImport.magnetUri
   }
-  return processFile(() => downloadWebTorrentVideo(target, VIDEO_IMPORT_TIMEOUT), videoImport, options)
+  return processFile(() => downloadWebTorrentVideo(target, JOB_TTL['video-import']), videoImport, options)
 }
 
-async function processYoutubeDLImport (job: Job, payload: VideoImportYoutubeDLPayload) {
+async function processYoutubeDLImport (job: Job, videoImport: MVideoImportDefault, payload: VideoImportYoutubeDLPayload) {
   logger.info('Processing youtubeDL video import in job %d.', job.id)
 
-  const videoImport = await getVideoImportOrDie(payload.videoImportId)
-  const options = {
-    type: payload.type,
-    videoImportId: videoImport.id
-  }
+  const options = { type: payload.type, videoImportId: videoImport.id }
 
-  const youtubeDL = new YoutubeDL(videoImport.targetUrl, ServerConfigManager.Instance.getEnabledResolutions('vod'))
+  const youtubeDL = new YoutubeDLWrapper(videoImport.targetUrl, ServerConfigManager.Instance.getEnabledResolutions('vod'))
 
   return processFile(
-    () => youtubeDL.downloadYoutubeDLVideo(payload.fileExt, VIDEO_IMPORT_TIMEOUT),
+    () => youtubeDL.downloadVideo(payload.fileExt, JOB_TTL['video-import']),
     videoImport,
     options
   )
 }
 
-async function getVideoImportOrDie (videoImportId: number) {
-  const videoImport = await VideoImportModel.loadAndPopulateVideo(videoImportId)
+async function getVideoImportOrDie (payload: VideoImportPayload) {
+  const videoImport = await VideoImportModel.loadAndPopulateVideo(payload.videoImportId)
   if (!videoImport || !videoImport.Video) {
-    throw new Error('Cannot import video %s: the video import or video linked to this import does not exist anymore.')
+    throw new Error(`Cannot import video ${payload.videoImportId}: the video import or video linked to this import does not exist anymore.`)
   }
 
   return videoImport
@@ -114,9 +117,14 @@ async function processFile (downloader: () => Promise<string>, videoImport: MVid
       throw new Error('The user video quota is exceeded with this video to import.')
     }
 
-    const { resolution } = await getVideoFileResolution(tempVideoPath)
-    const fps = await getVideoFileFPS(tempVideoPath)
-    const duration = await getDurationFromVideoFile(tempVideoPath)
+    const probe = await ffprobePromise(tempVideoPath)
+
+    const { resolution } = await isAudioFile(tempVideoPath, probe)
+      ? { resolution: VideoResolution.H_NOVIDEO }
+      : await getVideoStreamDimensionsInfo(tempVideoPath)
+
+    const fps = await getVideoStreamFPS(tempVideoPath, probe)
+    const duration = await getVideoStreamDuration(tempVideoPath, probe)
 
     // Prepare video file object for creation in database
     const fileExt = getLowercaseExtension(tempVideoPath)
@@ -246,12 +254,12 @@ async function processFile (downloader: () => Promise<string>, videoImport: MVid
     }
 
     if (video.state === VideoState.TO_MOVE_TO_EXTERNAL_STORAGE) {
-      return addMoveToObjectStorageJob(videoImportUpdated.Video)
+      return addMoveToObjectStorageJob({ video: videoImportUpdated.Video, previousVideoState: VideoState.TO_IMPORT })
     }
 
     // Create transcoding jobs?
     if (video.state === VideoState.TO_TRANSCODE) {
-      await addOptimizeOrMergeAudioJob(videoImportUpdated.Video, videoFile, videoImport.User)
+      await addOptimizeOrMergeAudioJob({ video: videoImportUpdated.Video, videoFile, user: videoImport.User })
     }
 
   } catch (err) {

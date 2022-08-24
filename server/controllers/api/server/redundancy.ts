@@ -1,13 +1,10 @@
-import express from "express"
-import { JobQueue } from "@server/lib/job-queue"
-import { VideoRedundancyModel } from "@server/models/redundancy/video-redundancy"
-import { HttpStatusCode } from "../../../../shared/models/http/http-error-codes"
-import { UserRight } from "../../../../shared/models/users"
-import { logger } from "../../../helpers/logger"
-import {
-  removeRedundanciesOfServer,
-  removeVideoRedundancy
-} from "../../../lib/redundancy"
+import express from 'express'
+import { JobQueue } from '@server/lib/job-queue'
+import { VideoRedundancyModel } from '@server/models/redundancy/video-redundancy'
+import { HttpStatusCode } from '../../../../shared/models/http/http-error-codes'
+import { UserRight } from '../../../../shared/models/users'
+import { logger } from '../../../helpers/logger'
+import { removeRedundanciesOfServer, removeVideoRedundancy } from '../../../lib/redundancy'
 import {
   asyncMiddleware,
   authenticate,
@@ -16,30 +13,24 @@ import {
   setDefaultPagination,
   setDefaultVideoRedundanciesSort,
   videoRedundanciesSortValidator
-} from "../../../middlewares"
+} from '../../../middlewares'
 import {
   addVideoRedundancyValidator,
   listVideoRedundanciesValidator,
   removeVideoRedundancyValidator,
   updateServerRedundancyValidator
-} from "../../../middlewares/validators/redundancy"
-import { StatsManager } from "@server/lib/stat-manager"
-import { VideoModel } from "@server/models/video/video"
-import { getServerActor } from "@server/models/application/application"
-import { ActorFollowModel } from "../../../models/actor/actor-follow"
+} from '../../../middlewares/validators/redundancy'
 
 const serverRedundancyRouter = express.Router()
 
-serverRedundancyRouter.put(
-  "/redundancy/:host",
+serverRedundancyRouter.put('/redundancy/:host',
   authenticate,
   ensureUserHasRight(UserRight.MANAGE_SERVER_FOLLOW),
   asyncMiddleware(updateServerRedundancyValidator),
   asyncMiddleware(updateRedundancy)
 )
 
-serverRedundancyRouter.get(
-  "/redundancy/videos",
+serverRedundancyRouter.get('/redundancy/videos',
   authenticate,
   ensureUserHasRight(UserRight.MANAGE_VIDEOS_REDUNDANCIES),
   listVideoRedundanciesValidator,
@@ -50,37 +41,29 @@ serverRedundancyRouter.get(
   asyncMiddleware(listVideoRedundancies)
 )
 
-serverRedundancyRouter.post(
-  "/redundancy/videos",
+serverRedundancyRouter.post('/redundancy/videos',
   authenticate,
   ensureUserHasRight(UserRight.MANAGE_VIDEOS_REDUNDANCIES),
   addVideoRedundancyValidator,
   asyncMiddleware(addVideoRedundancy)
 )
 
-serverRedundancyRouter.delete(
-  "/redundancy/videos/:redundancyId",
+serverRedundancyRouter.delete('/redundancy/videos/:redundancyId',
   authenticate,
   ensureUserHasRight(UserRight.MANAGE_VIDEOS_REDUNDANCIES),
   removeVideoRedundancyValidator,
   asyncMiddleware(removeVideoRedundancyController)
 )
 
-serverRedundancyRouter.get(
-  "/redundancy/stats",
-  asyncMiddleware(getRedundancyStats)
-)
+// ---------------------------------------------------------------------------
+
+export {
+  serverRedundancyRouter
+}
 
 // ---------------------------------------------------------------------------
 
-export { serverRedundancyRouter }
-
-// ---------------------------------------------------------------------------
-
-async function listVideoRedundancies (
-  req: express.Request,
-  res: express.Response
-) {
+async function listVideoRedundancies (req: express.Request, res: express.Response) {
   const resultList = await VideoRedundancyModel.listForApi({
     start: req.query.start,
     count: req.query.count,
@@ -91,9 +74,7 @@ async function listVideoRedundancies (
 
   const result = {
     total: resultList.total,
-    data: resultList.data.map((r) =>
-      VideoRedundancyModel.toFormattedJSONStatic(r)
-    )
+    data: resultList.data.map(r => VideoRedundancyModel.toFormattedJSONStatic(r))
   }
 
   return res.json(result)
@@ -105,17 +86,14 @@ async function addVideoRedundancy (req: express.Request, res: express.Response) 
   }
 
   await JobQueue.Instance.createJobWithPromise({
-    type: "video-redundancy",
+    type: 'video-redundancy',
     payload
   })
 
   return res.status(HttpStatusCode.NO_CONTENT_204).end()
 }
 
-async function removeVideoRedundancyController (
-  req: express.Request,
-  res: express.Response
-) {
+async function removeVideoRedundancyController (req: express.Request, res: express.Response) {
   await removeVideoRedundancy(res.locals.videoRedundancy)
 
   return res.status(HttpStatusCode.NO_CONTENT_204).end()
@@ -130,32 +108,9 @@ async function updateRedundancy (req: express.Request, res: express.Response) {
 
   if (server.redundancyAllowed !== true) {
     // Async, could be long
-    removeRedundanciesOfServer(server.id).catch((err) =>
-      logger.error("Cannot remove redundancy of %s.", server.host, { err })
-    )
+    removeRedundanciesOfServer(server.id)
+      .catch(err => logger.error('Cannot remove redundancy of %s.', server.host, { err }))
   }
 
   return res.status(HttpStatusCode.NO_CONTENT_204).end()
-}
-
-async function getRedundancyStats (req: express.Request, res: express.Response) {
-  const redundancyStats = await StatsManager.Instance.buildSingleRedundancyStat(
-    "recently-added"
-  )
-
-  const { totalVideos } = await VideoModel.getStats()
-
-  const serverActor = await getServerActor()
-  const resultList = await ActorFollowModel.listFollowersForApi({
-    actorId: serverActor.id,
-    start: 0,
-    count: 10,
-    sort: "-createdAt"
-  })
-
-  return res.json({
-    totalVideosMirrored: redundancyStats.totalVideos,
-    totalVideosLocal: totalVideos,
-    followers: resultList.data.map(follower => follower?.ActorFollower?.Server?.host)
-  })
 }

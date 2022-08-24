@@ -9,8 +9,10 @@ import {
   CustomPagesCommand,
   killallServers,
   PeerTubeServer,
-  setAccessTokensToServers
-} from '../../../../shared/extra-utils/index'
+  setAccessTokensToServers,
+  setDefaultAccountAvatar,
+  setDefaultChannelAvatar
+} from '../../../../shared/server-commands/index'
 
 const expect = chai.expect
 
@@ -29,6 +31,8 @@ describe('Test instance homepage actions', function () {
 
     server = await createSingleServer(1)
     await setAccessTokensToServers([ server ])
+    await setDefaultChannelAvatar(server)
+    await setDefaultAccountAvatar(server)
 
     command = server.customPage
   })

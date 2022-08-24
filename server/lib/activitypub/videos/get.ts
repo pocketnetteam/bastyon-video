@@ -1,9 +1,9 @@
-import { getAPId } from '@server/helpers/activitypub'
 import { retryTransactionWrapper } from '@server/helpers/database-utils'
 import { JobQueue } from '@server/lib/job-queue'
 import { loadVideoByUrl, VideoLoadByUrlType } from '@server/lib/model-loaders'
 import { MVideoAccountLightBlacklistAllFiles, MVideoImmutable, MVideoThumbnail } from '@server/types/models'
 import { APObject } from '@shared/models'
+import { getAPId } from '../activity'
 import { refreshVideoIfNeeded } from './refresh'
 import { APVideoCreator, fetchRemoteVideo, SyncParam, syncVideoExternalAttributes } from './shared'
 
@@ -42,7 +42,7 @@ async function getOrCreateAPVideo (
   options: GetVideoParamAll | GetVideoParamImmutable | GetVideoParamOther
 ): GetVideoResult<MVideoAccountLightBlacklistAllFiles | MVideoThumbnail | MVideoImmutable> {
   // Default params
-  const syncParam = options.syncParam || { likes: true, dislikes: true, shares: true, comments: true, thumbnail: true, refreshVideo: false }
+  const syncParam = options.syncParam || { rates: true, shares: true, comments: true, thumbnail: true, refreshVideo: false }
   const fetchType = options.fetchType || 'all'
   const allowRefresh = options.allowRefresh !== false
 

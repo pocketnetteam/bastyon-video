@@ -18,10 +18,10 @@ import {
 import { getHLSPublicFileUrl } from '@server/lib/object-storage'
 import { VideoFileModel } from '@server/models/video/video-file'
 import { MStreamingPlaylist, MVideo } from '@server/types/models'
-import { AttributesOnly } from '@shared/core-utils'
+import { sha1 } from '@shared/extra-utils'
 import { VideoStorage } from '@shared/models'
+import { AttributesOnly } from '@shared/typescript-utils'
 import { VideoStreamingPlaylistType } from '../../../shared/models/videos/video-streaming-playlist.type'
-import { sha1 } from '../../helpers/core-utils'
 import { isActivityPubUrlValid } from '../../helpers/custom-validators/activitypub/misc'
 import { isArrayOf } from '../../helpers/custom-validators/misc'
 import { isVideoFileInfoHashValid } from '../../helpers/custom-validators/videos'
@@ -37,7 +37,6 @@ import { VideoRedundancyModel } from '../redundancy/video-redundancy'
 import { doesExist } from '../shared'
 import { throwIfNotValid } from '../utils'
 import { VideoModel } from './video'
-import { logger } from '@server/helpers/logger'
 
 @Table({
   tableName: 'videoStreamingPlaylist',
@@ -199,30 +198,39 @@ export class VideoStreamingPlaylistModel extends Model<Partial<AttributesOnly<Vi
     return Object.assign(playlist, { videoId: video.id, Video: video })
   }
 
+  static doesOwnedHLSPlaylistExist (videoUUID: string) {
+    const query = `SELECT 1 FROM "videoStreamingPlaylist" ` +
+      `INNER JOIN "video" ON "video"."id" = "videoStreamingPlaylist"."videoId" ` +
+      `AND "video"."remote" IS FALSE AND "video"."uuid" = $videoUUID ` +
+      `AND "storage" = ${VideoStorage.FILE_SYSTEM} LIMIT 1`
+
+    return doesExist(query, { videoUUID })
+  }
+
   assignP2PMediaLoaderInfoHashes (video: MVideo, files: unknown[]) {
     const masterPlaylistUrl = this.getMasterPlaylistUrl(video)
 
     this.p2pMediaLoaderInfohashes = VideoStreamingPlaylistModel.buildP2PMediaLoaderInfoHashes(masterPlaylistUrl, files)
   }
 
-  getMasterPlaylistUrl (video: MVideo, idDuplicated?: boolean) {
+  getMasterPlaylistUrl (video: MVideo) {
     if (this.storage === VideoStorage.OBJECT_STORAGE) {
       return getHLSPublicFileUrl(this.playlistUrl)
     }
 
     if (video.isOwned()) return WEBSERVER.URL + this.getMasterPlaylistStaticPath(video.uuid)
 
-    return idDuplicated ? WEBSERVER.URL + this.getMasterPlaylistRedundancyPath(video.uuid) : this.playlistUrl
+    return this.playlistUrl
   }
 
-  getSha256SegmentsUrl (video: MVideo, idDuplicated?: boolean) {
+  getSha256SegmentsUrl (video: MVideo) {
     if (this.storage === VideoStorage.OBJECT_STORAGE) {
       return getHLSPublicFileUrl(this.segmentsSha256Url)
     }
 
     if (video.isOwned()) return WEBSERVER.URL + this.getSha256SegmentsStaticPath(video.uuid, video.isLive)
 
-    return idDuplicated ? WEBSERVER.URL + this.getSha256SegmentsRedundancyPath(video.uuid) : this.segmentsSha256Url
+    return this.segmentsSha256Url
   }
 
   getStringType () {
@@ -240,16 +248,12 @@ export class VideoStreamingPlaylistModel extends Model<Partial<AttributesOnly<Vi
       this.videoId === other.videoId
   }
 
+  withVideo (video: MVideo) {
+    return Object.assign(this, { Video: video })
+  }
+
   private getMasterPlaylistStaticPath (videoUUID: string) {
     return join(STATIC_PATHS.STREAMING_PLAYLISTS.HLS, videoUUID, this.playlistFilename)
-  }
-
-  private getMasterPlaylistRedundancyPath (videoUUID: string) {
-    return join(STATIC_PATHS.REDUNDANCY, 'hls', videoUUID, this.playlistFilename)
-  }
-
-  private getSha256SegmentsRedundancyPath (videoUUID: string) {
-    return join(STATIC_PATHS.REDUNDANCY, 'hls', videoUUID, this.segmentsSha256Filename)
   }
 
   private getSha256SegmentsStaticPath (videoUUID: string, isLive: boolean) {

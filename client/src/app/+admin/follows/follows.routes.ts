@@ -4,12 +4,10 @@ import { UserRightGuard } from '@app/core'
 import { UserRight } from '@shared/models'
 import { FollowersListComponent } from './followers-list'
 import { FollowingListComponent } from './following-list/following-list.component'
-import { FollowsComponent } from './follows.component'
 
 export const FollowsRoutes: Routes = [
   {
     path: 'follows',
-    component: FollowsComponent,
     canActivate: [ UserRightGuard ],
     data: {
       userRight: UserRight.MANAGE_SERVER_FOLLOW
@@ -44,7 +42,12 @@ export const FollowsRoutes: Routes = [
       },
       {
         path: 'video-redundancies-list',
-        component: VideoRedundanciesListComponent
+        component: VideoRedundanciesListComponent,
+        data: {
+          meta: {
+            title: $localize`Redundancy`
+          }
+        }
       }
     ]
   }

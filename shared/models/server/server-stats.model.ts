@@ -57,17 +57,6 @@ export interface ServerStats {
 
   activityPubMessagesProcessedPerSecond: number
   totalActivityPubMessagesWaiting: number
-
-  performance?: PerformanceStats
-}
-
-export interface PerformanceStats {
-  waitTranscodingJobs: number
-  failTranscodingJobs: number
-  waitImportsCount: number
-  activeLivestreams: number
-  failImportsCount: number
-  speedByResolution: any
 }
 
 export interface VideosRedundancyStats {
