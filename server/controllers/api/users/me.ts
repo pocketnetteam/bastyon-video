@@ -112,7 +112,9 @@ export {
 
 async function getUserVideoViews (req: express.Request, res: express.Response) {
   const username = res.locals.oauth.token.User.username
-  const totalViews: number | Promise<number> = await VideoModel.meVideoViews(username)
+  const startDate = req.params.startDate || null
+
+  const totalViews: number | Promise<number> = await VideoModel.meVideoViews(username, startDate)
 
   return res.json({
     total_views: totalViews
