@@ -146,13 +146,7 @@ class StatsManager {
       if (job.data.type !== TRANSCODING_JOB_TYPE) return
 
       const targetResolution: number = job.data.resolution
-      const executionTime: number = (job.finishedOn - job.timestamp) / 1000
-
-      logger.info(
-        "Calculated time for %s : %s",
-        targetResolution,
-        executionTime
-      )
+      const executionTime: number = (job.finishedOn - job.timestamp) / 100
 
       const fileSize: number =
         job.returnvalue?.VideoStreamingPlaylists?.[0]?.VideoFiles?.[0]?.size ||

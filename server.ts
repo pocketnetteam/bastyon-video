@@ -161,12 +161,12 @@ token('user-agent', (req: express.Request) => {
 
   return req.get('user-agent')
 })
-app.use(morgan('combined', {
-  stream: {
-    write: (str: string) => logger.info(str.trim(), { tags: [ 'http' ] })
-  },
-  skip: req => CONFIG.LOG.LOG_PING_REQUESTS === false && req.originalUrl === '/api/v1/ping'
-}))
+// app.use(morgan('combined', {
+//   stream: {
+//     write: (str: string) => logger.info(str.trim(), { tags: [ 'http' ] })
+//   },
+//   skip: req => CONFIG.LOG.LOG_PING_REQUESTS === false && req.originalUrl === '/api/v1/ping'
+// }))
 
 // Add .fail() helper to response
 app.use(apiFailMiddleware)
