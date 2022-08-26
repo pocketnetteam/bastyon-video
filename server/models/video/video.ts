@@ -615,7 +615,7 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
   @AllowNull(false)
   @Default(0)
   @Column(DataTypes.DOUBLE)
-  aspectRatio: number
+  aspectRatio: number;
 
   @ForeignKey(() => VideoChannelModel)
   @Column
@@ -1052,6 +1052,18 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     return result.map((v) => v.uuid)
   }
 
+  static async meVideoViews (username: string): Promise<number> {
+    const videoViewsQuery: string = `SELECT SUM("video"."views")
+                                  FROM "account"
+                                  JOIN "videoChannel" on "videoChannel"."accountId" = "account"."id"
+                                  JOIN "video" on "video"."channelId" = "videoChannel"."id"
+                                  WHERE "account"."name" = '${username}';
+                                `
+    return await VideoModel.sequelize
+      .query<any>(videoViewsQuery, { type: QueryTypes.SELECT, nest: true })
+      .then((rows) => rows[0]?.sum as number)
+  }
+
   static listUserVideosForApi (options: {
     user: any
     accountId: number
@@ -1063,8 +1075,7 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     isLive?: boolean
     search?: string
   }) {
-    const { channelId, start, count, sort, search, isLive } =
-      options
+    const { channelId, start, count, sort, search, isLive } = options
 
     function buildBaseQuery (forCount: boolean): FindOptions {
       const where: WhereOptions = {}
@@ -1137,7 +1148,7 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     isLocal?: boolean
     include?: VideoInclude
 
-    hasFiles?: boolean // default false
+    hasFiles?: boolean; // default false
     hasWebtorrentFiles?: boolean
     hasHLSFiles?: boolean
 
@@ -1242,13 +1253,13 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     search?: string
 
     host?: string
-    startDate?: string // ISO 8601
-    endDate?: string // ISO 8601
+    startDate?: string; // ISO 8601
+    endDate?: string; // ISO 8601
     originallyPublishedStartDate?: string
     originallyPublishedEndDate?: string
 
-    durationMin?: number // seconds
-    durationMax?: number // seconds
+    durationMin?: number; // seconds
+    durationMax?: number; // seconds
     uuids?: string[]
   }) {
     VideoModel.throwIfPrivateIncludeWithoutUser(options.include, options.user)
@@ -2084,7 +2095,9 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     isNewVideo: boolean,
     transaction: Transaction
   ) {
-    if (this.state === newState) { throw new Error("Cannot use same state " + newState) }
+    if (this.state === newState) {
+      throw new Error("Cannot use same state " + newState)
+    }
 
     this.state = newState
 
