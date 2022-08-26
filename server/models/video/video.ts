@@ -2113,8 +2113,8 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     return Math.ceil((videoFile.size * 8) / this.duration)
   }
 
-  getTrackerUrls () {
-    if (this.isOwned()) {
+  getTrackerUrls (isMirrored?: boolean) {
+    if (this.isOwned() || isMirrored) {
       return [
         WEBSERVER.URL + "/tracker/announce",
         WEBSERVER.WS +
