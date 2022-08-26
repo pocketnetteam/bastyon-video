@@ -109,6 +109,7 @@ async function getUserVideos (req: express.Request, res: express.Response) {
   const user = res.locals.oauth.token.User
 
   const apiOptions = await Hooks.wrapObject({
+    user: user,
     accountId: user.Account.id,
     start: req.query.start,
     count: req.query.count,
