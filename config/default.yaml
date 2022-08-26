@@ -191,7 +191,7 @@ trending:
 # Once you have defined your strategies, choose which instances you want to cache in admin -> manage follows -> following
 redundancy:
   videos:
-    check_interval: '1 hour' # How often you want to check new videos to cache
+    check_interval: '30 secods' # How often you want to check new videos to cache
     strategies: # Just uncomment strategies you want
 #      -
 #        size: '10GB'
@@ -203,12 +203,12 @@ redundancy:
 #        # Minimum time the video must remain in the cache. Only accept values > 10 hours (to not overload remote instances)
 #        min_lifetime: '48 hours'
 #        strategy: 'trending' # Cache trending videos
-#      -
-#        size: '10GB'
-#        # Minimum time the video must remain in the cache. Only accept values > 10 hours (to not overload remote instances)
-#        min_lifetime: '48 hours'
-#        strategy: 'recently-added' # Cache recently added videos
-#        min_views: 10 # Having at least x views
+     -
+       size: '4TB'
+       # Minimum time the video must remain in the cache. Only accept values > 10 hours (to not overload remote instances)
+       min_lifetime: '48 hours'
+       strategy: 'recently-added' # Cache recently added videos
+       min_views: 0 # Having at least x views
 
 # Other instances that duplicate your content
 remote_redundancy:
