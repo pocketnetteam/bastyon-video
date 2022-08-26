@@ -1148,7 +1148,7 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     isLocal?: boolean
     include?: VideoInclude
 
-    hasFiles?: boolean; // default false
+    hasFiles?: boolean // default false
     hasWebtorrentFiles?: boolean
     hasHLSFiles?: boolean
 
@@ -1253,13 +1253,13 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     search?: string
 
     host?: string
-    startDate?: string; // ISO 8601
-    endDate?: string; // ISO 8601
+    startDate?: string // ISO 8601
+    endDate?: string // ISO 8601
     originallyPublishedStartDate?: string
     originallyPublishedEndDate?: string
 
-    durationMin?: number; // seconds
-    durationMax?: number; // seconds
+    durationMin?: number // seconds
+    durationMax?: number // seconds
     uuids?: string[]
   }) {
     VideoModel.throwIfPrivateIncludeWithoutUser(options.include, options.user)
