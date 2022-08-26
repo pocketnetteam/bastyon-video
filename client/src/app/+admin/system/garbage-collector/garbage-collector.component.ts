@@ -20,6 +20,10 @@ export class GarbageCollectorComponent implements OnInit, OnDestroy {
 
   // List of garbage collector runs
   public gbRuns: any[];
+  public isFetchingHistory: boolean = false;
+  // Current garbage collector state
+  public currentGb: any;
+  public fetchingCurrentGb: boolean = false;
   // Number of pages for the history
   public nbPages: number;
   // Current page number
@@ -27,8 +31,6 @@ export class GarbageCollectorComponent implements OnInit, OnDestroy {
 
   // Internal variables
   private interval: any;
-  public isRequesting: boolean = false;
-  private isTriggering: boolean = false;
   public isExecuting: boolean = false;
   public hasError: boolean = false;
 
@@ -59,6 +61,8 @@ export class GarbageCollectorComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.fetchCurrentState();
+    this.setIntervalFetch();
     this.fetchGbHistory();
   }
 
@@ -66,14 +70,14 @@ export class GarbageCollectorComponent implements OnInit, OnDestroy {
     if (this.interval)
       clearInterval(this.interval);
     this.interval = setInterval(() => {
-      this.fetchGbHistory();
+      this.fetchCurrentState();
     }, this.refreshTime);
   }
 
   fetchGbHistory() {
-    if (this.isRequesting)
+    if (this.isFetchingHistory)
       return;
-    this.isRequesting = true;
+    this.isFetchingHistory = true;
     this.garbageCollectorService.fetchGbHistory(this.currentPage).then(({ history, nbPages }) => {
       this.gbRuns = history;
       this.nbPages = nbPages;
@@ -81,27 +85,42 @@ export class GarbageCollectorComponent implements OnInit, OnDestroy {
         this.currentPage = 0;
         this.fetchGbHistory();
       }
-      else
-        this.changePage(0);
     }, (err) => {
       this.gbRuns = null;
       this.hasError = true;
+    }).finally(() => {
+      this.isFetchingHistory = false;
+    });
+  }
+
+  fetchCurrentState() {
+    if (this.fetchingCurrentGb)
+      return;
+    this.fetchingCurrentGb = true;
+    this.garbageCollectorService.fetchLatestGb().then(({ history, nbPages }) => {
+      if (history && history.length > 0)
+        this.currentGb = history[0];
+        if (this.currentGb && this.currentGb.state != GarbageCollectorState.STARTED && this.currentPage == 0 && this.gbRuns != undefined) {
+          if (this.gbRuns.length <= 0 || this.currentGb.id != this.gbRuns[0].id)
+            this.gbRuns.unshift(this.currentGb);
+          else if (this.currentGb.state != this.gbRuns[0].state)
+            this.gbRuns[0] = this.currentGb;
+        }
+    }, (err) => {
+      this.currentGb = null;
+      this.hasError = true;
       clearInterval(this.interval);
     }).finally(() => {
-      this.isRequesting = false;
-      if (!this.isTriggering)
-        this.isExecuting = false;
+      this.fetchingCurrentGb = false;
     });
   }
 
   executeGarbageCollector() {
-    if (this.isTriggering)
-      return;
-    this.isTriggering = true;
     this.isExecuting = true;
-    this.garbageCollectorService.triggerGarbageCollector().then(() => {}).finally(() => {
-      this.isTriggering = false;
-    });
+    this.garbageCollectorService.triggerGarbageCollector().then(() => {}).finally(() => { });
+    setTimeout(() => {
+      this.isExecuting = false;
+    }, this.refreshTime);
   }
 
   openModalListVideos(gbRun: any) {
@@ -112,10 +131,7 @@ export class GarbageCollectorComponent implements OnInit, OnDestroy {
     this.currentPage += pageChange;
     this.currentPage = (this.currentPage < 0) ? 0 : this.currentPage;
     this.currentPage = (this.currentPage >= this.nbPages) ? this.nbPages - 1 : this.currentPage;
-    if (pageChange != 0) {
-      this.fetchGbHistory();
-      this.setIntervalFetch();
-    }
+    this.fetchGbHistory();
   }
 
 }

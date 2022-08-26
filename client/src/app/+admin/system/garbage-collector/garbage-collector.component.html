@@ -3,26 +3,27 @@
     Error, could not fetch garbage collector data
 </div>
 
-<div *ngIf="!gbRuns && !hasError" class="py-3 d-flex justify-content-center align-items-center">
+<div *ngIf="!gbRuns && !currentGb && !hasError" class="py-3 d-flex justify-content-center align-items-center">
     Loading...
 </div>
 
-<div *ngIf="gbRuns && !hasError">
+<div *ngIf="!hasError">
 
     <div class="progress" i18n-title title="Garbage collector progress">
-        <div class="progress-bar" role="progressbar" [style.width.%]="(gbRuns && gbRuns.length > 0 && gbRuns[0].state == garbageCollectorRunningState) ? gbRuns[0].progress : 0"
-            [attr.aria-valuenow]="(gbRuns && gbRuns.length > 0 && gbRuns[0].state == garbageCollectorRunningState) ? gbRuns[0].progress : 0" aria-valuemin="0" [attr.aria-valuemax]="100">
+        <div class="progress-bar" role="progressbar" [style.width.%]="(currentGb && currentGb.state == garbageCollectorRunningState) ? currentGb.progress : 0"
+            [attr.aria-valuenow]="(currentGb && currentGb.state == garbageCollectorRunningState) ? currentGb.progress : 0" aria-valuemin="0" [attr.aria-valuemax]="100">
         </div>
-        <span>{{ (gbRuns && gbRuns.length > 0 && gbRuns[0].state == garbageCollectorRunningState) ? gbRuns[0].progress : 0 }}</span>
+        <span>{{ (currentGb && currentGb.state == garbageCollectorRunningState) ? currentGb.progress : 0 }}</span>
         <span>100</span>
     </div>
 
     <div class="py-4 d-flex justify-content-center align-items-center">
-        <div *ngIf="gbRuns.length > 0 && gbRuns[0].state == garbageCollectorRunningState">
+        <div *ngIf="currentGb && currentGb.state == garbageCollectorRunningState">
             Garbage collector is running...
         </div>
-        <div *ngIf="!(gbRuns.length > 0 && gbRuns[0].state == garbageCollectorRunningState)">
+        <div *ngIf="!(currentGb && currentGb.state == garbageCollectorRunningState)">
             <button *ngIf="!isExecuting" (click)="executeGarbageCollector()">Execute</button>
+            <my-small-loader [loading]="isExecuting"></my-small-loader>
         </div>
     </div>
 
@@ -67,12 +68,12 @@
         <div class="d-flex justify-content-center align-items-center">
             Page {{ currentPage + 1 }} / {{ nbPages }}
         </div>
-        <div *ngIf="!isRequesting" class="d-flex justify-content-center align-items-center">
+        <div *ngIf="!isFetchingHistory" class="d-flex justify-content-center align-items-center">
             <button (click)="changePage(-1)" [disabled]="currentPage <= 0" class="mx-1">Previous</button>
             <button (click)="changePage(1)" [disabled]="currentPage >= (nbPages - 1)" class="mx-1">Next</button>
         </div>
-        <div *ngIf="isRequesting" class="d-flex justify-content-center align-items-center">
-            <my-small-loader [loading]="isRequesting"></my-small-loader>
+        <div *ngIf="isFetchingHistory" class="d-flex justify-content-center align-items-center">
+            <my-small-loader [loading]="isFetchingHistory"></my-small-loader>
         </div>
     </div>
 

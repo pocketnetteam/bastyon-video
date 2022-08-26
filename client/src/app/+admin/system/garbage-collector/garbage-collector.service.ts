@@ -14,6 +14,18 @@ export class GarbageCollectorService {
   ) {
   }
 
+  public async fetchLatestGb() {
+    return new Promise((resolve, reject) => {
+      // console.log("Fetching garbage state");
+      this.authHttp.get(GarbageCollectorService.BASE_GARBAGE_COLLECTOR_HISTORY_URL + '?limit=1', {
+        headers: { 'ignoreLoadingBar': 'true' },
+      }).subscribe({
+        error: (e) => reject(e),
+        next: (res) => resolve(res)
+      });
+    });
+  }
+
   public async fetchGbHistory(pageNumber = 0) {
     return new Promise((resolve, reject) => {
       // console.log("Fetching garbage state");
