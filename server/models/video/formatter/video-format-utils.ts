@@ -184,7 +184,13 @@ function videoModelToFormattedDetailsJSON (video: MVideoFormattableDetails): Vid
 
   const tags = video.Tags ? video.Tags.map(t => t.name) : []
 
-  const videoIsMirrored = !!isArray(video.VideoStreamingPlaylists?.[0]?.RedundancyVideos)
+  const redundancies = isArray(
+    video.VideoStreamingPlaylists?.[0]?.RedundancyVideos
+  )
+    ? video.VideoStreamingPlaylists?.[0]?.RedundancyVideos
+    : []
+
+  const videoIsMirrored = !!redundancies.length
 
   const detailsJSON = {
     support: video.support,
