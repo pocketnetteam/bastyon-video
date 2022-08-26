@@ -173,13 +173,15 @@ function addDefaultLiveHLSParams (options: {
   masterPlaylistName: string
   latencyMode: LiveVideoLatencyMode
 }) {
-  const { command, outPath, masterPlaylistName, latencyMode } = options
+  const { command, outPath, latencyMode } = options
 
   command.outputOption('-hls_time ' + getLiveSegmentTime(latencyMode))
   command.outputOption('-hls_list_size ' + VIDEO_LIVE.SEGMENTS_LIST_SIZE)
   command.outputOption('-hls_flags delete_segments+independent_segments+program_date_time')
-  command.outputOption(`-hls_segment_filename ${join(outPath, '%v-%06d.ts')}`)
-  command.outputOption('-master_pl_name ' + masterPlaylistName)
+  command.outputOption('-strftime 1')
+  command.outputOption(`-hls_segment_filename ${join(outPath, '%v-%Y%m%d-%s.ts')}`)
+  command.outputOption('-master_pl_name master.m3u8')
+  command.outputOption('-hls_flags delete_segments')
   command.outputOption(`-f hls`)
 
   command.output(join(outPath, '%v.m3u8'))

@@ -535,6 +535,17 @@ export class VideoFileModel extends Model<Partial<AttributesOnly<VideoFileModel>
       )
   }
 
+  static loadByPlaylistId (playlistId: number, resolution: number) {
+    const query = {
+      where: {
+        videoStreamingPlaylistId: playlistId,
+        resolution
+      }
+    }
+
+    return VideoFileModel.findOne<VideoFileModel>(query)
+  }
+
   withVideoOrPlaylist (videoOrPlaylist: MVideo | MStreamingPlaylistVideo) {
     if (isStreamingPlaylist(videoOrPlaylist)) return Object.assign(this, { VideoStreamingPlaylist: videoOrPlaylist })
 
