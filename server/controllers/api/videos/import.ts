@@ -267,7 +267,7 @@ async function buildVideo (channelId: number, body: VideoImportCreate, importDat
     language: body.language || importData.language,
     commentsEnabled: body.commentsEnabled ?? CONFIG.DEFAULTS.PUBLISH.COMMENTS_ENABLED,
     downloadEnabled: body.downloadEnabled ?? CONFIG.DEFAULTS.PUBLISH.DOWNLOAD_ENABLED,
-    waitTranscoding: body.waitTranscoding || false,
+    waitTranscoding: true,
     state: VideoState.TO_IMPORT,
     nsfw: body.nsfw || importData.nsfw || false,
     description: body.description || importData.description,
