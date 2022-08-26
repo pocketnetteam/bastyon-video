@@ -205,7 +205,8 @@ function buildUserResult (pluginResult: RegisterServerAuthenticatedResult) {
     username: pluginResult.username,
     email: pluginResult.email,
     role: pluginResult.role ?? UserRole.USER,
-    displayName: pluginResult.displayName || pluginResult.username
+    displayName: pluginResult.displayName || pluginResult.username,
+    userQuota: pluginResult.userQuota
   }
 }
 

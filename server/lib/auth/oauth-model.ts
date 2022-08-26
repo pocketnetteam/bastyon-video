@@ -31,6 +31,7 @@ export type BypassLogin = {
     email: string
     displayName: string
     role: UserRole
+    userQuota: number
   }
 }
 
