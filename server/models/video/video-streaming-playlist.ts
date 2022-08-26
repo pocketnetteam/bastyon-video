@@ -213,24 +213,24 @@ export class VideoStreamingPlaylistModel extends Model<Partial<AttributesOnly<Vi
     this.p2pMediaLoaderInfohashes = VideoStreamingPlaylistModel.buildP2PMediaLoaderInfoHashes(masterPlaylistUrl, files)
   }
 
-  getMasterPlaylistUrl (video: MVideo) {
+  getMasterPlaylistUrl (video: MVideo, idDuplicated?: boolean) {
     if (this.storage === VideoStorage.OBJECT_STORAGE) {
       return getHLSPublicFileUrl(this.playlistUrl)
     }
 
     if (video.isOwned()) return WEBSERVER.URL + this.getMasterPlaylistStaticPath(video.uuid)
 
-    return this.playlistUrl
+    return idDuplicated ? WEBSERVER.URL + this.getMasterPlaylistRedundancyPath(video.uuid) : this.playlistUrl
   }
 
-  getSha256SegmentsUrl (video: MVideo) {
+  getSha256SegmentsUrl (video: MVideo, idDuplicated?: boolean) {
     if (this.storage === VideoStorage.OBJECT_STORAGE) {
       return getHLSPublicFileUrl(this.segmentsSha256Url)
     }
 
     if (video.isOwned()) return WEBSERVER.URL + this.getSha256SegmentsStaticPath(video.uuid, video.isLive)
 
-    return this.segmentsSha256Url
+    return idDuplicated ? WEBSERVER.URL + this.getSha256SegmentsRedundancyPath(video.uuid) : this.segmentsSha256Url
   }
 
   getStringType () {
@@ -254,6 +254,14 @@ export class VideoStreamingPlaylistModel extends Model<Partial<AttributesOnly<Vi
 
   private getMasterPlaylistStaticPath (videoUUID: string) {
     return join(STATIC_PATHS.STREAMING_PLAYLISTS.HLS, videoUUID, this.playlistFilename)
+  }
+
+  private getMasterPlaylistRedundancyPath (videoUUID: string) {
+    return join(STATIC_PATHS.REDUNDANCY, 'hls', videoUUID, this.playlistFilename)
+  }
+
+  private getSha256SegmentsRedundancyPath (videoUUID: string) {
+    return join(STATIC_PATHS.REDUNDANCY, 'hls', videoUUID, this.segmentsSha256Filename)
   }
 
   private getSha256SegmentsStaticPath (videoUUID: string, isLive: boolean) {

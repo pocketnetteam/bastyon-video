@@ -112,7 +112,7 @@ async function buildSha256Segment (segmentPath: string) {
   return sha256(buf)
 }
 
-function downloadPlaylistSegments (playlistUrl: string, destinationDir: string, timeout: number, bodyKBLimit: number) {
+function downloadPlaylistSegments (playlistUrl: string, destinationDir: string, timeout: number, bodyKBLimit: number, segmentsUrl: string) {
   let timer
   let remainingBodyKBLimit = bodyKBLimit
 
@@ -135,6 +135,8 @@ function downloadPlaylistSegments (playlistUrl: string, destinationDir: string, 
 
       const subRequests = subPlaylistUrls.map(u => fetchUniqUrls(u))
       const fileUrls = uniq(flatten(await Promise.all(subRequests)))
+
+      fileUrls.push(...subPlaylistUrls, playlistUrl, segmentsUrl)
 
       logger.debug('Will download %d HLS files.', fileUrls.length, { fileUrls })
 
