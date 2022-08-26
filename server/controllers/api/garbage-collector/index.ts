@@ -45,6 +45,9 @@ async function listGarbageCollectorHistory (req: express.Request, res: express.R
     limit: limit,
     offset: offset
   });
+  const nbHistory = await GarbageCollectorHistoryModel.count();
+  var nbPages = Math.ceil(nbHistory / limit);
+  nbPages = (isNaN(nbPages) || nbPages <= 0) ? 1 : nbPages;
   // Return result
-  return res.json(gbHistory);
+  return res.json({ history: gbHistory, nbPages: nbPages });
 }

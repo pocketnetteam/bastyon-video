@@ -20,10 +20,14 @@ export class GarbageCollectorComponent implements OnInit, OnDestroy {
 
   // List of garbage collector runs
   public gbRuns: any[];
+  // Number of pages for the history
+  public nbPages: number;
+  // Current page number
+  public currentPage: number = 0;
 
   // Internal variables
   private interval: any;
-  private isRequesting: boolean = false;
+  public isRequesting: boolean = false;
   private isTriggering: boolean = false;
   public isExecuting: boolean = false;
   public hasError: boolean = false;
@@ -55,18 +59,30 @@ export class GarbageCollectorComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.fetchGbHistory();
+  }
+
+  setIntervalFetch() {
+    if (this.interval)
+      clearInterval(this.interval);
     this.interval = setInterval(() => {
       this.fetchGbHistory();
     }, this.refreshTime);
-    this.fetchGbHistory();
   }
 
   fetchGbHistory() {
     if (this.isRequesting)
       return;
     this.isRequesting = true;
-    this.garbageCollectorService.fetchGbHistory().then((gbRuns: any[]) => {
-      this.gbRuns = gbRuns;
+    this.garbageCollectorService.fetchGbHistory(this.currentPage).then(({ history, nbPages }) => {
+      this.gbRuns = history;
+      this.nbPages = nbPages;
+      if (this.gbRuns && this.gbRuns.length <= 0 && this.currentPage > 0) {
+        this.currentPage = 0;
+        this.fetchGbHistory();
+      }
+      else
+        this.changePage(0);
     }, (err) => {
       this.gbRuns = null;
       this.hasError = true;
@@ -83,15 +99,23 @@ export class GarbageCollectorComponent implements OnInit, OnDestroy {
       return;
     this.isTriggering = true;
     this.isExecuting = true;
-    this.garbageCollectorService.triggerGarbageCollector().then(() => {
-
-    }).finally(() => {
+    this.garbageCollectorService.triggerGarbageCollector().then(() => {}).finally(() => {
       this.isTriggering = false;
     });
   }
 
   openModalListVideos(gbRun: any) {
     this.listVideosModal.show(gbRun);
+  }
+
+  changePage(pageChange: number) {
+    this.currentPage += pageChange;
+    this.currentPage = (this.currentPage < 0) ? 0 : this.currentPage;
+    this.currentPage = (this.currentPage >= this.nbPages) ? this.nbPages - 1 : this.currentPage;
+    if (pageChange != 0) {
+      this.fetchGbHistory();
+      this.setIntervalFetch();
+    }
   }
 
 }

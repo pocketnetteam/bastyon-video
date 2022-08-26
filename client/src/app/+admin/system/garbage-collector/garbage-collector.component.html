@@ -63,6 +63,19 @@
         </table>
     </div>
 
+    <div *ngIf="nbPages > 1">
+        <div class="d-flex justify-content-center align-items-center">
+            Page {{ currentPage + 1 }} / {{ nbPages }}
+        </div>
+        <div *ngIf="!isRequesting" class="d-flex justify-content-center align-items-center">
+            <button (click)="changePage(-1)" [disabled]="currentPage <= 0" class="mx-1">Previous</button>
+            <button (click)="changePage(1)" [disabled]="currentPage >= (nbPages - 1)" class="mx-1">Next</button>
+        </div>
+        <div *ngIf="isRequesting" class="d-flex justify-content-center align-items-center">
+            <my-small-loader [loading]="isRequesting"></my-small-loader>
+        </div>
+    </div>
+
 </div>
 
 <my-list-videos-modal #listVideosModal></my-list-videos-modal>

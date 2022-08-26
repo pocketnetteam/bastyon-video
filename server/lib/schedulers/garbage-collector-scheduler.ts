@@ -108,6 +108,7 @@ export class GarbageCollectorScheduler extends AbstractScheduler {
       if (!hasBlockchainDoubt && lastNbVideosBlockchain > 0)
         this.videosToDelete = this.videosToDelete.concat(vidsToDelete);
       // Update progress
+      // console.log("Garbage collector: current progress = " + (100 - Math.round((this.oldVideos.length / nbVideosTotal) * 100)) + "   (" + this.oldVideos.length + " videos remaining)");
       gcModel.update({
         progress: 100 - Math.round((this.oldVideos.length / nbVideosTotal) * 100)
       });
