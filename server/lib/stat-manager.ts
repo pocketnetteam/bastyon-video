@@ -155,7 +155,8 @@ class StatsManager {
       )
 
       const fileSize: number =
-        job.returnvalue?.VideoStreamingPlaylists[0]?.VideoFiles[0]?.size || 0
+        job.returnvalue?.VideoStreamingPlaylists?.[0]?.VideoFiles?.[0]?.size ||
+        0
 
       if (!fileSize) return
 
