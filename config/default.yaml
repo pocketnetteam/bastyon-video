@@ -173,7 +173,7 @@ log:
     max_file_size: 12MB
     max_files: 20
   anonymize_ip: false
-  log_ping_requests: true
+  log_ping_requests: false
   prettify_sql: false
 
 trending:
