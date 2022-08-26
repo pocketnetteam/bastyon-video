@@ -371,7 +371,7 @@ export class VideoRedundancyModel extends Model<Partial<AttributesOnly<VideoRedu
     const query = {
       attributes: [ 'id', 'publishedAt' ],
       limit: randomizedFactor,
-      order: getVideoSort('-publishedAt'),
+      order: getVideoSort('publishedAt'),
       where: {
         privacy: VideoPrivacy.PUBLIC,
         isLive: false,
