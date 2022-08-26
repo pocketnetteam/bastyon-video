@@ -26,6 +26,10 @@ import { CONFIG, registerConfigChangedHandler } from './config'
 
 const LAST_MIGRATION_VERSION = 710
 
+// pocketnet constants
+
+const TRANSCODING_JOB_TYPE = 'new-resolution-to-hls'
+
 // ---------------------------------------------------------------------------
 
 const API_VERSION = 'v1'
@@ -923,6 +927,7 @@ export {
   JOB_ATTEMPTS,
   AP_CLEANER,
   LAST_MIGRATION_VERSION,
+  TRANSCODING_JOB_TYPE,
   OAUTH_LIFETIME,
   CUSTOM_HTML_TAG_COMMENTS,
   STATS_TIMESERIE,
