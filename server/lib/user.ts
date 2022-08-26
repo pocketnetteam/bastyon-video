@@ -175,7 +175,7 @@ async function getOriginalVideoFileTotalFromUser (user: MUserId) {
     withSelect: true,
     whereUserId: '$userId',
     daily: false
-  })
+  }, user as UserModel)
 
   const base = await UserModel.getTotalRawQuery(query, user.id)
 
@@ -189,7 +189,7 @@ async function getOriginalVideoFileTotalDailyFromUser (user: MUserId) {
     withSelect: true,
     whereUserId: '$userId',
     daily: true
-  })
+  }, user as UserModel)
 
   const base = await UserModel.getTotalRawQuery(query, user.id)
 

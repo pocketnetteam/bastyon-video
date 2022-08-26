@@ -770,14 +770,17 @@ export class UserModel extends Model<Partial<AttributesOnly<UserModel>>> {
     whereUserId: '$userId' | '"UserModel"."id"'
     withSelect: boolean
     daily: boolean
-  }) {
+  }, user?: UserModel) {
     const andWhere = options.daily === true
       ? 'AND "video"."createdAt" > now() - interval \'24 hours\''
       : ''
 
+    const usernameQuotes = user?.username ? `'${user.username}'` : null
+    const tableQuotes = user?.username ? `"name"` : `"userId"`
+
     const videoChannelJoin = 'INNER JOIN "videoChannel" ON "videoChannel"."id" = "video"."channelId" ' +
       'INNER JOIN "account" ON "videoChannel"."accountId" = "account"."id" ' +
-      `WHERE "account"."userId" = ${options.whereUserId} ${andWhere}`
+      `WHERE "account".${tableQuotes}=${usernameQuotes || options.whereUserId} = ${options.whereUserId} ${andWhere}`
 
     const webtorrentFiles = 'SELECT "videoFile"."size" AS "size", "video"."id" AS "videoId" FROM "videoFile" ' +
       'INNER JOIN "video" ON "videoFile"."videoId" = "video"."id" ' +
