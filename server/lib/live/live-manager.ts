@@ -27,7 +27,7 @@ import { JobQueue } from '../job-queue'
 import { generateHLSMasterPlaylistFilename, generateHlsSha256SegmentsFilename, getLiveReplayBaseDirectory } from '../paths'
 import { PeerTubeSocket } from '../peertube-socket'
 import { LiveQuotaStore } from './live-quota-store'
-import { cleanupPermanentLive } from './live-utils'
+// import { cleanupPermanentLive } from './live-utils'
 import { MuxingSession } from './shared'
 
 import * as Bull from 'bull'
@@ -290,7 +290,7 @@ class LiveManager {
     const videoUUID = videoLive.Video.uuid
     const localLTags = lTags(sessionId, videoUUID)
 
-    const liveSession = await this.saveStartingSession(videoLive)
+    // const liveSession = await this.saveStartingSession(videoLive)
 
     const user = await UserModel.loadByLiveId(videoLive.id)
     LiveQuotaStore.Instance.addNewLive(user.id, videoLive.id)
