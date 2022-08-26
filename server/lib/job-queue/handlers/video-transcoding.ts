@@ -26,6 +26,7 @@ import {
   optimizeOriginalVideofile,
   transcodeNewWebTorrentResolution
 } from '../../transcoding/transcoding'
+import { MAX_ALLOWED_RESOLUTION } from '../../../initializers/constants'
 
 type HandlerFunction = (job: Job, payload: VideoTranscodingPayload, video: MVideoFullLight, user: MUser) => Promise<void>
 
@@ -87,7 +88,7 @@ async function handleHLSJob (job: Job, payload: HLSTranscodingPayload, video: MV
   logger.info('Handling HLS transcoding job for %s.', video.uuid, lTags(video.uuid))
 
   const videoFileInput = payload.copyCodecs
-    ? video.getWebTorrentFile(payload.resolution)
+    ? (video.getWebTorrentFile(payload.resolution) || video.getMaxQualityFile())
     : video.getMaxQualityFile()
 
   const videoOrStreamingPlaylist = videoFileInput.getVideoOrStreamingPlaylist()
@@ -190,7 +191,10 @@ async function onVideoFirstWebTorrentTranscoding (
 
     isPortraitMode,
     hasAudio: !!audioStream,
-    resolution: videoDatabase.getMaxQualityFile().resolution,
+    resolution:
+        videoDatabase.getMaxQualityFile().resolution > MAX_ALLOWED_RESOLUTION
+          ? MAX_ALLOWED_RESOLUTION
+          : videoDatabase.getMaxQualityFile().resolution,
     // If we quick transcoded original file, force transcoding for HLS to avoid some weird playback issues
     copyCodecs: transcodeType !== 'quick-transcode',
     isMaxQuality: true
