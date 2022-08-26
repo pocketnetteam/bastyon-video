@@ -29,6 +29,7 @@ const LAST_MIGRATION_VERSION = 710
 // pocketnet constants
 
 const TRANSCODING_JOB_TYPE = 'new-resolution-to-hls'
+const FULL_DISC_SPACE_PERCENTAGE = 0.9
 
 // ---------------------------------------------------------------------------
 
@@ -928,6 +929,7 @@ export {
   AP_CLEANER,
   LAST_MIGRATION_VERSION,
   TRANSCODING_JOB_TYPE,
+  FULL_DISC_SPACE_PERCENTAGE,
   OAUTH_LIFETIME,
   CUSTOM_HTML_TAG_COMMENTS,
   STATS_TIMESERIE,

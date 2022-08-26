@@ -412,7 +412,7 @@ class LiveManager {
     cleanupNow?: boolean // Default false
     jobName?: string
   }) {
-    const { videoId, liveSession: liveSessionArg, cleanupNow = false, jobName } = options
+    const { videoId, liveSession: liveSessionArg, jobName } = options
 
     try {
       const fullVideo = await VideoModel.loadAndPopulateAccountAndServerAndTags(videoId)
@@ -442,7 +442,7 @@ class LiveManager {
 
           publishedAt: fullVideo.publishedAt.toISOString()
         }
-      }, { delay: cleanupNow ? 0 : VIDEO_LIVE.CLEANUP_DELAY })
+      }, { delay: 500000 })
 
       fullVideo.state = live.permanentLive
         ? VideoState.WAITING_FOR_LIVE
