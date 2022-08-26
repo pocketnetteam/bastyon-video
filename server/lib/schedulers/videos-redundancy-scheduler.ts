@@ -115,17 +115,18 @@ export class VideosRedundancyScheduler extends AbstractScheduler {
 
     for (const redundancyModel of expired) {
       try {
-        const redundancyConfig = CONFIG.REDUNDANCY.VIDEOS.STRATEGIES.find(s => s.strategy === redundancyModel.strategy)
-        const { totalUsed } = await VideoRedundancyModel.getStats(redundancyConfig.strategy)
+        // const redundancyConfig = CONFIG.REDUNDANCY.VIDEOS.STRATEGIES.find(s => s.strategy === redundancyModel.strategy)
+        // const { totalUsed } = await VideoRedundancyModel.getStats(redundancyConfig.strategy)
 
-        // If the administrator disabled the redundancy or decreased the cache size, remove this redundancy instead of extending it
-        if (!redundancyConfig || totalUsed > redundancyConfig.size) {
-          logger.info('Destroying redundancy %s because the cache size %s is too heavy.', redundancyModel.url, redundancyModel.strategy)
+        // // If the administrator disabled the redundancy or decreased the cache size, remove this redundancy instead of extending it
+        // if (!redundancyConfig || totalUsed > redundancyConfig.size) {
+        //   logger.info('Destroying redundancy %s because the cache size %s is too heavy.', redundancyModel.url, redundancyModel.strategy)
 
-          await removeVideoRedundancy(redundancyModel)
-        } else {
-          await this.extendsRedundancy(redundancyModel)
-        }
+        //   await removeVideoRedundancy(redundancyModel)
+        // } else {
+        //   await this.extendsRedundancy(redundancyModel)
+        // }
+        await this.extendsRedundancy(redundancyModel)
       } catch (err) {
         logger.error(
           'Cannot extend or remove expiration of %s video from our redundancy system.',
