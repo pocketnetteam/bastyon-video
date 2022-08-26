@@ -223,7 +223,7 @@ const AP_CLEANER = {
 }
 
 const REQUEST_TIMEOUTS = {
-  DEFAULT: 7000, // 7 seconds
+  DEFAULT: 60000, // 7 seconds
   FILE: 30000, // 30 seconds
   REDUNDANCY: JOB_TTL['video-redundancy']
 }
