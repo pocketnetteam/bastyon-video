@@ -20,6 +20,10 @@ import {
   removeVideoRedundancyValidator,
   updateServerRedundancyValidator
 } from '../../../middlewares/validators/redundancy'
+import { StatsManager } from "@server/lib/stat-manager"
+import { VideoModel } from "@server/models/video/video"
+import { getServerActor } from "@server/models/application/application"
+import { ActorFollowModel } from "../../../models/actor/actor-follow"
 
 const serverRedundancyRouter = express.Router()
 
@@ -55,6 +59,10 @@ serverRedundancyRouter.delete('/redundancy/videos/:redundancyId',
   asyncMiddleware(removeVideoRedundancyController)
 )
 
+serverRedundancyRouter.get(
+  "/redundancy/stats",
+  asyncMiddleware(getRedundancyStats)
+)
 // ---------------------------------------------------------------------------
 
 export {
@@ -113,4 +121,26 @@ async function updateRedundancy (req: express.Request, res: express.Response) {
   }
 
   return res.status(HttpStatusCode.NO_CONTENT_204).end()
+}
+
+async function getRedundancyStats (req: express.Request, res: express.Response) {
+  const redundancyStats = await StatsManager.Instance.buildSingleRedundancyStat(
+    "recently-added"
+  )
+
+  const { totalVideos } = await VideoModel.getStats()
+
+  const serverActor = await getServerActor()
+  const resultList = await ActorFollowModel.listFollowersForApi({
+    actorIds: [ serverActor.id ],
+    start: 0,
+    count: 10,
+    sort: "-createdAt"
+  })
+
+  return res.json({
+    totalVideosMirrored: redundancyStats.totalVideos,
+    totalVideosLocal: totalVideos,
+    followers: resultList.data.map((follower: any) => follower?.follower?.host)
+  })
 }
