@@ -30,6 +30,8 @@ import { LiveQuotaStore } from './live-quota-store'
 import { cleanupPermanentLive } from './live-utils'
 import { MuxingSession } from './shared'
 
+import * as Bull from 'bull'
+
 const NodeRtmpSession = require('node-media-server/src/node_rtmp_session')
 const context = require('node-media-server/src/node_core_ctx')
 const nodeMediaServerLogger = require('node-media-server/src/node_core_logger')
@@ -206,7 +208,18 @@ class LiveManager {
   }
 
   private async handleSession (sessionId: string, inputUrl: string, streamKey: string) {
-    const videoLive = await VideoLiveModel.loadByStreamKey(streamKey)
+    const pendingStreamJobs = await JobQueue.Instance.getQueues('video-live-ending', [ 'delayed' ])
+
+    const currentSessionJob = pendingStreamJobs.find((job: Bull.Job) => job.data.name === streamKey)
+
+    const videoLive = currentSessionJob
+      ? await VideoLiveModel.loadByStreamKeyLiveEnded(streamKey)
+      : await VideoLiveModel.loadByStreamKey(streamKey)
+
+    if (currentSessionJob) {
+      await currentSessionJob.remove()
+    }
+
     if (!videoLive) {
       logger.warn('Unknown live video with stream key %s.', streamKey, lTags(sessionId))
       return this.abortSession(sessionId)
@@ -219,12 +232,12 @@ class LiveManager {
     }
 
     // Cleanup old potential live (could happen with a permanent live)
-    const oldStreamingPlaylist = await VideoStreamingPlaylistModel.loadHLSPlaylistByVideo(video.id)
-    if (oldStreamingPlaylist) {
-      if (!videoLive.permanentLive) throw new Error('Found previous session in a non permanent live: ' + video.uuid)
+    // const oldStreamingPlaylist = await VideoStreamingPlaylistModel.loadHLSPlaylistByVideo(video.id)
+    // if (oldStreamingPlaylist) {
+    //   if (!videoLive.permanentLive) throw new Error('Found previous session in a non permanent live: ' + video.uuid)
 
-      await cleanupPermanentLive(video, oldStreamingPlaylist)
-    }
+    //   await cleanupPermanentLive(video, oldStreamingPlaylist)
+    // }
 
     this.videoSessions.set(video.id, sessionId)
 
@@ -334,7 +347,7 @@ class LiveManager {
 
       muxingSession.destroy()
 
-      return this.onAfterMuxingCleanup({ videoId, liveSession })
+      return this.onAfterMuxingCleanup({ videoId, cleanupNow: false, jobName: videoLive.streamKey })
         .catch(err => logger.error('Error in end transmuxing.', { err, ...localLTags }))
     })
 
@@ -386,8 +399,9 @@ class LiveManager {
     videoId: number | string
     liveSession?: MVideoLiveSession
     cleanupNow?: boolean // Default false
+    jobName?: string
   }) {
-    const { videoId, liveSession: liveSessionArg, cleanupNow = false } = options
+    const { videoId, liveSession: liveSessionArg, cleanupNow = false, jobName } = options
 
     try {
       const fullVideo = await VideoModel.loadAndPopulateAccountAndServerAndTags(videoId)
@@ -407,7 +421,7 @@ class LiveManager {
         type: 'video-live-ending',
         payload: {
           videoId: fullVideo.id,
-
+          name: jobName,
           replayDirectory: live.saveReplay
             ? await this.findReplayDirectory(fullVideo)
             : undefined,

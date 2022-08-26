@@ -160,6 +160,7 @@ export type VideoTranscodingPayload =
 
 export interface VideoLiveEndingPayload {
   videoId: number
+  name?: string
   publishedAt: string
   liveSessionId: number
   streamingPlaylistId: number

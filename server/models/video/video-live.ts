@@ -91,6 +91,31 @@ export class VideoLiveModel extends Model<Partial<AttributesOnly<VideoLiveModel>
     return VideoLiveModel.findOne<MVideoLiveVideo>(query)
   }
 
+  static loadByStreamKeyLiveEnded (streamKey: string) {
+    const query = {
+      where: {
+        streamKey
+      },
+      include: [
+        {
+          model: VideoModel.unscoped(),
+          required: true,
+          where: {
+            state: VideoState.LIVE_ENDED
+          },
+          include: [
+            {
+              model: VideoBlacklistModel.unscoped(),
+              required: false
+            }
+          ]
+        }
+      ]
+    }
+
+    return VideoLiveModel.findOne<MVideoLiveVideo>(query)
+  }
+
   static loadByVideoId (videoId: number) {
     const query = {
       where: {
