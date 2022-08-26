@@ -1005,6 +1005,48 @@ export {
 
 // ---------------------------------------------------------------------------
 
+const MINUTES_STORED = 2
+
+const MINIMUM_QUOTA = 2000000000
+
+const DEFAULT_AUTH_ERROR_TEXT = 'Invalid Credentials'
+const NOT_ENOUGH_COINS_TEXT = 'You need at least 5 PKOIN to publish videos'
+
+const POCKETNET_PROXY_META = [
+  {
+    host: 'pocketnet.app',
+    port: 8899,
+    wss: 8099,
+    direct: ''
+  },
+  {
+    host: '1.pocketnet.app',
+    port: 8899,
+    wss: 8099,
+    direct: ''
+  }
+]
+
+const POCKETNET_PROXY_META_TEST = [
+  {
+    host: 'test.pocketnet.app',
+    port: 8899,
+    wss: 8099,
+    direct: ''
+  }
+]
+
+export {
+  MINUTES_STORED,
+  MINIMUM_QUOTA,
+  DEFAULT_AUTH_ERROR_TEXT,
+  NOT_ENOUGH_COINS_TEXT,
+  POCKETNET_PROXY_META,
+  POCKETNET_PROXY_META_TEST
+}
+
+// ---------------------------------------------------------------------------
+
 function buildVideoMimetypeExt () {
   const data = {
     // streamable formats that warrant cross-browser compatibility

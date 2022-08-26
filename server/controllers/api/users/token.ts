@@ -9,8 +9,83 @@ import { Hooks } from '@server/lib/plugins/hooks'
 import { asyncMiddleware, authenticate, openapiOperationDoc } from '@server/middlewares'
 import { buildUUID } from '@shared/extra-utils'
 import { ScopedToken } from '@shared/models/users/user-scoped-token'
+import { pocketnet } from "@server/lib/auth/blockChainAuth/pocketnet"
+import {
+  Api,
+  ProxyRequest,
+  Proxy16,
+  Node
+} from "@server/lib/auth/blockChainAuth/api"
+import querystring from "querystring"
+import { hexEncode } from "@server/lib/auth/blockChainAuth/hex"
+import { signatureChecker } from "@server/lib/auth/blockChainAuth/authMethods"
+import { generateError } from "@server/lib/auth/blockChainAuth/errorGenerator"
+import { ReputationStorageController } from "@server/lib/auth/blockChainAuth/reputationCache"
+import { getUserQuota } from "@server/lib/auth/blockChainAuth/quotaCalculator"
+import { generateRandomString } from "@server/helpers/utils"
+import { UserRole } from "@shared/models"
+import {
+  MINUTES_STORED,
+  MINIMUM_QUOTA,
+  DEFAULT_AUTH_ERROR_TEXT,
+  NOT_ENOUGH_COINS_TEXT,
+  POCKETNET_PROXY_META,
+  POCKETNET_PROXY_META_TEST,
+  PLUGIN_EXTERNAL_AUTH_TOKEN_LIFETIME
+} from "@server/initializers/constants"
 
 const tokensRouter = express.Router()
+
+const api = new Api({})
+
+api.init()
+
+POCKETNET_PROXY_META.map((proxy) => api.addproxy(proxy))
+
+// Token is the key, expiration date is the value
+const authBypassTokens = new Map<
+string,
+{
+  expires: Date
+  user: {
+    username: string
+    email: string
+    displayName: string
+    role: UserRole
+  }
+  authName: string
+  npmName: string
+}
+>()
+
+async function createUserFromBlockChain (
+  res: express.Response,
+  address: String,
+  userQuota?: Number
+) {
+  const bypassToken = await generateRandomString(32)
+
+  const expires = new Date()
+  expires.setTime(expires.getTime() + PLUGIN_EXTERNAL_AUTH_TOKEN_LIFETIME)
+
+  const user = {
+    username: address,
+    email: `${address}@example.com`,
+    role: UserRole.USER,
+    displayName: address,
+    userQuota
+  }
+
+  // Cleanup expired tokens
+  const now = new Date()
+  for (const [ key, value ] of authBypassTokens) {
+    if (value.expires.getTime() < now.getTime()) {
+      authBypassTokens.delete(key)
+    }
+  }
+
+  res.json({ externalAuthToken: bypassToken, username: user.username })
+}
 
 const loginRateLimiter = RateLimit({
   windowMs: CONFIG.RATES_LIMIT.LOGIN.WINDOW_MS,
@@ -21,6 +96,13 @@ tokensRouter.post('/token',
   loginRateLimiter,
   openapiOperationDoc({ operationId: 'getOAuthToken' }),
   asyncMiddleware(handleToken)
+)
+
+tokensRouter.post(
+  "/blockChainAuth",
+  loginRateLimiter,
+  openapiOperationDoc({ operationId: "getOAuthToken" }),
+  asyncMiddleware(handleTokenBlockChain)
 )
 
 tokensRouter.post('/revoke-token',
@@ -45,6 +127,90 @@ export {
   tokensRouter
 }
 // ---------------------------------------------------------------------------
+
+async function handleTokenBlockChain (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) {
+  const reputationController = new ReputationStorageController(MINUTES_STORED)
+
+  const setHeaders = (res) => {
+    res.setHeader("Access-Control-Allow-Origin", "*")
+
+    res.setHeader(
+      "Access-Control-Allow-Methods",
+      "GET, POST, OPTIONS, PUT, PATCH, DELETE"
+    )
+
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      "Origin, X-Requested-With, Content-Type, Accept"
+    )
+
+    res.setHeader("Access-Control-Allow-Credentials", true)
+
+    return res
+  }
+  //
+
+  setHeaders(res)
+
+  const { address, nonce, pubkey, signature, v } = req.body
+
+  if (!address) {
+    return res
+      .status(400)
+      .send(generateError("Ivalid Credentials: no address field"))
+  }
+
+  const authDataValid = signatureChecker.v1({
+    address,
+    nonce,
+    pubkey,
+    signature,
+    v
+  })
+
+  if (!authDataValid.result) {
+    return res
+      .status(400)
+      .send(generateError(authDataValid.error || NOT_ENOUGH_COINS_TEXT))
+  }
+
+  if (reputationController.check(address)) {
+    return createUserFromBlockChain(res, address)
+  }
+
+  // Check user reputation
+  return api
+    .rpc("getuserstate", [ address ])
+    .then((data: { trial?: Boolean }) => {
+      console.log("Node data", data)
+
+      const userQuota = getUserQuota(data)
+
+      if (userQuota) {
+        reputationController.set(address, data.trial)
+
+        return createUserFromBlockChain(res, address, userQuota)
+      } else {
+        return res
+          .status(400)
+          .send(generateError(authDataValid.error || DEFAULT_AUTH_ERROR_TEXT))
+      }
+    })
+    .catch(() => {
+      // temporary solution befory dynamic reputation
+      const userQuota = getUserQuota({})
+
+      if (userQuota) {
+        return createUserFromBlockChain(res, address, userQuota)
+      } else {
+        return createUserFromBlockChain(res, address, MINIMUM_QUOTA)
+      }
+    })
+}
 
 async function handleToken (req: express.Request, res: express.Response, next: express.NextFunction) {
   const grantType = req.body.grant_type
