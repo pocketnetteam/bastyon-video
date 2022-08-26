@@ -25,6 +25,7 @@ import { downloadPlaylistSegments } from '../hls'
 import { removeVideoRedundancy } from '../redundancy'
 import { generateHLSRedundancyUrl, generateWebTorrentRedundancyUrl } from '../video-urls'
 import { AbstractScheduler } from './abstract-scheduler'
+import { sequelizeTypescript } from '@server/initializers/database'
 
 const lTags = loggerTagsFactory('redundancy')
 
@@ -183,28 +184,60 @@ export class VideosRedundancyScheduler extends AbstractScheduler {
 
       return
     }
+    // For clearing, if something went wrong
+    const fileRedundancyModels = []
+    const streamingPlaylistRedundancyModels = []
 
-    for (const file of data.files) {
-      const existingRedundancy = await VideoRedundancyModel.loadLocalByFileId(file.id)
-      if (existingRedundancy) {
-        await this.extendsRedundancy(existingRedundancy)
+    try {
+      for (const file of data.files) {
+        const existingRedundancy = await VideoRedundancyModel.loadLocalByFileId(file.id)
+        if (existingRedundancy) {
+          await this.extendsRedundancy(existingRedundancy)
 
-        continue
+          continue
+        }
+
+        const returnedModel = await this.createVideoFileRedundancy(data.redundancy, video, file)
+
+        fileRedundancyModels.push(returnedModel)
       }
 
-      await this.createVideoFileRedundancy(data.redundancy, video, file)
+      for (const streamingPlaylist of data.streamingPlaylists) {
+        const existingRedundancy = await VideoRedundancyModel.loadLocalByStreamingPlaylistId(streamingPlaylist.id)
+        if (existingRedundancy) {
+          await this.extendsRedundancy(existingRedundancy)
+
+          continue
+        }
+
+        const returnedModel = await this.createStreamingPlaylistRedundancy(data.redundancy, video, streamingPlaylist)
+
+        streamingPlaylistRedundancyModels.push(returnedModel)
+      }
+    } catch (error) {
+      await this.clearVideoRedundancyModels(fileRedundancyModels, streamingPlaylistRedundancyModels)
+
+      throw new Error('Failed Request')
     }
+  }
 
-    for (const streamingPlaylist of data.streamingPlaylists) {
-      const existingRedundancy = await VideoRedundancyModel.loadLocalByStreamingPlaylistId(streamingPlaylist.id)
-      if (existingRedundancy) {
-        await this.extendsRedundancy(existingRedundancy)
+  private async clearVideoRedundancyModels (
+    fileRedundancyModels: MVideoRedundancyFileVideo[],
+    streamingPlaylistRedundancyModels: MVideoRedundancyStreamingPlaylistVideo[]
+  ) {
+    await sequelizeTypescript.transaction(async t => {
+      for (const fileModel of fileRedundancyModels) {
+        await fileModel.destroy({ transaction: t })
 
-        continue
+        logger.warn('DESTROYED FILE MODEL')
       }
 
-      await this.createStreamingPlaylistRedundancy(data.redundancy, video, streamingPlaylist)
-    }
+      for (const playlistModel of streamingPlaylistRedundancyModels) {
+        await playlistModel.destroy({ transaction: t })
+
+        logger.warn('DESTROYED PLAYLIST MODEL')
+      }
+    })
   }
 
   private async createVideoFileRedundancy (redundancy: VideosRedundancyStrategy | null, video: MVideoAccountLight, fileArg: MVideoFile) {
