@@ -20,6 +20,7 @@ const authBypassTokens = new Map<string, {
     email: string
     displayName: string
     role: UserRole
+    userQuota: number
   }
   authName: string
   npmName: string
