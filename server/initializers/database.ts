@@ -83,14 +83,14 @@ const sequelizeTypescript = new SequelizeTypescript({
   benchmark: isTestInstance(),
   isolationLevel: Transaction.ISOLATION_LEVELS.SERIALIZABLE,
   logging: (message: string, benchmark: number) => {
-    if (process.env.NODE_DB_LOG === 'false') return
+    // if (process.env.NODE_DB_LOG === 'false') return
 
-    let newMessage = 'Executed SQL request'
-    if (isTestInstance() === true && benchmark !== undefined) {
-      newMessage += ' in ' + benchmark + 'ms'
-    }
+    // let newMessage = 'Executed SQL request'
+    // if (isTestInstance() === true && benchmark !== undefined) {
+    //   newMessage += ' in ' + benchmark + 'ms'
+    // }
 
-    logger.debug(newMessage, { sql: message, tags: [ 'sql' ] })
+    // logger.debug(newMessage, { sql: message, tags: [ 'sql' ] })
   }
 })
 
