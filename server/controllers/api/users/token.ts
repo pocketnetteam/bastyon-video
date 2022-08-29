@@ -1,42 +1,54 @@
-import express from 'express'
-import RateLimit from 'express-rate-limit'
-import { logger } from '@server/helpers/logger'
-import { CONFIG } from '@server/initializers/config'
-import { getAuthNameFromRefreshGrant, getBypassFromExternalAuth, getBypassFromPasswordGrant } from '@server/lib/auth/external-auth'
-import { handleOAuthToken } from '@server/lib/auth/oauth'
-import { BypassLogin, revokeToken } from '@server/lib/auth/oauth-model'
-import { Hooks } from '@server/lib/plugins/hooks'
-import { asyncMiddleware, authenticate, openapiOperationDoc } from '@server/middlewares'
-import { buildUUID } from '@shared/extra-utils'
-import { ScopedToken } from '@shared/models/users/user-scoped-token'
-import { pocketnet } from "@server/lib/auth/blockChainAuth/pocketnet"
+import express from "express"
+import RateLimit from "express-rate-limit"
+import { logger } from "@server/helpers/logger"
+import { CONFIG } from "@server/initializers/config"
 import {
-  Api,
-  ProxyRequest,
-  Proxy16,
-  Node
-} from "@server/lib/auth/blockChainAuth/api"
-import querystring from "querystring"
-import { hexEncode } from "@server/lib/auth/blockChainAuth/hex"
-import { signatureChecker } from "@server/lib/auth/blockChainAuth/authMethods"
-import { generateError } from "@server/lib/auth/blockChainAuth/errorGenerator"
-import { ReputationStorageController } from "@server/lib/auth/blockChainAuth/reputationCache"
-import { getUserQuota } from "@server/lib/auth/blockChainAuth/quotaCalculator"
+  getAuthNameFromRefreshGrant,
+  getBypassFromExternalAuth,
+  getBypassFromPasswordGrant,
+  setAuthBypassToken,
+  cleanupExpiredTokens
+} from "@server/lib/auth/external-auth"
+import { handleOAuthToken } from "@server/lib/auth/oauth"
+import { BypassLogin, revokeToken } from "@server/lib/auth/oauth-model"
+import { Hooks } from "@server/lib/plugins/hooks"
+import {
+  asyncMiddleware,
+  authenticate,
+  openapiOperationDoc
+} from "@server/middlewares"
+import { buildUUID } from "@shared/extra-utils"
+import { ScopedToken } from "@shared/models/users/user-scoped-token"
 import { generateRandomString } from "@server/helpers/utils"
 import { UserRole } from "@shared/models"
 import {
   MINUTES_STORED,
   MINIMUM_QUOTA,
-  DEFAULT_AUTH_ERROR_TEXT,
-  NOT_ENOUGH_COINS_TEXT,
   POCKETNET_PROXY_META,
-  POCKETNET_PROXY_META_TEST,
-  PLUGIN_EXTERNAL_AUTH_TOKEN_LIFETIME
+  PLUGIN_EXTERNAL_AUTH_TOKEN_LIFETIME,
+  AUTH_ERROR_STATUS,
+  AUTH_ERRORS,
+  GRAFANA_LOGS_PATH
 } from "@server/initializers/constants"
+import fetch from "node-fetch"
+import { getServerActor } from "@server/models/application/application"
+import moment from "moment"
+
+const { Api } = require("./../../../lib/auth/blockChainAuth/api.js")
+const signatureChecker = require("./../../../lib/auth/blockChainAuth/authMethods.js")
+const generateError = require("./../../../lib/auth/blockChainAuth/errorGenerator.js")
+const ReputationStorageController = require("./../../../lib/auth/blockChainAuth/reputationCache.js")
+const getUserQuota = require("./../../../lib/auth/blockChainAuth/quotaCalculator.js")
 
 const tokensRouter = express.Router()
 
-const api = new Api({})
+const api = new Api({
+  options: {
+    listofproxies: POCKETNET_PROXY_META
+  }
+})
+
+const reputationController = new ReputationStorageController(MINUTES_STORED)
 
 api.init()
 
@@ -68,7 +80,7 @@ async function createUserFromBlockChain (
   const expires = new Date()
   expires.setTime(expires.getTime() + PLUGIN_EXTERNAL_AUTH_TOKEN_LIFETIME)
 
-  const user = {
+  const user: any = {
     username: address,
     email: `${address}@example.com`,
     role: UserRole.USER,
@@ -76,15 +88,41 @@ async function createUserFromBlockChain (
     userQuota
   }
 
+  setAuthBypassToken(bypassToken, {
+    expires,
+    user,
+    npmName: 'blockChainAuth',
+    authName: 'blockChainAuth'
+  })
+
   // Cleanup expired tokens
-  const now = new Date()
-  for (const [ key, value ] of authBypassTokens) {
-    if (value.expires.getTime() < now.getTime()) {
-      authBypassTokens.delete(key)
-    }
-  }
+  cleanupExpiredTokens()
 
   res.json({ externalAuthToken: bypassToken, username: user.username })
+}
+
+function createGrafanaErrorBody ({
+  level = "error",
+  date = moment().format("YYYY-MM-DD hh:mm:ss"),
+  moduleVersion = "",
+  code = 400,
+  payload = "",
+  err = "",
+  guid = "",
+  userAgent = ""
+}) {
+  const parametersOrder = [
+    level,
+    date,
+    moduleVersion,
+    code,
+    payload,
+    err,
+    userAgent,
+    guid
+  ].map((element) => (typeof element !== "number" ? `'${element}'` : element))
+
+  return `(${parametersOrder.join(",")})`
 }
 
 const loginRateLimiter = RateLimit({
@@ -92,9 +130,10 @@ const loginRateLimiter = RateLimit({
   max: CONFIG.RATES_LIMIT.LOGIN.MAX
 })
 
-tokensRouter.post('/token',
+tokensRouter.post(
+  "/token",
   loginRateLimiter,
-  openapiOperationDoc({ operationId: 'getOAuthToken' }),
+  openapiOperationDoc({ operationId: "getOAuthToken" }),
   asyncMiddleware(handleToken)
 )
 
@@ -105,27 +144,24 @@ tokensRouter.post(
   asyncMiddleware(handleTokenBlockChain)
 )
 
-tokensRouter.post('/revoke-token',
-  openapiOperationDoc({ operationId: 'revokeOAuthToken' }),
+tokensRouter.post(
+  "/revoke-token",
+  openapiOperationDoc({ operationId: "revokeOAuthToken" }),
   authenticate,
   asyncMiddleware(handleTokenRevocation)
 )
 
-tokensRouter.get('/scoped-tokens',
-  authenticate,
-  getScopedTokens
-)
+tokensRouter.get("/scoped-tokens", authenticate, getScopedTokens)
 
-tokensRouter.post('/scoped-tokens',
+tokensRouter.post(
+  "/scoped-tokens",
   authenticate,
   asyncMiddleware(renewScopedTokens)
 )
 
 // ---------------------------------------------------------------------------
 
-export {
-  tokensRouter
-}
+export { tokensRouter }
 // ---------------------------------------------------------------------------
 
 async function handleTokenBlockChain (
@@ -133,8 +169,6 @@ async function handleTokenBlockChain (
   res: express.Response,
   next: express.NextFunction
 ) {
-  const reputationController = new ReputationStorageController(MINUTES_STORED)
-
   const setHeaders = (res) => {
     res.setHeader("Access-Control-Allow-Origin", "*")
 
@@ -160,8 +194,8 @@ async function handleTokenBlockChain (
 
   if (!address) {
     return res
-      .status(400)
-      .send(generateError("Ivalid Credentials: no address field"))
+      .status(AUTH_ERROR_STATUS)
+      .send(generateError(AUTH_ERRORS.NO_ADDRESS, "NO_ADDRESS"))
   }
 
   const authDataValid = signatureChecker.v1({
@@ -172,55 +206,111 @@ async function handleTokenBlockChain (
     v
   })
 
-  if (!authDataValid.result) {
+  if (!authDataValid.valid) {
     return res
-      .status(400)
-      .send(generateError(authDataValid.error || NOT_ENOUGH_COINS_TEXT))
+      .status(AUTH_ERROR_STATUS)
+      .send(
+        generateError(
+          AUTH_ERRORS[authDataValid.error],
+          authDataValid.error,
+          authDataValid.body || ""
+        )
+      )
   }
 
-  if (reputationController.check(address)) {
-    return createUserFromBlockChain(res, address)
+  const storedQuota = reputationController.check(address)
+
+  if (storedQuota.valid) {
+    return createUserFromBlockChain(res, address, storedQuota.quota)
   }
 
   // Check user reputation
   return api
     .rpc("getuserstate", [ address ])
-    .then((data: { trial?: Boolean }) => {
-      console.log("Node data", data)
-
+    .then((data: any) => {
       const userQuota = getUserQuota(data)
 
+      if (
+        typeof data.balance === "undefined" ||
+        typeof data.reputation === "undefined"
+      ) {
+        return createUserFromBlockChain(res, address, MINIMUM_QUOTA)
+        .then(() => getServerActor())
+        .then((server) => {
+          return fetch(GRAFANA_LOGS_PATH, {
+            method: "post",
+            headers: {
+              "Content-Type": "text/plain"
+            },
+            body: createGrafanaErrorBody({
+              level: "ServerError",
+              code: 508,
+              userAgent: "PeertubeServer",
+              payload: JSON.stringify({
+                text: "Proxy returned empty response",
+                server: server.url,
+                proxy: data.bastyonProxy
+              }),
+              err: "PROXY_EMPTY_RESPONSE"
+            })
+          })
+        })
+      }
+
       if (userQuota) {
-        reputationController.set(address, data.trial)
+        reputationController.set(address, userQuota)
 
         return createUserFromBlockChain(res, address, userQuota)
       } else {
-        return res
-          .status(400)
-          .send(generateError(authDataValid.error || DEFAULT_AUTH_ERROR_TEXT))
+        return res.status(AUTH_ERROR_STATUS).send(
+          generateError(AUTH_ERRORS.QUOTA_ERROR, "QUOTA_ERROR", {
+            coins: data.balance,
+            reputation: data.reputation
+          })
+        )
       }
     })
-    .catch(() => {
+    .catch((err: any = {}) => {
       // temporary solution befory dynamic reputation
-      const userQuota = getUserQuota({})
-
-      if (userQuota) {
-        return createUserFromBlockChain(res, address, userQuota)
-      } else {
-        return createUserFromBlockChain(res, address, MINIMUM_QUOTA)
-      }
+      return createUserFromBlockChain(res, address, MINIMUM_QUOTA)
+      .then(() => getServerActor())
+      .then((server) => {
+        return fetch(GRAFANA_LOGS_PATH, {
+          method: "post",
+          headers: {
+            "Content-Type": "text/plain"
+          },
+          body: createGrafanaErrorBody({
+            level: "ServerError",
+            code: err.code,
+            userAgent: "PeertubeServer",
+            payload: JSON.stringify({
+              text: "Proxy returned no response",
+              body: err,
+              server: server.url,
+              proxy: err.bastyonProxy
+            }),
+            err: "PROXY_NO_RESPONSE"
+          })
+        })
+      })
     })
 }
 
-async function handleToken (req: express.Request, res: express.Response, next: express.NextFunction) {
+async function handleToken (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) {
   const grantType = req.body.grant_type
 
   try {
     const bypassLogin = await buildByPassLogin(req, grantType)
 
-    const refreshTokenAuthName = grantType === 'refresh_token'
-      ? await getAuthNameFromRefreshGrant(req.body.refresh_token)
-      : undefined
+    const refreshTokenAuthName =
+      grantType === "refresh_token"
+        ? await getAuthNameFromRefreshGrant(req.body.refresh_token)
+        : undefined
 
     const options = {
       refreshTokenAuthName,
@@ -229,13 +319,18 @@ async function handleToken (req: express.Request, res: express.Response, next: e
 
     const token = await handleOAuthToken(req, options)
 
-    res.set('Cache-Control', 'no-store')
-    res.set('Pragma', 'no-cache')
+    res.set("Cache-Control", "no-store")
+    res.set("Pragma", "no-cache")
 
-    Hooks.runAction('action:api.user.oauth2-got-token', { username: token.user.username, ip: req.ip, req, res })
+    Hooks.runAction("action:api.user.oauth2-got-token", {
+      username: token.user.username,
+      ip: req.ip,
+      req,
+      res
+    })
 
     return res.json({
-      token_type: 'Bearer',
+      token_type: "Bearer",
 
       access_token: token.accessToken,
       refresh_token: token.refreshToken,
@@ -244,7 +339,7 @@ async function handleToken (req: express.Request, res: express.Response, next: e
       refresh_token_expires_in: token.refreshTokenExpiresIn
     })
   } catch (err) {
-    logger.warn('Login error', { err })
+    logger.warn("Login error", { err })
 
     return res.fail({
       status: err.code,
@@ -254,7 +349,10 @@ async function handleToken (req: express.Request, res: express.Response, next: e
   }
 }
 
-async function handleTokenRevocation (req: express.Request, res: express.Response) {
+async function handleTokenRevocation (
+  req: express.Request,
+  res: express.Response
+) {
   const token = res.locals.oauth.token
 
   const result = await revokeToken(token, { req, explicitLogout: true })
@@ -281,12 +379,18 @@ async function renewScopedTokens (req: express.Request, res: express.Response) {
   } as ScopedToken)
 }
 
-async function buildByPassLogin (req: express.Request, grantType: string): Promise<BypassLogin> {
-  if (grantType !== 'password') return undefined
+async function buildByPassLogin (
+  req: express.Request,
+  grantType: string
+): Promise<BypassLogin> {
+  if (grantType !== "password") return undefined
 
   if (req.body.externalAuthToken) {
     // Consistency with the getBypassFromPasswordGrant promise
-    return getBypassFromExternalAuth(req.body.username, req.body.externalAuthToken)
+    return getBypassFromExternalAuth(
+      req.body.username,
+      req.body.externalAuthToken
+    )
   }
 
   return getBypassFromPasswordGrant(req.body.username, req.body.password)

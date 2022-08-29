@@ -1005,12 +1005,9 @@ export {
 
 // ---------------------------------------------------------------------------
 
-const MINUTES_STORED = 2
+const MINUTES_STORED = 1
 
 const MINIMUM_QUOTA = 2000000000
-
-const DEFAULT_AUTH_ERROR_TEXT = 'Invalid Credentials'
-const NOT_ENOUGH_COINS_TEXT = 'You need at least 5 PKOIN to publish videos'
 
 const POCKETNET_PROXY_META = [
   {
@@ -1021,6 +1018,18 @@ const POCKETNET_PROXY_META = [
   },
   {
     host: '1.pocketnet.app',
+    port: 8899,
+    wss: 8099,
+    direct: ''
+  },
+  {
+    host: '2.pocketnet.app',
+    port: 8899,
+    wss: 8099,
+    direct: ''
+  },
+  {
+    host: '3.pocketnet.app',
     port: 8899,
     wss: 8099,
     direct: ''
@@ -1036,13 +1045,30 @@ const POCKETNET_PROXY_META_TEST = [
   }
 ]
 
+const AUTH_ERROR_STATUS = 408
+
+const AUTH_ERRORS = {
+  NO_ADDRESS: 'Ivalid Credentials: no address field',
+  NO_PUBKEY: 'No pubkey passed to signature checking function',
+  NO_NOONCE: 'No noonce passed to signature checking function',
+  NO_ADDRESS_CHECKING: 'No address passed to signature checking function',
+  CHECKING_EXECUTION_ERROR: 'Error during checking execution',
+  HASH_VERIFICATION_ERROR: 'Verifying function (kit.verifyhash) failed to verify keychain',
+  ADDRESS_VERIFICATION_ERROR: 'Received address is not equal from obtained with keychain',
+  ADDRESS_NOT_INCLUDED_IN_SIGNATURE: 'Received address is not included in signature addresses',
+  QUOTA_ERROR: 'User unable to upload videos, calculated quota is 0'
+}
+
+const GRAFANA_LOGS_PATH = 'https://metrix.pocketnet.app/front/add'
+
 export {
   MINUTES_STORED,
   MINIMUM_QUOTA,
-  DEFAULT_AUTH_ERROR_TEXT,
-  NOT_ENOUGH_COINS_TEXT,
   POCKETNET_PROXY_META,
-  POCKETNET_PROXY_META_TEST
+  POCKETNET_PROXY_META_TEST,
+  AUTH_ERROR_STATUS,
+  AUTH_ERRORS,
+  GRAFANA_LOGS_PATH
 }
 
 // ---------------------------------------------------------------------------
