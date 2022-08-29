@@ -29,6 +29,7 @@
     "strict": false,
     "skipLibCheck": true,
     "composite": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "allowJs": true
   }
 }

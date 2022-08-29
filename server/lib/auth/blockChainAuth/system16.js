@@ -1,252 +1,259 @@
 var electron = null;
 
-var WssDummy = function (system16) {
-  var self = this;
+class WssDummy {
+  constructor(system16) {
+    var self = this;
 
-  self.ip = 'localhost';
+    self.ip = 'localhost';
 
-  self.onmessage = null;
-  self.onopen = null;
-
-  self.send = function (message) {
-    system16.wsssend(message);
-  };
-
-  self.recieve = function (data) {
-    if (self.onmessage) {
-      self.onmessage(data);
-    }
-  };
-
-  self.close = function () {
     self.onmessage = null;
     self.onopen = null;
 
-    if (self.onclose) {
-      self.onclose();
-    }
+    self.send = function (message) {
+      system16.wsssend(message);
+    };
 
-    self.onclose = null;
-  };
+    self.recieve = function (data) {
+      if (self.onmessage) {
+        self.onmessage(data);
+      }
+    };
 
-  self.init = function () {
-    if (self.onopen) self.onopen();
-  };
+    self.close = function () {
+      self.onmessage = null;
+      self.onopen = null;
 
-  return self;
-};
+      if (self.onclose) {
+        self.onclose();
+      }
 
-var System16 = function (app, proxy, direct) {
-  var self = this;
+      self.onclose = null;
+    };
 
-  var requestes = {};
+    self.init = function () {
+      if (self.onopen)
+        self.onopen();
+    };
 
-  self.wssdummy = new WssDummy(self);
+    return self;
+  }
+}
 
-  var state = {
-    hash: [],
-    tick: {},
-  };
+class System16 {
+  constructor(app, proxy, direct) {
+    var self = this;
 
-  var wssdummy = function (e, message) {
-    self.wssdummy.recieve(message);
-  };
+    var requestes = {};
 
-  var response = function (e, message) {
-    var request = requestes[message.id];
+    self.wssdummy = new WssDummy(self);
 
-    if (request) {
-      if (request.clbk) request.clbk(message.error, message.data);
+    var state = {
+      hash: [],
+      tick: {},
+    };
 
-      delete requestes[message.id];
-    }
-  };
+    var wssdummy = function (e, message) {
+      self.wssdummy.recieve(message);
+    };
 
-  var tick = function (e, d) {
-    var message = d.data;
+    var response = function (e, message) {
+      var request = requestes[message.id];
 
-    if (!message) return;
+      if (request) {
+        if (request.clbk)
+          request.clbk(message.error, message.data);
 
-    var settings = message.settings || {};
+        delete requestes[message.id];
+      }
+    };
 
-    var hash = bitcoin.crypto.hash256(JSON.stringify(settings));
+    var tick = function (e, d) {
+      var message = d.data;
 
-    var change = hash.join('') !== state.hash.join('');
+      if (!message)
+        return;
 
-    state.hash = hash;
-    state.tick = settings;
+      var settings = message.settings || {};
 
-    _.each(self.clbks.tick, (c) => {
-      c(state.tick, message.state, change);
-    });
-  };
+      var hash = bitcoin.crypto.hash256(JSON.stringify(settings));
 
-  var sign = function (data) {
-    var signature = null;
+      var change = hash.join('') !== state.hash.join('');
 
-    if (app.user && app.user.getstate() == 1) {
-      try {
-        signature = app.user.signature();
-      } catch (e) {}
-    }
+      state.hash = hash;
+      state.tick = settings;
 
-    if (signature) {
-      data.signature = signature;
-    }
+      _.each(self.clbks.tick, (c) => {
+        c(state.tick, message.state, change);
+      });
+    };
 
-    return data;
-  };
+    var sign = function (data) {
+      var signature = null;
 
-  self.tick = function (message) {
-    tick(null, message);
-  };
+      if (app.user && app.user.getstate() == 1) {
+        try {
+          signature = app.user.signature();
+        } catch (e) { }
+      }
 
-  self.clbks = {
-    tick: {},
-  };
+      if (signature) {
+        data.signature = signature;
+      }
 
-  self.settings = {
-    server: {
-      enabled: {
-        type: 'BOOLEAN',
+      return data;
+    };
+
+    self.tick = function (message) {
+      tick(null, message);
+    };
+
+    self.clbks = {
+      tick: {},
+    };
+
+    self.settings = {
+      server: {
+        enabled: {
+          type: 'BOOLEAN',
+        },
+        ports: {
+          //https,
+          //wss
+        },
+        iplimiter: {
+          //interval,
+          //count,
+          //blacklistcount
+        },
+        captcha: {
+          type: 'BOOLEAN',
+          //enabled
+        },
+        ssl: {
+          //key, /FILE_UPLOAD
+          //cert, /FILE_UPLOAD
+          //passphrase
+        },
+        firebase: {
+          //id
+          //fbkjsonfile /FILE_UPLOAD
+        },
       },
-      ports: {
-        //https,
-        //wss
+      wallet: {
+        addresses: {},
       },
-      iplimiter: {
-        //interval,
-        //count,
-        //blacklistcount
-      },
-      captcha: {
-        type: 'BOOLEAN',
-        //enabled
-      },
-      ssl: {
-        //key, /FILE_UPLOAD
-        //cert, /FILE_UPLOAD
-        //passphrase
-      },
-      firebase: {
-        //id
-        //fbkjsonfile /FILE_UPLOAD
-      },
-    },
-    wallet: {
-      addresses: {},
-    },
-    admins: {
-      // addressesArray, push, remove
-    },
-    node: {
-      enabled: {
-        type: 'BOOLEAN',
-      },
-
-      binPath: {
-        type: 'FILE_SELECT',
-      },
-
-      dataPath: {
-        type: 'FILE_SELECT',
-      },
-
-      stacking: {
+      admins: {
         // addressesArray, push, remove
       },
-    },
-  };
-
-  var request = function (pack) {
-    pack.id = makeid();
-    pack.data || (pack.data = {});
-
-    sign(pack.data);
-
-    electron.ipcRenderer.send('proxy-message', pack);
-
-    return new Promise((resolve, reject) => {
-      requestes[pack.id] = {
-        id: pack.id,
-        clbk: function (error, data) {
-          if (error) {
-            reject(error);
-          } else {
-            resolve(data);
-          }
+      node: {
+        enabled: {
+          type: 'BOOLEAN',
         },
+
+        binPath: {
+          type: 'FILE_SELECT',
+        },
+
+        dataPath: {
+          type: 'FILE_SELECT',
+        },
+
+        stacking: {
+          // addressesArray, push, remove
+        },
+      },
+    };
+
+    var request = function (pack) {
+      pack.id = makeid();
+      pack.data || (pack.data = {});
+
+      sign(pack.data);
+
+      electron.ipcRenderer.send('proxy-message', pack);
+
+      return new Promise((resolve, reject) => {
+        requestes[pack.id] = {
+          id: pack.id,
+          clbk: function (error, data) {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(data);
+            }
+          },
+        };
+      });
+    };
+
+    self.request = function (action, data) {
+      var rdata = {
+        action: action,
+        data: data || {},
       };
-    });
-  };
 
-  self.request = function (action, data) {
-    var rdata = {
-      action: action,
-      data: data || {},
+      if (electron && direct) {
+        return request(rdata);
+      } else {
+        return proxy.fetch('manage', rdata);
+      }
     };
 
-    if (electron && direct) {
-      return request(rdata);
-    } else {
-      return proxy.fetch('manage', rdata);
-    }
-  };
-
-  self.api = {
-    get: {
-      settings: function () {
-        return self.request('get.settings', {});
+    self.api = {
+      get: {
+        settings: function () {
+          return self.request('get.settings', {});
+        },
       },
-    },
-  };
-
-  self.rpc = function (method, parameters, options) {
-    return request({
-      path: '/rpc/*',
-      data: {
-        method: method,
-        parameters: parameters,
-        options: options || {},
-      },
-    });
-  };
-
-  self.fetch = function (path, data) {
-    var pack = {
-      path: '/' + path,
-      data: data,
     };
 
-    return request(pack);
-  };
-
-  self.wsssend = function (data) {
-    var pack = {
-      wssdummy: true,
-      data: data,
+    self.rpc = function (method, parameters, options) {
+      return request({
+        path: '/rpc/*',
+        data: {
+          method: method,
+          parameters: parameters,
+          options: options || {},
+        },
+      });
     };
 
-    return request(pack);
-  };
+    self.fetch = function (path, data) {
+      var pack = {
+        path: '/' + path,
+        data: data,
+      };
 
-  self.listen = function () {
-    if (electron && direct) {
-      electron.ipcRenderer.on('proxy-message', response);
-      electron.ipcRenderer.on('proxy-message-tick', tick);
-      electron.ipcRenderer.on('wssdummy', wssdummy);
-    }
-  };
+      return request(pack);
+    };
 
-  self.stop = function () {
-    if (electron && direct) {
-      electron.ipcRenderer.off('proxy-message', response);
-      electron.ipcRenderer.off('proxy-message-tick', tick);
-      electron.ipcRenderer.off('wssdummy', wssdummy);
-    }
-  };
+    self.wsssend = function (data) {
+      var pack = {
+        wssdummy: true,
+        data: data,
+      };
 
-  return self;
-};
+      return request(pack);
+    };
+
+    self.listen = function () {
+      if (electron && direct) {
+        electron.ipcRenderer.on('proxy-message', response);
+        electron.ipcRenderer.on('proxy-message-tick', tick);
+        electron.ipcRenderer.on('wssdummy', wssdummy);
+      }
+    };
+
+    self.stop = function () {
+      if (electron && direct) {
+        electron.ipcRenderer.off('proxy-message', response);
+        electron.ipcRenderer.off('proxy-message-tick', tick);
+        electron.ipcRenderer.off('wssdummy', wssdummy);
+      }
+    };
+
+    return self;
+  }
+}
 
 module.exports = { System16 };
