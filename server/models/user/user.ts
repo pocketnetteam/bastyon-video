@@ -780,7 +780,7 @@ export class UserModel extends Model<Partial<AttributesOnly<UserModel>>> {
 
     const videoChannelJoin = 'INNER JOIN "videoChannel" ON "videoChannel"."id" = "video"."channelId" ' +
       'INNER JOIN "account" ON "videoChannel"."accountId" = "account"."id" ' +
-      `WHERE "account".${tableQuotes}=${usernameQuotes || options.whereUserId} = ${options.whereUserId} ${andWhere}`
+      `WHERE "account".${tableQuotes}=${usernameQuotes || options.whereUserId}`
 
     const webtorrentFiles = 'SELECT "videoFile"."size" AS "size", "video"."id" AS "videoId" FROM "videoFile" ' +
       'INNER JOIN "video" ON "videoFile"."videoId" = "video"."id" ' +
