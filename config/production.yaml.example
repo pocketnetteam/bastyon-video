@@ -12,15 +12,15 @@ rates_limit:
   api:
     # 50 attempts in 10 seconds
     window: 10 seconds
-    max: 50
+    max: 500
   login:
     # 15 attempts in 5 min
-    window: 5 minutes
-    max: 15
+    window: 1 minute
+    max: 100
   signup:
     # 2 attempts in 5 min (only succeeded attempts are taken into account)
-    window: 5 minutes
-    max: 2
+    window: 1 minute
+    max: 100
   ask_send_email:
     # 3 attempts in 5 min
     window: 5 minutes
@@ -34,10 +34,10 @@ trust_proxy:
 
 # Your database name will be database.name OR 'peertube'+database.suffix
 database:
-  hostname: 'localhost'
+  hostname: 'postgres'
   port: 5432
   ssl: false
-  suffix: '_prod'
+  suffix: '_dev'
   username: 'peertube'
   password: 'peertube'
   pool:
@@ -47,7 +47,7 @@ database:
 # You can also specify a 'socket' path to a unix socket but first need to
 # set 'hostname' and 'port' to null
 redis:
-  hostname: 'localhost'
+  hostname: 'redis'
   port: 6379
   auth: null
   db: 0
@@ -166,8 +166,8 @@ log:
   level: 'info' # 'debug' | 'info' | 'warn' | 'error'
   rotation:
     enabled : true # Enabled by default, if disabled make sure that 'storage.logs' is pointing to a folder handled by logrotate
-    max_file_size: 12MB
-    max_files: 20
+    max_file_size: 1MB
+    max_files: 10
   anonymize_ip: false
   log_ping_requests: true
   prettify_sql: false
@@ -187,7 +187,7 @@ trending:
 # Once you have defined your strategies, choose which instances you want to cache in admin -> manage follows -> following
 redundancy:
   videos:
-    check_interval: '1 hour' # How often you want to check new videos to cache
+    check_interval: '30 seconds' # How often you want to check new videos to cache
     strategies: # Just uncomment strategies you want
 #      -
 #        size: '10GB'
@@ -199,13 +199,12 @@ redundancy:
 #        # Minimum time the video must remain in the cache. Only accept values > 10 hours (to not overload remote instances)
 #        min_lifetime: '48 hours'
 #        strategy: 'trending' # Cache trending videos
-#      -
-#        size: '10GB'
-#        # Minimum time the video must remain in the cache. Only accept values > 10 hours (to not overload remote instances)
-#        min_lifetime: '48 hours'
-#        strategy: 'recently-added' # Cache recently added videos
-#        min_views: 10 # Having at least x views
-  garbage_collector_check_interval: '2 hours'
+      -
+        size: '4TB'
+        # Minimum time the video must remain in the cache. Only accept values > 10 hours (to not overload remote instances)
+        min_lifetime: '48 hours'
+        strategy: 'recently-added' # Cache recently added videos
+        min_views: 0 # Having at least x views
 
 # Other instances that duplicate your content
 remote_redundancy:
@@ -231,7 +230,7 @@ tracker:
   # Only handle requests on your videos
   # If you set this to false it means you have a public tracker
   # Then, it is possible that clients overload your instance with external torrents
-  private: true
+  private: false
   # Reject peers that do a lot of announces (could improve privacy of TCP/UDP peers)
   reject_too_many_announces: false
 
@@ -283,7 +282,7 @@ federation:
 peertube:
   check_latest_version:
     # Check and notify admins of new PeerTube versions
-    enabled: true
+    enabled: false
     # You can use a custom URL if your want, that respect the format behind https://joinpeertube.org/api/v1/versions.json
     url: 'https://joinpeertube.org/api/v1/versions.json'
 
@@ -307,11 +306,11 @@ webadmin:
 
 cache:
   previews:
-    size: 500 # Max number of previews you want to cache
+    size: 50000 # Max number of previews you want to cache
   captions:
-    size: 500 # Max number of video captions/subtitles you want to cache
+    size: 50000 # Max number of video captions/subtitles you want to cache
   torrents:
-    size: 500 # Max number of video torrents you want to cache
+    size: 50000 # Max number of video torrents you want to cache
 
 admin:
   # Used to generate the root user at first startup
@@ -354,9 +353,9 @@ transcoding:
   allow_audio_files: true
 
   # Amount of threads used by ffmpeg for 1 transcoding job
-  threads: 1
+  threads: 4
   # Amount of transcoding jobs to execute in parallel
-  concurrency: 1
+  concurrency: 4
 
   # Choose the transcoding profile
   # New profiles can be added by plugins
@@ -365,11 +364,11 @@ transcoding:
 
   resolutions: # Only created if the original video has a higher resolution, uses more storage!
     0p: false # audio-only (creates mp4 without video stream, always created when enabled)
-    144p: false
+    144p: true
     240p: false
-    360p: false
-    480p: false
-    720p: false
+    360p: true
+    480p: true
+    720p: true
     1080p: false
     1440p: false
     2160p: false
@@ -476,13 +475,13 @@ import:
   # Add ability for your users to import remote videos (from YouTube, torrent...)
   videos:
     # Amount of import jobs to execute in parallel
-    concurrency: 1
+    concurrency: 2
 
     # Classic HTTP or all sites supported by youtube-dl https://rg3.github.io/youtube-dl/supportedsites.html
     http:
       # We recommend to use a HTTP proxy if you enable HTTP import to prevent private URL access from this server
       # See https://docs.joinpeertube.org/maintain-configuration?id=security for more information
-      enabled: false
+      enabled: true
 
       youtube_dl_release:
         # Direct download URL to youtube-dl binary
@@ -516,9 +515,9 @@ auto_blacklist:
 
 # Instance settings
 instance:
-  name: 'PeerTube'
-  short_description: 'PeerTube, an ActivityPub-federated video streaming platform using P2P directly in your web browser.'
-  description: 'Welcome to this PeerTube instance!' # Support markdown
+  name: 'Bastyon Video Network'
+  short_description: 'Video Node of the decentralised BAstyon Network'
+  description: 'Welcome to this instance!' # Support markdown
   terms: 'No terms for now.' # Support markdown
   code_of_conduct: '' # Supports markdown
 
