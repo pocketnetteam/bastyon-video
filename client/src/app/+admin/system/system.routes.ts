@@ -3,6 +3,7 @@ import { UserRightGuard } from '@app/core'
 import { UserRight } from '@shared/models'
 import { DebugComponent } from './debug'
 import { JobsComponent } from './jobs/jobs.component'
+import { GarbageCollectorComponent } from './garbage-collector'
 import { LogsComponent } from './logs'
 
 export const SystemRoutes: Routes = [
@@ -44,6 +45,17 @@ export const SystemRoutes: Routes = [
           meta: {
             userRight: UserRight.MANAGE_DEBUG,
             title: $localize`Debug`
+          }
+        }
+      },
+      {
+        path: 'garbage-collector',
+        canActivate: [ UserRightGuard ],
+        component: GarbageCollectorComponent,
+        data: {
+          meta: {
+            userRight: UserRight.MANAGE_CONFIGURATION,
+            title: $localize`Garbage Collector`
           }
         }
       }

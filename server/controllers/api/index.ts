@@ -20,6 +20,7 @@ import { usersRouter } from './users'
 import { videoChannelRouter } from './video-channel'
 import { videoPlaylistRouter } from './video-playlist'
 import { videosRouter } from './videos'
+import { garbageCollectorRouter } from './garbage-collector'
 
 const apiRouter = express.Router()
 
@@ -51,6 +52,7 @@ apiRouter.use('/overviews', overviewsRouter)
 apiRouter.use('/plugins', pluginRouter)
 apiRouter.use('/custom-pages', customPageRouter)
 apiRouter.use('/blocklist', blocklistRouter)
+apiRouter.use('/garbage-collector', garbageCollectorRouter)
 apiRouter.use('/ping', pong)
 apiRouter.use('/*', badRequest)
 

@@ -49,9 +49,11 @@ import {
   PluginSearchComponent,
   PluginShowInstalledComponent
 } from './plugins'
-import { JobService, LogsComponent, LogsService } from './system'
+import { JobService, LogsComponent, LogsService, GarbageCollectorService } from './system'
 import { DebugComponent, DebugService } from './system/debug'
 import { JobsComponent } from './system/jobs/jobs.component'
+import { GarbageCollectorComponent } from './system/garbage-collector/garbage-collector.component'
+import { ListVideosModalComponent } from './system/garbage-collector/list-videos-modal/list-videos-modal.component'
 
 @NgModule({
   imports: [
@@ -107,6 +109,8 @@ import { JobsComponent } from './system/jobs/jobs.component'
     JobsComponent,
     LogsComponent,
     DebugComponent,
+    GarbageCollectorComponent,
+    ListVideosModalComponent,
 
     EditCustomConfigComponent,
     EditBasicConfigurationComponent,
@@ -128,6 +132,7 @@ import { JobsComponent } from './system/jobs/jobs.component'
     ConfigService,
     PluginApiService,
     EditConfigurationService,
+    GarbageCollectorService,
     VideoAdminService
   ]
 })

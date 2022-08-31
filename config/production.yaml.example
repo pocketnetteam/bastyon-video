@@ -205,6 +205,7 @@ redundancy:
 #        min_lifetime: '48 hours'
 #        strategy: 'recently-added' # Cache recently added videos
 #        min_views: 10 # Having at least x views
+  garbage_collector_check_interval: '2 hours'
 
 # Other instances that duplicate your content
 remote_redundancy:

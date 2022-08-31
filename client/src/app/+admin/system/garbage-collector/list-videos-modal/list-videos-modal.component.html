@@ -1,0 +1,16 @@
+<ng-template #modal>
+
+  <div class="modal-header">
+    <h1 i18n class="modal-title">Videos</h1>
+    <my-global-icon iconName="cross" aria-label="Close" tabindex="0" role="button" (click)="hide()" (keydown.enter)="hide()"></my-global-icon>
+  </div>
+
+  <div class="modal-body">
+    <div *ngIf="gbRun && gbRun.videosUrls && gbRun.videosUrls.length > 0">
+      <span *ngFor="let url of gbRun.videosUrls">
+        <a [href]="url" target="_blank" rel="noopener noreferrer">{{url}}</a><br/>
+      </span>
+    </div>
+  </div>
+
+</ng-template>

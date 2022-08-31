@@ -1,0 +1,32 @@
+@use '_variables' as *;
+@use '_mixins' as *;
+
+.progress {
+    @include progressbar($small: true);
+  
+    width: auto;
+    max-width: 100%;
+}
+
+button {
+    @include peertube-button-link;
+    @include orange-button;
+}
+
+#gbHistory {
+    width: 100%;
+    overflow-x: auto;
+
+    table {
+        min-width: 500px;
+        width: 100%;
+
+        tr {
+            height: 32px;
+        }
+
+        .button-link:hover {
+            cursor: pointer;
+        }
+    }
+}

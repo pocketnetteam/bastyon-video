@@ -59,6 +59,7 @@ redundancy:
         min_lifetime: '10 minutes'
         strategy: 'recently-added'
         min_views: 1
+  garbage_collector_check_interval: '2 hours'
 
 cache:
   previews:

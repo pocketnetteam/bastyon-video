@@ -173,6 +173,14 @@ export class AdminComponent implements OnInit {
       })
     }
 
+    if (this.hasConfigRight()) {
+      systemItems.children.push({
+        label: 'Garbage collector',
+        iconName: 'delete',
+        routerLink: '/admin/system/garbage-collector'
+      })
+    }
+
     if (systemItems.children.length !== 0) {
       this.menuEntries.push(systemItems)
     }
