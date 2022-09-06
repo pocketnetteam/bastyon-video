@@ -36,7 +36,7 @@ trust_proxy:
 
 # Your database name will be database.name OR 'peertube'+database.suffix
 database:
-  hostname: 'postges'
+  hostname: 'postgres'
   port: 5432
   ssl: false
   suffix: '_dev'
