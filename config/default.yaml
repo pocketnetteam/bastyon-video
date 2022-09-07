@@ -259,7 +259,7 @@ views:
     # PeerTube buffers local video views before updating and federating the video
     local_buffer_update_interval: '1 minute'
 
-    ip_view_expiration: '1 hour'
+    ip_view_expiration: '1 minute'
 
 # Used to get country location of views of local videos
 geo_ip:

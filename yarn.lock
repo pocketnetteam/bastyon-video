@@ -2819,23 +2819,7 @@
   "resolved" "https://registry.npmjs.org/bn.js/-/bn.js-5.2.0.tgz"
   "version" "5.2.0"
 
-"body-parser@1.19.2":
-  "integrity" "sha512-SAAwOxgoCKMGs9uUAUFHygfLAyaniaoun6I8mFY9pRAJL9+Kec34aU+oIjDhTycub1jozEfEwx1W1IuOYxVSFw=="
-  "resolved" "https://registry.npmjs.org/body-parser/-/body-parser-1.19.2.tgz"
-  "version" "1.19.2"
-  dependencies:
-    "bytes" "3.1.2"
-    "content-type" "~1.0.4"
-    "debug" "2.6.9"
-    "depd" "~1.1.2"
-    "http-errors" "1.8.1"
-    "iconv-lite" "0.4.24"
-    "on-finished" "~2.3.0"
-    "qs" "6.9.7"
-    "raw-body" "2.4.3"
-    "type-is" "~1.6.18"
-
-"body-parser@1.20.0":
+"body-parser@^1.19.0", "body-parser@1.20.0":
   "integrity" "sha512-DfJ+q6EPcGKZD1QWUjSpqp+Q7bDQTsQIF4zfUAtZ6qk+H/3/QRhg9CEp39ss+/T2vw0+HaidC0ecJj/DRLIaKg=="
   "resolved" "https://registry.npmjs.org/body-parser/-/body-parser-1.20.0.tgz"
   "version" "1.20.0"
@@ -2852,6 +2836,22 @@
     "raw-body" "2.5.1"
     "type-is" "~1.6.18"
     "unpipe" "1.0.0"
+
+"body-parser@1.19.2":
+  "integrity" "sha512-SAAwOxgoCKMGs9uUAUFHygfLAyaniaoun6I8mFY9pRAJL9+Kec34aU+oIjDhTycub1jozEfEwx1W1IuOYxVSFw=="
+  "resolved" "https://registry.npmjs.org/body-parser/-/body-parser-1.19.2.tgz"
+  "version" "1.19.2"
+  dependencies:
+    "bytes" "3.1.2"
+    "content-type" "~1.0.4"
+    "debug" "2.6.9"
+    "depd" "~1.1.2"
+    "http-errors" "1.8.1"
+    "iconv-lite" "0.4.24"
+    "on-finished" "~2.3.0"
+    "qs" "6.9.7"
+    "raw-body" "2.4.3"
+    "type-is" "~1.6.18"
 
 "boolbase@^1.0.0":
   "integrity" "sha1-aN/1++YMUes3cl6p4+0xDcwed24="
@@ -6559,7 +6559,7 @@
   "resolved" "https://registry.npmjs.org/node-cleanup/-/node-cleanup-2.1.2.tgz"
   "version" "2.1.2"
 
-"node-fetch@^2.6.0", "node-fetch@^2.6.7":
+"node-fetch@^2.6.0", "node-fetch@^2.6.1", "node-fetch@^2.6.7":
   "integrity" "sha512-ZjMPFEfVx5j+y2yF35Kzx5sF7kDzxuDj6ziH4FFbOp87zKDZNx8yExJIb05OGF4Nlt9IHFIMBkRl41VdvcNdbQ=="
   "resolved" "https://registry.npmjs.org/node-fetch/-/node-fetch-2.6.7.tgz"
   "version" "2.6.7"
@@ -7024,6 +7024,16 @@
     "buffer-from" "^1.0.0"
     "duplexify" "^3.5.0"
     "through2" "^2.0.3"
+
+"peertube-plugin-pocketnet-auth@^0.7.11":
+  "integrity" "sha512-VY6hYJm9Wjh5/OyDzQljfnJcRhXBAr0GNbdRCd8shtc2mFHR5rtvTHCulplIQtx6VXrzNSnAPNW1uFU+I682ew=="
+  "resolved" "https://registry.npmjs.org/peertube-plugin-pocketnet-auth/-/peertube-plugin-pocketnet-auth-0.7.13.tgz"
+  "version" "0.7.13"
+  dependencies:
+    "abort-controller" "^3.0.0"
+    "body-parser" "^1.19.0"
+    "moment" "^2.29.1"
+    "node-fetch" "^2.6.1"
 
 "pem@^1.12.3":
   "integrity" "sha512-I5GKUer2PPv5qzUfxaZ6IGRkhp+357Kyv2t1JJg9vP8hGGI13qU34N2QupmggbpIZGPuudH0jn8KU5hjFpPk3g=="
