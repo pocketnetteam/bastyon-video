@@ -8,7 +8,7 @@ services:
     # If you don't want to use the official image and build one from sources:
     build:
       context: .
-      dockerfile: Dockerfile.nginx
+      dockerfile: ./support/docker/production/Dockerfile.nginx
     env_file:
       - .env
     ports:
@@ -18,7 +18,7 @@ services:
       - type: bind
         # Switch sources if you downloaded the whole repository
         #source: ../../nginx/peertube
-        source: ./docker-volume/nginx/peertube
+        source: ./support/nginx/peertube
         target: /etc/nginx/conf.d/peertube.template
       - assets:/var/www/peertube/peertube-latest/client/dist:ro
       - ./docker-volume/data:/var/www/peertube/storage
@@ -42,10 +42,10 @@ services:
 
   peertube:
     # If you don't want to use the official image and build one from sources:
-    # build:
-    #   context: .
-    #   dockerfile: ./support/docker/production/Dockerfile.bullseye
-    image: chocobozzz/peertube:production-bullseye
+    build:
+      context: .
+      dockerfile: ./support/docker/production/Dockerfile.bullseye
+    # image: chocobozzz/peertube:production-bullseye
     # Use a static IP for this container because nginx does not handle proxy host change without reload
     # This container could be restarted on crash or until the postgresql database is ready for connection
     networks:
