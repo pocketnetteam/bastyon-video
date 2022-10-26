@@ -92,6 +92,14 @@ async function getUser (usernameOrEmail?: string, password?: string, bypassLogin
     let user = await UserModel.loadByEmail(bypassLogin.user.email)
     if (!user) user = await createUserFromExternal(bypassLogin.pluginName, bypassLogin.user)
 
+    // dynamic user quota
+    console.log('USEEEER', bypassLogin.user)
+
+    if (bypassLogin.user.userQuota) {
+      user.videoQuotaDaily = bypassLogin.user.userQuota
+      await user.save()
+    }
+
     // Cannot create a user
     if (!user) throw new AccessDeniedError('Cannot create such user: an actor with that name already exists.')
 
@@ -225,6 +233,7 @@ async function createUserFromExternal (pluginAuth: string, options: {
   email: string
   role: UserRole
   displayName: string
+  userQuota?: number
 }) {
   // Check an actor does not already exists with that name (removed user)
   const actor = await ActorModel.loadLocalByName(options.username)
@@ -235,6 +244,7 @@ async function createUserFromExternal (pluginAuth: string, options: {
 
     emailVerified: null,
     password: null,
+    videoQuotaDaily: options.userQuota,
     pluginAuth
   })
 
