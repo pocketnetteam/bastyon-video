@@ -21,6 +21,7 @@ import { videoChannelRouter } from './video-channel'
 import { videoPlaylistRouter } from './video-playlist'
 import { videosRouter } from './videos'
 import { garbageCollectorRouter } from './garbage-collector'
+import { imagesRouter } from './images'
 
 const apiRouter = express.Router()
 
@@ -46,6 +47,7 @@ apiRouter.use('/accounts', accountsRouter)
 apiRouter.use('/video-channels', videoChannelRouter)
 apiRouter.use('/video-playlists', videoPlaylistRouter)
 apiRouter.use('/videos', videosRouter)
+apiRouter.use('/images', imagesRouter)
 apiRouter.use('/jobs', jobsRouter)
 apiRouter.use('/search', searchRouter)
 apiRouter.use('/overviews', overviewsRouter)

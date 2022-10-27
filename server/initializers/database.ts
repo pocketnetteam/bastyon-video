@@ -50,6 +50,7 @@ import { VideoTagModel } from '../models/video/video-tag'
 import { VideoViewModel } from '../models/view/video-view'
 import { GarbageCollectorHistoryModel } from '@server/models/garbage-collector/garbage-collector-history'
 import { CONFIG } from './config'
+import { ImageModel } from '@server/models/image/image'
 
 require('pg').defaults.parseInt8 = true // Avoid BIGINT to be converted to string
 
@@ -153,7 +154,8 @@ async function initDatabaseModels (silent: boolean) {
     PluginModel,
     ActorCustomPageModel,
     VideoJobInfoModel,
-    GarbageCollectorHistoryModel
+    GarbageCollectorHistoryModel,
+    ImageModel
   ])
 
   // Check extensions exist in the database
