@@ -14,6 +14,7 @@ storage:
   bin: 'test5/bin/'
   avatars: 'test5/avatars/'
   videos: 'test5/videos/'
+  images: 'test5/images/'
   streaming_playlists: 'test5/streaming-playlists/'
   redundancy: 'test5/redundancy/'
   logs: 'test5/logs/'

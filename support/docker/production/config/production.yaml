@@ -47,6 +47,7 @@ storage:
   bin: '../data/bin/'
   avatars: '../data/avatars/'
   videos: '../data/videos/'
+  images: '../data/images/'
   streaming_playlists: '../data/streaming-playlists'
   redundancy: '../data/redundancy/'
   logs: '../data/logs/'

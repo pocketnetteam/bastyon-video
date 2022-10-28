@@ -635,7 +635,8 @@ const STATIC_PATHS = {
   REDUNDANCY: '/static/redundancy/',
   STREAMING_PLAYLISTS: {
     HLS: '/static/streaming-playlists/hls'
-  }
+  },
+  IMAGES: '/images/'
 }
 const STATIC_DOWNLOAD_PATHS = {
   TORRENTS: '/download/torrents/',

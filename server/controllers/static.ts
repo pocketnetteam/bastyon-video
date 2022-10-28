@@ -42,6 +42,12 @@ staticRouter.use(
   express.static(CONFIG.STORAGE.REDUNDANCY_DIR, { fallthrough: false }) // 404 because we don't have this video
 )
 
+// Images
+staticRouter.use(
+  STATIC_PATHS.IMAGES,
+  express.static(CONFIG.STORAGE.IMAGES_DIR, { fallthrough: false })
+)
+
 // HLS
 staticRouter.use(
   STATIC_PATHS.STREAMING_PLAYLISTS.HLS,

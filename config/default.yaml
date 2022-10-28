@@ -109,6 +109,7 @@ storage:
   bin: 'storage/bin/'
   avatars: 'storage/avatars/'
   videos: 'storage/videos/'
+  images: 'storage/images/'
   streaming_playlists: 'storage/streaming-playlists/'
   redundancy: 'storage/redundancy/'
   logs: 'storage/logs/'
