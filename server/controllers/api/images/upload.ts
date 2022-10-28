@@ -113,6 +113,7 @@ export async function uploadImage (req: express.Request, res: express.Response) 
 
         // Done
         return res.json({
+            status: "success",
             url: imageStaticUrl,
             thumbnail: thumbnailStaticUrl
         });
