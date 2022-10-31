@@ -23,7 +23,7 @@ const reqImageFileAdd = createReqFiles(
   )
 
 uploadRouter.post('/upload',
-  // authenticate,
+  authenticate,
   reqImageFileAdd,
   asyncRetryTransactionMiddleware(uploadImage)
 )
