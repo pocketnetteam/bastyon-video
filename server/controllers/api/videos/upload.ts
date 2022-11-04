@@ -176,16 +176,18 @@ async function addVideo (options: {
 
   const MAX_IMAGE_SIZE = 640 * 640
 
-  const wallpaperResolution =
-    videoResolutionInfo.width * videoResolutionInfo.height
-  const denominator =
-    wallpaperResolution > MAX_IMAGE_SIZE
-      ? wallpaperResolution / MAX_IMAGE_SIZE
-      : 1
+  const size = { width: 16, height: 9 }
 
-  const size = {
-    width: Math.floor(videoResolutionInfo.width / Math.sqrt(denominator)),
-    height: Math.floor(videoResolutionInfo.height / Math.sqrt(denominator))
+  if (videoResolutionInfo) {
+    const wallpaperResolution =
+      videoResolutionInfo.width * videoResolutionInfo.height
+    const denominator =
+      wallpaperResolution > MAX_IMAGE_SIZE
+        ? wallpaperResolution / MAX_IMAGE_SIZE
+        : 1
+
+    size.width = Math.floor(videoResolutionInfo.width / Math.sqrt(denominator))
+    size.height = Math.floor(videoResolutionInfo.height / Math.sqrt(denominator))
   }
 
   videoInfo.aspectRatio = size.width / size.height
