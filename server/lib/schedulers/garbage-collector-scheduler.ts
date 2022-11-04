@@ -124,8 +124,10 @@ export class GarbageCollectorScheduler extends AbstractScheduler {
         return video.encodedUrl
       });
       var blockchainVideos = await api.rpc('searchlinks', [oldVideosStrings, 'video', 0, oldVideosStrings.length]);
-      if (!blockchainVideos || blockchainVideos.length <= 0)
+      if (!blockchainVideos || blockchainVideos.length <= 0) {
+        logger.warn("Garbage collector: Warning in checkBlockchain: empty response");
         return;
+      }
       var blockchainVideosStrings = blockchainVideos.map((post) => post.u);
       vidsToDelete = vidsToDelete.concat(videos.filter((video) => {
         if (blockchainVideosStrings.indexOf(video.encodedUrl) == -1)
@@ -140,7 +142,8 @@ export class GarbageCollectorScheduler extends AbstractScheduler {
       }));
       return vidsToDelete;
     } catch(error) {
-      console.error("Error: " + error);
+      console.error("Garbage collector: Error: " + error);
+      logger.error("Garbage collector: Error in checkBlockchain: ", error);
       return;
     }
   }
