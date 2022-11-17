@@ -52,7 +52,8 @@ function buildLocalVideoFromReq (
     originallyPublishedAt: videoInfo.originallyPublishedAt
       ? new Date(videoInfo.originallyPublishedAt)
       : null,
-    aspectRatio: videoInfo.aspectRatio
+    aspectRatio: videoInfo.aspectRatio,
+    isAudio: videoInfo.isAudio
   }
 }
 

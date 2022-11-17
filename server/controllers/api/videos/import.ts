@@ -278,7 +278,8 @@ async function buildVideo (channelId: number, body: VideoImportCreate, importDat
     originallyPublishedAt: body.originallyPublishedAt
       ? new Date(body.originallyPublishedAt)
       : importData.originallyPublishedAt,
-    aspectRatio: 1.77
+    aspectRatio: 1.77,
+    isAudio: false
   }
 
   videoData = await Hooks.wrapObject(

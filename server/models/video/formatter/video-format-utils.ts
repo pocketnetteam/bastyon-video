@@ -120,6 +120,7 @@ function videoModelToFormattedJSON (video: MVideoFormattable, options: VideoForm
     originallyPublishedAt: video.originallyPublishedAt,
 
     aspectRatio: video.aspectRatio,
+    isAudio: video.isAudio,
 
     isLive: video.isLive,
 
@@ -207,7 +208,8 @@ function videoModelToFormattedDetailsJSON (video: MVideoFormattableDetails): Vid
     },
 
     trackerUrls: video.getTrackerUrls(videoIsMirrored),
-    aspectRatio: video.aspectRatio
+    aspectRatio: video.aspectRatio,
+    isAudio: video.isAudio
   }
 
   return Object.assign(videoJSON, detailsJSON)
