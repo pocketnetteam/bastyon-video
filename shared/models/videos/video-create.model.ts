@@ -24,4 +24,5 @@ export interface VideoCreate {
 
   aspectRatio?: number
   isAudio?: boolean
+  mimeType?: string
 }
