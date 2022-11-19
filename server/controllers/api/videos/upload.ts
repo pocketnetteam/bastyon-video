@@ -1,6 +1,6 @@
 import express from "express"
 import { move } from "fs-extra"
-import { basename } from "path"
+import { basename, join } from "path"
 import { getResumableUploadPath } from "@server/helpers/upload"
 import { getLocalVideoActivityPubUrl } from "@server/lib/activitypub/url"
 import { JobQueue } from "@server/lib/job-queue"
@@ -37,6 +37,7 @@ import { createReqFiles } from "../../../helpers/express-utils"
 import {
   buildFileMetadata,
   ffprobePromise,
+  generateWaveform,
   getVideoStreamDimensionsInfo,
   getVideoStreamFPS
 } from "../../../helpers/ffmpeg"
@@ -59,6 +60,7 @@ import {
 import { ScheduleVideoUpdateModel } from "../../../models/video/schedule-video-update"
 import { VideoModel } from "../../../models/video/video"
 import { VideoFileModel } from "../../../models/video/video-file"
+import { CONFIG } from "@server/initializers/config"
 
 const lTags = loggerTagsFactory("api", "video")
 const auditLogger = auditLoggerFactory("videos")
@@ -176,7 +178,7 @@ async function addVideo (options: {
 
   const MAX_IMAGE_SIZE = 640 * 640
 
-  const size = { width: 16, height: 9 }
+  const size = { width: 960, height: 120 }
 
   if (videoResolutionInfo) {
     const wallpaperResolution =
@@ -283,6 +285,16 @@ async function addVideo (options: {
 
     return { videoCreated }
   })
+
+  // Generate the sound wave if that's an audio file,
+  // and replace the thumbnail and preview
+  if (videoInfo.isAudio && thumbnailModel && previewModel) {
+    await generateWaveform(
+      videoPhysicalFile.path,
+      join(CONFIG.STORAGE.PREVIEWS_DIR, previewModel.filename),
+      join(CONFIG.STORAGE.THUMBNAILS_DIR, thumbnailModel.filename)
+    )
+  }
 
   // Channel has a new content, set as updated
   await videoCreated.VideoChannel.setAsUpdated()
