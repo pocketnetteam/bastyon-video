@@ -12,8 +12,8 @@ import * as Jimp from 'jimp'
 
 // All images will have a thumbnail version
 var THUMBNAIL_SIZE = 256;
-// Only images with size > 600 will have a regular version
-var REGULAR_SIZE = 600;
+// Only images with size > 1280 will have a regular version
+var REGULAR_SIZE = 1280;
 
 const uploadRouter = express.Router()
 
@@ -96,8 +96,8 @@ export async function uploadImage (req: express.Request, res: express.Response) 
         var imageStaticUrl = ImageModel.getImageStaticUrl(parse(image.filename).name, image.filename, req.headers.host);
         var thumbnailStaticUrl = ImageModel.getImageStaticUrl(parse(image.filename).name, image.thumbnailname, req.headers.host);
 
-        // If image is smaller than 600, delete original and use the thumbnail only
-        if (isAvatar == false && originalSize.w < 600 && originalSize.h < 600) {
+        // If image is smaller than REGULAR_SIZE, delete original and use the thumbnail only
+        if (isAvatar == false && originalSize.w < REGULAR_SIZE && originalSize.h < REGULAR_SIZE) {
             await remove(imagePath);
             image.filename = image.thumbnailname;
             imageStaticUrl = thumbnailStaticUrl;
