@@ -69,6 +69,7 @@ export interface Video {
   streamingPlaylists?: VideoStreamingPlaylist[]
 
   aspectRatio?: number
+  isAudio?: boolean
 }
 
 export interface VideoDetails extends Video {
@@ -90,4 +91,5 @@ export interface VideoDetails extends Video {
   streamingPlaylists: VideoStreamingPlaylist[]
 
   aspectRatio?: number
+  isAudio?: boolean
 }

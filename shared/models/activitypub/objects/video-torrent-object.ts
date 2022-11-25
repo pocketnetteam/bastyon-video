@@ -55,4 +55,5 @@ export interface VideoObject {
   cc?: string[]
 
   aspectRatio?: number
+  isAudio?: boolean
 }

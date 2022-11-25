@@ -265,7 +265,8 @@ export class VideoTableAttributes {
       'createdAt',
       'updatedAt',
       'moveJobsRunning',
-      'aspectRatio'
+      'aspectRatio',
+      'isAudio'
     ]
   }
 }

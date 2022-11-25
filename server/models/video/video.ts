@@ -617,6 +617,10 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
   @Column(DataTypes.DOUBLE)
   aspectRatio: number;
 
+  @Default(false)
+  @Column(DataTypes.BOOLEAN)
+  isAudio: boolean;
+
   @ForeignKey(() => VideoChannelModel)
   @Column
   channelId: number;

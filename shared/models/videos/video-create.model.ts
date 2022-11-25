@@ -23,4 +23,6 @@ export interface VideoCreate {
   previewfile?: Blob | string
 
   aspectRatio?: number
+  isAudio?: boolean
+  mimeType?: string
 }
