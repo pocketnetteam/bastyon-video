@@ -42,7 +42,7 @@ async function migrate () {
       await executeMigration(actualVersion, migrationScript)
     } catch (err) {
       logger.error('Cannot execute migration %s.', migrationScript.version, { err })
-      process.exit(-1)
+      // process.exit(-1)
     }
   }
 
