@@ -192,12 +192,18 @@ async function addVideo (options: {
 
   videoInfo.aspectRatio = size.width / size.height
 
-  console.log("Checking: " + videoInfo.mimeType);
-  console.log(Object.keys(MIMETYPES.AUDIO.MIMETYPE_EXT));
-  if (Object.keys(MIMETYPES.AUDIO.MIMETYPE_EXT).includes(videoInfo.mimeType)) {
-    videoInfo.isAudio = true
+  console.log(JSON.stringify(videoInfo));
+  console.log(JSON.stringify(videoPhysicalFile));
+
+  const mimeType = videoInfo.mimeType || (videoPhysicalFile as any).contentType;
+  if (mimeType && Object.keys(MIMETYPES.AUDIO.MIMETYPE_EXT).includes(videoInfo.mimeType))
+    videoInfo.isAudio = true;
+
+  if (!mimeType) {
+    const extName = getLowercaseExtension(videoPhysicalFile.filename);
+    if (Object.values(MIMETYPES.AUDIO.MIMETYPE_EXT).includes(extName))
+      videoInfo.isAudio = true;
   }
-  console.log("Result:  " +  videoInfo.isAudio);
   //
 
   let videoData = buildLocalVideoFromReq(videoInfo, videoChannel.id)
