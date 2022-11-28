@@ -192,9 +192,12 @@ async function addVideo (options: {
 
   videoInfo.aspectRatio = size.width / size.height
 
+  console.log("Checking: " + videoInfo.mimeType);
+  console.log(Object.keys(MIMETYPES.AUDIO.MIMETYPE_EXT));
   if (Object.keys(MIMETYPES.AUDIO.MIMETYPE_EXT).includes(videoInfo.mimeType)) {
     videoInfo.isAudio = true
   }
+  console.log("Result:  " +  videoInfo.isAudio);
   //
 
   let videoData = buildLocalVideoFromReq(videoInfo, videoChannel.id)
