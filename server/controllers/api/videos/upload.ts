@@ -196,7 +196,7 @@ async function addVideo (options: {
   console.log(JSON.stringify(videoPhysicalFile));
 
   const mimeType = videoInfo.mimeType || (videoPhysicalFile as any).contentType;
-  if (mimeType && Object.keys(MIMETYPES.AUDIO.MIMETYPE_EXT).includes(videoInfo.mimeType))
+  if (mimeType && Object.keys(MIMETYPES.AUDIO.MIMETYPE_EXT).includes(mimeType))
     videoInfo.isAudio = true;
 
   if (!mimeType) {
