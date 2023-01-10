@@ -342,7 +342,8 @@ async function addVideo (options: {
     video: {
       id: videoCreated.id,
       shortUUID: uuidToShort(videoCreated.uuid),
-      uuid: videoCreated.uuid
+      uuid: videoCreated.uuid,
+      isAudio: videoCreated.isAudio
     }
   }
 }
