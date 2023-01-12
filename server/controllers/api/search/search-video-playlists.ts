@@ -109,7 +109,7 @@ async function searchVideoPlaylistsURI (search: string, res: express.Response) {
 
       videoPlaylist = await getOrCreateAPVideoPlaylist(url)
     } catch (err) {
-      logger.info('Cannot search remote video playlist %s.', search, { err })
+      // logger.info('Cannot search remote video playlist %s.', search, { err })
     }
   } else {
     videoPlaylist = await searchLocalUrl(sanitizeLocalUrl(search), url => VideoPlaylistModel.loadByUrlWithAccountAndChannelSummary(url))

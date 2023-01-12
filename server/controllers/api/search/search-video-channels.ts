@@ -131,7 +131,7 @@ async function searchVideoChannelURI (search: string, res: express.Response) {
       const actor = await getOrCreateAPActor(latestUri, 'all', true, true)
       videoChannel = actor.VideoChannel
     } catch (err) {
-      logger.info('Cannot search remote video channel %s.', uri, { err })
+      // logger.info('Cannot search remote video channel %s.', uri, { err })
     }
   } else {
     videoChannel = await searchLocalUrl(sanitizeLocalUrl(uri), url => VideoChannelModel.loadByUrlAndPopulateAccount(url))

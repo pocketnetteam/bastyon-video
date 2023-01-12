@@ -25,7 +25,7 @@ async function sendUpdateVideo (videoArg: MVideoAPWithoutCaption, transaction: T
 
   if (!video.hasPrivacyForFederation()) return undefined
 
-  logger.info('Creating job to update video %s.', video.url)
+  // logger.info('Creating job to update video %s.', video.url)
 
   const byActor = overriddenByActor || video.VideoChannel.Account.Actor
 
@@ -56,7 +56,7 @@ async function sendUpdateVideo (videoArg: MVideoAPWithoutCaption, transaction: T
 async function sendUpdateActor (accountOrChannel: MChannelDefault | MAccountDefault, transaction: Transaction) {
   const byActor = accountOrChannel.Actor
 
-  logger.info('Creating job to update actor %s.', byActor.url)
+  // logger.info('Creating job to update actor %s.', byActor.url)
 
   const url = getUpdateActivityPubUrl(byActor.url, byActor.updatedAt.toISOString())
   const accountOrChannelObject = (accountOrChannel as any).toActivityPubObject() // FIXME: typescript bug?
@@ -84,7 +84,7 @@ async function sendUpdateActor (accountOrChannel: MChannelDefault | MAccountDefa
 }
 
 async function sendUpdateCacheFile (byActor: MActorLight, redundancyModel: MVideoRedundancyVideo) {
-  logger.info('Creating job to update cache file %s.', redundancyModel.url)
+  // logger.info('Creating job to update cache file %s.', redundancyModel.url)
 
   const associatedVideo = redundancyModel.getVideo()
   if (!associatedVideo) {
@@ -109,7 +109,7 @@ async function sendUpdateVideoPlaylist (videoPlaylist: MVideoPlaylistFull, trans
 
   const byActor = videoPlaylist.OwnerAccount.Actor
 
-  logger.info('Creating job to update video playlist %s.', videoPlaylist.url)
+  // logger.info('Creating job to update video playlist %s.', videoPlaylist.url)
 
   const url = getUpdateActivityPubUrl(videoPlaylist.url, videoPlaylist.updatedAt.toISOString())
 

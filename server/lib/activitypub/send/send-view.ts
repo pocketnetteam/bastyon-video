@@ -18,7 +18,7 @@ async function sendView (options: {
 }) {
   const { byActor, type, video, viewerIdentifier, transaction } = options
 
-  logger.info('Creating job to send %s of %s.', type, video.url)
+  // logger.info('Creating job to send %s of %s.', type, video.url)
 
   const activityBuilder = (audience: ActivityAudience) => {
     const url = getLocalVideoViewActivityPubUrl(byActor, video, viewerIdentifier)

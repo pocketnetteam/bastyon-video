@@ -30,7 +30,7 @@ const lTags = loggerTagsFactory('ap', 'create')
 async function sendCreateVideo (video: MVideoAP, transaction: Transaction) {
   if (!video.hasPrivacyForFederation()) return undefined
 
-  logger.info('Creating job to send video creation of %s.', video.url, lTags(video.uuid))
+  // logger.info('Creating job to send video creation of %s.', video.url, lTags(video.uuid))
 
   const byActor = video.VideoChannel.Account.Actor
   const videoObject = video.toActivityPubObject()

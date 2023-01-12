@@ -11,7 +11,7 @@ function sendReject (followUrl: string, follower: MActor, following: MActor) {
     return
   }
 
-  logger.info('Creating job to reject follower %s.', follower.url)
+  // logger.info('Creating job to reject follower %s.', follower.url)
 
   const followData = buildFollowActivity(followUrl, follower, following)
 

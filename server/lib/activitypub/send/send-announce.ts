@@ -26,7 +26,7 @@ async function buildAnnounceWithVideoAudience (
 async function sendVideoAnnounce (byActor: MActorLight, videoShare: MVideoShare, video: MVideo, transaction: Transaction) {
   const { activity, actorsInvolvedInVideo } = await buildAnnounceWithVideoAudience(byActor, videoShare, video, transaction)
 
-  logger.info('Creating job to send announce %s.', videoShare.url)
+  // logger.info('Creating job to send announce %s.', videoShare.url)
 
   return broadcastToFollowers({
     data: activity,

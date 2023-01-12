@@ -37,7 +37,7 @@ function sendUndoFollow (actorFollow: MActorFollowActors, t: Transaction) {
   // Same server as ours
   if (!following.serverId) return
 
-  logger.info('Creating job to send an unfollow request to %s.', following.url)
+  // logger.info('Creating job to send an unfollow request to %s.', following.url)
 
   const undoUrl = getUndoActivityPubUrl(actorFollow.url)
 
@@ -57,7 +57,7 @@ function sendUndoFollow (actorFollow: MActorFollowActors, t: Transaction) {
 // ---------------------------------------------------------------------------
 
 async function sendUndoAnnounce (byActor: MActorLight, videoShare: MVideoShare, video: MVideo, transaction: Transaction) {
-  logger.info('Creating job to undo announce %s.', videoShare.url)
+  // logger.info('Creating job to undo announce %s.', videoShare.url)
 
   const undoUrl = getUndoActivityPubUrl(videoShare.url)
 
@@ -75,7 +75,7 @@ async function sendUndoAnnounce (byActor: MActorLight, videoShare: MVideoShare, 
 }
 
 async function sendUndoCacheFile (byActor: MActor, redundancyModel: MVideoRedundancyVideo, transaction: Transaction) {
-  logger.info('Creating job to undo cache file %s.', redundancyModel.url)
+  // logger.info('Creating job to undo cache file %s.', redundancyModel.url)
 
   const associatedVideo = redundancyModel.getVideo()
   if (!associatedVideo) {
@@ -99,7 +99,7 @@ async function sendUndoCacheFile (byActor: MActor, redundancyModel: MVideoRedund
 // ---------------------------------------------------------------------------
 
 async function sendUndoLike (byActor: MActor, video: MVideoAccountLight, t: Transaction) {
-  logger.info('Creating job to undo a like of video %s.', video.url)
+  // logger.info('Creating job to undo a like of video %s.', video.url)
 
   const likeUrl = getVideoLikeActivityPubUrlByLocalActor(byActor, video)
   const likeActivity = buildLikeActivity(likeUrl, byActor, video)
@@ -108,7 +108,7 @@ async function sendUndoLike (byActor: MActor, video: MVideoAccountLight, t: Tran
 }
 
 async function sendUndoDislike (byActor: MActor, video: MVideoAccountLight, t: Transaction) {
-  logger.info('Creating job to undo a dislike of video %s.', video.url)
+  // logger.info('Creating job to undo a dislike of video %s.', video.url)
 
   const dislikeUrl = getVideoDislikeActivityPubUrlByLocalActor(byActor, video)
   const dislikeActivity = buildDislikeActivity(dislikeUrl, byActor, video)

@@ -147,7 +147,7 @@ async function searchVideoURI (url: string, res: express.Response) {
       })
       video = result ? result.video : undefined
     } catch (err) {
-      logger.info('Cannot search remote video %s.', url, { err })
+      // logger.info('Cannot search remote video %s.', url, { err })
     }
   } else {
     video = await searchLocalUrl(sanitizeLocalUrl(url), url => VideoModel.loadByUrlAndPopulateAccount(url))

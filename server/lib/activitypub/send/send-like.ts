@@ -7,7 +7,7 @@ import { getVideoLikeActivityPubUrlByLocalActor } from '../url'
 import { sendVideoActivityToOrigin } from './shared/send-utils'
 
 function sendLike (byActor: MActor, video: MVideoAccountLight, transaction: Transaction) {
-  logger.info('Creating job to like %s.', video.url)
+  // logger.info('Creating job to like %s.', video.url)
 
   const activityBuilder = (audience: ActivityAudience) => {
     const url = getVideoLikeActivityPubUrlByLocalActor(byActor, video)

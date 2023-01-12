@@ -48,7 +48,7 @@ export class VideoViewsManager {
   }) {
     const { video, ip, viewEvent, currentTime } = options
 
-    logger.debug('Processing local view for %s and ip %s.', video.url, ip, lTags())
+    // logger.debug('Processing local view for %s and ip %s.', video.url, ip, lTags())
 
     await this.videoViewerStats.addLocalViewer({ video, ip, viewEvent, currentTime })
 
@@ -69,7 +69,7 @@ export class VideoViewsManager {
   }) {
     const { video, viewerId, viewerExpires } = options
 
-    logger.debug('Processing remote view for %s.', video.url, { viewerExpires, viewerId, ...lTags() })
+    // logger.debug('Processing remote view for %s.', video.url, { viewerExpires, viewerId, ...lTags() })
 
     if (viewerExpires) await this.videoViewerCounters.addRemoteViewer({ video, viewerId, viewerExpires })
     else await this.videoViews.addRemoteView({ video })

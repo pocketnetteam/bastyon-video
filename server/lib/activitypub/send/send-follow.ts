@@ -11,7 +11,7 @@ function sendFollow (actorFollow: MActorFollowActors, t: Transaction) {
   // Same server as ours
   if (!following.serverId) return
 
-  logger.info('Creating job to send follow request to %s.', following.url)
+  // logger.info('Creating job to send follow request to %s.', following.url)
 
   const data = buildFollowActivity(actorFollow.url, me, following)
 
