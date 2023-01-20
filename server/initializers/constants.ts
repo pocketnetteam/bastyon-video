@@ -394,7 +394,7 @@ const VIDEO_TRANSCODING_FPS: VideoTranscodingFPS = {
   KEEP_ORIGIN_FPS_RESOLUTION_MIN: 720 // We keep the original FPS on high resolutions (720 minimum)
 }
 
-const DEFAULT_AUDIO_RESOLUTION = VideoResolution.H_480P
+const DEFAULT_AUDIO_RESOLUTION = VideoResolution.H_NOVIDEO
 
 const VIDEO_RATE_TYPES: { [ id: string ]: VideoRateType } = {
   LIKE: 'like',
