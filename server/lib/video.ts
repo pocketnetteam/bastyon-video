@@ -127,7 +127,7 @@ async function addOptimizeOrMergeAudioJob (options: {
   if (videoFile.isAudio()) {
     dataInput = {
       type: "merge-audio-to-webtorrent",
-      resolution: DEFAULT_AUDIO_RESOLUTION,
+      resolution: 0,
       videoUUID: video.uuid,
       createHLSIfNeeded: true,
       isNewVideo
