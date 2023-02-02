@@ -121,7 +121,17 @@ function generateVideoMiniature (options: {
     const { height, width } = size || videoMeta
 
     const thumbnailCreator = videoFile.isAudio()
-      ? () => processImage(ASSETS_PATH.DEFAULT_AUDIO_BACKGROUND, outputPath, { width, height }, true)
+      ? () => {
+        return new Promise((resolve) => {
+          generateImageFromVideoFile(input, basePath, filename, { height, width }, true).then((res) => {
+            resolve(res);
+          }, (err) => {
+            processImage(ASSETS_PATH.DEFAULT_AUDIO_BACKGROUND, outputPath, { width, height }, true).finally(() => {
+              resolve(undefined);
+            })
+          })
+        })
+      }
       : () => generateImageFromVideoFile(input, basePath, filename, { height, width })
 
     return updateThumbnailFromFunction({
