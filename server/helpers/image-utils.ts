@@ -36,7 +36,7 @@ async function processImage (
   if (keepOriginal !== true) await remove(path)
 }
 
-async function generateImageFromVideoFile (fromPath: string, folder: string, imageName: string, size: { width: number, height: number }) {
+async function generateImageFromVideoFile (fromPath: string, folder: string, imageName: string, size: { width: number, height: number }, throwError: boolean = false) {
   const pendingImageName = 'pending-' + imageName
   const pendingImagePath = join(folder, pendingImageName)
 
@@ -53,6 +53,9 @@ async function generateImageFromVideoFile (fromPath: string, folder: string, ima
     } catch (err) {
       logger.debug('Cannot remove pending image path after generation error.', { err, ...lTags() })
     }
+
+    if (throwError)
+      throw new Error("Cannot generate thumbnail from video")
   }
 }
 
