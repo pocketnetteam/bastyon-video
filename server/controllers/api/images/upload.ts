@@ -14,6 +14,8 @@ import * as Jimp from 'jimp'
 var THUMBNAIL_SIZE = 256;
 // Only images with size > 1280 will have a regular version
 var REGULAR_SIZE = 1280;
+// Maximum megapixels allowed for an image
+var MAX_MEGAPIXELS_ALLOWED = 16;
 
 const uploadRouter = express.Router()
 
@@ -75,37 +77,61 @@ export async function uploadImage (req: express.Request, res: express.Response) 
     });
     // Create a thumbnail version of the image
     image.thumbnailname = image.id + '-thumbnail' + image.extname;
-      
+    image.originalname = image.id + '-original' + image.extname;
+
     // Ensure image directory exists
     const imageFolderPath = join(CONFIG.STORAGE.IMAGES_DIR, image.id);
     await ensureDir(imageFolderPath);
 
     // Move image inside folder
-    const imagePath = join(imageFolderPath, image.filename);
+    const imagePath = join(imageFolderPath, image.originalname);
     await move(imageFile.path, imagePath);
 
     Jimp.read(imagePath).then(async (destImage) => {
 
         var originalSize = { w: destImage.getWidth(), h: destImage.getHeight() };
 
-        // Create the thumbnail image
-        var newThumbnailSize = calculateImageSizeReduction(originalSize, thumbnailSize);
-        destImage.scaleToFit(newThumbnailSize.w, newThumbnailSize.h).quality(90).write(join(imageFolderPath, image.thumbnailname));
-
-        // Determine images static path
-        var imageStaticUrl = ImageModel.getImageStaticUrl(parse(image.filename).name, image.filename, req.headers.host);
-        var thumbnailStaticUrl = ImageModel.getImageStaticUrl(parse(image.filename).name, image.thumbnailname, req.headers.host);
-
-        // If image is smaller than REGULAR_SIZE, delete original and use the thumbnail only
-        if (isAvatar == false && originalSize.w < REGULAR_SIZE && originalSize.h < REGULAR_SIZE) {
-            await remove(imagePath);
-            image.filename = image.thumbnailname;
-            imageStaticUrl = thumbnailStaticUrl;
+        // Check image is not too big
+        if (originalSize.w * originalSize.h > MAX_MEGAPIXELS_ALLOWED*1000*1000) {
+          logger.error('Image is too big (' + ((originalSize.w * originalSize.h) / 1000*1000) + ' megapixels), max allowed: ' + MAX_MEGAPIXELS_ALLOWED)
+          return res.fail({
+            status: HttpStatusCode.BAD_REQUEST_400,
+            message: 'Image is too big'
+          })
         }
-        // Else, we keep the original image, but we lower its size
+
+        var maxImageSize = (originalSize.w > originalSize.h) ? originalSize.w : originalSize.h;
+        // Images static path
+        var imageStaticUrl = ImageModel.getImageStaticUrl(parse(image.filename).name, image.originalname, req.headers.host);
+        var imageRegularStaticUrl;
+        var thumbnailStaticUrl;
+
+        // If image size is already smaller or equal than the thumbnail size
+        // No need to create a regular size, nor a thumbnail size
+        if (maxImageSize <= thumbnailSize) {
+          imageRegularStaticUrl = imageStaticUrl;
+          thumbnailStaticUrl = imageStaticUrl;
+        }
+        // If image size is smaller or equal than the regular size
+        // No need to create a regular size, but need to create a thumbnail size
+        else if (maxImageSize <= regularSize) {
+          imageRegularStaticUrl = imageStaticUrl;
+          // Create the thumbnail image
+          var newThumbnailSize = calculateImageSizeReduction(originalSize, thumbnailSize);
+          destImage.scaleToFit(newThumbnailSize.w, newThumbnailSize.h).write(join(imageFolderPath, image.thumbnailname));
+          thumbnailStaticUrl = ImageModel.getImageStaticUrl(parse(image.filename).name, image.thumbnailname, req.headers.host);
+        }
+        // Else, image size is big
+        // Need to create a regular size and a thumbnail size
         else {
-            var newRegularSize = calculateImageSizeReduction(originalSize, regularSize);
-            destImage.scaleToFit(newRegularSize.w, newRegularSize.h).write(imagePath);
+          // Create the regular image
+          var newRegularSize = calculateImageSizeReduction(originalSize, regularSize);
+          destImage.scaleToFit(newRegularSize.w, newRegularSize.h).write(join(imageFolderPath, image.filename));
+          imageRegularStaticUrl = ImageModel.getImageStaticUrl(parse(image.filename).name, image.filename, req.headers.host);
+          // Create the thumbnail image
+          var newThumbnailSize = calculateImageSizeReduction(originalSize, thumbnailSize);
+          destImage.scaleToFit(newThumbnailSize.w, newThumbnailSize.h).write(join(imageFolderPath, image.thumbnailname));
+          thumbnailStaticUrl = ImageModel.getImageStaticUrl(parse(image.filename).name, image.thumbnailname, req.headers.host);
         }
 
         // Save image in database
@@ -115,6 +141,7 @@ export async function uploadImage (req: express.Request, res: express.Response) 
         return res.json({
             status: "success",
             url: imageStaticUrl,
+            regular: imageRegularStaticUrl,
             thumbnail: thumbnailStaticUrl
         });
 

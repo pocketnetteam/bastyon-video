@@ -47,7 +47,8 @@ async function listImages (req: express.Request, res: express.Response) {
   });
   var imagesUrl = images.map((i) => {
     return {
-      url: ImageModel.getImageStaticUrl(parse(i.filename).name, i.filename),
+      url: ImageModel.getImageStaticUrl(parse(i.filename).name, i.originalname),
+      regular: ImageModel.getImageStaticUrl(parse(i.filename).name, i.filename),
       thumbnail: ImageModel.getImageStaticUrl(parse(i.filename).name, i.thumbnailname)
     }
   });
