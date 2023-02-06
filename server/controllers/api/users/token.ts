@@ -24,7 +24,7 @@ import { UserRole } from "@shared/models"
 import {
   MINUTES_STORED,
   MINIMUM_QUOTA,
-  POCKETNET_PROXY_META,
+  POCKETNET_PROXY_META_TEST,
   PLUGIN_EXTERNAL_AUTH_TOKEN_LIFETIME,
   AUTH_ERROR_STATUS,
   AUTH_ERRORS,
@@ -44,7 +44,7 @@ const tokensRouter = express.Router()
 
 const api = new Api({
   options: {
-    listofproxies: POCKETNET_PROXY_META
+    listofproxies: POCKETNET_PROXY_META_TEST
   }
 })
 
@@ -52,7 +52,7 @@ const reputationController = new ReputationStorageController(MINUTES_STORED)
 
 api.init()
 
-POCKETNET_PROXY_META.map((proxy) => api.addproxy(proxy))
+POCKETNET_PROXY_META_TEST.map((proxy) => api.addproxy(proxy))
 
 // Token is the key, expiration date is the value
 const authBypassTokens = new Map<

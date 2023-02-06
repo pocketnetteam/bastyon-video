@@ -116,6 +116,7 @@ var Pocketnet = {
         }
 
         if (!(signature.address === kit.addressByPublicKey(pkbuffer))) {
+          console.log('ADR', signature.address, kit.addressByPublicKey(pkbuffer));
           return {
             valid: false,
             error: "ADDRESS_VERIFICATION_ERROR",
