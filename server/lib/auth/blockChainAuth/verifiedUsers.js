@@ -209,4 +209,13 @@ module.exports = [
   "PXZGt2EaVyRDrXCWMTiH2Tvh5eP7RZhhxF",
   "PCtDTH7XznLBCTHhKFeeg8ezSa7WJtYiMJ",
   "PUK1GND45D8yVx5WoJKvCMHLfNLNih5MYH",
+  "PF4eMjha9MFs4F3CaiHG1CJjDJGS7w8tvF",
+  "PLpzAiA6H8isp33WeVx2UEuXLfc3SyqkzK",
+  "P9igzkJ57DYXyXMjCyTLvHmJJTjwDBB8Ug",
+  "PHPrCVNBHMJCD2fVUFXLw92rZnAMJ1UFF6",
+  "PEXsbgKmfxxMGhaqELM7FdhgexhhvtrirY",
+  "PHLz9EhgvPDZx9Erer3romhcNSGRw2FUmu",
+  "PXasvRAZmYYvX7bxCXoSD6xskKsXFAt3jg",
+  "PUcbjUHfSTSYxLwqmndEzWVyxwTCiGjkTL",
+  "PSDZb5TAtxhRx2Kw4d6mATJrsR6yaYgzhC"
 ];
