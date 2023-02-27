@@ -301,7 +301,7 @@ class LiveManager {
     const videoUUID = videoLive.Video.uuid
     const localLTags = lTags(sessionId, videoUUID)
 
-    // const liveSession = await this.saveStartingSession(videoLive)
+    const liveSession = await this.saveStartingSession(videoLive)
 
     const user = await UserModel.loadByLiveId(videoLive.id)
     LiveQuotaStore.Instance.addNewLive(user.id, videoLive.id)
@@ -358,7 +358,7 @@ class LiveManager {
 
       muxingSession.destroy()
 
-      return this.onAfterMuxingCleanup({ videoId, cleanupNow: false, jobName: videoLive.streamKey })
+      return this.onAfterMuxingCleanup({ videoId, liveSession, cleanupNow: false, jobName: videoLive.streamKey })
         .catch(err => logger.error('Error in end transmuxing.', { err, ...localLTags }))
     })
 
