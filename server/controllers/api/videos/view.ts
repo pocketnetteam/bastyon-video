@@ -5,6 +5,9 @@ import { MVideoId } from '@server/types/models'
 import { HttpStatusCode, VideoView } from '@shared/models'
 import { asyncMiddleware, methodsValidator, openapiOperationDoc, optionalAuthenticate, videoViewValidator } from '../../../middlewares'
 import { UserVideoHistoryModel } from '../../../models/user/user-video-history'
+import { logger, loggerTagsFactory } from '@server/helpers/logger'
+
+const lTags = loggerTagsFactory('api', 'video')
 
 const viewRouter = express.Router()
 
@@ -31,6 +34,7 @@ async function viewVideo (req: express.Request, res: express.Response) {
   const body = req.body as VideoView
 
   const ip = req.ip
+
   const { successView } = await VideoViewsManager.Instance.processLocalView({
     video,
     ip,
@@ -39,6 +43,8 @@ async function viewVideo (req: express.Request, res: express.Response) {
   })
 
   if (successView) {
+    logger.info('Posting video view of %s. From ip %s.', video.url, ip)
+
     Hooks.runAction('action:api.video.viewed', { video: video, ip, req, res })
   } else {
     return res.fail({
@@ -46,6 +52,7 @@ async function viewVideo (req: express.Request, res: express.Response) {
       message: 'Unable to process view'
     })
   }
+  logger.warn('View already exists %s. %s', video.url, ip)
 
   await updateUserHistoryIfNeeded(body, video, res)
 
