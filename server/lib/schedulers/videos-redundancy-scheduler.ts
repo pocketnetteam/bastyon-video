@@ -103,7 +103,7 @@ export class VideosRedundancyScheduler extends AbstractScheduler {
 
     await this.extendsLocalExpiration()
 
-    await this.purgeRemoteExpired()
+    // await this.purgeRemoteExpired()
   }
 
   static get Instance () {
