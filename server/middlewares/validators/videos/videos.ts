@@ -251,7 +251,7 @@ const videosUpdateValidator = getCommonVideoEditAttributes().concat([
 ])
 
 async function checkVideoFollowConstraints (req: express.Request, res: express.Response, next: express.NextFunction) {
-  const video = getVideoWithAttributes(res)
+  const video = await getVideoWithAttributes(res)
 
   // Anybody can watch local videos
   if (video.isOwned() === true) return next()
@@ -266,17 +266,18 @@ async function checkVideoFollowConstraints (req: express.Request, res: express.R
   if (CONFIG.SEARCH.REMOTE_URI.ANONYMOUS === true) return next()
 
   // Check our instance follows an actor that shared this video
-  const serverActor = await getServerActor()
-  if (await VideoModel.checkVideoHasInstanceFollow(video.id, serverActor.id) === true) return next()
+  return next()
+  // const serverActor = await getServerActor()
+  // if (await VideoModel.checkVideoHasInstanceFollow(video.id, serverActor.id) === true) return next()
 
-  return res.fail({
-    status: HttpStatusCode.FORBIDDEN_403,
-    message: 'Cannot get this video regarding follow constraints',
-    type: ServerErrorCode.DOES_NOT_RESPECT_FOLLOW_CONSTRAINTS,
-    data: {
-      originUrl: video.url
-    }
-  })
+  // return res.fail({
+  //   status: HttpStatusCode.FORBIDDEN_403,
+  //   message: 'Cannot get this video regarding follow constraints',
+  //   type: ServerErrorCode.DOES_NOT_RESPECT_FOLLOW_CONSTRAINTS,
+  //   data: {
+  //     originUrl: video.url
+  //   }
+  // })
 }
 
 const videosCustomGetValidator = (

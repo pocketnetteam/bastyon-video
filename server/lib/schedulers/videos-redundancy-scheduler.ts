@@ -83,12 +83,12 @@ export class VideosRedundancyScheduler extends AbstractScheduler {
           streamingPlaylists: videoToDuplicate.VideoStreamingPlaylists
         }
 
-        await this.purgeCacheIfNeeded(candidateToDuplicate)
+        // await this.purgeCacheIfNeeded(candidateToDuplicate)
 
-        if (await this.isTooHeavy(candidateToDuplicate)) {
-          logger.info('Video %s is too big for our cache, skipping.', videoToDuplicate.url, lTags(videoToDuplicate.uuid))
-          continue
-        }
+        // if (await this.isTooHeavy(candidateToDuplicate)) {
+        //   logger.info('Video %s is too big for our cache, skipping.', videoToDuplicate.url, lTags(videoToDuplicate.uuid))
+        //   continue
+        // }
 
         logger.info(
           'Will duplicate video %s in redundancy scheduler "%s".',
@@ -343,9 +343,9 @@ export class VideosRedundancyScheduler extends AbstractScheduler {
 
       const redundancies = await VideoRedundancyModel.listLocalByVideoId(videoId)
 
-      for (const redundancy of redundancies) {
-        await removeVideoRedundancy(redundancy)
-      }
+      // for (const redundancy of redundancies) {
+      //   await removeVideoRedundancy(redundancy)
+      // }
     }
   }
 
