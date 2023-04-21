@@ -16,11 +16,12 @@ export class VideoViews {
   }) {
     const { video, ip, watchTime } = options
 
-    logger.debug('Adding local view to video %s.', video.uuid, { watchTime, ...lTags(video.uuid) })
+    // logger.debug('Adding local view to video %s.', video.uuid, { watchTime, ...lTags(video.uuid) })
 
-    if (!this.hasEnoughWatchTime(video, watchTime)) return false
+    // if (!this.hasEnoughWatchTime(video, watchTime)) return false
 
     const viewExists = await Redis.Instance.doesVideoIPViewExist(ip, video.uuid)
+
     if (viewExists) return false
 
     await Redis.Instance.setIPVideoView(ip, video.uuid)

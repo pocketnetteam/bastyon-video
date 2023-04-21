@@ -40,6 +40,11 @@ async function viewVideo (req: express.Request, res: express.Response) {
 
   if (successView) {
     Hooks.runAction('action:api.video.viewed', { video: video, ip, req, res })
+  } else {
+    return res.fail({
+      status: HttpStatusCode.CONFLICT_409,
+      message: 'Unable to process view'
+    })
   }
 
   await updateUserHistoryIfNeeded(body, video, res)
