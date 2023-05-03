@@ -139,10 +139,10 @@ export class VideosRedundancyScheduler extends AbstractScheduler {
   private async extendsRedundancy (redundancyModel: MVideoRedundancyVideo) {
     const redundancy = CONFIG.REDUNDANCY.VIDEOS.STRATEGIES.find(s => s.strategy === redundancyModel.strategy)
     // Redundancy strategy disabled, remove our redundancy instead of extending expiration
-    if (!redundancy) {
-      await removeVideoRedundancy(redundancyModel)
-      return
-    }
+    // if (!redundancy) {
+    //   await removeVideoRedundancy(redundancyModel)
+    //   return
+    // }
 
     await this.extendsExpirationOf(redundancyModel, redundancy.minLifetime)
   }

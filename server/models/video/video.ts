@@ -613,7 +613,7 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
   originallyPublishedAt: Date;
 
   @AllowNull(false)
-  @Default(0)
+  @Default(1.77)
   @Column(DataTypes.DOUBLE)
   aspectRatio: number;
 
