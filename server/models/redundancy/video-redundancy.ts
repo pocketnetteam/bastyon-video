@@ -395,59 +395,55 @@ export class VideoRedundancyModel extends Model<Partial<AttributesOnly<VideoRedu
   }
 
   static async loadOldestLocalExpired (strategy: VideoRedundancyStrategy, expiresAfterMs: number): Promise<MVideoRedundancyVideo> {
-    // const expiredDate = new Date()
-    // expiredDate.setMilliseconds(expiredDate.getMilliseconds() - expiresAfterMs)
+    const expiredDate = new Date()
+    expiredDate.setMilliseconds(expiredDate.getMilliseconds() - expiresAfterMs)
 
-    // const actor = await getServerActor()
+    const actor = await getServerActor()
 
-    // const query = {
-    //   where: {
-    //     actorId: actor.id,
-    //     strategy,
-    //     createdAt: {
-    //       [Op.lt]: expiredDate
-    //     }
-    //   }
-    // }
+    const query = {
+      where: {
+        actorId: actor.id,
+        strategy,
+        createdAt: {
+          [Op.lt]: expiredDate
+        }
+      }
+    }
 
-    // return VideoRedundancyModel.scope([ ScopeNames.WITH_VIDEO ]).findOne(query)
-    return await undefined
+    return VideoRedundancyModel.scope([ ScopeNames.WITH_VIDEO ]).findOne(query)
   }
 
   static async listLocalExpired (): Promise<MVideoRedundancyVideo[]> {
-    // const actor = await getServerActor()
+    const actor = await getServerActor()
 
-    // const query = {
-    //   where: {
-    //     actorId: actor.id,
-    //     expiresOn: {
-    //       [Op.lt]: new Date()
-    //     }
-    //   }
-    // }
+    const query = {
+      where: {
+        actorId: actor.id,
+        expiresOn: {
+          [Op.lt]: new Date()
+        }
+      }
+    }
 
-    // return VideoRedundancyModel.scope([ ScopeNames.WITH_VIDEO ]).findAll(query)
-
-    return await []
+    return VideoRedundancyModel.scope([ ScopeNames.WITH_VIDEO ]).findAll(query)
   }
 
   static async listRemoteExpired () {
-    // const actor = await getServerActor()
+    const actor = await getServerActor()
 
-    // const query = {
-    //   where: {
-    //     actorId: {
-    //       [Op.ne]: actor.id
-    //     },
-    //     expiresOn: {
-    //       [Op.lt]: new Date(),
-    //       [Op.ne]: null
-    //     }
-    //   }
-    // }
+    const query = {
+      where: {
+        actorId: {
+          [Op.ne]: actor.id
+        },
+        expiresOn: {
+          [Op.lt]: new Date(),
+          [Op.ne]: null
+        }
+      }
+    }
 
-    // return VideoRedundancyModel.scope([ ScopeNames.WITH_VIDEO ]).findAll(query)
-    return await []
+    return VideoRedundancyModel.scope([ ScopeNames.WITH_VIDEO ]).findAll(query)
   }
 
   static async listLocalOfServer (serverId: number) {
