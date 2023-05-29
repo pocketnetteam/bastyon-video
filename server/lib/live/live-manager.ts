@@ -480,7 +480,8 @@ class LiveManager {
       ? computeLowerResolutionsToTranscode(originResolution, 'live')
       : []
 
-    return resolutionsEnabled.concat([ originResolution ])
+    // return resolutionsEnabled.concat([ originResolution ])
+    return resolutionsEnabled
   }
 
   private async createLivePlaylist (video: MVideo, allResolutions: number[]): Promise<MStreamingPlaylistVideo> {
