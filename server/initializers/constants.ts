@@ -31,7 +31,7 @@ const LAST_MIGRATION_VERSION = 714
 
 const TRANSCODING_JOB_TYPE = 'new-resolution-to-hls'
 const FULL_DISC_SPACE_PERCENTAGE = 0.9
-const MAX_ALLOWED_RESOLUTION = 720
+const MAX_ALLOWED_RESOLUTION = 480
 // ---------------------------------------------------------------------------
 
 const API_VERSION = 'v1'
