@@ -120,7 +120,7 @@ const ROUTE_CACHE_LIFETIME = {
   ACTIVITY_PUB: {
     VIDEOS: '1 second' // 1 second, cache concurrent requests after a broadcast for example
   },
-  STATS: '1 minute'
+  STATS: '30 minutes'
 }
 
 // ---------------------------------------------------------------------------

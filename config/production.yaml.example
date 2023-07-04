@@ -12,15 +12,15 @@ rates_limit:
   api:
     # 50 attempts in 10 seconds
     window: 10 seconds
-    max: 500
+    max: 50000
   login:
     # 15 attempts in 5 min
     window: 1 minute
-    max: 100
+    max: 1000
   signup:
     # 2 attempts in 5 min (only succeeded attempts are taken into account)
     window: 1 minute
-    max: 100
+    max: 1000
   ask_send_email:
     # 3 attempts in 5 min
     window: 5 minutes
@@ -201,7 +201,7 @@ redundancy:
 #        min_lifetime: '48 hours'
 #        strategy: 'trending' # Cache trending videos
       -
-        size: '4TB'
+        size: '40TB'
         # Minimum time the video must remain in the cache. Only accept values > 10 hours (to not overload remote instances)
         min_lifetime: '48 hours'
         strategy: 'recently-added' # Cache recently added videos

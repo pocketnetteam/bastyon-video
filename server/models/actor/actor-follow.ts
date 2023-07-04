@@ -198,14 +198,16 @@ export class ActorFollowModel extends Model<Partial<AttributesOnly<ActorFollowMo
 
   // Remove actor follows with a score of 0 (too many requests where they were unreachable)
   static async removeBadActorFollows () {
-    const actorFollows = await ActorFollowModel.listBadActorFollows()
+    // const actorFollows = await ActorFollowModel.listBadActorFollows()
 
-    const actorFollowsRemovePromises = actorFollows.map(actorFollow => actorFollow.destroy())
-    await Promise.all(actorFollowsRemovePromises)
+    await ActorFollowModel.listBadActorFollows()
 
-    const numberOfActorFollowsRemoved = actorFollows.length
+    // const actorFollowsRemovePromises = actorFollows.map(actorFollow => actorFollow.destroy())
+    // await Promise.all(actorFollowsRemovePromises)
 
-    if (numberOfActorFollowsRemoved) logger.info('Removed bad %d actor follows.', numberOfActorFollowsRemoved)
+    // const numberOfActorFollowsRemoved = actorFollows.length
+
+    // if (numberOfActorFollowsRemoved) logger.info('Removed bad %d actor follows.', numberOfActorFollowsRemoved)
   }
 
   static isFollowedBy (actorId: number, followerActorId: number) {

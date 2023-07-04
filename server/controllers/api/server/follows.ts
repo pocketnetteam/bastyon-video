@@ -167,8 +167,8 @@ async function removeFollowing (req: express.Request, res: express.Response) {
     await server.save({ transaction: t })
 
     // Async, could be long
-    removeRedundanciesOfServer(server.id)
-      .catch(err => logger.error('Cannot remove redundancy of %s.', server.host, err))
+    // removeRedundanciesOfServer(server.id)
+    //   .catch(err => logger.error('Cannot remove redundancy of %s.', server.host, err))
 
     await follow.destroy({ transaction: t })
   })

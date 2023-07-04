@@ -3,12 +3,14 @@ import { asyncMiddleware } from "../../../middlewares"
 import { CONFIG } from "../../../../server/initializers/config"
 import { FULL_DISC_SPACE_PERCENTAGE } from "../../../../server/initializers/constants"
 import checkDiskSpace from "check-disk-space"
+import { cacheRoute } from '../../../middlewares/cache/cache'
+import { ROUTE_CACHE_LIFETIME } from '../../../initializers/constants'
 
 const spaceRouter = express.Router()
 
 spaceRouter.get(
   "/space",
-  // asyncMiddleware(cacheRoute()(ROUTE_CACHE_LIFETIME.STATS)), CONFIG.STORAGE.VIDEOS_DIR
+  cacheRoute(ROUTE_CACHE_LIFETIME.STATS),
   asyncMiddleware(getSpace)
 )
 

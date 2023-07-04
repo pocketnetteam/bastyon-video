@@ -52,58 +52,65 @@ class StatsManager {
   }
 
   async getStats () {
-    const { totalLocalVideos, totalLocalVideoViews, totalVideos } =
-      await VideoModel.getStats()
-    const { totalLocalVideoComments, totalVideoComments } =
-      await VideoCommentModel.getStats()
-    const {
-      totalUsers,
-      totalDailyActiveUsers,
-      totalWeeklyActiveUsers,
-      totalMonthlyActiveUsers
-    } = await UserModel.getStats()
-    const { totalInstanceFollowers, totalInstanceFollowing } =
-      await ActorFollowModel.getStats()
-    const { totalLocalVideoFilesSize } = await VideoFileModel.getStats()
-    const {
-      totalLocalVideoChannels,
-      totalLocalDailyActiveVideoChannels,
-      totalLocalWeeklyActiveVideoChannels,
-      totalLocalMonthlyActiveVideoChannels
-    } = await VideoChannelModel.getStats()
-    const { totalLocalPlaylists } = await VideoPlaylistModel.getStats()
+    // const { totalLocalVideos, totalLocalVideoViews, totalVideos } =
+    //   await VideoModel.getStats()
+    // const { totalLocalVideoComments, totalVideoComments } =
+    //   await VideoCommentModel.getStats()
+    // const {
+    //   totalUsers,
+    //   totalDailyActiveUsers,
+    //   totalWeeklyActiveUsers,
+    //   totalMonthlyActiveUsers
+    // } = await UserModel.getStats()
+    // const { totalInstanceFollowers, totalInstanceFollowing } =
+    //   await ActorFollowModel.getStats()
+    // const { totalLocalVideoFilesSize } = await VideoFileModel.getStats()
+    // const {
+    //   totalLocalVideoChannels,
+    //   totalLocalDailyActiveVideoChannels,
+    //   totalLocalWeeklyActiveVideoChannels,
+    //   totalLocalMonthlyActiveVideoChannels
+    // } = await VideoChannelModel.getStats()
+    // const { totalLocalPlaylists } = await VideoPlaylistModel.getStats()
 
-    const videosRedundancyStats = await this.buildRedundancyStats()
+    // const videosRedundancyStats = await this.buildRedundancyStats()
 
-    const performance: PerformanceStats = await this.getPerformanceStats()
+    // const performance: PerformanceStats = await this.getPerformanceStats()
 
-    const data: ServerStats = {
-      totalUsers,
-      totalDailyActiveUsers,
-      totalWeeklyActiveUsers,
-      totalMonthlyActiveUsers,
+    const data: ServerStats = await {
+      totalUsers: 1,
+      totalDailyActiveUsers: 1,
+      totalWeeklyActiveUsers: 1,
+      totalMonthlyActiveUsers: 1,
 
-      totalLocalVideos,
-      totalLocalVideoViews,
-      totalLocalVideoComments,
-      totalLocalVideoFilesSize,
+      totalLocalVideos: 1,
+      totalLocalVideoViews: 1,
+      totalLocalVideoComments: 1,
+      totalLocalVideoFilesSize: 1,
 
-      totalVideos,
-      totalVideoComments,
+      totalVideos: 1,
+      totalVideoComments: 1,
 
-      totalLocalVideoChannels,
-      totalLocalDailyActiveVideoChannels,
-      totalLocalWeeklyActiveVideoChannels,
-      totalLocalMonthlyActiveVideoChannels,
+      totalLocalVideoChannels: 1,
+      totalLocalDailyActiveVideoChannels: 1,
+      totalLocalWeeklyActiveVideoChannels: 1,
+      totalLocalMonthlyActiveVideoChannels: 1,
 
-      totalLocalPlaylists,
+      totalLocalPlaylists: 1,
 
-      totalInstanceFollowers,
-      totalInstanceFollowing,
+      totalInstanceFollowers: 1,
+      totalInstanceFollowing: 1,
 
-      videosRedundancy: videosRedundancyStats,
+      videosRedundancy: [],
 
-      performance,
+      performance: {
+        waitTranscodingJobs: 0,
+        failTranscodingJobs: 0,
+        waitImportsCount: 0,
+        activeLivestreams: 0,
+        failImportsCount: 0,
+        speedByResolution: {}
+      },
 
       ...this.buildAPStats()
     }
