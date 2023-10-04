@@ -69,37 +69,37 @@ export class VideosRedundancyScheduler extends AbstractScheduler {
   }
 
   protected async internalExecute () {
-    for (const redundancyConfig of CONFIG.REDUNDANCY.VIDEOS.STRATEGIES) {
-      logger.info('Running redundancy scheduler for strategy %s.', redundancyConfig.strategy, lTags())
+    // for (const redundancyConfig of CONFIG.REDUNDANCY.VIDEOS.STRATEGIES) {
+    //   logger.info('Running redundancy scheduler for strategy %s.', redundancyConfig.strategy, lTags())
 
-      try {
-        const videoToDuplicate = await this.findVideoToDuplicate(redundancyConfig)
-        if (!videoToDuplicate) continue
+    //   try {
+    //     const videoToDuplicate = await this.findVideoToDuplicate(redundancyConfig)
+    //     if (!videoToDuplicate) continue
 
-        const candidateToDuplicate = {
-          video: videoToDuplicate,
-          redundancy: redundancyConfig,
-          files: videoToDuplicate.VideoFiles,
-          streamingPlaylists: videoToDuplicate.VideoStreamingPlaylists
-        }
+    //     const candidateToDuplicate = {
+    //       video: videoToDuplicate,
+    //       redundancy: redundancyConfig,
+    //       files: videoToDuplicate.VideoFiles,
+    //       streamingPlaylists: videoToDuplicate.VideoStreamingPlaylists
+    //     }
 
-        // await this.purgeCacheIfNeeded(candidateToDuplicate)
+    //     // await this.purgeCacheIfNeeded(candidateToDuplicate)
 
-        // if (await this.isTooHeavy(candidateToDuplicate)) {
-        //   logger.info('Video %s is too big for our cache, skipping.', videoToDuplicate.url, lTags(videoToDuplicate.uuid))
-        //   continue
-        // }
+    //     // if (await this.isTooHeavy(candidateToDuplicate)) {
+    //     //   logger.info('Video %s is too big for our cache, skipping.', videoToDuplicate.url, lTags(videoToDuplicate.uuid))
+    //     //   continue
+    //     // }
 
-        logger.info(
-          'Will duplicate video %s in redundancy scheduler "%s".',
-          videoToDuplicate.url, redundancyConfig.strategy, lTags(videoToDuplicate.uuid)
-        )
+    //     logger.info(
+    //       'Will duplicate video %s in redundancy scheduler "%s".',
+    //       videoToDuplicate.url, redundancyConfig.strategy, lTags(videoToDuplicate.uuid)
+    //     )
 
-        await this.createVideoRedundancies(candidateToDuplicate)
-      } catch (err) {
-        logger.error('Cannot run videos redundancy %s.', redundancyConfig.strategy, { err, ...lTags() })
-      }
-    }
+    //     await this.createVideoRedundancies(candidateToDuplicate)
+    //   } catch (err) {
+    //     logger.error('Cannot run videos redundancy %s.', redundancyConfig.strategy, { err, ...lTags() })
+    //   }
+    // }
 
     await this.extendsLocalExpiration()
 

@@ -128,7 +128,7 @@ export class APVideoUpdater extends APVideoAbstractBuilder {
     this.video.channelId = videoData.channelId
     this.video.views = videoData.views
     this.video.isLive = videoData.isLive
-    this.video.aspectRatio = videoData.aspectRatio
+    this.video.aspectRatio = videoData.aspectRatio || 1.77
     this.video.isAudio = videoData.isAudio
 
     // Ensures we update the updatedAt attribute, even if main attributes did not change

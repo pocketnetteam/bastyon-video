@@ -17,14 +17,16 @@ async function processActivityPubFollow (job: Job) {
   const payload = job.data as ActivitypubFollowPayload
   const host = payload.host
 
-  logger.info('Processing ActivityPub follow in job %d.', job.id)
+  logger.info('Processing ActivityPub follow in job %s.', payload.host)
 
   let targetActor: MActorFull
   if (!host || host === WEBSERVER.HOST) {
     targetActor = await ActorModel.loadLocalByName(payload.name)
   } else {
     const sanitizedHost = sanitizeHost(host, REMOTE_SCHEME.HTTP)
+    logger.info('Sanitized %s.', sanitizedHost)
     const actorUrl = await loadActorUrlOrGetFromWebfinger(payload.name + '@' + sanitizedHost)
+    logger.info('Sanitized AFTER%s.', actorUrl)
     targetActor = await getOrCreateAPActor(actorUrl, 'all')
   }
 
