@@ -308,7 +308,9 @@ async function startApplication () {
     .catch(err => logger.error('Cannot update streaming playlist infohashes.', { err }))
 
   LiveManager.Instance.init()
-  if (CONFIG.LIVE.ENABLED) await LiveManager.Instance.run()
+  if (CONFIG.LIVE.ENABLED) {
+    await LiveManager.Instance.run(server)
+  }
 
   // Make server listening
   server.listen(port, hostname, async () => {

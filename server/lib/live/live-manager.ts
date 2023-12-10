@@ -30,6 +30,7 @@ import { LiveQuotaStore } from './live-quota-store'
 import { LiveSegmentShaStore } from './live-segment-sha-store'
 // import { cleanupPermanentLive } from './live-utils'
 import { MuxingSession } from './shared'
+import BrowserToRtmpServer from '@api.video/browser-to-rtmp-server'
 
 import * as Bull from 'bull'
 
@@ -61,6 +62,7 @@ class LiveManager {
 
   private rtmpServer: Server
   private rtmpsServer: ServerTLS
+  private browserToRtmpServer: any
 
   private running = false
 
@@ -104,7 +106,7 @@ class LiveManager {
       .catch(err => logger.error('Cannot handle broken lives.', { err, ...lTags() }))
   }
 
-  async run () {
+  async run (server?: any) {
     this.running = true
 
     if (CONFIG.LIVE.RTMP.ENABLED) {
@@ -122,6 +124,20 @@ class LiveManager {
       })
 
       this.rtmpServer.listen(CONFIG.LIVE.RTMP.PORT, CONFIG.LIVE.RTMP.HOSTNAME)
+
+      this.browserToRtmpServer = new BrowserToRtmpServer(server, {
+        hooks: {
+          start: (socket, config) => {
+            const rtmpEndpoint = 'rtmp://127.0.0.1:' + CONFIG.LIVE.RTMP.PORT
+            return {
+              ...config,
+              rtmp: rtmpEndpoint
+            }
+          }
+        }
+      })
+
+      server.listen(CONFIG.LIVE.RTMP.PORT, CONFIG.LISTEN.HOSTNAME)
     }
 
     if (CONFIG.LIVE.RTMPS.ENABLED) {

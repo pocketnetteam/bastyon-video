@@ -2,6 +2,16 @@
 # yarn lockfile v1
 
 
+"@api.video/browser-to-rtmp-server@^0.2.4":
+  version "0.2.4"
+  resolved "https://registry.yarnpkg.com/@api.video/browser-to-rtmp-server/-/browser-to-rtmp-server-0.2.4.tgz#73096383e626d1b49f2c37e4c2e77007c3c6fe38"
+  integrity sha512-206iEmJILcrtGlk/ucVCO3yxCrfX9t+8Ooba4LzZVt03N2ibYaJ8HY0msQf0iUwTR7lCyigrym2lvJh4QaYt3w==
+  dependencies:
+    socket.io "^4.4.0"
+    ts-deepmerge "^3.0.0"
+    tslog "^3.3.0"
+    typed-emitter "^1.4.0"
+
 "@apidevtools/json-schema-ref-parser@^9.0.6":
   version "9.0.9"
   resolved "https://registry.npmjs.org/@apidevtools/json-schema-ref-parser/-/json-schema-ref-parser-9.0.9.tgz"
@@ -1620,10 +1630,10 @@
   dependencies:
     xml-js "^1.6.11"
 
-"@peertube/http-signature@^1.6.0":
-  version "1.6.0"
-  resolved "https://registry.npmjs.org/@peertube/http-signature/-/http-signature-1.6.0.tgz"
-  integrity sha512-Bx780c7FPYtkV4LgCoaJcXYcKQqaMef2iQR2V2r5klkYkIQWFxbTOpyhKxvVXYIBIFpj5Cb8DGVDAmhkm7aavg==
+"@peertube/http-signature@^1.7.0":
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/@peertube/http-signature/-/http-signature-1.7.0.tgz#12a84f3fc62e786aa3a2eb09426417bad65736dc"
+  integrity sha512-aGQIwo6/sWtyyqhVK4e1MtxYz4N1X8CNt6SOtCc+Wnczs5S5ONaLHDDR8LYaGn0MgOwvGgXyuZ5sJIfd7iyoUw==
   dependencies:
     assert-plus "^1.0.0"
     jsprim "^1.2.2"
@@ -1663,6 +1673,11 @@
   version "3.0.0"
   resolved "https://registry.npmjs.org/@socket.io/component-emitter/-/component-emitter-3.0.0.tgz"
   integrity sha512-2pTGuibAXJswAPJjaKisthqS/NOK5ypG4LYT6tEAV0S/mxW0zOIvYvGK0V8w8+SHxAm6vRMSjqSalFXeBAqs+Q==
+
+"@socket.io/component-emitter@~3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@socket.io/component-emitter/-/component-emitter-3.1.0.tgz#96116f2a912e0c02817345b3c10751069920d553"
+  integrity sha512-+9jVqKhRSpsc591z5vX+X5Yyw+he/HCB4iQ/RYxw35CEPaY1gnsNE43nf9n9AaYjAQrTiI/mOwKUKdUs9vf7Xg==
 
 "@szmarczak/http-timer@^4.0.5":
   version "4.0.6"
@@ -2024,13 +2039,6 @@
     "@types/magnet-uri" "*"
     "@types/node" "*"
     "@types/parse-torrent-file" "*"
-
-"@types/pem@^1.9.3":
-  version "1.9.6"
-  resolved "https://registry.npmjs.org/@types/pem/-/pem-1.9.6.tgz"
-  integrity sha512-IC67SxacM9fxEi/w7hf98dTun83OwUMeLMo1NS2gE0wdM9MHeg73iH/Pp9nB02OUCQ7Zb2UuKE/IpFCmQw9jxw==
-  dependencies:
-    "@types/node" "*"
 
 "@types/qs@*":
   version "6.9.7"
@@ -3090,11 +3098,6 @@ character-parser@^2.2.0:
   dependencies:
     is-regex "^1.0.3"
 
-charenc@0.0.2:
-  version "0.0.2"
-  resolved "https://registry.npmjs.org/charenc/-/charenc-0.0.2.tgz"
-  integrity sha1-wKHS86cJLgN3S/qD8UwPxXkKhmc=
-
 charset-detector@0.0.2:
   version "0.0.2"
   resolved "https://registry.npmjs.org/charset-detector/-/charset-detector-0.0.2.tgz"
@@ -3538,11 +3541,6 @@ cross-spawn@^7.0.2, cross-spawn@^7.0.3:
     shebang-command "^2.0.0"
     which "^2.0.1"
 
-crypt@0.0.2:
-  version "0.0.2"
-  resolved "https://registry.npmjs.org/crypt/-/crypt-0.0.2.tgz"
-  integrity sha1-iNf/fsDfuG9xPch7u0LQRNPmxBs=
-
 css-select@^4.3.0:
   version "4.3.0"
   resolved "https://registry.npmjs.org/css-select/-/css-select-4.3.0.tgz"
@@ -3946,6 +3944,11 @@ engine.io-parser@~5.0.0, engine.io-parser@~5.0.3:
   dependencies:
     "@socket.io/base64-arraybuffer" "~1.0.2"
 
+engine.io-parser@~5.2.1:
+  version "5.2.1"
+  resolved "https://registry.yarnpkg.com/engine.io-parser/-/engine.io-parser-5.2.1.tgz#9f213c77512ff1a6cc0c7a86108a7ffceb16fcfb"
+  integrity sha512-9JktcM3u18nU9N2Lz3bWeBgxVgOKpw7yhRaoxQA3FUDZzzw+9WlA6p4G4u0RixNkg14fH7EfEc/RhpurtiROTQ==
+
 engine.io@~6.1.0:
   version "6.1.3"
   resolved "https://registry.npmjs.org/engine.io/-/engine.io-6.1.3.tgz"
@@ -3961,6 +3964,22 @@ engine.io@~6.1.0:
     debug "~4.3.1"
     engine.io-parser "~5.0.3"
     ws "~8.2.3"
+
+engine.io@~6.5.2:
+  version "6.5.4"
+  resolved "https://registry.yarnpkg.com/engine.io/-/engine.io-6.5.4.tgz#6822debf324e781add2254e912f8568508850cdc"
+  integrity sha512-KdVSDKhVKyOi+r5uEabrDLZw2qXStVvCsEB/LN3mw4WFi6Gx50jTyuxYVCwAAC0U46FdnzP/ScKRBTXb/NiEOg==
+  dependencies:
+    "@types/cookie" "^0.4.1"
+    "@types/cors" "^2.8.12"
+    "@types/node" ">=10.0.0"
+    accepts "~1.3.4"
+    base64id "2.0.0"
+    cookie "~0.4.1"
+    cors "~2.8.5"
+    debug "~4.3.1"
+    engine.io-parser "~5.2.1"
+    ws "~8.11.0"
 
 entities@2.2.0, entities@^2.0.0:
   version "2.2.0"
@@ -4043,11 +4062,6 @@ es6-iterator@^2.0.3:
     d "1"
     es5-ext "^0.10.35"
     es6-symbol "^3.1.1"
-
-es6-promisify@^6.0.0:
-  version "6.1.1"
-  resolved "https://registry.npmjs.org/es6-promisify/-/es6-promisify-6.1.1.tgz"
-  integrity sha512-HBL8I3mIki5C1Cc9QjKUenHtnG0A5/xA8Q/AllRcfiwl2CZFXGK7ddBiCoRwAix4i2KxcQfjtIVcrVbB3vbmwg==
 
 es6-symbol@^3.1.1, es6-symbol@^3.1.3:
   version "3.1.3"
@@ -5346,11 +5360,6 @@ is-boolean-object@^1.1.0:
     call-bind "^1.0.2"
     has-tostringtag "^1.0.0"
 
-is-buffer@~1.1.6:
-  version "1.1.6"
-  resolved "https://registry.npmjs.org/is-buffer/-/is-buffer-1.1.6.tgz"
-  integrity sha512-NcdALwpXkTm5Zvvbk7owOUSvVvBKDgKP5/ewfXEznmQFfs4ZRmanOeKBTjRVjka3QFoN6XJ+9F3USqfHqTaU5w==
-
 is-callable@^1.1.4, is-callable@^1.2.4:
   version "1.2.4"
   resolved "https://registry.npmjs.org/is-callable/-/is-callable-1.2.4.tgz"
@@ -6082,15 +6091,6 @@ maxmind@^4.3.6:
     mmdb-lib "2.0.2"
     tiny-lru "8.0.2"
 
-md5@^2.2.1:
-  version "2.3.0"
-  resolved "https://registry.npmjs.org/md5/-/md5-2.3.0.tgz"
-  integrity sha512-T1GITYmFaKuO91vxyoQMFETst+O71VUPEU3ze5GNzDm0OWdP8v1ziTaAEPUr/3kLsY3Sftgz242A1SetQiDL7g==
-  dependencies:
-    charenc "0.0.2"
-    crypt "0.0.2"
-    is-buffer "~1.1.6"
-
 mdurl@^1.0.1:
   version "1.0.1"
   resolved "https://registry.npmjs.org/mdurl/-/mdurl-1.0.1.tgz"
@@ -6742,7 +6742,7 @@ optionator@^0.9.1:
     type-check "^0.4.0"
     word-wrap "^1.2.3"
 
-os-tmpdir@^1.0.1, os-tmpdir@~1.0.2:
+os-tmpdir@~1.0.2:
   version "1.0.2"
   resolved "https://registry.npmjs.org/os-tmpdir/-/os-tmpdir-1.0.2.tgz"
   integrity sha1-u+Z0BseaqFxc/sdm/lc0VV36EnQ=
@@ -7006,16 +7006,6 @@ peertube-plugin-pocketnet-auth@^0.7.11:
     body-parser "^1.19.0"
     moment "^2.29.1"
     node-fetch "^2.6.1"
-
-pem@^1.12.3:
-  version "1.14.6"
-  resolved "https://registry.npmjs.org/pem/-/pem-1.14.6.tgz"
-  integrity sha512-I5GKUer2PPv5qzUfxaZ6IGRkhp+357Kyv2t1JJg9vP8hGGI13qU34N2QupmggbpIZGPuudH0jn8KU5hjFpPk3g==
-  dependencies:
-    es6-promisify "^6.0.0"
-    md5 "^2.2.1"
-    os-tmpdir "^1.0.1"
-    which "^2.0.2"
 
 pg-connection-string@^2.5.0:
   version "2.5.0"
@@ -8066,6 +8056,13 @@ socket.io-adapter@~2.3.3:
   resolved "https://registry.npmjs.org/socket.io-adapter/-/socket.io-adapter-2.3.3.tgz"
   integrity sha512-Qd/iwn3VskrpNO60BeRyCyr8ZWw9CPZyitW4AQwmRZ8zCiyDiL+znRnWX6tDHXnWn1sJrM1+b6Mn6wEDJJ4aYQ==
 
+socket.io-adapter@~2.5.2:
+  version "2.5.2"
+  resolved "https://registry.yarnpkg.com/socket.io-adapter/-/socket.io-adapter-2.5.2.tgz#5de9477c9182fdc171cd8c8364b9a8894ec75d12"
+  integrity sha512-87C3LO/NOMc+eMcpcxUBebGjkpMDkNBS9tf7KJqcDsmL936EChtVva71Dw2q4tQcuVC+hAUy4an2NO/sYXmwRA==
+  dependencies:
+    ws "~8.11.0"
+
 socket.io-client@^4.0.1:
   version "4.4.1"
   resolved "https://registry.npmjs.org/socket.io-client/-/socket.io-client-4.4.1.tgz"
@@ -8095,6 +8092,14 @@ socket.io-parser@~4.1.1:
     "@socket.io/component-emitter" "~3.0.0"
     debug "~4.3.1"
 
+socket.io-parser@~4.2.4:
+  version "4.2.4"
+  resolved "https://registry.yarnpkg.com/socket.io-parser/-/socket.io-parser-4.2.4.tgz#c806966cf7270601e47469ddeec30fbdfda44c83"
+  integrity sha512-/GbIKmo8ioc+NIWIhwdecY0ge+qVBSMdgxGygevmdHj24bsfgtCmcUUcQ5ZzcylGFHsN3k4HB4Cgkl96KVnuew==
+  dependencies:
+    "@socket.io/component-emitter" "~3.1.0"
+    debug "~4.3.1"
+
 socket.io@^4.0.1:
   version "4.4.1"
   resolved "https://registry.npmjs.org/socket.io/-/socket.io-4.4.1.tgz"
@@ -8106,6 +8111,19 @@ socket.io@^4.0.1:
     engine.io "~6.1.0"
     socket.io-adapter "~2.3.3"
     socket.io-parser "~4.0.4"
+
+socket.io@^4.4.0:
+  version "4.7.2"
+  resolved "https://registry.yarnpkg.com/socket.io/-/socket.io-4.7.2.tgz#22557d76c3f3ca48f82e73d68b7add36a22df002"
+  integrity sha512-bvKVS29/I5fl2FGLNHuXlQaUH/BlzX1IN6S+NKLNZpBsPZIDH+90eQmCs2Railn4YUiww4SzUedJ6+uzwFnKLw==
+  dependencies:
+    accepts "~1.3.4"
+    base64id "~2.0.0"
+    cors "~2.8.5"
+    debug "~4.3.2"
+    engine.io "~6.5.2"
+    socket.io-adapter "~2.5.2"
+    socket.io-parser "~4.2.4"
 
 socks@^2.0.0:
   version "2.6.2"
@@ -8120,12 +8138,20 @@ socks@^2.0.0:
   resolved "https://registry.npmjs.org/source-map-js/-/source-map-js-1.0.2.tgz"
   integrity sha512-R0XvVJ9WusLiqTCEiGCmICCMplcCkIwwR11mOSD9CR5u+IXYdiseeEuXCVAjS54zqwkLcPNnmU4OeJ6tUrWhDw==
 
+source-map-support@^0.5.21:
+  version "0.5.21"
+  resolved "https://registry.yarnpkg.com/source-map-support/-/source-map-support-0.5.21.tgz#04fe7c7f9e1ed2d662233c28cb2b35b9f63f6e4f"
+  integrity sha512-uBHU3L3czsIyYXKX88fdrGovxdSCoTGDRZ6SYXtSRxLZUzHg5P/66Ht6uoUlHu9EZod+inXhKo3qQgwXUT/y1w==
+  dependencies:
+    buffer-from "^1.0.0"
+    source-map "^0.6.0"
+
 source-map@^0.5.0:
   version "0.5.7"
   resolved "https://registry.npmjs.org/source-map/-/source-map-0.5.7.tgz"
   integrity sha1-igOdLRAh0i0eoUyA2OpGi6LvP8w=
 
-source-map@^0.6.1:
+source-map@^0.6.0, source-map@^0.6.1:
   version "0.6.1"
   resolved "https://registry.npmjs.org/source-map/-/source-map-0.6.1.tgz"
   integrity sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==
@@ -8641,6 +8667,11 @@ triple-beam@^1.3.0:
   resolved "https://registry.npmjs.org/triple-beam/-/triple-beam-1.3.0.tgz"
   integrity sha512-XrHUvV5HpdLmIj4uVMxHggLbFSZYIn7HEWsqePZcI50pco+MPqJ50wMGY794X7AOOhxOBAjbkqfAbEe/QMp2Lw==
 
+ts-deepmerge@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/ts-deepmerge/-/ts-deepmerge-3.0.0.tgz#231c48901606eb104ab51a74cb447af0e9e669e4"
+  integrity sha512-gpjFrde/nE3jp7l5cJTDpyhdbGdAIO/AkNjaz4V9odnopdLd9NVrQcBDEBiE/ucMV9dmNOcdgzOVwS7U6SsBhA==
+
 ts-node@10.7.0:
   version "10.7.0"
   resolved "https://registry.npmjs.org/ts-node/-/ts-node-10.7.0.tgz"
@@ -8690,6 +8721,13 @@ tslib@^2.0.0, tslib@^2.2.0, tslib@^2.3.1:
   version "2.3.1"
   resolved "https://registry.npmjs.org/tslib/-/tslib-2.3.1.tgz"
   integrity sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw==
+
+tslog@^3.3.0:
+  version "3.3.4"
+  resolved "https://registry.yarnpkg.com/tslog/-/tslog-3.3.4.tgz#083197a908c97b3b714a0576b9dac293f223f368"
+  integrity sha512-N0HHuHE0e/o75ALfkioFObknHR5dVchUad4F0XyFf3gXJYB++DewEzwGI/uIOM216E5a43ovnRNEeQIq9qgm4Q==
+  dependencies:
+    source-map-support "^0.5.21"
 
 tsutils@^3.21.0:
   version "3.21.0"
@@ -8742,6 +8780,11 @@ type@^2.5.0:
   version "2.6.0"
   resolved "https://registry.npmjs.org/type/-/type-2.6.0.tgz"
   integrity sha512-eiDBDOmkih5pMbo9OqsqPRGMljLodLcwd5XD5JbtNB0o89xZAwynY9EdCDsJU7LtcVCClu9DvM7/0Ep1hYX3EQ==
+
+typed-emitter@^1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/typed-emitter/-/typed-emitter-1.4.0.tgz#38c6bf1224e764906bb20cb0b458fa914100607c"
+  integrity sha512-weBmoo3HhpKGgLBOYwe8EB31CzDFuaK7CCL+axXhUYhn4jo6DSkHnbefboCF5i4DQ2aMFe0C/FdTWcPdObgHyg==
 
 typedarray-to-buffer@^3.0.0:
   version "3.1.5"
@@ -9057,7 +9100,7 @@ which-module@^2.0.0:
   resolved "https://registry.npmjs.org/which-module/-/which-module-2.0.0.tgz"
   integrity sha1-2e8H3Od7mQK4o6j6SzHD4/fm6Ho=
 
-which@2.0.2, which@^2.0.1, which@^2.0.2:
+which@2.0.2, which@^2.0.1:
   version "2.0.2"
   resolved "https://registry.npmjs.org/which/-/which-2.0.2.tgz"
   integrity sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==
@@ -9179,6 +9222,11 @@ ws@^8.0.0:
   version "8.5.0"
   resolved "https://registry.npmjs.org/ws/-/ws-8.5.0.tgz"
   integrity sha512-BWX0SWVgLPzYwF8lTzEy1egjhS4S4OEAHfsO8o65WOVsrnSRGaSiUaa9e0ggGlkMTtBlmOpEXiie9RUcBO86qg==
+
+ws@~8.11.0:
+  version "8.11.0"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-8.11.0.tgz#6a0d36b8edfd9f96d8b25683db2f8d7de6e8e143"
+  integrity sha512-HPG3wQd9sNQoT9xHyNCXoDUa+Xw/VevmY9FoHyQ+g+rrMn4j6FB4np7Z0OhdTgjx6MgQLK7jwSy1YecU1+4Asg==
 
 ws@~8.2.3:
   version "8.2.3"
