@@ -26,9 +26,27 @@ async function doesVideoExist (id: number | string, res: Response, fetchType: Vi
   const video = await loadVideo(id, fetchType, userId)
 
   if (video === null) {
-    res.fail({
+    res.json({
       status: HttpStatusCode.NOT_FOUND_404,
-      message: 'Video not found'
+      videoBrief: true,
+      uuid: id,
+      thumbnailPath: '',
+      previewPath: '',
+      streamingPlaylists: {
+        id: 1,
+        type: 1,
+        playlistUrl: `https://peertube.archive.pocketnet.app/static/redundancy/hls/${id}/${id}-master.m3u8`,
+        segmentsSha256Url: `https://peertube.archive.pocketnet.app/static/redundancy/hls/${id}/${id}-segments-sha256.json`
+      },
+      waitTranscoding: false,
+      state: {
+        id: 1,
+        label: "Published"
+      },
+      trackerUrls: [
+        "wss://peertube.archive.pocketnet.app/tracker/socket",
+        "https://peertube.archive.pocketnet.app/tracker/announce"
+      ]
     })
     return false
   }
