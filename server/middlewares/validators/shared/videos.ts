@@ -30,14 +30,106 @@ async function doesVideoExist (id: number | string, res: Response, fetchType: Vi
       status: HttpStatusCode.NOT_FOUND_404,
       videoBrief: true,
       uuid: id,
-      thumbnailPath: '',
-      previewPath: '',
+      thumbnailPath: "",
+      previewPath: "",
+      blacklisted: false,
+      blacklistedReason: null,
       streamingPlaylists: {
         id: 1,
         type: 1,
         playlistUrl: `https://peertube.archive.pocketnet.app/static/redundancy/hls/${id}/${id}-master.m3u8`,
-        segmentsSha256Url: `https://peertube.archive.pocketnet.app/static/redundancy/hls/${id}/${id}-segments-sha256.json`
+        segmentsSha256Url: `https://peertube.archive.pocketnet.app/static/redundancy/hls/${id}/${id}-segments-sha256.json`,
+        redundancies: [],
+        files: [
+          {
+            resolution: {
+              id: 720,
+              label: "720p"
+            },
+            magnetUri:
+              "magnet:?xs=https%3A%2F%2Fpeertube.archive.pocketnet.app%2Flazy-static%2Ftorrents%2F58792096-3024-4812-bd5c-f581f2d628d8-720-hls.torrent&xt=urn:btih:39195d4783e9b1045c0a230631a6f039819dfb5b&dn=%D0%9D%D0%B0%D0%B2%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9%2C%D0%97%D0%B5%D0%BB%D0%B5%D0%BD%D1%81%D0%BA%D0%B8%D0%B9%2C%D0%B7%D0%B5%D0%BB%D0%B5%D0%BD%D0%BA%D0%B0%2C%D0%9D%D0%90%D0%A1%D0%90%2C%D0%9E%D1%81%D0%B8%D1%80%D0%B8%D1%81+%D0%B8+%D0%9A%D0%B0%D0%BB%D0%B8&tr=wss%3A%2F%2Fpeertube17.pocketnet.app%2Ftracker%2Fsocket&tr=https%3A%2F%2Fpeertube17.pocketnet.app%2Ftracker%2Fannounce&ws=https%3A%2F%2Fpeertube17.pocketnet.app%2Fstatic%2Fstreaming-playlists%2Fhls%2F3f3afffb-057b-413d-9622-5559f4a65db6%2F507b298f-0ecc-4664-bda2-8329338e9e4b-720-fragmented.mp4",
+            size: 119140262,
+            fps: 30,
+            torrentUrl:
+              "https://peertube.archive.pocketnet.app/lazy-static/torrents/58792096-3024-4812-bd5c-f581f2d628d8-720-hls.torrent",
+            torrentDownloadUrl:
+              "https://peertube.archive.pocketnet.app/download/torrents/58792096-3024-4812-bd5c-f581f2d628d8-720-hls.torrent",
+            fileUrl:
+              "https://peertube17.pocketnet.app/static/streaming-playlists/hls/3f3afffb-057b-413d-9622-5559f4a65db6/507b298f-0ecc-4664-bda2-8329338e9e4b-720-fragmented.mp4",
+            fileDownloadUrl:
+              "https://peertube17.pocketnet.app/download/streaming-playlists/hls/videos/3f3afffb-057b-413d-9622-5559f4a65db6-720-fragmented.mp4",
+            metadataUrl:
+              "https://peertube17.pocketnet.app/api/v1/videos/3f3afffb-057b-413d-9622-5559f4a65db6/metadata/71825",
+          },
+          {
+            resolution: {
+              id: 480,
+              label: "480p"
+            },
+            magnetUri:
+              "magnet:?xs=https%3A%2F%2Fpeertube.archive.pocketnet.app%2Flazy-static%2Ftorrents%2F7eebd2eb-7070-441e-a3ff-3d7196d89e1c-480-hls.torrent&xt=urn:btih:b6386c1470d8c025b46ad2d4a53e7aabb49e8462&dn=%D0%9D%D0%B0%D0%B2%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9%2C%D0%97%D0%B5%D0%BB%D0%B5%D0%BD%D1%81%D0%BA%D0%B8%D0%B9%2C%D0%B7%D0%B5%D0%BB%D0%B5%D0%BD%D0%BA%D0%B0%2C%D0%9D%D0%90%D0%A1%D0%90%2C%D0%9E%D1%81%D0%B8%D1%80%D0%B8%D1%81+%D0%B8+%D0%9A%D0%B0%D0%BB%D0%B8&tr=wss%3A%2F%2Fpeertube17.pocketnet.app%2Ftracker%2Fsocket&tr=https%3A%2F%2Fpeertube17.pocketnet.app%2Ftracker%2Fannounce&ws=https%3A%2F%2Fpeertube17.pocketnet.app%2Fstatic%2Fstreaming-playlists%2Fhls%2F3f3afffb-057b-413d-9622-5559f4a65db6%2F404af490-713d-4c8e-94db-d7fc2e58d1cc-480-fragmented.mp4",
+            size: 75569790,
+            fps: 30,
+            torrentUrl:
+              "https://peertube.archive.pocketnet.app/lazy-static/torrents/7eebd2eb-7070-441e-a3ff-3d7196d89e1c-480-hls.torrent",
+            torrentDownloadUrl:
+              "https://peertube.archive.pocketnet.app/download/torrents/7eebd2eb-7070-441e-a3ff-3d7196d89e1c-480-hls.torrent",
+            fileUrl:
+              "https://peertube17.pocketnet.app/static/streaming-playlists/hls/3f3afffb-057b-413d-9622-5559f4a65db6/404af490-713d-4c8e-94db-d7fc2e58d1cc-480-fragmented.mp4",
+            fileDownloadUrl:
+              "https://peertube17.pocketnet.app/download/streaming-playlists/hls/videos/3f3afffb-057b-413d-9622-5559f4a65db6-480-fragmented.mp4",
+            metadataUrl:
+              "https://peertube17.pocketnet.app/api/v1/videos/3f3afffb-057b-413d-9622-5559f4a65db6/metadata/71828",
+          },
+          {
+            resolution: {
+              id: 360,
+              label: "360p"
+            },
+            magnetUri:
+              "magnet:?xs=https%3A%2F%2Fpeertube.archive.pocketnet.app%2Flazy-static%2Ftorrents%2Ff6c41ea6-2b21-460d-9492-7eb04ddec253-360-hls.torrent&xt=urn:btih:14b962128106c2f8a17ebab4003a454a559facc0&dn=%D0%9D%D0%B0%D0%B2%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9%2C%D0%97%D0%B5%D0%BB%D0%B5%D0%BD%D1%81%D0%BA%D0%B8%D0%B9%2C%D0%B7%D0%B5%D0%BB%D0%B5%D0%BD%D0%BA%D0%B0%2C%D0%9D%D0%90%D0%A1%D0%90%2C%D0%9E%D1%81%D0%B8%D1%80%D0%B8%D1%81+%D0%B8+%D0%9A%D0%B0%D0%BB%D0%B8&tr=wss%3A%2F%2Fpeertube17.pocketnet.app%2Ftracker%2Fsocket&tr=https%3A%2F%2Fpeertube17.pocketnet.app%2Ftracker%2Fannounce&ws=https%3A%2F%2Fpeertube17.pocketnet.app%2Fstatic%2Fstreaming-playlists%2Fhls%2F3f3afffb-057b-413d-9622-5559f4a65db6%2Fcbff9736-6574-4448-b7ad-e8a104edee59-360-fragmented.mp4",
+            size: 58111755,
+            fps: 30,
+            torrentUrl:
+              "https://peertube.archive.pocketnet.app/lazy-static/torrents/f6c41ea6-2b21-460d-9492-7eb04ddec253-360-hls.torrent",
+            torrentDownloadUrl:
+              "https://peertube.archive.pocketnet.app/download/torrents/f6c41ea6-2b21-460d-9492-7eb04ddec253-360-hls.torrent",
+            fileUrl:
+              "https://peertube17.pocketnet.app/static/streaming-playlists/hls/3f3afffb-057b-413d-9622-5559f4a65db6/cbff9736-6574-4448-b7ad-e8a104edee59-360-fragmented.mp4",
+            fileDownloadUrl:
+              "https://peertube17.pocketnet.app/download/streaming-playlists/hls/videos/3f3afffb-057b-413d-9622-5559f4a65db6-360-fragmented.mp4",
+            metadataUrl:
+              "https://peertube17.pocketnet.app/api/v1/videos/3f3afffb-057b-413d-9622-5559f4a65db6/metadata/71827",
+          },
+          {
+            resolution: {
+              id: 144,
+              label: "144p"
+            },
+            magnetUri:
+              "magnet:?xs=https%3A%2F%2Fpeertube.archive.pocketnet.app%2Flazy-static%2Ftorrents%2Fbb6e6991-2d70-47e1-921a-2d2f7218762f-144-hls.torrent&xt=urn:btih:875e7f2d301b21d046eb3239b9c4c69c27145a56&dn=%D0%9D%D0%B0%D0%B2%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9%2C%D0%97%D0%B5%D0%BB%D0%B5%D0%BD%D1%81%D0%BA%D0%B8%D0%B9%2C%D0%B7%D0%B5%D0%BB%D0%B5%D0%BD%D0%BA%D0%B0%2C%D0%9D%D0%90%D0%A1%D0%90%2C%D0%9E%D1%81%D0%B8%D1%80%D0%B8%D1%81+%D0%B8+%D0%9A%D0%B0%D0%BB%D0%B8&tr=wss%3A%2F%2Fpeertube17.pocketnet.app%2Ftracker%2Fsocket&tr=https%3A%2F%2Fpeertube17.pocketnet.app%2Ftracker%2Fannounce&ws=https%3A%2F%2Fpeertube17.pocketnet.app%2Fstatic%2Fstreaming-playlists%2Fhls%2F3f3afffb-057b-413d-9622-5559f4a65db6%2F7946cec0-6d25-4049-a8e0-526d3e1d7da7-144-fragmented.mp4",
+            size: 32061933,
+            fps: 30,
+            torrentUrl:
+              "https://peertube.archive.pocketnet.app/lazy-static/torrents/bb6e6991-2d70-47e1-921a-2d2f7218762f-144-hls.torrent",
+            torrentDownloadUrl:
+              "https://peertube.archive.pocketnet.app/download/torrents/bb6e6991-2d70-47e1-921a-2d2f7218762f-144-hls.torrent",
+            fileUrl:
+              "https://peertube17.pocketnet.app/static/streaming-playlists/hls/3f3afffb-057b-413d-9622-5559f4a65db6/7946cec0-6d25-4049-a8e0-526d3e1d7da7-144-fragmented.mp4",
+            fileDownloadUrl:
+              "https://peertube17.pocketnet.app/download/streaming-playlists/hls/videos/3f3afffb-057b-413d-9622-5559f4a65db6-144-fragmented.mp4",
+            metadataUrl:
+              "https://peertube17.pocketnet.app/api/v1/videos/3f3afffb-057b-413d-9622-5559f4a65db6/metadata/71826"
+          }
+        ]
       },
+      files: [],
+      support: null,
+      descriptionPath:
+        "/api/v1/videos/3f3afffb-057b-413d-9622-5559f4a65db6/description",
+      tags: [],
+      commentsEnabled: true,
+      downloadEnabled: true,
       waitTranscoding: false,
       state: {
         id: 1,
@@ -45,8 +137,28 @@ async function doesVideoExist (id: number | string, res: Response, fetchType: Vi
       },
       trackerUrls: [
         "wss://peertube.archive.pocketnet.app/tracker/socket",
-        "https://peertube.archive.pocketnet.app/tracker/announce"
-      ]
+        "https://peertube.archive.pocketnet.app/tracker/announce",
+      ],
+      isAudio: false,
+      isLive: false,
+      aspectRatio: 1.77,
+      category: {
+        id: null,
+        label: "Misc"
+      },
+      licence: {
+        id: null,
+        label: "Unknown"
+      },
+      language: {
+        id: null,
+        label: "Unknown"
+      },
+      privacy: {
+        id: 1,
+        label: "Public"
+      },
+      name: "Restored Video"
     })
     return false
   }
