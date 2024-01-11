@@ -106,8 +106,7 @@ function computeLowerResolutionsToTranscode (videoFileResolution: number, type: 
     VideoResolution.H_144P,
     VideoResolution.H_1080P,
     VideoResolution.H_1440P,
-    VideoResolution.H_4K,
-    VideoResolution.H_144P
+    VideoResolution.H_4K
   ]
 
   for (const resolution of resolutions) {

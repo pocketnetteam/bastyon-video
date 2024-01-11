@@ -196,7 +196,7 @@ async function onVideoFirstWebTorrentTranscoding (
           ? MAX_ALLOWED_RESOLUTION
           : videoDatabase.getMaxQualityFile().resolution,
     // If we quick transcoded original file, force transcoding for HLS to avoid some weird playback issues
-    copyCodecs: transcodeType !== 'quick-transcode',
+    copyCodecs: false,
     isMaxQuality: true
   }
   const hasHls = await createHlsJobIfEnabled(user, originalFileHLSPayload)
@@ -275,7 +275,7 @@ async function createLowerResolutionsJobs (options: {
   // Create transcoding jobs if there are enabled resolutions
   const resolutionsEnabled = computeLowerResolutionsToTranscode(videoFileResolution, 'vod')
   const resolutionCreated: string[] = []
-
+  logger.warn('Resolutions List %s', resolutionsEnabled)
   for (const resolution of resolutionsEnabled) {
     if (resolution === VideoResolution.H_NOVIDEO && hasAudio === false) continue
 
