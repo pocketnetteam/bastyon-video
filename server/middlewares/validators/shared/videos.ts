@@ -30,8 +30,8 @@ async function doesVideoExist (id: number | string, res: Response, fetchType: Vi
       status: HttpStatusCode.NOT_FOUND_404,
       videoBrief: true,
       uuid: id,
-      thumbnailPath: "",
-      previewPath: "",
+      thumbnailPath: `https://peertube.archive.pocketnet.app/static/redundancy/hls/${id}/${id}.jpg`,
+      previewPath: `https://peertube.archive.pocketnet.app/static/redundancy/hls/${id}/${id}.jpg`,
       blacklisted: false,
       blacklistedReason: null,
       streamingPlaylists: {
