@@ -13,7 +13,7 @@ import {
 } from '@server/helpers/ffmpeg'
 import { logger, loggerTagsFactory } from '@server/helpers/logger'
 import { CONFIG, registerConfigChangedHandler } from '@server/initializers/config'
-import { P2P_MEDIA_LOADER_PEER_VERSION, VIDEO_LIVE } from '@server/initializers/constants'
+import { P2P_MEDIA_LOADER_PEER_VERSION, VIDEO_LIVE, MAX_ALLOWED_RESOLUTION } from '@server/initializers/constants'
 import { UserModel } from '@server/models/user/user'
 import { VideoModel } from '@server/models/video/video'
 import { VideoLiveModel } from '@server/models/video/video-live'
@@ -480,6 +480,9 @@ class LiveManager {
       ? computeLowerResolutionsToTranscode(originResolution, 'live')
       : []
 
+    if (originResolution <= MAX_ALLOWED_RESOLUTION) {
+      resolutionsEnabled.push(originResolution)
+    }
     // return resolutionsEnabled.concat([ originResolution ])
     return resolutionsEnabled
   }

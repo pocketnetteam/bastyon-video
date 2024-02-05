@@ -185,6 +185,7 @@ async function onVideoFirstWebTorrentTranscoding (
   // Video does not exist anymore
   if (!videoDatabase) return undefined
 
+  const copyCodecs = videoDatabase.isLive ? (transcodeType !== 'quick-transcode') : false
   // Generate HLS version of the original file
   const originalFileHLSPayload = {
     ...payload,
@@ -196,7 +197,7 @@ async function onVideoFirstWebTorrentTranscoding (
           ? MAX_ALLOWED_RESOLUTION
           : videoDatabase.getMaxQualityFile().resolution,
     // If we quick transcoded original file, force transcoding for HLS to avoid some weird playback issues
-    copyCodecs: false,
+    copyCodecs,
     isMaxQuality: true
   }
   const hasHls = await createHlsJobIfEnabled(user, originalFileHLSPayload)
