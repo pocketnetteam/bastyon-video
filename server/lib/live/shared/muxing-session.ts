@@ -140,7 +140,7 @@ class MuxingSession extends EventEmitter {
     this.outDirectory = getLiveDirectory(this.videoLive.Video)
     this.replayDirectory = join(
       getLiveReplayBaseDirectory(this.videoLive.Video),
-      new Date().toISOString()
+      'replayDir'
     )
 
     this.lTags = loggerTagsFactory("live", this.sessionId, this.videoUUID)
