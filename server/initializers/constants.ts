@@ -1019,12 +1019,12 @@ const MINUTES_STORED = 1
 const MINIMUM_QUOTA = 2000000000
 
 const POCKETNET_PROXY_META = [
-  {
-    host: 'pocketnet.app',
-    port: 8899,
-    wss: 8099,
-    direct: ''
-  },
+  // {
+  //   host: 'pocketnet.app',
+  //   port: 8899,
+  //   wss: 8099,
+  //   direct: ''
+  // },
   {
     host: '1.pocketnet.app',
     port: 8899,
