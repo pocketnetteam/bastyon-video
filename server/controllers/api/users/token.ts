@@ -24,6 +24,7 @@ import { UserRole } from "@shared/models"
 import {
   MINUTES_STORED,
   MINIMUM_QUOTA,
+  NEW_USER_QUOTA,
   POCKETNET_PROXY_META,
   PLUGIN_EXTERNAL_AUTH_TOKEN_LIFETIME,
   AUTH_ERROR_STATUS,
@@ -73,7 +74,8 @@ string,
 async function createUserFromBlockChain (
   res: express.Response,
   address: String,
-  userQuota?: Number
+  userQuota?: Number,
+  newUser?: Boolean
 ) {
   const bypassToken = await generateRandomString(32)
 
@@ -98,7 +100,7 @@ async function createUserFromBlockChain (
   // Cleanup expired tokens
   cleanupExpiredTokens()
 
-  res.json({ externalAuthToken: bypassToken, username: user.username })
+  res.json({ externalAuthToken: bypassToken, username: user.username, isNewUser: newUser || false })
 }
 
 function createGrafanaErrorBody ({
@@ -262,12 +264,16 @@ async function handleTokenBlockChain (
 
         return createUserFromBlockChain(res, address, userQuota)
       } else {
-        return res.status(AUTH_ERROR_STATUS).send(
-          generateError(AUTH_ERRORS.QUOTA_ERROR, "QUOTA_ERROR", {
-            coins: data.balance,
-            reputation: data.reputation
-          })
-        )
+        // Open download to everyone
+        const newUser = true
+
+        return createUserFromBlockChain(res, address, NEW_USER_QUOTA, newUser)
+        // return res.status(AUTH_ERROR_STATUS).send(
+        //   generateError(AUTH_ERRORS.QUOTA_ERROR, "QUOTA_ERROR", {
+        //     coins: data.balance,
+        //     reputation: data.reputation
+        //   })
+        // )
       }
     })
     .catch((err: any = {}) => {
