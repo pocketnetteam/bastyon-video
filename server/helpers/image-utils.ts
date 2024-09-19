@@ -103,12 +103,13 @@ async function jimpProcessor (path: string, destination: string, newSize: { widt
 
   // Optimization if the source file has the appropriate size
   const outputExt = getLowercaseExtension(destination)
+
   if (skipProcessing({ sourceImage, newSize, imageBytes: inputBuffer.byteLength, inputExt, outputExt })) {
     return copy(path, destination)
   }
 
   await sourceImage
-    .quality(95)
+    .quality(80)
     .writeAsync(destination)
 }
 
