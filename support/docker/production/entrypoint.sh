@@ -12,7 +12,7 @@ fi
 
 # allow the container to be started with `--user`
 if [ "$1" = 'node' -a "$(id -u)" = '0' ]; then
-    find /data ! -user peertube -exec  chown peertube:peertube {} \;
+    # find /data ! -user peertube -exec  chown peertube:peertube {} \;
     exec gosu peertube "$0" "$@"
 fi
 
