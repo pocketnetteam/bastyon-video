@@ -181,7 +181,7 @@ const CONFIG = {
       CHECK_INTERVAL: parseDurationToMs(config.get<string>('redundancy.videos.check_interval')),
       STRATEGIES: buildVideosRedundancy(config.get<any[]>('redundancy.videos.strategies'))
     },
-    GARBAGE_COLLECTOR_CHECK_INTERVAL: parseDurationToMs(config.get<string>('redundancy.garbage_collector_check_interval')),
+    GARBAGE_COLLECTOR_CHECK_INTERVAL: parseDurationToMs(config.get<string>('redundancy.garbage_collector_check_interval'))
   },
   REMOTE_REDUNDANCY: {
     VIDEOS: {
