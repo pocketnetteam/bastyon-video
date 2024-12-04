@@ -226,6 +226,17 @@ async function handleTokenBlockChain (
     return createUserFromBlockChain(res, address, storedQuota.quota)
   }
 
+  // Check verified —> no need to ask proxy
+  const checkVerifiedObj = {
+    address
+  }
+  const verifiedQuota = getUserQuota(checkVerifiedObj)
+  if (verifiedQuota) {
+    reputationController.set(address, verifiedQuota)
+
+    return createUserFromBlockChain(res, address, verifiedQuota)
+  }
+
   // Check user reputation
   return api
     .rpc("getuserstate", [ address ])
@@ -236,6 +247,8 @@ async function handleTokenBlockChain (
         typeof data.balance === "undefined" ||
         typeof data.reputation === "undefined"
       ) {
+        logger.warn('Empty proxy response for address %s', address)
+
         return createUserFromBlockChain(res, address, MINIMUM_QUOTA)
         .then(() => getServerActor())
         .then((server) => {
