@@ -147,6 +147,8 @@ async function createOAuthAdminIfNotExist () {
     validatePassword = false
   } else if (process.env.PT_INITIAL_ROOT_PASSWORD) {
     password = process.env.PT_INITIAL_ROOT_PASSWORD
+  } else if (CONFIG.INSTANCE.ROOT_PASSWORD) {
+    password = CONFIG.INSTANCE.ROOT_PASSWORD
   } else {
     password = passwordGenerator(16, true)
   }

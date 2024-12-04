@@ -415,7 +415,9 @@ const CONFIG = {
     },
     get ROBOTS () { return config.get<string>('instance.robots') },
     get SECURITYTXT () { return config.get<string>('instance.securitytxt') },
-    get SECURITYTXT_CONTACT () { return config.get<string>('admin.email') }
+    get SECURITYTXT_CONTACT () { return config.get<string>('admin.email') },
+
+    ROOT_PASSWORD: config.has('rootpassword.value') ? config.get<string>('rootpassword.value') : ''
   },
   SERVICES: {
     TWITTER: {

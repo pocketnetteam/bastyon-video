@@ -669,3 +669,6 @@ client:
       # If you enable only one external auth plugin
       # You can automatically redirect your users on this external platform when they click on the login button
       redirect_on_single_external_auth: false
+
+rootpassword:
+  value: 'testPassword123'
