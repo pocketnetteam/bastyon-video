@@ -18,33 +18,34 @@ async function refreshVideoPlaylistIfNeeded (videoPlaylist: MVideoPlaylistOwner)
   const lTags = loggerTagsFactory('ap', 'video-playlist', 'refresh', videoPlaylist.uuid, videoPlaylist.url)
 
   logger.info('Refreshing playlist %s.', videoPlaylist.url, lTags())
+  await videoPlaylist.setAsRefreshed()
+  return videoPlaylist
+  // try {
+  //   const { playlistObject } = await fetchRemoteVideoPlaylist(videoPlaylist.url)
 
-  try {
-    const { playlistObject } = await fetchRemoteVideoPlaylist(videoPlaylist.url)
+  //   if (playlistObject === undefined) {
+  //     logger.warn('Cannot refresh remote playlist %s: invalid body.', videoPlaylist.url, lTags())
 
-    if (playlistObject === undefined) {
-      logger.warn('Cannot refresh remote playlist %s: invalid body.', videoPlaylist.url, lTags())
+  //     await videoPlaylist.setAsRefreshed()
+  //     return videoPlaylist
+  //   }
 
-      await videoPlaylist.setAsRefreshed()
-      return videoPlaylist
-    }
+  //   await createOrUpdateVideoPlaylist(playlistObject)
 
-    await createOrUpdateVideoPlaylist(playlistObject)
+  //   return videoPlaylist
+  // } catch (err) {
+  //   if ((err as PeerTubeRequestError).statusCode === HttpStatusCode.NOT_FOUND_404) {
+  //     logger.info('Cannot refresh not existing playlist %s. Deleting it.', videoPlaylist.url, lTags())
 
-    return videoPlaylist
-  } catch (err) {
-    if ((err as PeerTubeRequestError).statusCode === HttpStatusCode.NOT_FOUND_404) {
-      logger.info('Cannot refresh not existing playlist %s. Deleting it.', videoPlaylist.url, lTags())
+  //     await videoPlaylist.destroy()
+  //     return undefined
+  //   }
 
-      await videoPlaylist.destroy()
-      return undefined
-    }
+  //   logger.warn('Cannot refresh video playlist %s.', videoPlaylist.url, { err, ...lTags() })
 
-    logger.warn('Cannot refresh video playlist %s.', videoPlaylist.url, { err, ...lTags() })
-
-    await videoPlaylist.setAsRefreshed()
-    return videoPlaylist
-  }
+  //   await videoPlaylist.setAsRefreshed()
+  //   return videoPlaylist
+  // }
 }
 
 export {

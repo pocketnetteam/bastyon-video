@@ -23,42 +23,43 @@ async function refreshVideoIfNeeded (options: {
   const lTags = loggerTagsFactory('ap', 'video', 'refresh', video.uuid, video.url)
 
   logger.info('Refreshing video %s.', video.url, lTags())
+  await video.setAsRefreshed()
+  return video
+  // try {
+  //   const { videoObject } = await fetchRemoteVideo(video.url)
 
-  try {
-    const { videoObject } = await fetchRemoteVideo(video.url)
+  //   if (videoObject === undefined) {
+  //     logger.warn('Cannot refresh remote video %s: invalid body.', video.url, lTags())
 
-    if (videoObject === undefined) {
-      logger.warn('Cannot refresh remote video %s: invalid body.', video.url, lTags())
+  //     await video.setAsRefreshed()
+  //     return video
+  //   }
 
-      await video.setAsRefreshed()
-      return video
-    }
+  //   const videoUpdater = new APVideoUpdater(videoObject, video)
+  //   await videoUpdater.update()
 
-    const videoUpdater = new APVideoUpdater(videoObject, video)
-    await videoUpdater.update()
+  //   await syncVideoExternalAttributes(video, videoObject, options.syncParam)
 
-    await syncVideoExternalAttributes(video, videoObject, options.syncParam)
+  //   ActorFollowHealthCache.Instance.addGoodServerId(video.VideoChannel.Actor.serverId)
 
-    ActorFollowHealthCache.Instance.addGoodServerId(video.VideoChannel.Actor.serverId)
+  //   return video
+  // } catch (err) {
+  //   if ((err as PeerTubeRequestError).statusCode === HttpStatusCode.NOT_FOUND_404) {
+  //     logger.info('Cannot refresh remote video %s: video does not exist anymore. Deleting it.', video.url, lTags())
 
-    return video
-  } catch (err) {
-    if ((err as PeerTubeRequestError).statusCode === HttpStatusCode.NOT_FOUND_404) {
-      logger.info('Cannot refresh remote video %s: video does not exist anymore. Deleting it.', video.url, lTags())
+  //     // Video does not exist anymore
+  //     // await video.destroy()
+  //     return undefined
+  //   }
 
-      // Video does not exist anymore
-      await video.destroy()
-      return undefined
-    }
+  //   logger.warn('Cannot refresh video %s.', options.video.url, { err, ...lTags() })
 
-    logger.warn('Cannot refresh video %s.', options.video.url, { err, ...lTags() })
+  //   ActorFollowHealthCache.Instance.addBadServerId(video.VideoChannel.Actor.serverId)
 
-    ActorFollowHealthCache.Instance.addBadServerId(video.VideoChannel.Actor.serverId)
-
-    // Don't refresh in loop
-    await video.setAsRefreshed()
-    return video
-  }
+  //   // Don't refresh in loop
+  //   await video.setAsRefreshed()
+  //   return video
+  // }
 }
 
 // ---------------------------------------------------------------------------
