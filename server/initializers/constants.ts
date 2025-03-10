@@ -310,7 +310,7 @@ const CONSTRAINTS_FIELDS = {
     IMAGE: {
       EXTNAME: [ '.png', '.jpg', '.jpeg', '.webp' ],
       FILE_SIZE: {
-        max: 4 * 1024 * 1024 // 4MB
+        max: 20 * 1024 * 1024 // 4MB
       }
     },
     EXTNAME: [] as string[],

@@ -8,7 +8,7 @@ const spaceRouter = express.Router()
 
 spaceRouter.get(
   "/space",
-  // asyncMiddleware(cacheRoute()(ROUTE_CACHE_LIFETIME.STATS)), CONFIG.STORAGE.VIDEOS_DIR
+  // asyncMiddleware(cacheRoute(ROUTE_CACHE_LIFETIME.STATS))
   asyncMiddleware(getSpace)
 )
 
