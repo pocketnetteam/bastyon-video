@@ -102,6 +102,7 @@ export class ThumbnailModel extends Model<Partial<AttributesOnly<ThumbnailModel>
   // If this thumbnail replaced existing one, track the old name
   previousThumbnailFilename: string
 
+  // Change for remote storage!
   private static readonly types: { [ id in ThumbnailType ]: { label: string, directory: string, staticPath: string } } = {
     [ThumbnailType.MINIATURE]: {
       label: 'miniature',

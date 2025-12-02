@@ -1887,8 +1887,8 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
 
     if (videoPlaylist.storage === VideoStorage.OBJECT_STORAGE) {
 
-      if (CONFIG.OBJECT_STORAGE.VIDEOS.BASE_URL) {
-        return `${CONFIG.OBJECT_STORAGE.VIDEOS.BASE_URL}/hls/${this.uuid}/${thumbnail.filename}`
+      if (CONFIG.OBJECT_STORAGE.STREAMING_PLAYLISTS.BASE_URL) {
+        return `${CONFIG.OBJECT_STORAGE.STREAMING_PLAYLISTS.BASE_URL}/hls/${this.uuid}/${thumbnail.filename}`
       }
 
       return `${this.getBaseUrlFromPlaylist(videoPlaylist.playlistUrl)}/${thumbnail.filename}`
@@ -1913,8 +1913,8 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
 
     if (videoPlaylist.storage === VideoStorage.OBJECT_STORAGE) {
 
-      if (CONFIG.OBJECT_STORAGE.VIDEOS.BASE_URL) {
-        return `${CONFIG.OBJECT_STORAGE.VIDEOS.BASE_URL}/hls/${this.uuid}/${preview.filename}`
+      if (CONFIG.OBJECT_STORAGE.STREAMING_PLAYLISTS.BASE_URL) {
+        return `${CONFIG.OBJECT_STORAGE.STREAMING_PLAYLISTS.BASE_URL}/hls/${this.uuid}/${preview.filename}`
       }
 
       return `${this.getBaseUrlFromPlaylist(videoPlaylist.playlistUrl)}/${preview.filename}`

@@ -94,18 +94,26 @@ async function moveHLSFiles (video: MVideoWithAllFiles) {
 }
 
 async function moveVideoImageFiles (video: MVideoWithAllFiles) {
-  const thumbnailName = `thumbnail-${video.uuid}`
-  const previewName = `preview-${video.uuid}`
+  const thumbnailName = `thumbnail-${video.uuid}.jpg`
+  const previewName = `preview-${video.uuid}.jpg`
 
   //  Get thumbnail and preview paths
   const videoThumbnailFile = join(getHLSDirectory(video), thumbnailName)
   const videoPreviewFile = join(getHLSDirectory(video), previewName)
 
   logger.info('Moving thumbnail file: %s ', videoThumbnailFile)
-  await storeImageFile(thumbnailName, videoThumbnailFile, video.uuid)
+  try {
+    await storeImageFile(thumbnailName, videoThumbnailFile, video.uuid)
+  } catch (error) {
+    logger.error('Unable to move thumbnail %s ', videoThumbnailFile)
+  }
 
   logger.info('Moving preview file: %s ', videoPreviewFile)
-  await storeImageFile(previewName, videoPreviewFile, video.uuid)
+  try {
+    await storeImageFile(previewName, videoPreviewFile, video.uuid)
+  } catch (error) {
+    logger.error('Unable to move preview %s ', videoThumbnailFile)
+  }
 }
 
 async function doAfterLastJob (options: {
