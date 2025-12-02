@@ -12,6 +12,10 @@ function generateImageFilename (extension = '.jpg') {
   return buildUUID() + extension
 }
 
+function generateImageFilenameWithUUID (uuid = '', extension = '.jpg') {
+  return uuid + extension
+}
+
 async function processImage (
   path: string,
   destination: string,
@@ -74,6 +78,7 @@ async function getImageSize (path: string) {
 
 export {
   generateImageFilename,
+  generateImageFilenameWithUUID,
   generateImageFromVideoFile,
 
   processImage,

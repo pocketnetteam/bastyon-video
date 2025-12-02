@@ -1,6 +1,6 @@
 import { join } from 'path'
 import { ThumbnailType } from '@shared/models'
-import { generateImageFilename, generateImageFromVideoFile, processImage } from '../helpers/image-utils'
+import { generateImageFilename, generateImageFilenameWithUUID, generateImageFromVideoFile, processImage } from '../helpers/image-utils'
 import { downloadImage } from '../helpers/requests'
 import { CONFIG } from '../initializers/config'
 import { ASSETS_PATH, PREVIEWS_SIZE, THUMBNAILS_SIZE } from '../initializers/constants'
@@ -213,8 +213,9 @@ function buildMetadataFromVideo (video: MVideoThumbnail, type: ThumbnailType, si
     : undefined
 
   if (type === ThumbnailType.MINIATURE) {
-    const filename = generateImageFilename()
-    const basePath = CONFIG.STORAGE.THUMBNAILS_DIR
+    // Store thumbnails inside video folder
+    const filename = `thumbnail-${generateImageFilenameWithUUID(video.uuid)}`
+    const basePath = `${CONFIG.STORAGE.STREAMING_PLAYLISTS_DIR}/hls/${video.uuid}/`
 
     return {
       filename,
@@ -227,8 +228,9 @@ function buildMetadataFromVideo (video: MVideoThumbnail, type: ThumbnailType, si
   }
 
   if (type === ThumbnailType.PREVIEW) {
-    const filename = generateImageFilename()
-    const basePath = CONFIG.STORAGE.PREVIEWS_DIR
+    // Store previews inside video folder
+    const filename = `preview-${generateImageFilenameWithUUID(video.uuid)}`
+    const basePath = `${CONFIG.STORAGE.STREAMING_PLAYLISTS_DIR}/hls/${video.uuid}/`
 
     return {
       filename,

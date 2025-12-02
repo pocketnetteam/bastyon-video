@@ -96,7 +96,8 @@ import {
   CONSTRAINTS_FIELDS,
   LAZY_STATIC_PATHS,
   STATIC_PATHS,
-  WEBSERVER
+  WEBSERVER,
+  HLS_STREAMING_PLAYLIST_DIRECTORY,
 } from "../../initializers/constants"
 import { sendDeleteVideo } from "../../lib/activitypub/send"
 import {
@@ -1867,15 +1868,19 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     const thumbnail = this.getMiniature()
     if (!thumbnail) return null
 
-    return join(STATIC_PATHS.THUMBNAILS, thumbnail.filename)
+    const newStaticPathDir = `${WEBSERVER.URL}/${join(STATIC_PATHS.STREAMING_PLAYLISTS.HLS, this.uuid)}`
+
+    return join(newStaticPathDir, thumbnail.filename)
   }
 
   getPreviewStaticPath () {
     const preview = this.getPreview()
     if (!preview) return null
 
+    const newStaticPathDir = `${WEBSERVER.URL}/${join(STATIC_PATHS.STREAMING_PLAYLISTS.HLS, this.uuid)}`
+
     // We use a local cache, so specify our cache endpoint instead of potential remote URL
-    return join(LAZY_STATIC_PATHS.PREVIEWS, preview.filename)
+    return join(newStaticPathDir, preview.filename)
   }
 
   toFormattedJSON (
