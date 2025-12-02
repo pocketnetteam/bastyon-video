@@ -1864,11 +1864,35 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     return buildVideoEmbedPath(this)
   }
 
+  getBaseUrlFromPlaylist (playlistUrl: string) {
+    const baseUrl = playlistUrl.split('/')
+    baseUrl.pop()
+
+    return baseUrl.join('/')
+  }
+
   getMiniatureStaticPath () {
     const thumbnail = this.getMiniature()
     if (!thumbnail) return null
 
     const newStaticPathDir = `${WEBSERVER.URL}/${join(STATIC_PATHS.STREAMING_PLAYLISTS.HLS, this.uuid)}`
+
+    const videoPlaylist = this.VideoStreamingPlaylists[0]
+
+    if (!videoPlaylist) {
+      logger.warn('No playlist passed to getMiniatureStaticPath for: %s', this.uuid)
+
+      return join(newStaticPathDir, thumbnail.filename)
+    }
+
+    if (videoPlaylist.storage === VideoStorage.OBJECT_STORAGE) {
+
+      if (CONFIG.OBJECT_STORAGE.VIDEOS.BASE_URL) {
+        return `${CONFIG.OBJECT_STORAGE.VIDEOS.BASE_URL}/hls/${this.uuid}/${thumbnail.filename}`
+      }
+
+      return `${this.getBaseUrlFromPlaylist(videoPlaylist.playlistUrl)}/${thumbnail.filename}`
+    }
 
     return join(newStaticPathDir, thumbnail.filename)
   }
@@ -1878,6 +1902,23 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     if (!preview) return null
 
     const newStaticPathDir = `${WEBSERVER.URL}/${join(STATIC_PATHS.STREAMING_PLAYLISTS.HLS, this.uuid)}`
+
+    const videoPlaylist = this.VideoStreamingPlaylists[0]
+
+    if (!videoPlaylist) {
+      logger.warn('No playlist passed to getPreviewStaticPath for: %s', this.uuid)
+
+      return join(newStaticPathDir, preview.filename)
+    }
+
+    if (videoPlaylist.storage === VideoStorage.OBJECT_STORAGE) {
+
+      if (CONFIG.OBJECT_STORAGE.VIDEOS.BASE_URL) {
+        return `${CONFIG.OBJECT_STORAGE.VIDEOS.BASE_URL}/hls/${this.uuid}/${preview.filename}`
+      }
+
+      return `${this.getBaseUrlFromPlaylist(videoPlaylist.playlistUrl)}/${preview.filename}`
+    }
 
     // We use a local cache, so specify our cache endpoint instead of potential remote URL
     return join(newStaticPathDir, preview.filename)

@@ -9,6 +9,12 @@ function generateHLSObjectBaseStorageKey (playlist: MStreamingPlaylistVideo) {
   return join(playlist.getStringType(), playlist.Video.uuid)
 }
 
+function generateImageObjectBaseStorageKey (filename: string, videoId: string) {
+  const baseHlsPath = join('hls', videoId)
+
+  return join(baseHlsPath, filename)
+}
+
 function generateWebTorrentObjectStorageKey (filename: string) {
   return filename
 }
@@ -16,5 +22,6 @@ function generateWebTorrentObjectStorageKey (filename: string) {
 export {
   generateHLSObjectStorageKey,
   generateHLSObjectBaseStorageKey,
-  generateWebTorrentObjectStorageKey
+  generateWebTorrentObjectStorageKey,
+  generateImageObjectBaseStorageKey
 }

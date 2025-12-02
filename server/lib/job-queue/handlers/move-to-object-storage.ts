@@ -5,7 +5,7 @@ import { logger, loggerTagsFactory } from '@server/helpers/logger'
 import { updateTorrentMetadata } from '@server/helpers/webtorrent'
 import { CONFIG } from '@server/initializers/config'
 import { P2P_MEDIA_LOADER_PEER_VERSION } from '@server/initializers/constants'
-import { storeHLSFile, storeWebTorrentFile } from '@server/lib/object-storage'
+import { storeHLSFile, storeWebTorrentFile, storeImageFile } from '@server/lib/object-storage'
 import { getHLSDirectory, getHlsResolutionPlaylistFilename } from '@server/lib/paths'
 import { moveToFailedMoveToObjectStorageState, moveToNextState } from '@server/lib/video-state'
 import { VideoModel } from '@server/models/video/video'
@@ -40,6 +40,8 @@ export async function processMoveToObjectStorage (job: Job) {
 
       await moveHLSFiles(video)
     }
+
+    await moveVideoImageFiles(video)
 
     const pendingMove = await VideoJobInfoModel.decrease(video.uuid, 'pendingMove')
     if (pendingMove === 0) {
@@ -89,6 +91,21 @@ async function moveHLSFiles (video: MVideoWithAllFiles) {
       await onFileMoved({ videoOrPlaylist: Object.assign(playlist, { Video: video }), file, fileUrl, oldPath })
     }
   }
+}
+
+async function moveVideoImageFiles (video: MVideoWithAllFiles) {
+  const thumbnailName = `thumbnail-${video.uuid}`
+  const previewName = `preview-${video.uuid}`
+
+  //  Get thumbnail and preview paths
+  const videoThumbnailFile = join(getHLSDirectory(video), thumbnailName)
+  const videoPreviewFile = join(getHLSDirectory(video), previewName)
+
+  logger.info('Moving thumbnail file: %s ', videoThumbnailFile)
+  await storeImageFile(thumbnailName, videoThumbnailFile, video.uuid)
+
+  logger.info('Moving preview file: %s ', videoPreviewFile)
+  await storeImageFile(previewName, videoPreviewFile, video.uuid)
 }
 
 async function doAfterLastJob (options: {
