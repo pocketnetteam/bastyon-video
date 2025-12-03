@@ -1605,10 +1605,8 @@
     events "^3.3.0"
     m3u8-parser "^4.6.0"
 
-"@peertube/videojs-contextmenu@^5.5.0":
+"@peertube/videojs-contextmenu@file:./vendor/videojs-contextmenu":
   version "5.5.0"
-  resolved "https://registry.yarnpkg.com/@peertube/videojs-contextmenu/-/videojs-contextmenu-5.5.0.tgz#d1e8d368ee978fe04dcbcdd1d125a656f7350f55"
-  integrity sha512-+zV/RbrybVJHwqOO+YmtJjTwKM8r695Ax8AbXmNoL3J7NVguqy6TI8XKyQo3g5WHNj5nJozzaJQqDBc+BhKGRw==
   dependencies:
     global "^4.4.0"
     video.js "^7.6.0"
