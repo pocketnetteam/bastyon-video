@@ -5,7 +5,7 @@ import { logger, loggerTagsFactory } from '@server/helpers/logger'
 import { updateTorrentMetadata } from '@server/helpers/webtorrent'
 import { CONFIG } from '@server/initializers/config'
 import { P2P_MEDIA_LOADER_PEER_VERSION } from '@server/initializers/constants'
-import { storeHLSFile, storeWebTorrentFile, storeImageFile } from '@server/lib/object-storage'
+import { storeHLSFile, storeWebTorrentFile, storeImageFile, removeImageFile } from '@server/lib/object-storage'
 import { getHLSDirectory, getHlsResolutionPlaylistFilename } from '@server/lib/paths'
 import { moveToFailedMoveToObjectStorageState, moveToNextState } from '@server/lib/video-state'
 import { VideoModel } from '@server/models/video/video'
@@ -93,7 +93,26 @@ async function moveHLSFiles (video: MVideoWithAllFiles) {
   }
 }
 
-async function moveVideoImageFiles (video: MVideoWithAllFiles) {
+export async function deleteOldVideoImageFilesFromRemote (video: MVideoWithAllFiles) {
+  const thumbnailName = `thumbnail-${video.uuid}.jpg`
+  const previewName = `preview-${video.uuid}.jpg`
+
+  logger.info('Removing thumbnail file: %s ', thumbnailName)
+  try {
+    await removeImageFile(thumbnailName)
+  } catch (error) {
+    logger.error('Unable to remove thumbnail %s ', thumbnailName)
+  }
+
+  logger.info('Removing preview file: %s ', previewName)
+  try {
+    await removeImageFile(previewName)
+  } catch (error) {
+    logger.error('Unable to remove preview %s ', previewName)
+  }
+}
+
+export async function moveVideoImageFiles (video: MVideoWithAllFiles) {
   const thumbnailName = `thumbnail-${video.uuid}.jpg`
   const previewName = `preview-${video.uuid}.jpg`
 

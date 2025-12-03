@@ -29,6 +29,12 @@ function storeImageFile (filename: string, path: string, videoId: string) {
   })
 }
 
+function removeImageFile (filename: string) {
+  logger.info('Removing image file with key: %s', filename)
+
+  return removeObject(filename, CONFIG.OBJECT_STORAGE.STREAMING_PLAYLISTS)
+}
+
 function storeWebTorrentFile (filename: string) {
   return storeObject({
     inputPath: join(CONFIG.STORAGE.VIDEOS_DIR, filename),
@@ -77,6 +83,7 @@ export {
   storeWebTorrentFile,
   storeHLSFile,
   storeImageFile,
+  removeImageFile,
 
   removeHLSObjectStorage,
   removeWebTorrentObjectStorage,

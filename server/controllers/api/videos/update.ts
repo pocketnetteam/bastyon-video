@@ -20,6 +20,8 @@ import { autoBlacklistVideoIfNeeded } from '../../../lib/video-blacklist'
 import { asyncMiddleware, asyncRetryTransactionMiddleware, authenticate, videosUpdateValidator } from '../../../middlewares'
 import { ScheduleVideoUpdateModel } from '../../../models/video/schedule-video-update'
 import { VideoModel } from '../../../models/video/video'
+import { moveVideoImageFiles, deleteOldVideoImageFilesFromRemote } from '../../../lib/job-queue/handlers/move-to-object-storage'
+import { CONFIG } from '@server/initializers/config'
 
 const lTags = loggerTagsFactory('api', 'video')
 const auditLogger = auditLoggerFactory('videos')
@@ -104,6 +106,15 @@ async function updateVideo (req: express.Request, res: express.Response) {
       // Thumbnail & preview updates?
       if (thumbnailModel) await videoInstanceUpdated.addAndSaveThumbnail(thumbnailModel, t)
       if (previewModel) await videoInstanceUpdated.addAndSaveThumbnail(previewModel, t)
+
+      // Move new video thumbnails to remote storage
+      if (CONFIG.OBJECT_STORAGE.ENABLED) {
+        // Remove older images
+        await deleteOldVideoImageFilesFromRemote(video)
+
+        // Move newely generated images to remote storage
+        await moveVideoImageFiles(video)
+      }
 
       // Video tags update?
       if (videoInfoToUpdate.tags !== undefined) {
