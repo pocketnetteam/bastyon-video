@@ -280,7 +280,7 @@ async function generateHlsPlaylistCommon (options: {
   const videoTranscodedBasePath = join(transcodeDirectory, type)
   await ensureDir(videoTranscodedBasePath)
 
-  const videoFilename = generateHLSVideoFilename(resolution)
+  const videoFilename = generateHLSVideoFilename(resolution, video.uuid)
   const resolutionPlaylistFilename = getHlsResolutionPlaylistFilename(videoFilename)
   const resolutionPlaylistFileTranscodePath = join(videoTranscodedBasePath, resolutionPlaylistFilename)
 
@@ -312,11 +312,11 @@ async function generateHlsPlaylistCommon (options: {
   const playlist = await VideoStreamingPlaylistModel.loadOrGenerate(video)
 
   if (!playlist.playlistFilename) {
-    playlist.playlistFilename = generateHLSMasterPlaylistFilename(video.isLive)
+    playlist.playlistFilename = generateHLSMasterPlaylistFilename(video.isLive, video.uuid)
   }
 
   if (!playlist.segmentsSha256Filename) {
-    playlist.segmentsSha256Filename = generateHlsSha256SegmentsFilename(video.isLive)
+    playlist.segmentsSha256Filename = generateHlsSha256SegmentsFilename(video.isLive, video.uuid)
   }
 
   playlist.p2pMediaLoaderInfohashes = []

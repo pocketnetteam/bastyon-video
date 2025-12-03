@@ -11,8 +11,8 @@ function generateWebTorrentVideoFilename (resolution: number, extname: string) {
   return buildUUID() + '-' + resolution + extname
 }
 
-function generateHLSVideoFilename (resolution: number) {
-  return `${buildUUID()}-${resolution}-fragmented.mp4`
+function generateHLSVideoFilename (resolution: number, uuid?: string) {
+  return `${uuid || buildUUID()}-${resolution}-fragmented.mp4`
 }
 
 // ################## Streaming playlist ##################
@@ -38,16 +38,16 @@ function getHlsResolutionPlaylistFilename (videoFilename: string) {
   return removeFragmentedMP4Ext(videoFilename) + '.m3u8'
 }
 
-function generateHLSMasterPlaylistFilename (isLive = false) {
+function generateHLSMasterPlaylistFilename (isLive = false, uuid?: string) {
   if (isLive) return 'master.m3u8'
 
-  return buildUUID() + '-master.m3u8'
+  return (uuid || buildUUID()) + '-master.m3u8'
 }
 
-function generateHlsSha256SegmentsFilename (isLive = false) {
+function generateHlsSha256SegmentsFilename (isLive = false, uuid?: string) {
   if (isLive) return 'segments-sha256.json'
 
-  return buildUUID() + '-segments-sha256.json'
+  return (uuid || buildUUID()) + '-segments-sha256.json'
 }
 
 // ################## Torrents ##################
