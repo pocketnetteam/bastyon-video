@@ -55,7 +55,7 @@
     "@ngx-loading-bar/router": "^6.0.0",
     "@peertube/p2p-media-loader-core": "^1.0.6",
     "@peertube/p2p-media-loader-hlsjs": "^1.0.8",
-    "@peertube/videojs-contextmenu": "^5.5.0",
+    "@peertube/videojs-contextmenu": "file:./vendor/videojs-contextmenu",
     "@peertube/xliffmerge": "^2.0.3",
     "@types/chart.js": "^2.9.16",
     "@types/core-js": "^2.5.2",
