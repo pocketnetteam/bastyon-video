@@ -1877,7 +1877,7 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
 
     const newStaticPathDir = `${WEBSERVER.URL}/${join(STATIC_PATHS.STREAMING_PLAYLISTS.HLS, this.uuid)}`
 
-    const videoPlaylist = this.VideoStreamingPlaylists[0]
+    const videoPlaylist = this?.VideoStreamingPlaylists[0]
 
     if (!videoPlaylist) {
       logger.warn('No playlist passed to getMiniatureStaticPath for: %s', this.uuid)
@@ -1903,7 +1903,7 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
 
     const newStaticPathDir = `${WEBSERVER.URL}/${join(STATIC_PATHS.STREAMING_PLAYLISTS.HLS, this.uuid)}`
 
-    const videoPlaylist = this.VideoStreamingPlaylists[0]
+    const videoPlaylist = this?.VideoStreamingPlaylists[0]
 
     if (!videoPlaylist) {
       logger.warn('No playlist passed to getPreviewStaticPath for: %s', this.uuid)
