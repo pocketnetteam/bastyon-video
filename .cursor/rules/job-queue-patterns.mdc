@@ -1,0 +1,386 @@
+---
+description: Job queue patterns and conventions using Bull
+globs: server/lib/job-queue/**/*.ts
+alwaysApply: false
+---
+
+# Job Queue Patterns
+
+## Job Handler Structure
+
+Follow consistent structure for job handlers:
+
+```typescript
+import { Job } from 'bull'
+import { logger } from '@server/helpers/logger'
+import { VideoModel } from '@server/models/video/video'
+
+// ✅ GOOD - Define payload interface
+export interface VideoTranscodingPayload {
+  type: 'new-resolution' | 'optimize' | 'merge-audio'
+  videoId: number
+  resolution?: number
+  isNewVideo?: boolean
+}
+
+// ✅ GOOD - Main processing function
+export async function processVideoTranscoding(
+  job: Job<VideoTranscodingPayload>
+): Promise<void> {
+  const payload = job.data
+
+  logger.info('Processing video transcoding job', { payload, jobId: job.id })
+
+  // Load video
+  const video = await VideoModel.loadAndPopulateAccountAndServerAndTags(payload.videoId)
+  if (!video) {
+    logger.error('Video not found for transcoding', { videoId: payload.videoId })
+    throw new Error(`Video ${payload.videoId} does not exist`)
+  }
+
+  try {
+    // Update job progress
+    await job.progress(10)
+
+    // Perform transcoding based on type
+    switch (payload.type) {
+      case 'new-resolution':
+        await transcodeNewResolution(video, payload.resolution!, job)
+        break
+      case 'optimize':
+        await optimizeOriginalVideo(video, job)
+        break
+      case 'merge-audio':
+        await mergeAudioVideoFiles(video, job)
+        break
+    }
+
+    await job.progress(100)
+
+    logger.info('Video transcoding completed', {
+      videoId: video.id,
+      type: payload.type
+    })
+  } catch (error) {
+    logger.error('Video transcoding failed', {
+      error,
+      videoId: video.id,
+      payload
+    })
+    throw error
+  }
+}
+
+// Helper functions
+async function transcodeNewResolution(
+  video: MVideoFullLight,
+  resolution: number,
+  job: Job
+): Promise<void> {
+  // Implementation
+  await job.progress(50)
+  // ...
+}
+```
+
+## Job Queue Configuration
+
+Configure job queues properly:
+
+```typescript
+// ✅ GOOD - Queue configuration
+import Queue, { Job, JobOptions } from 'bull'
+import { redis } from '@server/initializers/redis'
+
+export class JobQueue {
+  private static instance: JobQueue
+
+  private queues: Map<string, Queue.Queue> = new Map()
+
+  private constructor() {}
+
+  static get Instance() {
+    return this.instance || (this.instance = new this())
+  }
+
+  init() {
+    const jobTypes: string[] = [
+      'video-transcoding',
+      'activitypub-http-broadcast',
+      'activitypub-http-unicast',
+      'activitypub-http-fetcher',
+      'email',
+      'video-import',
+      'move-to-object-storage'
+    ]
+
+    for (const jobType of jobTypes) {
+      const queue = this.createQueue(jobType)
+      this.queues.set(jobType, queue)
+    }
+  }
+
+  private createQueue(jobType: string): Queue.Queue {
+    const queue = new Queue(jobType, {
+      redis: {
+        host: redis.hostname,
+        port: redis.port,
+        password: redis.auth
+      },
+      defaultJobOptions: {
+        removeOnComplete: 100,  // Keep last 100 completed jobs
+        removeOnFail: 1000,     // Keep last 1000 failed jobs
+        attempts: 3,
+        backoff: {
+          type: 'exponential',
+          delay: 5000
+        }
+      }
+    })
+
+    // Setup processor
+    queue.process(this.getProcessor(jobType))
+
+    // Setup event handlers
+    queue.on('completed', (job: Job) => {
+      logger.info('Job completed', { jobId: job.id, jobType })
+    })
+
+    queue.on('failed', (job: Job, err: Error) => {
+      logger.error('Job failed', { jobId: job.id, jobType, error: err })
+    })
+
+    return queue
+  }
+}
+```
+
+## Creating Jobs
+
+Use proper job creation patterns:
+
+```typescript
+// ✅ GOOD - Create job with proper options
+async function createTranscodingJob(
+  video: MVideo,
+  resolution: number,
+  priority: number = 10
+): Promise<void> {
+  const payload: VideoTranscodingPayload = {
+    type: 'new-resolution',
+    videoId: video.id,
+    resolution,
+    isNewVideo: false
+  }
+
+  const jobOptions: JobOptions = {
+    priority,
+    delay: 0,
+    attempts: 3,
+    backoff: {
+      type: 'exponential',
+      delay: 5000
+    }
+  }
+
+  await JobQueue.Instance.createJob({
+    type: 'video-transcoding',
+    payload,
+    options: jobOptions
+  })
+
+  logger.info('Transcoding job created', { videoId: video.id, resolution })
+}
+```
+
+## Job Priorities
+
+Use consistent priority levels:
+
+```typescript
+// ✅ GOOD - Define priority constants
+export const JOB_PRIORITIES = {
+  HIGH: 1,       // Critical operations (live stream ending, user actions)
+  NORMAL: 10,    // Standard operations (video transcoding)
+  LOW: 20        // Background tasks (statistics, cleanup)
+}
+
+// Usage
+await JobQueue.Instance.createJob({
+  type: 'video-transcoding',
+  payload: { videoId: video.id },
+  options: { priority: JOB_PRIORITIES.NORMAL }
+})
+
+await JobQueue.Instance.createJob({
+  type: 'video-live-ending',
+  payload: { videoId: liveVideo.id },
+  options: { priority: JOB_PRIORITIES.HIGH }
+})
+```
+
+## Error Handling in Jobs
+
+Handle errors properly with retry logic:
+
+```typescript
+// ✅ GOOD - Proper error handling
+export async function processVideoImport(
+  job: Job<VideoImportPayload>
+): Promise<void> {
+  const payload = job.data
+
+  try {
+    const videoImport = await VideoImportModel.findById(payload.videoImportId)
+    if (!videoImport) {
+      throw new Error(`Video import ${payload.videoImportId} not found`)
+    }
+
+    // Check if this is a retry
+    if (job.attemptsMade > 0) {
+      logger.warn('Retrying video import', {
+        importId: videoImport.id,
+        attempt: job.attemptsMade
+      })
+    }
+
+    await performImport(videoImport, job)
+
+    // Update state on success
+    videoImport.state = VideoImportState.SUCCESS
+    await videoImport.save()
+
+  } catch (error) {
+    // Determine if error is recoverable
+    if (isRecoverableError(error)) {
+      logger.warn('Recoverable error in video import', { error })
+      throw error  // Will retry
+    } else {
+      logger.error('Fatal error in video import', { error })
+      
+      // Mark as failed and don't retry
+      const videoImport = await VideoImportModel.findById(payload.videoImportId)
+      if (videoImport) {
+        videoImport.state = VideoImportState.FAILED
+        videoImport.error = error.message
+        await videoImport.save()
+      }
+      
+      return  // Don't throw - prevents retry
+    }
+  }
+}
+
+function isRecoverableError(error: any): boolean {
+  // Network errors, timeouts - recoverable
+  if (error.code === 'ETIMEDOUT' || error.code === 'ECONNREFUSED') {
+    return true
+  }
+  
+  // 4xx errors - not recoverable
+  if (error.statusCode >= 400 && error.statusCode < 500) {
+    return false
+  }
+  
+  // 5xx errors - recoverable
+  if (error.statusCode >= 500) {
+    return true
+  }
+  
+  return false
+}
+```
+
+## Progress Tracking
+
+Update job progress for long-running operations:
+
+```typescript
+// ✅ GOOD - Progress tracking
+export async function processVideoTranscoding(
+  job: Job<VideoTranscodingPayload>
+): Promise<void> {
+  const video = await loadVideo(job.data.videoId)
+  
+  // Initial setup
+  await job.progress(5)
+  
+  // Download (if remote)
+  if (video.remote) {
+    await downloadVideo(video, (percent) => {
+      job.progress(5 + (percent * 0.2))  // 5-25%
+    })
+  }
+  
+  await job.progress(25)
+  
+  // Transcode
+  await transcodeVideo(video, (percent) => {
+    job.progress(25 + (percent * 0.5))  // 25-75%
+  })
+  
+  await job.progress(75)
+  
+  // Upload to storage
+  await uploadVideo(video, (percent) => {
+    job.progress(75 + (percent * 0.2))  // 75-95%
+  })
+  
+  await job.progress(95)
+  
+  // Cleanup
+  await cleanup(video)
+  
+  await job.progress(100)
+}
+```
+
+## Job Cleanup
+
+Implement proper cleanup for failed/completed jobs:
+
+```typescript
+// ✅ GOOD - Cleanup on completion/failure
+export async function processMoveToObjectStorage(
+  job: Job<MoveObjectStoragePayload>
+): Promise<void> {
+  const { videoId } = job.data
+  const video = await VideoModel.load(videoId)
+  
+  const tempFiles: string[] = []
+  
+  try {
+    // Move files
+    for (const file of video.VideoFiles) {
+      const tempPath = await downloadToTemp(file)
+      tempFiles.push(tempPath)
+      
+      await uploadToObjectStorage(file, tempPath)
+      await file.save()
+    }
+    
+    // Success - remove local files
+    await video.removeLocalFiles()
+    
+  } catch (error) {
+    // Failure - rollback
+    logger.error('Failed to move to object storage, rolling back', { error })
+    
+    for (const file of video.VideoFiles) {
+      if (file.objectStorageUrl) {
+        await deleteFromObjectStorage(file.objectStorageUrl)
+        file.objectStorageUrl = null
+        await file.save()
+      }
+    }
+    
+    throw error
+    
+  } finally {
+    // Always cleanup temp files
+    for (const tempFile of tempFiles) {
+      await remove(tempFile)
+    }
+  }
+}
+```

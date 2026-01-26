@@ -1,0 +1,334 @@
+---
+description: Angular frontend patterns and conventions
+globs: client/src/**/*.ts
+alwaysApply: false
+---
+
+# Angular Frontend Standards
+
+## Component Structure
+
+Follow Angular best practices for component organization:
+
+```typescript
+import { Component, OnInit, OnDestroy } from '@angular/core'
+import { Subject } from 'rxjs'
+import { takeUntil } from 'rxjs/operators'
+
+// ✅ GOOD - Proper component structure
+@Component({
+  selector: 'my-video-list',
+  templateUrl: './video-list.component.html',
+  styleUrls: ['./video-list.component.scss']
+})
+export class VideoListComponent implements OnInit, OnDestroy {
+  videos: Video[] = []
+  isLoading = false
+  
+  private destroy$ = new Subject<void>()
+
+  constructor(
+    private videoService: VideoService,
+    private notifier: Notifier
+  ) {}
+
+  ngOnInit() {
+    this.loadVideos()
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next()
+    this.destroy$.complete()
+  }
+
+  private loadVideos() {
+    this.isLoading = true
+    
+    this.videoService.getVideos()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: result => {
+          this.videos = result.data
+          this.isLoading = false
+        },
+        error: err => {
+          this.notifier.error(err.message)
+          this.isLoading = false
+        }
+      })
+  }
+}
+```
+
+## Service Patterns
+
+Keep services focused and use observables:
+
+```typescript
+import { Injectable } from '@angular/core'
+import { HttpClient, HttpParams } from '@angular/common/http'
+import { Observable } from 'rxjs'
+import { map, catchError } from 'rxjs/operators'
+
+// ✅ GOOD - Service with proper error handling
+@Injectable({
+  providedIn: 'root'
+})
+export class VideoService {
+  private readonly apiUrl = '/api/v1/videos'
+
+  constructor(private http: HttpClient) {}
+
+  getVideos(options: {
+    start?: number
+    count?: number
+    sort?: string
+  } = {}): Observable<ResultList<Video>> {
+    let params = new HttpParams()
+    
+    if (options.start) params = params.set('start', options.start.toString())
+    if (options.count) params = params.set('count', options.count.toString())
+    if (options.sort) params = params.set('sort', options.sort)
+
+    return this.http.get<ResultList<Video>>(this.apiUrl, { params })
+      .pipe(
+        map(result => ({
+          total: result.total,
+          data: result.data.map(v => new Video(v))
+        })),
+        catchError(this.handleError)
+      )
+  }
+
+  getVideo(id: string): Observable<Video> {
+    return this.http.get<Video>(`${this.apiUrl}/${id}`)
+      .pipe(map(v => new Video(v)))
+  }
+
+  private handleError(error: any): Observable<never> {
+    console.error('API Error:', error)
+    throw error
+  }
+}
+```
+
+## RxJS Best Practices
+
+Use proper RxJS patterns and operators:
+
+```typescript
+// ❌ BAD - Nested subscriptions
+this.videoService.getVideo(id).subscribe(video => {
+  this.channelService.getChannel(video.channelId).subscribe(channel => {
+    this.channel = channel
+  })
+})
+
+// ✅ GOOD - Proper chaining
+this.videoService.getVideo(id)
+  .pipe(
+    switchMap(video => {
+      this.video = video
+      return this.channelService.getChannel(video.channelId)
+    }),
+    takeUntil(this.destroy$)
+  )
+  .subscribe(channel => {
+    this.channel = channel
+  })
+
+// ✅ GOOD - Combine multiple observables
+forkJoin({
+  video: this.videoService.getVideo(id),
+  channel: this.channelService.getChannel(channelId),
+  comments: this.commentService.getComments(id)
+})
+  .pipe(takeUntil(this.destroy$))
+  .subscribe(({ video, channel, comments }) => {
+    this.video = video
+    this.channel = channel
+    this.comments = comments
+  })
+```
+
+## Template Best Practices
+
+Keep templates clean and use proper binding:
+
+```html
+<!-- ✅ GOOD - Clean template with async pipe -->
+<div class="video-list">
+  <ng-container *ngIf="videos$ | async as videos; else loading">
+    <div *ngFor="let video of videos; trackBy: trackByVideoId" 
+         class="video-item">
+      <my-video-miniature 
+        [video]="video"
+        (clicked)="onVideoClick($event)">
+      </my-video-miniature>
+    </div>
+    
+    <div *ngIf="videos.length === 0" class="no-results">
+      No videos found
+    </div>
+  </ng-container>
+
+  <ng-template #loading>
+    <my-loader></my-loader>
+  </ng-template>
+</div>
+```
+
+## Forms
+
+Use reactive forms with proper validation:
+
+```typescript
+import { FormBuilder, FormGroup, Validators } from '@angular/forms'
+
+// ✅ GOOD - Reactive form with validation
+@Component({...})
+export class VideoEditComponent implements OnInit {
+  form: FormGroup
+
+  constructor(
+    private fb: FormBuilder,
+    private videoService: VideoService
+  ) {}
+
+  ngOnInit() {
+    this.form = this.fb.group({
+      name: ['', [
+        Validators.required,
+        Validators.minLength(3),
+        Validators.maxLength(120)
+      ]],
+      description: ['', Validators.maxLength(10000)],
+      privacy: [VideoPrivacy.PUBLIC, Validators.required],
+      category: [null],
+      tags: [[]],
+      channelId: ['', Validators.required]
+    })
+  }
+
+  onSubmit() {
+    if (this.form.invalid) {
+      return
+    }
+
+    const video = this.form.value
+
+    this.videoService.updateVideo(this.videoId, video)
+      .subscribe({
+        next: () => {
+          this.notifier.success('Video updated successfully')
+          this.router.navigate(['/videos', this.videoId])
+        },
+        error: err => {
+          this.notifier.error(err.message)
+        }
+      })
+  }
+}
+```
+
+## State Management
+
+Use services for shared state:
+
+```typescript
+// ✅ GOOD - State service
+@Injectable({
+  providedIn: 'root'
+})
+export class UserService {
+  private userSubject = new BehaviorSubject<User | null>(null)
+  public user$ = this.userSubject.asObservable()
+
+  constructor(private authHttp: AuthHttp) {}
+
+  loadUser() {
+    this.authHttp.get<User>('/api/v1/users/me')
+      .subscribe(user => this.userSubject.next(user))
+  }
+
+  updateUser(userData: Partial<User>) {
+    return this.authHttp.put<User>('/api/v1/users/me', userData)
+      .pipe(
+        tap(user => this.userSubject.next(user))
+      )
+  }
+}
+```
+
+## Performance Optimization
+
+Use proper change detection strategies:
+
+```typescript
+// ✅ GOOD - OnPush for better performance
+@Component({
+  selector: 'my-video-miniature',
+  templateUrl: './video-miniature.component.html',
+  styleUrls: ['./video-miniature.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class VideoMiniatureComponent {
+  @Input() video: Video
+  @Output() clicked = new EventEmitter<Video>()
+
+  constructor(private cd: ChangeDetectorRef) {}
+
+  onClick() {
+    this.clicked.emit(this.video)
+  }
+}
+```
+
+## TrackBy Functions
+
+Always use trackBy for lists:
+
+```typescript
+// ✅ GOOD - TrackBy function
+@Component({...})
+export class VideoListComponent {
+  videos: Video[] = []
+
+  trackByVideoId(index: number, video: Video): number {
+    return video.id
+  }
+}
+```
+
+```html
+<div *ngFor="let video of videos; trackBy: trackByVideoId">
+  <!-- ... -->
+</div>
+```
+
+## Error Handling
+
+Use centralized error handling:
+
+```typescript
+// ✅ GOOD - Global error handler
+@Injectable()
+export class GlobalErrorHandler implements ErrorHandler {
+  constructor(
+    private notifier: Notifier,
+    private logger: LoggerService
+  ) {}
+
+  handleError(error: Error | HttpErrorResponse) {
+    if (error instanceof HttpErrorResponse) {
+      // Server error
+      this.notifier.error(`Server Error: ${error.message}`)
+      this.logger.error('HTTP Error', error)
+    } else {
+      // Client error
+      this.notifier.error('An unexpected error occurred')
+      this.logger.error('Client Error', error)
+    }
+  }
+}
+```

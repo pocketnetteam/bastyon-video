@@ -1,0 +1,172 @@
+---
+description: TypeScript backend coding standards for PeerTube server
+globs: server/**/*.ts
+alwaysApply: false
+---
+
+# Backend TypeScript Standards
+
+## Error Handling
+
+Always handle errors properly and provide context:
+
+```typescript
+// ❌ BAD - Swallowing errors
+try {
+  await performOperation()
+} catch (e) {
+  // Silent failure
+}
+
+// ❌ BAD - Generic errors
+throw new Error('Failed')
+
+// ✅ GOOD - Proper error handling with context
+try {
+  await performOperation()
+} catch (err) {
+  logger.error('Failed to perform operation', { error: err, context: additionalInfo })
+  throw new VideoProcessingError('Unable to process video', { cause: err })
+}
+```
+
+## Async/Await Patterns
+
+Use async/await consistently and avoid callback hell:
+
+```typescript
+// ❌ BAD - Callback style
+function getVideo(id: number, callback: (err: Error, video: Video) => void) {
+  VideoModel.findByPk(id, (err, video) => {
+    callback(err, video)
+  })
+}
+
+// ✅ GOOD - Async/await
+async function getVideo(id: number): Promise<Video> {
+  const video = await VideoModel.findByPk(id)
+  if (!video) throw new VideoNotFoundError(`Video ${id} not found`)
+  return video
+}
+```
+
+## Sequelize Model Usage
+
+Always use proper type safety with Sequelize models:
+
+```typescript
+// ❌ BAD - Using raw queries without types
+const results = await sequelize.query('SELECT * FROM videos')
+
+// ✅ GOOD - Using typed models
+const videos = await VideoModel.findAll({
+  where: { isLive: true },
+  include: [
+    { model: VideoChannelModel, required: true },
+    { model: VideoFileModel }
+  ]
+})
+```
+
+## Logger Usage
+
+Use the Winston logger with proper context:
+
+```typescript
+import { logger } from '@server/helpers/logger'
+
+// ❌ BAD - Console logging
+console.log('Video uploaded')
+
+// ✅ GOOD - Structured logging
+logger.info('Video uploaded successfully', {
+  videoId: video.id,
+  userId: user.id,
+  size: video.size
+})
+```
+
+## Transaction Handling
+
+Always use transactions for operations that modify multiple tables:
+
+```typescript
+// ✅ GOOD - Using transactions
+const video = await sequelizeTypescript.transaction(async t => {
+  const videoCreated = await VideoModel.create(videoData, { transaction: t })
+  
+  await VideoFileModel.create({
+    videoId: videoCreated.id,
+    ...fileData
+  }, { transaction: t })
+  
+  await TagModel.findOrCreateTags(tags, t)
+  
+  return videoCreated
+})
+```
+
+## Type Imports
+
+Import types properly to avoid circular dependencies:
+
+```typescript
+// ❌ BAD - Direct import can cause circular deps
+import { MVideoFullLight } from '@server/types/models'
+
+// ✅ GOOD - Use type-only imports when possible
+import type { MVideoFullLight } from '@server/types/models'
+```
+
+## Validation
+
+Use express-validator for request validation:
+
+```typescript
+import { body, param, query } from 'express-validator'
+import { isIdValid } from '@server/helpers/custom-validators/misc'
+
+// ✅ GOOD - Comprehensive validation
+const videoUpdateValidator = [
+  param('id').custom(isIdValid),
+  body('name').optional().trim().isLength({ min: 3, max: 120 }),
+  body('category').optional().isInt(),
+  body('privacy').optional().isInt(),
+  areValidationErrors
+]
+```
+
+## Job Queue Patterns
+
+When creating job queue handlers, follow this structure:
+
+```typescript
+// ✅ GOOD - Proper job handler structure
+import { Job } from 'bull'
+import { logger } from '@server/helpers/logger'
+
+export interface VideoTranscodingPayload {
+  videoId: number
+  resolution: number
+}
+
+async function processVideoTranscoding(job: Job<VideoTranscodingPayload>) {
+  const payload = job.data
+  
+  logger.info('Processing video transcoding', { payload })
+  
+  try {
+    const video = await VideoModel.loadAndPopulateAccountAndServerAndTags(payload.videoId)
+    if (!video) {
+      throw new Error(`Video ${payload.videoId} not found`)
+    }
+    
+    await transcodeVideo(video, payload.resolution)
+    
+    logger.info('Video transcoding completed', { videoId: video.id })
+  } catch (err) {
+    logger.error('Video transcoding failed', { error: err, payload })
+    throw err
+  }
+}
+```

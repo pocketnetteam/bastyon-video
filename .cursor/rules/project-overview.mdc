@@ -1,0 +1,198 @@
+---
+description: Project overview and architecture context for Bastyon Video Servers
+alwaysApply: true
+---
+
+# Bastyon Video Servers - Project Context
+
+## What This Project Is
+
+This is a **PeerTube-based video streaming platform** (v4.2.2) customized for the **Pocketnet/Bastyon ecosystem**. It provides decentralized, federated video hosting using ActivityPub protocol and peer-to-peer (WebTorrent) distribution.
+
+## Key Architectural Components
+
+### Backend (Node.js/Express)
+- **Location**: `/server/`
+- **Entry Point**: `server.ts`
+- **Framework**: Express.js with TypeScript
+- **ORM**: Sequelize-TypeScript
+- **Job Queue**: Bull (Redis-backed)
+
+### Frontend (Angular)
+- **Location**: `/client/`
+- **Framework**: Angular SPA
+- **Video Player**: Video.js with WebTorrent
+- **Styles**: SCSS with Angular Material-inspired components
+
+### Database
+- **System**: PostgreSQL 13+
+- **Models**: `/server/models/`
+- **Migrations**: `/server/initializers/migrations/`
+
+### Core Features
+1. **Video Management**: Upload, transcode, serve videos
+2. **Live Streaming**: RTMP ingestion, HLS output
+3. **Federation**: ActivityPub for inter-instance communication
+4. **P2P Distribution**: WebTorrent for bandwidth reduction
+5. **Job Processing**: Asynchronous tasks via Bull queues
+
+## Related Codebases
+
+**Pocketnet Core**: `../pocketnet/`
+- Blockchain node for Bastyon ecosystem
+- Provides authentication backend
+- Integration APIs
+
+## Deployment Context
+
+This application runs in **Docker containers**:
+- `peertube`: Main Node.js application
+- `postgres`: PostgreSQL database
+- `redis`: Cache and job queue
+- `webserver`: Nginx reverse proxy
+- `postfix`: Email delivery
+- `certbot`: SSL certificate management
+
+See `docker-compose.yml` for complete setup.
+
+## Important Directories
+
+```
+├── server/               # Backend code
+│   ├── controllers/      # API route handlers
+│   ├── models/          # Database models
+│   ├── lib/             # Business logic
+│   │   ├── job-queue/   # Job handlers
+│   │   ├── activitypub/ # Federation logic
+│   │   └── transcoding/ # Video processing
+│   ├── middlewares/     # Express middlewares
+│   └── helpers/         # Utility functions
+├── client/              # Angular frontend
+├── shared/              # Shared TypeScript code
+├── config/              # Configuration files
+└── scripts/             # CLI utilities
+```
+
+## Common Operations
+
+### Video Upload Flow
+1. User uploads via API → Multer receives file
+2. Video model created → Job queued
+3. Transcoding job processes → Multiple resolutions
+4. HLS playlist generated → WebTorrent created
+5. Files stored (local or S3) → Video published
+
+### Live Streaming Flow
+1. RTMP stream received → Node Media Server
+2. FFmpeg transcodes → HLS segments created
+3. Segments streamed to viewers → Video.js player
+4. Optionally saved as replay
+
+### Federation Flow
+1. Local activity occurs → ActivityPub object created
+2. Job queued for broadcast → HTTP signed requests
+3. Sent to follower inboxes → Remote instances process
+4. Remote objects cached → Federation synchronized
+
+## Technology Stack
+
+**Backend**:
+- Node.js 16+, Express, TypeScript
+- Sequelize (PostgreSQL ORM)
+- Bull (job queue)
+- FFmpeg (video processing)
+- WebTorrent (P2P)
+
+**Frontend**:
+- Angular, RxJS, TypeScript
+- Video.js (player)
+- SCSS (styling)
+
+**Infrastructure**:
+- Docker & Docker Compose
+- Nginx (reverse proxy)
+- PostgreSQL 13 (database)
+- Redis 6 (cache/queue)
+
+## Development Commands
+
+```bash
+# Install dependencies
+npm install
+
+# Development mode (hot reload)
+npm run dev              # Full stack
+npm run dev:server      # Backend only
+npm run dev:client      # Frontend only
+
+# Build for production
+npm run build
+
+# Run tests
+npm test
+
+# Database migrations (automatic on startup)
+# Manual: npm run tsc -- scripts/migrations/...
+
+# CLI tools
+npm run prune-storage
+npm run create-transcoding-job
+npm run regenerate-thumbnails
+```
+
+## Configuration
+
+Main config file: `config/production.yaml`
+
+Key sections:
+- `webserver`: Domain, ports, HTTPS
+- `database`: PostgreSQL connection
+- `redis`: Redis connection
+- `storage`: File paths
+- `object_storage`: S3 configuration
+- `transcoding`: Video encoding settings
+- `live`: Live streaming settings
+- `federation`: ActivityPub settings
+
+## Bastyon-Specific Customizations
+
+1. **Pocketnet Authentication Plugin**: `peertube-plugin-pocketnet-auth`
+   - Custom authentication flow
+   - User sync with Pocketnet blockchain
+
+2. **Integration with Pocketnet Core**: Communication with `../pocketnet/`
+
+## Documentation
+
+- **Architecture**: See `ARCHITECTURE.md`
+- **Deployment**: See `BASTYON_DEPLOYMENT.md`
+- **Upstream PeerTube**: https://docs.joinpeertube.org
+
+## Code Style
+
+- **Linting**: ESLint with TypeScript rules
+- **Formatting**: StandardJS (backend), Angular style guide (frontend)
+- **Type Safety**: Strict TypeScript configuration
+
+## Testing
+
+- **Unit Tests**: Mocha + Chai
+- **API Tests**: Supertest
+- **E2E Tests**: Custom test suite in `/server/tests/`
+
+## Common Gotchas
+
+1. **Circular Dependencies**: Use type-only imports when possible
+2. **Transactions**: Always use for multi-table operations
+3. **Job Retries**: Distinguish recoverable vs. fatal errors
+4. **ActivityPub**: Requires HTTPS and HTTP signatures
+5. **File Storage**: Can be local or object storage (S3)
+6. **FFmpeg**: Required for video processing and live streaming
+7. **WebTorrent**: Tracker runs on same port as API (9000)
+
+## Getting Help
+
+- Check existing code in similar files
+- Review PeerTube documentation: https://docs.joinpeertube.org
+- Examine test files for usage examples
+- See API reference: https://docs.joinpeertube.org/api-rest-reference.html

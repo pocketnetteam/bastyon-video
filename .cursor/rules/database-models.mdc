@@ -1,0 +1,318 @@
+---
+description: Sequelize model patterns and database conventions
+globs: server/models/**/*.ts
+alwaysApply: false
+---
+
+# Database Model Standards
+
+## Model Definition
+
+Use Sequelize-TypeScript decorators properly:
+
+```typescript
+import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from 'sequelize-typescript'
+
+// ✅ GOOD - Proper model definition
+@Table({
+  tableName: 'videoFile',
+  indexes: [
+    {
+      fields: ['videoId']
+    },
+    {
+      fields: ['infoHash']
+    },
+    {
+      fields: ['videoId', 'resolution', 'fps'],
+      unique: true
+    }
+  ]
+})
+export class VideoFileModel extends Model {
+  @Column(DataType.INTEGER)
+  resolution: number
+
+  @Column(DataType.INTEGER)
+  size: number
+
+  @Column(DataType.STRING)
+  extname: string
+
+  @Column(DataType.STRING)
+  infoHash: string
+
+  @Column(DataType.INTEGER)
+  fps: number
+
+  @ForeignKey(() => VideoModel)
+  @Column
+  videoId: number
+
+  @BelongsTo(() => VideoModel, {
+    foreignKey: {
+      allowNull: false
+    },
+    onDelete: 'CASCADE'
+  })
+  Video: VideoModel
+
+  @Column(DataType.DATE)
+  createdAt: Date
+
+  @Column(DataType.DATE)
+  updatedAt: Date
+}
+```
+
+## Associations
+
+Define associations clearly with proper cascading:
+
+```typescript
+// ✅ GOOD - Clear associations
+@HasMany(() => VideoFileModel, {
+  foreignKey: {
+    name: 'videoId',
+    allowNull: false
+  },
+  onDelete: 'CASCADE'
+})
+VideoFiles: VideoFileModel[]
+
+@BelongsTo(() => VideoChannelModel, {
+  foreignKey: {
+    allowNull: false
+  },
+  onDelete: 'CASCADE'
+})
+VideoChannel: VideoChannelModel
+```
+
+## Scopes
+
+Use scopes for common query patterns:
+
+```typescript
+// ✅ GOOD - Reusable scopes
+@DefaultScope(() => ({
+  include: [
+    {
+      model: VideoChannelModel.unscoped(),
+      required: true
+    }
+  ]
+}))
+@Scopes(() => ({
+  withFiles: {
+    include: [
+      {
+        model: VideoFileModel,
+        required: false
+      }
+    ]
+  },
+  withAccountAndChannel: {
+    include: [
+      {
+        model: VideoChannelModel.scope('withAccount'),
+        required: true
+      }
+    ]
+  }
+}))
+export class VideoModel extends Model {
+  // ...
+}
+
+// Usage
+const videos = await VideoModel.scope(['withFiles', 'withAccountAndChannel']).findAll()
+```
+
+## Static Methods
+
+Create static methods for common queries:
+
+```typescript
+// ✅ GOOD - Typed static methods
+export class VideoModel extends Model {
+  static async loadByUUID(uuid: string): Promise<MVideoThumbnail> {
+    const query = {
+      where: { uuid },
+      include: [
+        {
+          model: ThumbnailModel,
+          required: false
+        }
+      ]
+    }
+    
+    return VideoModel.findOne(query)
+  }
+
+  static async listForApi(options: {
+    start: number
+    count: number
+    sort: string
+    nsfw?: boolean
+    filter?: string
+  }) {
+    const query = {
+      offset: options.start,
+      limit: options.count,
+      order: getSort(options.sort),
+      where: buildWhere(options)
+    }
+    
+    return VideoModel.findAndCountAll(query)
+  }
+}
+```
+
+## Instance Methods
+
+Add instance methods for common operations:
+
+```typescript
+// ✅ GOOD - Instance methods
+export class VideoModel extends Model {
+  // Format for API response
+  toFormattedJSON(this: MVideoFormattable): Video {
+    return {
+      id: this.id,
+      uuid: this.uuid,
+      name: this.name,
+      category: {
+        id: this.category,
+        label: VideoModel.getCategoryLabel(this.category)
+      },
+      // ... more fields
+    }
+  }
+
+  // Format for ActivityPub
+  toActivityPubObject(this: MVideoAP): VideoObject {
+    return {
+      type: 'Video' as 'Video',
+      id: this.url,
+      name: this.name,
+      duration: getActivityStreamDuration(this.duration),
+      uuid: this.uuid,
+      // ... ActivityPub fields
+    }
+  }
+
+  // Check permissions
+  isOwned(this: MVideo): boolean {
+    return this.remote === false
+  }
+
+  canBeUpdatedBy(user: MUser): boolean {
+    return this.VideoChannel.Account.userId === user.id
+  }
+}
+```
+
+## Hooks
+
+Use hooks for automatic operations:
+
+```typescript
+// ✅ GOOD - Lifecycle hooks
+@BeforeDestroy
+static async removeFiles(instance: VideoModel) {
+  const tasks: Promise<any>[] = []
+
+  tasks.push(instance.removeThumbnails())
+  tasks.push(instance.removePreview())
+
+  // Remove video files
+  for (const file of instance.VideoFiles) {
+    tasks.push(instance.removeFile(file))
+    tasks.push(instance.removeTorrent(file))
+  }
+
+  await Promise.all(tasks)
+}
+
+@BeforeCreate
+static async setUUID(instance: VideoModel) {
+  if (!instance.uuid) {
+    instance.uuid = buildUUID()
+  }
+}
+```
+
+## Transactions
+
+Always use transactions for complex operations:
+
+```typescript
+// ✅ GOOD - Transaction usage
+static async create(
+  videoData: VideoCreate,
+  t: Transaction
+): Promise<MVideoFullLight> {
+  const video = await VideoModel.create(videoData, { transaction: t })
+
+  await TagModel.findOrCreateTags(videoData.tags, t)
+
+  await video.$set('Tags', tags, { transaction: t })
+
+  await video.addAndSaveThumbnail(thumbnail, t)
+
+  return video
+}
+```
+
+## Query Optimization
+
+Add indexes for frequently queried fields:
+
+```typescript
+// ✅ GOOD - Proper indexing
+@Table({
+  tableName: 'video',
+  indexes: [
+    { fields: ['uuid'], unique: true },
+    { fields: ['url'], unique: true },
+    { fields: ['channelId'] },
+    { fields: ['createdAt'] },
+    { fields: ['views'] },
+    { fields: ['remote', 'views'] },  // Composite index
+    { 
+      fields: ['name'],
+      using: 'gin',
+      operator: 'gin_trgm_ops'  // For LIKE queries
+    }
+  ]
+})
+```
+
+## Type Safety
+
+Use proper TypeScript types for model instances:
+
+```typescript
+// Define model types
+export type MVideo = Omit<VideoModel, 'VideoChannel' | 'Tags'>
+export type MVideoId = Pick<VideoModel, 'id'>
+export type MVideoUUID = Pick<VideoModel, 'uuid'>
+export type MVideoUrl = Pick<VideoModel, 'url'>
+
+export type MVideoWithFile = MVideo & {
+  VideoFiles: VideoFileModel[]
+}
+
+export type MVideoFullLight = MVideo & {
+  VideoChannel: MChannelAccountLight
+  Tags: TagModel[]
+  VideoFiles: VideoFileModel[]
+  Thumbnails: ThumbnailModel[]
+}
+
+// Use in function signatures
+function processVideo(video: MVideoWithFile): Promise<void> {
+  // video.VideoFiles is guaranteed to exist
+}
+```

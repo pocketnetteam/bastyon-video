@@ -1,0 +1,522 @@
+---
+description: ActivityPub federation patterns and conventions
+globs: server/lib/activitypub/**/*.ts
+alwaysApply: false
+---
+
+# ActivityPub Federation Standards
+
+## Activity Creation
+
+Follow ActivityPub spec for creating activities:
+
+```typescript
+import { ActivityCreate, VideoObject } from '@shared/models/activitypub'
+import { buildUUID } from '@server/helpers/uuid'
+
+// ✅ GOOD - Proper Activity structure
+export function buildCreateActivity(
+  url: string,
+  actor: MActorUrl,
+  object: VideoObject
+): ActivityCreate {
+  return {
+    type: 'Create',
+    id: url + '/activity',
+    actor: actor.url,
+    to: object.to,
+    cc: object.cc,
+    object
+  }
+}
+
+// ✅ GOOD - Video to ActivityPub object
+export function videoToActivityPubObject(video: MVideoAP): VideoObject {
+  return {
+    type: 'Video' as 'Video',
+    id: video.url,
+    name: video.name,
+    duration: getActivityStreamDuration(video.duration),
+    uuid: video.uuid,
+    tag: video.Tags.map(t => ({
+      type: 'Hashtag' as 'Hashtag',
+      name: t.name
+    })),
+    category: {
+      identifier: video.category + '',
+      name: getCategoryLabel(video.category)
+    },
+    published: video.publishedAt.toISOString(),
+    updated: video.updatedAt.toISOString(),
+    mediaType: 'text/html',
+    url: [
+      {
+        type: 'Link',
+        mediaType: 'text/html',
+        href: WEBSERVER.URL + '/videos/watch/' + video.uuid
+      },
+      ...buildVideoFileUrls(video)
+    ],
+    to: video.getActivityPubAudience().to,
+    cc: video.getActivityPubAudience().cc
+  }
+}
+```
+
+## HTTP Signatures
+
+Always sign outgoing ActivityPub requests:
+
+```typescript
+import { sign } from 'http-signature'
+import { createPrivateKey } from 'crypto'
+
+// ✅ GOOD - Sign HTTP request
+export async function signAndSendActivity(
+  activity: Activity,
+  byActor: MActorSignature,
+  targetActorUrl: string
+) {
+  const body = JSON.stringify(activity)
+  
+  const digest = 'SHA-256=' + createHash('sha256')
+    .update(body)
+    .digest('base64')
+
+  const options = {
+    method: 'POST',
+    uri: targetActorUrl,
+    json: activity,
+    httpSignature: {
+      key: byActor.privateKey,
+      keyId: byActor.url,
+      headers: ['(request-target)', 'host', 'date', 'digest']
+    },
+    headers: {
+      'digest': digest
+    }
+  }
+
+  const response = await doRequest(options)
+  
+  logger.info('Activity sent', {
+    activityType: activity.type,
+    actorUrl: byActor.url,
+    targetUrl: targetActorUrl
+  })
+  
+  return response
+}
+
+// ✅ GOOD - Verify incoming signature
+export async function verifySignature(req: express.Request): Promise<MActorSignature> {
+  const signatureObject = parseHttpSignature(req, 10 * 1024)
+  
+  const actor = await ActorModel.loadByUrl(signatureObject.keyId)
+  if (!actor) {
+    throw new Error('Actor not found: ' + signatureObject.keyId)
+  }
+
+  const verified = verify(signatureObject, {
+    publicKey: actor.publicKey,
+    algorithm: 'rsa-sha256'
+  })
+
+  if (!verified) {
+    throw new Error('Invalid signature')
+  }
+
+  return actor
+}
+```
+
+## Inbox Processing
+
+Handle incoming ActivityPub activities properly:
+
+```typescript
+// ✅ GOOD - Inbox handler structure
+export async function processInboxActivity(
+  activity: Activity,
+  byActor: MActorSignature
+): Promise<void> {
+  logger.info('Processing inbox activity', {
+    type: activity.type,
+    actorUrl: byActor.url
+  })
+
+  // Verify actor is allowed
+  if (await isBlocked(byActor)) {
+    logger.warn('Ignoring activity from blocked actor', { actorUrl: byActor.url })
+    return
+  }
+
+  // Process based on activity type
+  switch (activity.type) {
+    case 'Create':
+      await processCreateActivity(activity as ActivityCreate, byActor)
+      break
+    case 'Update':
+      await processUpdateActivity(activity as ActivityUpdate, byActor)
+      break
+    case 'Delete':
+      await processDeleteActivity(activity as ActivityDelete, byActor)
+      break
+    case 'Follow':
+      await processFollowActivity(activity as ActivityFollow, byActor)
+      break
+    case 'Accept':
+      await processAcceptActivity(activity as ActivityAccept, byActor)
+      break
+    case 'Announce':
+      await processAnnounceActivity(activity as ActivityAnnounce, byActor)
+      break
+    case 'Like':
+      await processLikeActivity(activity as ActivityLike, byActor)
+      break
+    case 'Undo':
+      await processUndoActivity(activity as ActivityUndo, byActor)
+      break
+    default:
+      logger.warn('Unknown activity type', { type: activity.type })
+  }
+}
+
+// ✅ GOOD - Process Create activity
+async function processCreateActivity(
+  activity: ActivityCreate,
+  byActor: MActorSignature
+): Promise<void> {
+  const objectType = activity.object.type
+
+  if (objectType === 'Video') {
+    return processCreateVideo(activity, byActor)
+  } else if (objectType === 'Note') {
+    return processCreateComment(activity, byActor)
+  }
+
+  logger.warn('Unknown Create object type', { objectType })
+}
+
+async function processCreateVideo(
+  activity: ActivityCreate,
+  byActor: MActorSignature
+): Promise<void> {
+  const videoObject = activity.object as VideoObject
+
+  // Check if video already exists
+  const existingVideo = await VideoModel.loadByUrl(videoObject.id)
+  if (existingVideo) {
+    logger.info('Video already exists, skipping', { url: videoObject.id })
+    return
+  }
+
+  // Fetch full video object if needed
+  const fullVideo = await fetchRemoteVideo(videoObject.id)
+  if (!fullVideo) {
+    throw new Error('Cannot fetch video ' + videoObject.id)
+  }
+
+  // Create video in database
+  const video = await retryTransactionWrapper(async () => {
+    return sequelizeTypescript.transaction(async t => {
+      const channel = await VideoChannelModel.loadByUrl(fullVideo.attributedTo[0], t)
+      
+      if (!channel) {
+        throw new Error('Video channel not found')
+      }
+
+      return VideoModel.create({
+        name: fullVideo.name,
+        uuid: fullVideo.uuid,
+        url: fullVideo.id,
+        category: fullVideo.category?.identifier,
+        duration: parseDuration(fullVideo.duration),
+        channelId: channel.id,
+        remote: true,
+        published: new Date(fullVideo.published)
+      }, { transaction: t })
+    })
+  })
+
+  logger.info('Remote video created', { videoId: video.id, url: video.url })
+}
+```
+
+## Outbox Queries
+
+Implement outbox for actor's activities:
+
+```typescript
+// ✅ GOOD - Actor outbox endpoint
+export async function actorOutbox(req: express.Request, res: express.Response) {
+  const actor = res.locals.actor
+
+  const page = req.query.page
+  const size = 20
+
+  const outbox = await buildOutbox(actor, page, size)
+
+  return res.json(outbox)
+}
+
+async function buildOutbox(
+  actor: MActorFollowersUrl,
+  page?: string,
+  size = 20
+): Promise<OrderedCollectionObject<Activity>> {
+  const activities = await getActorActivities(actor, size, page)
+
+  const items = activities.map(a => a.toActivityPubObject())
+
+  if (page) {
+    return {
+      type: 'OrderedCollectionPage',
+      id: actor.url + '/outbox?page=' + page,
+      partOf: actor.url + '/outbox',
+      orderedItems: items,
+      next: hasMore ? actor.url + '/outbox?page=' + (parseInt(page) + 1) : undefined
+    }
+  }
+
+  return {
+    type: 'OrderedCollection',
+    id: actor.url + '/outbox',
+    totalItems: await getActorActivitiesCount(actor),
+    first: actor.url + '/outbox?page=1'
+  }
+}
+```
+
+## Fetching Remote Objects
+
+Fetch and cache remote ActivityPub objects:
+
+```typescript
+// ✅ GOOD - Fetch remote object with caching
+export async function fetchRemoteVideo(url: string): Promise<VideoObject | null> {
+  logger.info('Fetching remote video', { url })
+
+  // Check cache
+  const cached = await getVideoFromCache(url)
+  if (cached && !isExpired(cached)) {
+    logger.debug('Using cached video', { url })
+    return cached
+  }
+
+  try {
+    // Fetch with proper headers
+    const response = await doRequest({
+      uri: url,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"'
+      },
+      json: true,
+      timeout: 10000
+    })
+
+    const video = response.body as VideoObject
+
+    // Validate object
+    if (!isValidVideoObject(video)) {
+      throw new Error('Invalid video object')
+    }
+
+    // Cache for future use
+    await cacheVideo(url, video)
+
+    return video
+  } catch (err) {
+    logger.error('Failed to fetch remote video', { url, error: err })
+    return null
+  }
+}
+
+function isValidVideoObject(obj: any): obj is VideoObject {
+  return obj &&
+    obj.type === 'Video' &&
+    typeof obj.id === 'string' &&
+    typeof obj.name === 'string' &&
+    typeof obj.duration === 'string'
+}
+```
+
+## Following & Followers
+
+Implement ActivityPub follow mechanism:
+
+```typescript
+// ✅ GOOD - Send follow activity
+export async function sendFollow(
+  byActor: MActorSignature,
+  targetActor: MActorUrl
+): Promise<void> {
+  const activity: ActivityFollow = {
+    type: 'Follow',
+    id: buildUUID(),
+    actor: byActor.url,
+    object: targetActor.url
+  }
+
+  // Create follow in database
+  const follow = await ActorFollowModel.create({
+    actorId: byActor.id,
+    targetActorId: targetActor.id,
+    state: 'pending'
+  })
+
+  // Send activity
+  await signAndSendActivity(activity, byActor, targetActor.inboxUrl)
+
+  logger.info('Follow request sent', {
+    follower: byActor.url,
+    following: targetActor.url
+  })
+}
+
+// ✅ GOOD - Process follow request
+async function processFollowActivity(
+  activity: ActivityFollow,
+  byActor: MActorSignature
+): Promise<void> {
+  const targetActor = await getLocalActorByUrl(activity.object as string)
+  
+  if (!targetActor) {
+    logger.warn('Target actor not found', { url: activity.object })
+    return
+  }
+
+  // Check if auto-accept follows
+  const autoAccept = await shouldAutoAcceptFollow(byActor, targetActor)
+
+  const follow = await ActorFollowModel.create({
+    actorId: byActor.id,
+    targetActorId: targetActor.id,
+    state: autoAccept ? 'accepted' : 'pending'
+  })
+
+  if (autoAccept) {
+    // Send Accept activity
+    const acceptActivity: ActivityAccept = {
+      type: 'Accept',
+      id: buildUUID(),
+      actor: targetActor.url,
+      object: activity
+    }
+
+    await signAndSendActivity(acceptActivity, targetActor, byActor.inboxUrl)
+
+    logger.info('Follow request accepted', {
+      follower: byActor.url,
+      following: targetActor.url
+    })
+  } else {
+    logger.info('Follow request pending approval', {
+      follower: byActor.url,
+      following: targetActor.url
+    })
+  }
+}
+```
+
+## Broadcasting
+
+Broadcast activities to all followers:
+
+```typescript
+// ✅ GOOD - Broadcast activity via job queue
+export async function broadcastToFollowers(
+  activity: Activity,
+  byActor: MActorSignature,
+  options: {
+    contextType?: 'Video' | 'VideoChannel' | 'Account'
+  } = {}
+): Promise<void> {
+  // Get all followers
+  const followers = await ActorFollowModel.listAcceptedFollowerSharedInboxUrls(byActor)
+
+  if (followers.length === 0) {
+    logger.info('No followers to broadcast to', { actorUrl: byActor.url })
+    return
+  }
+
+  // Group by shared inbox for efficiency
+  const inboxes = new Set(followers.map(f => f.sharedInboxUrl || f.inboxUrl))
+
+  logger.info('Broadcasting activity', {
+    activityType: activity.type,
+    actorUrl: byActor.url,
+    inboxCount: inboxes.size
+  })
+
+  // Create job for each inbox
+  const jobs = Array.from(inboxes).map(inbox => ({
+    type: 'activitypub-http-broadcast' as const,
+    payload: {
+      uris: [inbox],
+      activity,
+      actorId: byActor.id
+    }
+  }))
+
+  await JobQueue.Instance.createJobs(jobs)
+}
+```
+
+## Error Handling
+
+Handle federation errors gracefully:
+
+```typescript
+// ✅ GOOD - Graceful error handling
+export async function sendActivityToInbox(
+  activity: Activity,
+  byActor: MActorSignature,
+  inboxUrl: string,
+  retries = 0
+): Promise<void> {
+  try {
+    await signAndSendActivity(activity, byActor, inboxUrl)
+  } catch (err) {
+    // Determine if we should retry
+    if (isRetryableError(err) && retries < 3) {
+      logger.warn('Retrying activity send', {
+        inboxUrl,
+        retries: retries + 1,
+        error: err.message
+      })
+      
+      await new Promise(resolve => setTimeout(resolve, 5000 * (retries + 1)))
+      return sendActivityToInbox(activity, byActor, inboxUrl, retries + 1)
+    }
+
+    // Log and give up
+    logger.error('Failed to send activity after retries', {
+      inboxUrl,
+      activityType: activity.type,
+      error: err
+    })
+
+    // Mark actor as unreachable if persistent failure
+    if (retries >= 3) {
+      await markActorAsUnreachable(inboxUrl)
+    }
+  }
+}
+
+function isRetryableError(err: any): boolean {
+  // Network errors
+  if (err.code === 'ETIMEDOUT' || err.code === 'ECONNREFUSED') {
+    return true
+  }
+
+  // 5xx errors
+  if (err.statusCode >= 500 && err.statusCode < 600) {
+    return true
+  }
+
+  // 4xx errors are not retryable
+  return false
+}
+```

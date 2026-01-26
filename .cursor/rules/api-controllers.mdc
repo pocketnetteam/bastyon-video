@@ -1,0 +1,201 @@
+---
+description: API controller patterns and conventions
+globs: server/controllers/**/*.ts
+alwaysApply: false
+---
+
+# API Controller Standards
+
+## Controller Structure
+
+Follow the established pattern for API controllers:
+
+```typescript
+import express from 'express'
+import { asyncMiddleware, authenticate, optionalAuthenticate } from '@server/middlewares'
+import { videoValidator } from '@server/middlewares/validators'
+
+const router = express.Router()
+
+// List videos (public endpoint)
+router.get('/',
+  optionalAuthenticate,
+  asyncMiddleware(listVideos)
+)
+
+// Get single video (public endpoint)
+router.get('/:id',
+  optionalAuthenticate,
+  asyncMiddleware(videoValidator),
+  asyncMiddleware(getVideo)
+)
+
+// Create video (authenticated endpoint)
+router.post('/',
+  authenticate,
+  asyncMiddleware(videoUploadValidator),
+  asyncMiddleware(createVideo)
+)
+
+// Update video (authenticated + ownership check)
+router.put('/:id',
+  authenticate,
+  asyncMiddleware(videoValidator),
+  asyncMiddleware(checkVideoOwnership),
+  asyncMiddleware(updateVideo)
+)
+
+// Delete video (authenticated + ownership check)
+router.delete('/:id',
+  authenticate,
+  asyncMiddleware(videoValidator),
+  asyncMiddleware(checkVideoOwnership),
+  asyncMiddleware(deleteVideo)
+)
+
+export { router as videosRouter }
+```
+
+## Handler Functions
+
+Keep handlers focused and use helper functions:
+
+```typescript
+// ✅ GOOD - Clean handler with helpers
+async function listVideos(req: express.Request, res: express.Response) {
+  const query = buildListQuery(req.query)
+  
+  const resultList = await VideoModel.listForApi(query)
+  
+  return res.json({
+    total: resultList.total,
+    data: resultList.data.map(v => v.toFormattedJSON())
+  })
+}
+
+// Extract query building to helper
+function buildListQuery(query: any) {
+  return {
+    start: parseInt(query.start) || 0,
+    count: parseInt(query.count) || 15,
+    sort: query.sort || '-createdAt',
+    search: query.search,
+    categoryOneOf: query.categoryOneOf,
+    licenceOneOf: query.licenceOneOf
+  }
+}
+```
+
+## Response Formatting
+
+Use consistent response formats:
+
+```typescript
+// ✅ GOOD - List response
+return res.json({
+  total: 100,
+  data: items.map(item => item.toFormattedJSON())
+})
+
+// ✅ GOOD - Single resource
+return res.json(video.toFormattedJSON())
+
+// ✅ GOOD - Success with no content
+return res.status(204).end()
+
+// ✅ GOOD - Created resource
+return res.status(201).json(video.toFormattedJSON())
+
+// ✅ GOOD - Error responses (handled by error middleware)
+throw new BadRequestError('Invalid video ID')
+```
+
+## Middleware Ordering
+
+Always maintain proper middleware order:
+
+```typescript
+// ✅ GOOD - Correct order
+router.post('/:id/rate',
+  authenticate,                    // 1. Authentication
+  asyncMiddleware(videoRateValidator),  // 2. Validation
+  asyncMiddleware(checkVideoExists),    // 3. Resource existence
+  asyncMiddleware(checkRateType),       // 4. Business logic checks
+  asyncMiddleware(rateVideo)            // 5. Handler
+)
+```
+
+## Pagination
+
+Always support pagination on list endpoints:
+
+```typescript
+// ✅ GOOD - Pagination support
+async function listVideos(req: express.Request, res: express.Response) {
+  const start = parseInt(req.query.start as string) || 0
+  const count = Math.min(parseInt(req.query.count as string) || 15, 100)
+  const sort = req.query.sort as string || '-createdAt'
+  
+  const resultList = await VideoModel.listForApi({
+    start,
+    count,
+    sort,
+    filter: req.query.filter
+  })
+  
+  return res.json({
+    total: resultList.total,
+    data: resultList.data.map(d => d.toFormattedJSON())
+  })
+}
+```
+
+## File Upload Handling
+
+Use proper multipart handling:
+
+```typescript
+import { getVideoFileMimeType } from '@server/helpers/video'
+
+// ✅ GOOD - File upload with validation
+async function uploadVideo(req: express.Request, res: express.Response) {
+  const videoFile = req.files['videofile'][0]
+  const user = res.locals.oauth.token.User
+  
+  // Validate file
+  const mimeType = await getVideoFileMimeType(videoFile.path)
+  if (!isVideoFileMimeTypeValid(mimeType)) {
+    throw new BadRequestError('Invalid video file type')
+  }
+  
+  // Create video
+  const video = await createVideoObject(videoFile, user)
+  
+  // Queue transcoding job
+  await JobQueue.Instance.createJob({
+    type: 'video-transcoding',
+    payload: { videoId: video.id }
+  })
+  
+  return res.json({ video: video.toFormattedJSON() })
+}
+```
+
+## ActivityPub Controllers
+
+Follow ActivityPub patterns for federation endpoints:
+
+```typescript
+// ✅ GOOD - ActivityPub endpoint
+async function videoController(req: express.Request, res: express.Response) {
+  const video = res.locals.videoAll
+  
+  // Serve ActivityPub JSON-LD
+  if (req.accepts('application/activity+json, application/ld+json')) {
+    return res.json(video.toActivityPubObject())
+  }
+  
+  // Redirect to web interface
+  return res.redirect(`/videos/watch/${video.uuid}`)
+}
+```
