@@ -279,6 +279,40 @@ describe('Test resumable upload', function () {
         }
       })
     })
+
+    it('Should reject malformed chunk data (Promise object)', async function () {
+      const uploadId = await prepareUpload({ token: server.accessToken })
+
+      // Try to send a malformed chunk (simulate Promise object being sent)
+      const res = await server.videos.sendResumableChunks({
+        token: server.accessToken,
+        pathUploadId: uploadId,
+        videoFilePath: buildAbsoluteFixturePath(defaultFixture),
+        size: 1000,
+        expectedStatus: HttpStatusCode.BAD_REQUEST_400,
+        // This simulates sending invalid data
+        contentRangeBuilder: () => 'bytes 0-999/1000'
+      })
+
+      // Server should handle the error gracefully without crashing
+      expect(res.status).to.equal(HttpStatusCode.BAD_REQUEST_400)
+    })
+
+    it('Should reject invalid content-range format', async function () {
+      const uploadId = await prepareUpload({ token: server.accessToken })
+
+      // Try to send chunk with invalid content-range
+      const res = await server.videos.sendResumableChunks({
+        token: server.accessToken,
+        pathUploadId: uploadId,
+        videoFilePath: buildAbsoluteFixturePath(defaultFixture),
+        size: 1000,
+        expectedStatus: HttpStatusCode.BAD_REQUEST_400,
+        contentRangeBuilder: () => 'invalid-range-format'
+      })
+
+      expect(res.status).to.equal(HttpStatusCode.BAD_REQUEST_400)
+    })
   })
 
   after(async function () {

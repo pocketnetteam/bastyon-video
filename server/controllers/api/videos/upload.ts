@@ -90,21 +90,22 @@ uploadRouter.post(
   authenticate,
   reqVideoFileAddResumable,
   asyncMiddleware(videosAddResumableInitValidator),
-  uploadx.upload
+  uploadxErrorHandler
 )
 
 uploadRouter.delete(
   "/upload-resumable",
   authenticate,
   asyncMiddleware(deleteUploadResumableCache),
-  uploadx.upload
+  uploadxErrorHandler
 )
 
 uploadRouter.put(
   "/upload-resumable",
   openapiOperationDoc({ operationId: "uploadResumable" }),
   authenticate,
-  uploadx.upload, // uploadx doesn't next() before the file upload completes
+  validateChunkData, // Validate chunk before processing
+  uploadxErrorHandler, // uploadx doesn't next() before the file upload completes
   asyncMiddleware(videosAddResumableValidator),
   asyncMiddleware(addVideoResumable)
 )
@@ -112,6 +113,134 @@ uploadRouter.put(
 // ---------------------------------------------------------------------------
 
 export { uploadRouter }
+
+// ---------------------------------------------------------------------------
+
+/**
+ * Validates chunk data before processing
+ * Prevents malformed data (like Promise objects) from reaching uploadx
+ */
+function validateChunkData (req: express.Request, res: express.Response, next: express.NextFunction) {
+  try {
+    const contentType = req.headers['content-type']
+    const contentRange = req.headers['content-range']
+
+    // For chunk uploads (PUT), we expect binary data with content-range header
+    if (req.method === 'PUT' && contentRange) {
+      // Check if body exists and is in a valid format
+      if (req.body !== undefined && req.body !== null) {
+        // Detect if body is a Promise or other invalid object type
+        const bodyType = Object.prototype.toString.call(req.body)
+
+        if (bodyType === '[object Promise]') {
+          logger.error('Invalid chunk data: Promise object detected', { contentType, contentRange, ...lTags() })
+          return res.fail({
+            status: HttpStatusCode.BAD_REQUEST_400,
+            message: 'Invalid chunk format. Expected binary data.'
+          })
+        }
+
+        // Check for other invalid types
+        if (typeof req.body === 'function' || typeof req.body === 'symbol') {
+          logger.error('Invalid chunk data type: ' + typeof req.body, { contentType, contentRange, ...lTags() })
+          return res.fail({
+            status: HttpStatusCode.BAD_REQUEST_400,
+            message: 'Invalid chunk format. Expected binary data.'
+          })
+        }
+
+        // If body is an object but not Buffer or expected format
+        if (typeof req.body === 'object' && !Buffer.isBuffer(req.body) && !(req.body instanceof Uint8Array)) {
+          // Check if it has promise-like properties
+          if ('then' in req.body || 'catch' in req.body || 'finally' in req.body) {
+            logger.error('Invalid chunk data: Promise-like object detected', { contentType, contentRange, ...lTags() })
+            return res.fail({
+              status: HttpStatusCode.BAD_REQUEST_400,
+              message: 'Invalid chunk format. Expected binary data.'
+            })
+          }
+        }
+      }
+
+      // Validate content-range format
+      const rangeMatch = contentRange.match(/^bytes (\d+)-(\d+)\/(\d+|\*)$/)
+      if (!rangeMatch) {
+        logger.error('Invalid content-range header format', { contentRange, ...lTags() })
+        return res.fail({
+          status: HttpStatusCode.BAD_REQUEST_400,
+          message: 'Invalid content-range header format.'
+        })
+      }
+    }
+
+    next()
+  } catch (err) {
+    logger.error('Error in chunk validation middleware', { err, ...lTags() })
+    return res.fail({
+      status: HttpStatusCode.BAD_REQUEST_400,
+      message: 'Invalid chunk data format.'
+    })
+  }
+}
+
+/**
+ * Error handling wrapper for uploadx middleware
+ * Prevents server crashes from malformed chunks or invalid upload data
+ */
+function uploadxErrorHandler (req: express.Request, res: express.Response, next: express.NextFunction) {
+  try {
+    // Validate request body/chunk data before passing to uploadx
+    if (req.body !== undefined && req.body !== null) {
+      // Check if body is a Promise or other invalid type
+      if (typeof req.body === 'object' && req.body.constructor && req.body.constructor.name === 'Promise') {
+        logger.error('Invalid chunk format received: Promise object', lTags())
+        return res.fail({
+          status: HttpStatusCode.BAD_REQUEST_400,
+          message: 'Invalid chunk format. Expected binary data or valid upload metadata.'
+        })
+      }
+
+      // Check for other invalid types
+      if (typeof req.body === 'function' || typeof req.body === 'symbol') {
+        logger.error('Invalid chunk format received: ' + typeof req.body, lTags())
+        return res.fail({
+          status: HttpStatusCode.BAD_REQUEST_400,
+          message: 'Invalid chunk format. Expected binary data or valid upload metadata.'
+        })
+      }
+    }
+
+    // Wrap uploadx.upload to catch any errors it might throw
+    uploadx.upload(req, res, (err?: any) => {
+      if (err) {
+        logger.error('Error in uploadx middleware', { err, ...lTags() })
+
+        // If response already sent, don't try to send another
+        if (res.headersSent) {
+          return next(err)
+        }
+
+        return res.fail({
+          status: HttpStatusCode.INTERNAL_SERVER_ERROR_500,
+          message: 'Upload processing failed. Please try again.'
+        })
+      }
+
+      next()
+    })
+  } catch (err) {
+    logger.error('Unexpected error in uploadx error handler', { err, ...lTags() })
+
+    if (!res.headersSent) {
+      return res.fail({
+        status: HttpStatusCode.INTERNAL_SERVER_ERROR_500,
+        message: 'Upload processing failed. Please try again.'
+      })
+    }
+
+    next(err)
+  }
+}
 
 // ---------------------------------------------------------------------------
 

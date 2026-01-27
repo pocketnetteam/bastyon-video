@@ -333,4 +333,35 @@ async function startApplication () {
   })
 
   process.on('SIGINT', () => process.exit(0))
+
+  // Handle unhandled promise rejections to prevent crashes from malformed upload chunks
+  process.on('unhandledRejection', (reason: Error | any, promise: Promise<any>) => {
+    logger.error('Unhandled promise rejection', {
+      reason: reason?.message || reason,
+      stack: reason?.stack,
+      promise: promise?.toString()
+    })
+
+    // Don't exit the process - let it continue running
+    // Only log the error to prevent Docker container restart
+  })
+
+  // Handle uncaught exceptions to prevent crashes
+  process.on('uncaughtException', (error: Error) => {
+    logger.error('Uncaught exception', {
+      error: error.message,
+      stack: error.stack
+    })
+
+    // Check if this is from uploadx or upload processing
+    if (error.stack && (error.stack.includes('uploadx') || error.stack.includes('upload-resumable'))) {
+      logger.error('Upload-related uncaught exception detected - continuing execution', { error: error.message })
+      // Don't exit - this might be from a malformed chunk
+      return
+    }
+
+    // For other critical errors, exit gracefully
+    logger.error('Critical error - shutting down gracefully')
+    process.exit(1)
+  })
 }
