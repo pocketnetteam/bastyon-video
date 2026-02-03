@@ -77,7 +77,11 @@ const sequelizeTypescript = new SequelizeTypescript({
   username,
   password,
   pool: {
-    max: poolMax
+    max: poolMax,
+    min: 0,                    // Минимальное количество соединений (0 для минимизации churn)
+    acquire: 120000,           // Таймаут получения соединения (120 сек)
+    idle: 30000,               // Таймаут простоя соединения (30 сек)
+    evict: 20000               // Интервал проверки неактивных соединений (20 сек)
   },
   benchmark: isTestInstance(),
   isolationLevel: Transaction.ISOLATION_LEVELS.SERIALIZABLE,

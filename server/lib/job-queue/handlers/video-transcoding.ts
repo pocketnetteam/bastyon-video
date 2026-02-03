@@ -41,24 +41,54 @@ async function processVideoTranscoding (job: Job) {
   const payload = job.data as VideoTranscodingPayload
   logger.info('Processing transcoding job %d.', job.id, lTags(payload.videoUUID))
 
-  const video = await VideoModel.loadAndPopulateAccountAndServerAndTags(payload.videoUUID)
-  // No video, maybe deleted?
-  if (!video) {
-    logger.info('Do not process job %d, video does not exist.', job.id, lTags(payload.videoUUID))
-    return undefined
+  try {
+    const video = await VideoModel.loadAndPopulateAccountAndServerAndTags(payload.videoUUID)
+    // No video, maybe deleted?
+    if (!video) {
+      logger.info('Do not process job %d, video does not exist.', job.id, lTags(payload.videoUUID))
+      return undefined
+    }
+
+    const user = await UserModel.loadByChannelActorId(video.VideoChannel.actorId)
+
+    const handler = handlers[payload.type]
+
+    if (!handler) {
+      throw new Error('Cannot find transcoding handler for ' + payload.type)
+    }
+
+    await handler(job, payload, video, user)
+
+    return video
+  } catch (err) {
+    // Логировать детальную информацию об ошибке
+    logger.error('Error processing transcoding job %d', job.id, { 
+      err, 
+      payload,
+      jobProgress: job.progress(),
+      jobAttemptsMade: job.attemptsMade
+    })
+    
+    // Если это ошибка БД, логировать предупреждение (Bull автоматически повторит задачу)
+    if (err.name === 'SequelizeConnectionAcquireTimeoutError') {
+      logger.warn('Database connection timeout for job %d, will retry', job.id, lTags(payload.videoUUID))
+    }
+    
+    // Ошибки ffmpeg с кодом 69 (Conversion failed) считаются terminal-failed
+    // Это обычно указывает на поврежденное видео или проблемы с исходным файлом
+    // Такие задачи не должны ретраиться, так как повторная попытка не поможет
+    if (err.message && err.message.includes('ffmpeg exited with code 69')) {
+      logger.error(
+        'FFmpeg conversion failed (code 69) for job %d - marking as terminal failure. ' +
+        'This usually indicates corrupted source video or unsupported format.',
+        job.id,
+        lTags(payload.videoUUID)
+      )
+      // Bull не будет ретраить задачу (attempts: 1), но помечаем её явно
+    }
+    
+    throw err
   }
-
-  const user = await UserModel.loadByChannelActorId(video.VideoChannel.actorId)
-
-  const handler = handlers[payload.type]
-
-  if (!handler) {
-    throw new Error('Cannot find transcoding handler for ' + payload.type)
-  }
-
-  await handler(job, payload, video, user)
-
-  return video
 }
 
 // ---------------------------------------------------------------------------

@@ -121,7 +121,7 @@ class JobQueue {
     this.initialized = true
 
     this.jobRedisPrefix = 'bull-' + WEBSERVER.HOST
-    const queueOptions = {
+    const baseQueueOptions = {
       prefix: this.jobRedisPrefix,
       redis: Redis.getRedisClientOptions(),
       settings: {
@@ -129,7 +129,36 @@ class JobQueue {
       }
     }
 
+    // Специальная конфигурация для video-transcoding (длительные задачи)
+    // Важно: lockDuration короткий, но регулярно обновляемый для быстрого обнаружения зависших задач
+    const transcodingQueueOptions = {
+      prefix: this.jobRedisPrefix,
+      redis: Redis.getRedisClientOptions(),
+      settings: {
+        maxStalledCount: 5,           // Оптимальный баланс между обнаружением и устойчивостью
+        stalledInterval: 30000,       // Проверка зависших задач каждые 30 сек
+        lockDuration: 60000,          // Блокировка на 1 минуту (короткая для быстрого обнаружения зависших)
+        lockRenewTime: 15000          // Обновление блокировки каждые 15 секунд (регулярное обновление)
+      },
+      defaultJobOptions: {
+        removeOnComplete: {
+          age: 3600,                  // Удалять завершенные задачи через 1 час
+          count: 1000                 // Или максимум 1000 задач
+        },
+        removeOnFail: {
+          age: 86400 * 7              // Удалять неудачные задачи через 7 дней
+        },
+        attempts: 1,
+        backoff: {
+          type: 'exponential',
+          delay: 60000                // Повтор через 1 минуту при ошибке
+        }
+      }
+    }
+
     for (const handlerName of (Object.keys(handlers) as JobType[])) {
+      // Использовать специальную конфигурацию для video-transcoding
+      const queueOptions = handlerName === 'video-transcoding' ? transcodingQueueOptions : baseQueueOptions
       const queue = new Bull(handlerName, queueOptions)
       const handler = handlers[handlerName]
 
