@@ -66,7 +66,10 @@ async function jimpProcessor (path: string, destination: string, newSize: { widt
     return copy(path, destination)
   }
 
+  // Изменяем размер, устанавливаем качество и сохраняем
+  // Примечание: проблема с Promise/Buffer должна быть решена через совместимые версии jimp/@jimp/core
   await jimpInstance
+    .resize(newSize.width, newSize.height)
     .quality(95)
     .writeAsync(destination)
 }

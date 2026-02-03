@@ -13,7 +13,7 @@ import {
   VideoResolution
 } from '../../shared/models/videos'
 import { CONFIG } from '../initializers/config'
-import { execPromise, promisify0 } from './core-utils'
+import { execPromise, getLowercaseExtension, promisify0 } from './core-utils'
 import { computeFPS, ffprobePromise, getAudioStream, getVideoFileBitrate, getVideoFileFPS, getVideoFileResolution } from './ffprobe-utils'
 import { processImage } from './image-utils'
 import { logger } from './logger'
@@ -94,6 +94,15 @@ function processGIF (
 }
 
 async function generateImageFromVideoFile (fromPath: string, folder: string, imageName: string, size: { width: number, height: number }) {
+  // Проверить, что файл не является аудио-файлом
+  const audioExtensions = ['.mp3', '.wav', '.ogg', '.aac', '.flac', '.m4a', '.opus', '.wma']
+  const extension = getLowercaseExtension(fromPath)
+  
+  if (audioExtensions.includes(extension)) {
+    logger.warn('Skipping image generation for audio-only file: %s', fromPath)
+    return
+  }
+
   const pendingImageName = 'pending-' + imageName
 
   const options = {
