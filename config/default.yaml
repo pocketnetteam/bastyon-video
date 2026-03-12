@@ -43,7 +43,7 @@ database:
   username: 'peertube'
   password: 'peertube'
   pool:
-    max: 5
+    max: 24
 
 # Redis server for short time storage
 # You can also specify a 'socket' path to a unix socket but first need to
