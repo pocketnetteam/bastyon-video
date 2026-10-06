@@ -1037,12 +1037,6 @@ const POCKETNET_PROXY_META = [
     port: 8899,
     wss: 8099,
     direct: ''
-  },
-  {
-    host: '3.pocketnet.app',
-    port: 8899,
-    wss: 8099,
-    direct: ''
   }
 ]
 
