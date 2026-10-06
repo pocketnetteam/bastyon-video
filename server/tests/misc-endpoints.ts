@@ -3,7 +3,7 @@
 import 'mocha'
 import * as chai from 'chai'
 import { cleanupTests, createSingleServer, makeGetRequest, PeerTubeServer, setAccessTokensToServers } from '@shared/server-commands'
-import { HttpStatusCode, VideoPrivacy } from '@shared/models'
+import { HttpStatusCode } from '@shared/models'
 
 const expect = chai.expect
 
@@ -132,59 +132,12 @@ describe('Test misc endpoints', function () {
 
   describe('Test bots endpoints', function () {
 
-    it('Should get the empty sitemap', async function () {
-      const res = await makeGetRequest({
+    it('Should not serve a sitemap', async function () {
+      await makeGetRequest({
         url: server.url,
         path: '/sitemap.xml',
-        expectedStatus: HttpStatusCode.OK_200
+        expectedStatus: HttpStatusCode.NOT_FOUND_404
       })
-
-      expect(res.text).to.contain('xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"')
-      expect(res.text).to.contain('<url><loc>http://localhost:' + server.port + '/about/instance</loc></url>')
-    })
-
-    it('Should get the empty cached sitemap', async function () {
-      const res = await makeGetRequest({
-        url: server.url,
-        path: '/sitemap.xml',
-        expectedStatus: HttpStatusCode.OK_200
-      })
-
-      expect(res.text).to.contain('xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"')
-      expect(res.text).to.contain('<url><loc>http://localhost:' + server.port + '/about/instance</loc></url>')
-    })
-
-    it('Should add videos, channel and accounts and get sitemap', async function () {
-      this.timeout(35000)
-
-      await server.videos.upload({ attributes: { name: 'video 1', nsfw: false } })
-      await server.videos.upload({ attributes: { name: 'video 2', nsfw: false } })
-      await server.videos.upload({ attributes: { name: 'video 3', privacy: VideoPrivacy.PRIVATE } })
-
-      await server.channels.create({ attributes: { name: 'channel1', displayName: 'channel 1' } })
-      await server.channels.create({ attributes: { name: 'channel2', displayName: 'channel 2' } })
-
-      await server.users.create({ username: 'user1', password: 'password' })
-      await server.users.create({ username: 'user2', password: 'password' })
-
-      const res = await makeGetRequest({
-        url: server.url,
-        path: '/sitemap.xml?t=1', // avoid using cache
-        expectedStatus: HttpStatusCode.OK_200
-      })
-
-      expect(res.text).to.contain('xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"')
-      expect(res.text).to.contain('<url><loc>http://localhost:' + server.port + '/about/instance</loc></url>')
-
-      expect(res.text).to.contain('<video:title>video 1</video:title>')
-      expect(res.text).to.contain('<video:title>video 2</video:title>')
-      expect(res.text).to.not.contain('<video:title>video 3</video:title>')
-
-      expect(res.text).to.contain('<url><loc>http://localhost:' + server.port + '/video-channels/channel1</loc></url>')
-      expect(res.text).to.contain('<url><loc>http://localhost:' + server.port + '/video-channels/channel2</loc></url>')
-
-      expect(res.text).to.contain('<url><loc>http://localhost:' + server.port + '/accounts/user1</loc></url>')
-      expect(res.text).to.contain('<url><loc>http://localhost:' + server.port + '/accounts/user2</loc></url>')
     })
   })
 
