@@ -41,37 +41,59 @@ const lTags = loggerTagsFactory('transcoding')
 
 async function processVideoTranscoding (job: Job) {
   const payload = job.data as VideoTranscodingPayload
+  let video: MVideoFullLight | undefined
+
   logger.info('Processing transcoding job %d.', job.id, lTags(payload.videoUUID))
 
-  const video = await VideoModel.loadAndPopulateAccountAndServerAndTags(payload.videoUUID)
-  // No video, maybe deleted?
-  if (!video) {
-    logger.info('Do not process job %d, video does not exist.', job.id, lTags(payload.videoUUID))
-    return undefined
-  }
-
-  const user = await UserModel.loadByChannelActorId(video.VideoChannel.actorId)
-
-  const handler = handlers[payload.type]
-
-  if (!handler) {
-    await moveToFailedTranscodingState(video)
-    await VideoJobInfoModel.decrease(video.uuid, 'pendingTranscode')
-
-    throw new Error('Cannot find transcoding handler for ' + payload.type)
-  }
-
   try {
+    video = await VideoModel.loadAndPopulateAccountAndServerAndTags(payload.videoUUID)
+    // No video, maybe deleted?
+    if (!video) {
+      logger.info('Do not process job %d, video does not exist.', job.id, lTags(payload.videoUUID))
+      return undefined
+    }
+
+    const user = await UserModel.loadByChannelActorId(video.VideoChannel.actorId)
+
+    const handler = handlers[payload.type]
+
+    if (!handler) {
+      // Failed state + pendingTranscode decrease are handled in the catch block below
+      throw new Error('Cannot find transcoding handler for ' + payload.type)
+    }
+
     await handler(job, payload, video, user)
-  } catch (error) {
-    await moveToFailedTranscodingState(video)
 
-    await VideoJobInfoModel.decrease(video.uuid, 'pendingTranscode')
+    return video
+  } catch (err) {
+    logger.error('Error processing transcoding job %d', job.id, {
+      err,
+      payload,
+      jobProgress: job.progress(),
+      jobAttemptsMade: job.attemptsMade,
+      ...lTags(payload.videoUUID)
+    })
 
-    throw error
+    if (err.name === 'SequelizeConnectionAcquireTimeoutError') {
+      logger.warn('Database connection timeout for job %d, marking video as failed', job.id, lTags(payload.videoUUID))
+    }
+
+    if (err.message && err.message.includes('ffmpeg exited with code 69')) {
+      logger.error(
+        'FFmpeg conversion failed (code 69) for job %d - marking as terminal failure. ' +
+        'This usually indicates corrupted source video or unsupported format.',
+        job.id,
+        lTags(payload.videoUUID)
+      )
+    }
+
+    if (video) {
+      await moveToFailedTranscodingState(video)
+      await VideoJobInfoModel.decrease(video.uuid, 'pendingTranscode')
+    }
+
+    throw err
   }
-
-  return video
 }
 
 // ---------------------------------------------------------------------------

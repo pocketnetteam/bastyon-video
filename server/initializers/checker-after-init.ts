@@ -185,6 +185,21 @@ function checkTranscodingConfig () {
     if (CONFIG.TRANSCODING.CONCURRENCY <= 0) {
       throw new Error('Transcoding concurrency should be > 0')
     }
+
+    // Критическая проверка: concurrency не должен превышать DB pool capacity
+    // Правило: TRANSCODING_CONCURRENCY ≤ DB_POOL_MAX / 4
+    const dbPoolMax = CONFIG.DATABASE.POOL.MAX
+    const maxAllowedConcurrency = Math.floor(dbPoolMax / 4)
+
+    if (CONFIG.TRANSCODING.CONCURRENCY > maxAllowedConcurrency) {
+      logger.warn(
+        'Transcoding concurrency (%d) exceeds recommended maximum (%d) based on DB pool size (%d). ' +
+        'This may cause database connection timeouts. Recommended: TRANSCODING_CONCURRENCY ≤ DB_POOL_MAX / 4',
+        CONFIG.TRANSCODING.CONCURRENCY,
+        maxAllowedConcurrency,
+        dbPoolMax
+      )
+    }
   }
 
   if (CONFIG.IMPORT.VIDEOS.HTTP.ENABLED || CONFIG.IMPORT.VIDEOS.TORRENT.ENABLED) {

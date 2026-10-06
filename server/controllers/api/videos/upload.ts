@@ -163,7 +163,7 @@ function validateChunkData (req: express.Request, res: express.Response, next: e
       }
 
       // Validate content-range format
-      const rangeMatch = contentRange.match(/^bytes (\d+)-(\d+)\/(\d+|\*)$/)
+      const rangeMatch = contentRange.match(/^bytes ((\d+)-(\d+)|\*)\/(\d+|\*)$/)
       if (!rangeMatch) {
         logger.error('Invalid content-range header format', { contentRange, ...lTags() })
         return res.fail({

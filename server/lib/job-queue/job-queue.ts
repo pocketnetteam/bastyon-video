@@ -129,7 +129,7 @@ class JobQueue {
 
     this.jobRedisPrefix = 'bull-' + WEBSERVER.HOST
 
-    const queueOptions: Bull.QueueOptions = {
+    const baseQueueOptions: Bull.QueueOptions = {
       prefix: this.jobRedisPrefix,
       redis: {
         password: CONFIG.REDIS.AUTH,
@@ -143,7 +143,33 @@ class JobQueue {
       }
     }
 
+    // Специальная конфигурация для video-transcoding (длительные задачи)
+    const transcodingQueueOptions: Bull.QueueOptions = {
+      ...baseQueueOptions,
+      settings: {
+        maxStalledCount: 5,
+        stalledInterval: 30000,
+        lockDuration: 60000,
+        lockRenewTime: 15000
+      },
+      defaultJobOptions: {
+        removeOnComplete: {
+          age: 3600,
+          count: 1000
+        },
+        removeOnFail: {
+          age: 86400 * 7
+        },
+        attempts: 1,
+        backoff: {
+          type: 'exponential',
+          delay: 60000
+        }
+      }
+    }
+
     for (const handlerName of (Object.keys(handlers) as JobType[])) {
+      const queueOptions = handlerName === 'video-transcoding' ? transcodingQueueOptions : baseQueueOptions
       const queue = new Bull(handlerName, queueOptions)
 
       if (produceOnly) {
