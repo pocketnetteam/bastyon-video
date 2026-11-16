@@ -9,6 +9,7 @@ import { join, parse } from 'path'
 import { ensureDir, move, remove } from 'fs-extra'
 import { CONFIG } from '@server/initializers/config'
 import * as Jimp from 'jimp'
+import { processGIF } from '@server/helpers/ffmpeg/ffmpeg-images'
 
 // All images will have a thumbnail version
 var THUMBNAIL_SIZE = 256;
@@ -118,7 +119,7 @@ export async function uploadImage (req: express.Request, res: express.Response) 
           imageRegularStaticUrl = imageStaticUrl;
           // Create the thumbnail image
           var newThumbnailSize = calculateImageSizeReduction(originalSize, thumbnailSize);
-          destImage.scaleToFit(newThumbnailSize.w, newThumbnailSize.h).write(join(imageFolderPath, image.thumbnailname));
+          await resizeImage(destImage, imagePath, join(imageFolderPath, image.thumbnailname), newThumbnailSize);
           thumbnailStaticUrl = ImageModel.getImageStaticUrl(parse(image.filename).name, image.thumbnailname, req.headers.host);
         }
         // Else, image size is big
@@ -126,11 +127,11 @@ export async function uploadImage (req: express.Request, res: express.Response) 
         else {
           // Create the regular image
           var newRegularSize = calculateImageSizeReduction(originalSize, regularSize);
-          destImage.scaleToFit(newRegularSize.w, newRegularSize.h).write(join(imageFolderPath, image.filename));
+          await resizeImage(destImage, imagePath, join(imageFolderPath, image.filename), newRegularSize);
           imageRegularStaticUrl = ImageModel.getImageStaticUrl(parse(image.filename).name, image.filename, req.headers.host);
           // Create the thumbnail image
           var newThumbnailSize = calculateImageSizeReduction(originalSize, thumbnailSize);
-          destImage.scaleToFit(newThumbnailSize.w, newThumbnailSize.h).write(join(imageFolderPath, image.thumbnailname));
+          await resizeImage(destImage, imagePath, join(imageFolderPath, image.thumbnailname), newThumbnailSize);
           thumbnailStaticUrl = ImageModel.getImageStaticUrl(parse(image.filename).name, image.thumbnailname, req.headers.host);
         }
 
@@ -152,6 +153,27 @@ export async function uploadImage (req: express.Request, res: express.Response) 
 }
 
 // Take the "destImage" size, and reduce it (if needed) to not exceed the "maxSize" passed in parameter
+// Jimp 0.16 cannot write GIF files: its GIF encoder returns a Promise and
+// Jimp#write() passes that Promise to fs.WriteStream#write(), which throws
+// ERR_INVALID_ARG_TYPE outside of any promise chain and kills the process.
+// GIFs are resized with ffmpeg instead (this also keeps the animation),
+// other formats go through writeAsync() so errors reach the caller.
+async function resizeImage (
+  source: Jimp,
+  sourcePath: string,
+  destination: string,
+  size: { w: number, h: number }
+) {
+  const width = Math.max(1, Math.round(size.w))
+  const height = Math.max(1, Math.round(size.h))
+
+  if (parse(destination).ext.toLowerCase() === '.gif') {
+    return processGIF(sourcePath, destination, { width, height })
+  }
+
+  await source.scaleToFit(width, height).writeAsync(destination)
+}
+
 function calculateImageSizeReduction(destImage, maxSize) {
     var w = destImage.w, h = destImage.h;
     var newW = w, newH = h;
